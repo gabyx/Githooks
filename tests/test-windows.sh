@@ -52,7 +52,7 @@ echo "Commit build v9.9.1-test to repo ..." &&
     git tag -f "v9.9.1-test" || exit 1
 
 # Copy the tests somewhere different
-cp "$REPO_DIR/tests" "$ROOT_DIR/tests" || exit 1
+cp -rf "$REPO_DIR/tests" "$ROOT_DIR/tests" || exit 1
 
 if [ -n "${EXTRA_INSTALL_ARGS}" ]; then
     sed -i -E "s|(.*)/installer\"|\1/installer\" ${EXTRA_INSTALL_ARGS}|g" "$ROOT_DIR"/tests/step-*
