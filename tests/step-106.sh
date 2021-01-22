@@ -17,7 +17,7 @@ onExit() {
 mkdir -p "$GH_TEST_TMP/test106-lfs" &&
     mkdir -p "$GH_TEST_TMP/test106" || exit 1
 
-cat <<"EOF" >"$GH_TEST_TMP/test106-lfs/git-lfs.go" || exit 2
+cat <<EOF >"$GH_TEST_TMP/test106-lfs/git-lfs.go" || exit 2
 package main
 
 import (
@@ -26,7 +26,7 @@ import (
 )
 
 func main() {
-    f, err := os.Create(os.Getenv("GH_TEST_TMP") + "/test106/lfs.out")
+    f, err := os.Create("$GH_TEST_TMP/test106/lfs.out")
     if err != nil {
         fmt.Printf("git-lfs-mock failed!")
         panic(err)

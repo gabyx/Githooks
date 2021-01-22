@@ -35,7 +35,7 @@ if [ ! -f "$REGISTER_FILE" ]; then
     exit 1
 fi
 
-if ! grep -qE '.+/test116.1/.git$' "$REGISTER_FILE"; then
+if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE"; then
     echo "Expected correct content"
     cat "$REGISTER_FILE"
     exit 2
@@ -48,8 +48,8 @@ mkdir -p "$GH_TEST_TMP/test116.2" && cd "$GH_TEST_TMP/test116.2" &&
     git commit --allow-empty -m 'Initial commit' ||
     exit 1
 
-if ! grep -qE '.+/test116.1/.git$' "$REGISTER_FILE" ||
-    ! grep -qE '.+/test116.2/.git$' "$REGISTER_FILE"; then
+if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE" ||
+    ! grep -qE '.+/test *116.2/.git$' "$REGISTER_FILE"; then
     echo "! Expected correct content"
     cat "$REGISTER_FILE"
     exit 3
@@ -62,9 +62,9 @@ echo "Y
 $GH_TEST_TMP
 " | "$GH_TEST_BIN/installer" --stdin || exit 1
 
-if ! grep -qE ".+/test116.1/.git$" "$REGISTER_FILE" ||
-    ! grep -qE ".+/test116.2/.git$" "$REGISTER_FILE" ||
-    ! grep -qE ".+/test116.3/.git$" "$REGISTER_FILE"; then
+if ! grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
+    ! grep -qE ".+/test *116.2/.git$" "$REGISTER_FILE" ||
+    ! grep -qE ".+/test *116.3/.git$" "$REGISTER_FILE"; then
     echo "! Expected all repos to be registered"
     cat "$REGISTER_FILE"
     exit 4
@@ -77,9 +77,9 @@ if ! "$GH_TEST_BIN/cli" uninstall --non-interactive; then
     exit 1
 fi
 
-if grep -qE ".+/test116.1/.git$" "$REGISTER_FILE" ||
-    (! grep -qE ".+/test116.2/.git$" "$REGISTER_FILE" &&
-        ! grep -qE ".+/test116.3/.git$" "$REGISTER_FILE"); then
+if grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
+    (! grep -qE ".+/test *116.2/.git$" "$REGISTER_FILE" &&
+        ! grep -qE ".+/test *116.3/.git$" "$REGISTER_FILE"); then
     echo "! Expected repo 2 and 3 to still be registered"
     cat "$REGISTER_FILE"
     exit 5
