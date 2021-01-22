@@ -81,6 +81,7 @@ func defineArguments(rootCmd *cobra.Command) {
 
 	rootCmd.PersistentFlags().Bool("internal-auto-update", false,
 		"Internal argument, do not use!") // @todo Remove this...
+	cm.AssertNoErrorPanic(rootCmd.PersistentFlags().MarkHidden("internal-auto-update"))
 
 	// User commands
 	rootCmd.PersistentFlags().Bool("dry-run", false,
@@ -325,8 +326,8 @@ func getDeploySettings(
 		cm.DebugAssert(cm.IsFile(args.DeploySettings))
 		fileToLoad = args.DeploySettings
 	case strs.IsEmpty(args.DeployAPI):
-		// If the user specified a deploy api type,
-		// dont load the deploy settings from install dir.
+		// If the user did not specify a deploy api type,
+		// load the deploy settings from install dir.
 		fileToLoad = installDeploySettings
 	}
 

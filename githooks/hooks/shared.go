@@ -76,7 +76,7 @@ type sharedHookConfig struct {
 	Version int `yaml:"version"`
 }
 
-const sharedHookConfigVersion int = 0
+const sharedHookConfigVersion int = 1
 
 func createSharedHookConfig() sharedHookConfig {
 	return sharedHookConfig{Version: sharedHookConfigVersion}

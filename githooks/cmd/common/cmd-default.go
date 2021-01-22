@@ -23,6 +23,10 @@ func SetCommandDefaults(log cm.ILogContext, cmd *cobra.Command) *cobra.Command {
 		cmd.Run = PanicWrongArgs(log)
 	}
 
+	// Dont sort flags.
+	cmd.PersistentFlags().SortFlags = false
+	cmd.Flags().SortFlags = false
+
 	return cmd
 }
 

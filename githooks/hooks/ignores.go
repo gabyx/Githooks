@@ -21,7 +21,12 @@ type hookIgnoreFile struct {
 }
 
 // hookIngoreFileVersion is the ignore file version.
-var hookIngoreFileVersion = 0
+var hookIngoreFileVersion = 1
+
+// createHookIgnoreFile creates the data for the hook ignore file.
+func createHookIgnoreFile() hookIgnoreFile {
+	return hookIgnoreFile{Version: hookIngoreFileVersion}
+}
 
 // HookPatterns for matching the namespace path of hooks.
 type HookPatterns struct {
@@ -264,7 +269,7 @@ func StoreHookPatternsGitDir(patterns HookPatterns, gitDirWorktree string) error
 
 // loadIgnorePatterns loads patterns.
 func LoadIgnorePatterns(file string) (patterns HookPatterns, err error) {
-	var data hookIgnoreFile
+	data := createHookIgnoreFile()
 
 	err = cm.LoadYAML(file, &data)
 	if err != nil {

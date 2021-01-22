@@ -180,8 +180,8 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 
 }
 
-func runDisable(ctx *ccm.CmdContext, opts *SetOptions) {
-	disable.RunDisable(ctx, opts.Reset, opts.Print)
+func runDisable(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	disable.RunDisable(ctx, opts.Reset, opts.Print, gitOpts.Global)
 }
 
 func runSearchDir(ctx *ccm.CmdContext, opts *SetOptions) {
@@ -500,17 +500,22 @@ func configDisableCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *Se
 
 	disableCmd := &cobra.Command{
 		Use:   "disable [flags]",
-		Short: "Disables Githooks in the current repository.",
-		Long: `Disables Githooks in the current repository.
-LFS hooks and replaced previous hooks are still executed.
-This command needs to be run at the root of a repository.`,
+		Short: "Disables Githooks in the current repository or globally.",
+		Long: `Disables Githooks in the current repository or globally.
+LFS hooks and replaced previous hooks are still executed by Githooks.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runDisable(ctx, setOpts)
+			if !gitOpts.Local && !gitOpts.Global {
+				gitOpts.Local = true
+			}
+
+			runDisable(ctx, setOpts, gitOpts)
 		}}
 
 	optsPSR := createOptionMap(true, false, true)
 
 	configSetOptions(disableCmd, setOpts, &optsPSR, ctx.Log, 0, 0)
+	disableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
+	disableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, disableCmd))
 }
 
