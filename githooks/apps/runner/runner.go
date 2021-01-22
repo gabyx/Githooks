@@ -62,8 +62,8 @@ func main() {
 		settings.GitDirWorktree,
 		[]string{settings.HookName})
 	log.AssertNoErrorF(err, "Errors while loading ignore patterns.")
-	log.DebugF("HooksDir ignore patterns: '%+v'.", ignores.HooksDir)
-	log.DebugF("User ignore patterns: '%+v'.", ignores.User)
+	log.DebugF("HooksDir ignore patterns: '%+q'.", ignores.HooksDir)
+	log.DebugF("User ignore patterns: '%+q'.", ignores.User)
 
 	defer storePendingData(&settings, &uiSettings, &ignores, &checksums)
 

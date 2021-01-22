@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func runList(ctx *ccm.CmdContext, hookNames []string, warnNotFound bool) {
+func runList(ctx *ccm.CmdContext, hookNames []string, warnNotFound bool, onlyListActiveHooks bool) {
 	repoDir, gitDir, gitDirWorktree := ccm.AssertRepoRoot(ctx)
 
 	repoHooksDir := hooks.GetGithooksDir(repoDir)
@@ -29,7 +29,8 @@ func runList(ctx *ccm.CmdContext, hookNames []string, warnNotFound bool) {
 			gitDir,
 			repoHooksDir,
 			shared,
-			state)
+			state,
+			onlyListActiveHooks)
 
 		if count != 0 {
 			ctx.Log.InfoF("Hook: '%s' [%v]:%s", hookName, count, list)
@@ -63,8 +64,8 @@ func PrepareListHookState(
 	// Load ignore patterns
 	ignores, err := hooks.GetIgnorePatterns(repoHooksDir, gitDirWorktree, hookNames)
 	ctx.Log.AssertNoErrorF(err, "Errors while loading ignore patterns.")
-	ctx.Log.DebugF("HooksDir ignore patterns: '%+v'.", ignores.HooksDir)
-	ctx.Log.DebugF("User ignore patterns: '%+v'.", ignores.User)
+	ctx.Log.DebugF("HooksDir ignore patterns: '%q'.", ignores.HooksDir)
+	ctx.Log.DebugF("User ignore patterns: '%+q'.", ignores.User)
 
 	// Load all shared hooks
 	shared := hooks.NewSharedRepos(8) //nolint: gomnd
@@ -160,7 +161,8 @@ func listHooksForName(
 	gitDir string,
 	repoHooksDir string,
 	shared hooks.SharedRepos,
-	state *ListHookState) (string, int) {
+	state *ListHookState,
+	onlyListActiveHooks bool) (string, int) {
 
 	// List replaced hooks (normally only one)
 	replacedHooks := GetAllHooksIn(
@@ -193,6 +195,11 @@ func listHooksForName(
 		cm.AssertNoErrorPanicF(err, "Could not write hook state.")
 
 		for i := range hooks {
+
+			if onlyListActiveHooks && !hooks[i].Active {
+				continue
+			}
+
 			sb.WriteString("\n")
 			formatHookState(&sb, &hooks[i], category, state.isGithooksDisabled, padding, "  ")
 		}
@@ -375,6 +382,8 @@ func formatHookState(
 
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
+	onlyListActiveHooks := false
+
 	listCmd := &cobra.Command{
 		Use:   "list [type]...",
 		Short: "Lists the active hooks in the current repository.",
@@ -396,12 +405,14 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 						"Hook type '%s' is not managed by Githooks.", h)
 				}
 
-				runList(ctx, args, true)
+				runList(ctx, args, true, onlyListActiveHooks)
 
 			} else {
-				runList(ctx, hooks.ManagedHookNames, false)
+				runList(ctx, hooks.ManagedHookNames, false, onlyListActiveHooks)
 			}
 		}}
+
+	listCmd.Flags().BoolVar(&onlyListActiveHooks, "active", false, "Only list hooks with state 'active'.")
 
 	return ccm.SetCommandDefaults(ctx.Log, listCmd)
 }

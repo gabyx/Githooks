@@ -9,7 +9,7 @@
 A **platform-independend hooks managger** written in Go to support per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the actual repository that uses them and also shared hook repositories. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are installed into the `.git/hooks`
-folders automatically on `git init` and `git clone`. There's more to the story though, you can read about it under the [Templates or Central Hooks](#templates-or-global-hooks) section.
+folders automatically on `git init` and `git clone`. There's more [to the story though](#templates-or-global-hooks).
 When one of the Githooks run-wrappers executes, Githooks tries to find matching hooks in the
 `.githooks` directory under the project root,
 and invoke them one-by-one. Also it searches for hooks in configured shared hook repositories.
@@ -53,11 +53,14 @@ Take this snippet of a project layout as an example:
 All hooks to be executed live under the `.githooks` top-level folder, that should be checked into the repository.
 Inside, we can have directories with the name of the hook (like `commit-msg` and `pre-commit` above),
 or a file matching the hook name (like `post-checkout` in the example). The filenames in the directory
-do not matter, but the ones starting with a `.` will be excluded by default.
-All others are executed in lexical order alphabetical order according to the Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk).
+do not matter, but the ones starting with a `.` (dotfiles) will be excluded by default.
+All others are executed in lexical order alphabetical order
+according to the Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk).
 rules.
 
-You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list` (a globally configured Git alias `alias.hooks`) to list all the hooks that apply to the current repository and their current state.
+You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list`
+(a globally configured Git alias `alias.hooks`) to list all the hooks that apply to
+the current repository and their current state.
 
 ## Execution
 
@@ -67,10 +70,11 @@ All parameters and standard input are forwarded from Git to the hooks.
 Hooks can also be specified by a run configuration in a corresponding YAML file,
 see [#hook-runner](Hook Run Configuration).
 
-Hooks related to `commit` events (where it makes sense, not `post-commit`) will also have a `${STAGED_FILES}` environment variable set
-that is the list of staged and changed files according to `git diff --cached --diff-filter=ACMR --name-only`.
-File paths are separated by a newline `\n`.
-If you want to iterate in a shell script over them, and expect spaces in paths, you might want to set the `IFS` like this:
+Hooks related to `commit` events (where it makes sense, not `post-commit`) will also have a `${STAGED_FILES}`
+ environment variable setthat is the list of staged and changed files according to
+ `git diff --cached --diff-filter=ACMR --name-only`.  File paths are separated by a newline `\n`.
+If you want to iterate in a shell script over them,
+and expect spaces in paths, you might want to set the `IFS` like this:
 
 ```shell
 IFS="
@@ -80,7 +84,8 @@ for STAGED in ${STAGED_FILES}; do
 done
 ```
 
-The `ACMR` filter in the `git diff` will include staged files that are added, copied, modified or renamed.
+The `ACMR` filter in the `git diff` will include staged
+files that are added, copied, modified or renamed.
 
 ### Hook Run Configuration
 

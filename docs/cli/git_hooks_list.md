@@ -42,7 +42,8 @@ git hooks list [type]...
 ### Options
 
 ```
-  -h, --help   help for list
+      --active   Only list hooks with state `active`.
+  -h, --help     help for list
 ```
 
 ### SEE ALSO
