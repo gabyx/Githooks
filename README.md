@@ -1,19 +1,18 @@
-<img src="docs/githooks-logo.svg" style="float:left; margin-right: 10pt"><h1>Githooks <span style="font-size:12pt">on Steroids</span></h1>
+<img src="docs/githooks-logo.svg" style="margin-right: 10pt" align="left">
+<h1>Githooks <span style="font-size:12pt">on Steroids</span></h1>
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
 
 **STILL BETA: Any changes with out notice!**
 
-A **platform-independend hooks managger** written in Go to support per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the actual repository that uses them and also shared hook repositories. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks).
+A **platform-independend hooks managger** written in Go to support per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the actual repository that uses them and also shared hook repositories. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
-
-To make this work, the installer creates run-wrappers for Githooks that are installed into the `.git/hooks` folders automatically on `git init` and `git clone`.
-When one of them executes, it will try to find matching files in the `.githooks` directory under the project root,
-and invoke them one-by-one.
-
-There's more to the story though, you can read about it under the [Templates or global hooks](#Templates-or-global-hooks) section.
-
+To make this work, the installer creates run-wrappers for Githooks that are installed into the `.git/hooks`
+folders automatically on `git init` and `git clone`. There's more to the story though, you can read about it under the [Templates or Central Hooks](#templates-or-global-hooks) section.
+When one of the Githooks run-wrappers executes, Githooks tries to find matching hooks in the
+`.githooks` directory under the project root,
+and invoke them one-by-one. Also it searches for hooks in configured shared hook repositories.
 
 **This Git hook manager supports:**
 
@@ -148,7 +147,7 @@ However there are use-cases for common hooks, shared between many repositories w
 For example, you could make sure Python dependencies are updated on projects that have a `requirements.txt` file,
 or an `mvn verify` is executed on `pre-commit` for Maven projects, etc.
 
-For this reason, you can place a `.shared.yaml` file (see [sepcs](#yaml-sepcs)) inside the `.githooks` repository, which can hold a list of repositories which hold common and shared hooks. Alternatively, you can have a shared repositories set by multiple `githooks.shared` local or global Git configuration variables, and the hooks in these repositories will execute for all local projects where Githooks is installed.
+For this reason, you can place a `.shared.yaml` file (see [specs](#yaml-specs)) inside the `.githooks` repository, which can hold a list of repositories which hold common and shared hooks. Alternatively, you can have a shared repositories set by multiple `githooks.shared` local or global Git configuration variables, and the hooks in these repositories will execute for all local projects where Githooks is installed.
 See [git hooks shared](docs/cli/git_hooks_shared.md) for configuring all 3 types of shared hooks repositories.
 
 Below are example values for these setting.
@@ -172,7 +171,7 @@ ssh://user@github.com/shared/special-hooks.git@v3.3.3
 
 ### Repository Configuration
 
-A example config `<repoPath>/.githooks/shared.yaml` (see [sepcs](#yaml-sepcs)):
+A example config `<repoPath>/.githooks/shared.yaml` (see [specs](#yaml-specs)):
 
 ```yaml
 version: 1
@@ -244,7 +243,7 @@ A shared repository can optionally have a namespace associated with it. The name
 
 ## Ignoring Hooks and Files
 
-The `.ignore.yaml` (see [sepcs](#yaml-sepcs)) files allow excluding files
+The `.ignore.yaml` (see [specs](#yaml-specs)) files allow excluding files
 
 - from being treated as hook scripts or
 - hooks from beeing run.
@@ -384,7 +383,7 @@ $ installer --template-dir "/home/public/.githooks-templates"
 By default the script will install the hooks into the `~/.githooks/templates/` directory.
 
 ### Install Mode: Centralized Hooks
-Lastly, you have the option to install the templates to, and use them from a centralized location. You can read more about the difference between this option and default one [below](#templates-or-global-hooks). For this, run the command below.
+Lastly, you have the option to install the templates to, and use them from a centralized location. You can read more about the difference between this option and default one [below](#templates-or-central-hooks). For this, run the command below.
 
 ```shell
 $ installer --use-core-hookspath
@@ -458,7 +457,7 @@ git hooks config trusted --accept
 git hooks config update --disable
 ```
 
-### Templates or Cental Hooks {#templates-or-global-hooks}
+### Templates or Cental Hooks {#templates-or-central-hooks}
 
 This installer can work in one of 2 ways:
 
@@ -552,7 +551,7 @@ If the exit code is not `0`, the normal prompt on the standard input is shown as
 
 **Note:** Githooks will probably in the future provide a default cross-platform Dialog implementation, which will render this feature obsolete. (PRs welcome, see [https://github.com/gen2brain/dlgs](https://github.com/gen2brain/dlgs))
 
-### Uninstalling {#uninstalling}
+## Uninstalling {#uninstalling}
 
 If you want to get rid of this hook manager, you can execute the uninstaller `<installDir>/bin/uninstaller` by
 
@@ -562,9 +561,31 @@ $ git hooks uninstall --global
 
 This will delete the run-wrappers installed in the template directory, optionally the installed hooks from the existing local repositories, and reinstates any previous hooks that were moved during the installation.
 
-### YAML Specifications {#yaml-sepcs}
+## YAML Specifications {#yaml-specs}
 
 You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks config files `.shared.yaml` [here](docs/cli/yaml-spec.md).
+
+## Migration
+
+Migrating from the `sh` [implementation here](https://github.com/rycus86/githooks) is easy, but unfortunately we do not yet provide an migration option during install (PRs welcome) to take over Git configuration values
+and other not so important settings.
+
+However, you can take the following steps for your old `.shared` and `.ignore` files inside your repositories to make them work
+directly with a new install:
+
+1 Convert all entries in `.ignore` files to a pattern in a YAML file `.ignore.yaml` (see [specs](#yaml-specs)). Each old glob pattern needs to be prepended by
+  `**/` (if not already existin) to make it work correctly (because of namespaces), e.g. a pattner `.*md` becomes `**/.*md`.
+  Disable shared repositories in the old version need to be reconfigured, be ignore patterns.
+  Check if the ignore is working by running `[git hooks list](docs/cli/git_hooks_list.md)`.
+
+2. Convert all entries in `.shared` files to an url in a YAML file `.shared.yaml`.
+
+3. It's heartly recommended to **first** uninstalling the old version, to get rid of any old settings.
+
+4. Install the new version.
+
+Trusted hooks will be needed to be trusted again.
+To port Git configuration variables use the file `githooks/hooks/gitconfig.go` which contains all used Git config keys.
 
 ## Acknowledgements
 
