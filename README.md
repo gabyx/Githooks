@@ -7,7 +7,7 @@
 **STILL BETA: Any changes with out notice!**
 <br><br><br><br>
 
-A **platform-independend hooks managger** written in Go to support hared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
+A **platform-independend hooks managger** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are installed into the `.git/hooks`
 folders automatically on `git init` and `git clone`. There's more [to the story though](#templates-or-global-hooks).
@@ -98,7 +98,7 @@ files that are added, copied, modified or renamed.
 Each supported hook can also be specified by a configuration file `<hookName>.yaml` where `<hookName>` is any [supported hook name](#supported-hooks). An example might look like the following:
 
 ```yaml
-# The command to run
+# The command to run.
 cmd: "my-command.exe"
 
 # The arguments given to `cmd`.
@@ -107,7 +107,7 @@ args:
   - "--all"
 
 # If you want to make sure your file is not
-# treated always as the newest version. Fix it!
+# treated always as the newest version. Fix the version by:
 version: 1
 ```
 
@@ -617,8 +617,6 @@ Trusted hooks will be needed to be trusted again.
 To port Git configuration variables use the file `githooks/hooks/gitconfig.go` which contains all used Git config keys.
 
 ## Acknowledgements
-
-These two projects gave some ideas and inspiration, you should check them out:
 
 - [Original Githooks implementation in `sh`](http://github.com/rycus86/githooks) by Victor Adams.
 
