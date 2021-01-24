@@ -27,9 +27,17 @@ go build -o custom-runner.exe ./... || exit 4
 
 # shellcheck disable=SC2016
 mkdir -p .githooks &&
-    echo 'Hello' >.githooks/pre-commit &&
-    echo "'$GH_TEST_TMP/test121/custom-runner.exe' 'my-file.py' '\${MONKEY}' \"\$MONKEY\" \${MONKEY} \$\$MONKEY \$\${MONKEY}" >.githooks/pre-commit.runner ||
-    exit 5
+    cat <<"EOF" >>".githooks/pre-commit.yaml" || exit 5
+cmd: "$GH_TEST_TMP/test121/custom-runner.exe"
+args:
+    - "my-file.py"
+    - '${MONKEY}'
+    - "$MONKEY"
+    - "${MONKEY}"
+    - "$$MONKEY"
+    - "$${MONKEY}"
+version: 1
+EOF
 
 # Execute pre-commit by the runner
 OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
@@ -38,7 +46,7 @@ OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Hello" ||
     ! echo "$OUT" | grep "my-file.py" ||
-    ! echo "$OUT" | grep 'Args:mon key,mon key,mon,key,$MONKEY,${MONKEY}'; then
+    ! echo "$OUT" | grep 'Args:mon key,mon key,mon key,$MONKEY,${MONKEY}'; then
     echo "! Expected hook with runner command to be executed."
     echo "$OUT"
     exit 6

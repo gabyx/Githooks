@@ -82,12 +82,17 @@ func createSharedHookConfig() sharedHookConfig {
 	return sharedHookConfig{Version: sharedHookConfigVersion}
 }
 
-func loadRepoSharedHooks(file string) (sharedHookConfig, error) {
-	var config = createSharedHookConfig()
-	var err error
+func loadRepoSharedHooks(file string) (config sharedHookConfig, err error) {
+	config = createSharedHookConfig()
 
 	if cm.IsFile(file) {
 		err = cm.LoadYAML(file, &config)
+
+		if config.Version == 0 {
+			err = cm.ErrorF("Version '%v' needs to be greater than 0.", config.Version)
+
+			return
+		}
 	}
 
 	config.Urls = strs.MakeUnique(config.Urls)

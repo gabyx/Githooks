@@ -67,9 +67,12 @@ the current repository and their current state.
 
 If a file is executable, it is directly invoked, otherwise it is interpreted with the `sh` shell.
 On Windows that mostly means dispatching to the `bash.exe` from [https://gitforwindows.org](https://gitforwindows.org).
-All parameters and standard input are forwarded from Git to the hooks.
+
+**All parameters and standard input** are forwarded from Git to the hooks.
+The standard output and standard error of any hook which Githooks runs is captured **together**<span id="a1">[<sup>1</sup>](#1)</span>. and printed to the standard error stream which might or might not get read by Git itself (e.g. `pre-push`).
+
 Hooks can also be specified by a run configuration in a corresponding YAML file,
-see [#hook-runner](Hook Run Configuration).
+see [#hook-run-configuration](Hook Run Configuration).
 
 Hooks related to `commit` events (where it makes sense, not `post-commit`) will also have a `${STAGED_FILES}`
  environment variable setthat is the list of staged and changed files according to
@@ -88,9 +91,29 @@ done
 The `ACMR` filter in the `git diff` will include staged
 files that are added, copied, modified or renamed.
 
+**<span id="1"><sup>1</sup></span>[⏎](#a1) Note:** This caveat is basically there because stdandard output and error might get interleaved badly and so far no solution to this small problem has been tackled yet. It is far better to output both streams in the correct order, and therefore send it the error stream because that will not conflict in anyway with Git (see [fsmonitor-watchman](https://git-scm.com/docs/githooks#_fsmonitor_watchman), unsupported right now.). If that poses a real problem for you, open an issue.
+
 ### Hook Run Configuration
 
-@todo Describe the runner config `<hookName>.yaml`.
+Each supported hook can also be specified by a configuration file `<hookName>.yaml` where `<hookName>` is any [supported hook name](#supported-hooks). An example might look like the following:
+
+```yaml
+# The command to run
+cmd: "my-command.exe"
+
+# The arguments given to `cmd`.
+args:
+  - "-s"
+  - "--all"
+
+# If you want to make sure your file is not
+# treated always as the newest version. Fix it!
+version: 1
+```
+
+All additional arguments given by Git to `<hookName>` will be appended last ont `args`.
+
+**Sidenote**: You might ask why we split this configuration into one for each hook instead of one collocated YAML file. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
 
 ## Supported Hooks
 
@@ -279,7 +302,7 @@ $ git hooks ignore add --pattern "my-shared-super-hooks/pre-commit/**"
 
 In the above example, one of the `.ignore.yaml` files should contain a pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file.
 
-The `.githooks/.ignore.yaml` file applies to each of the hook directories, and should still define filename patterns, `*.txt` instead of `**/*.txt` for example. If there is a `.ignore.yaml` file both in the hook type folder and in `.githooks`, the files whose filename matches any pattern from either of those two files will be excluded. You can also manage `.ignore.yaml` files using [`git hooks ignore --help`](docs/cli/git_hooks_ignore.md).
+The `.githooks/.ignore.yaml` file applies to each of the hook directories, and should still define filename patterns, `*.txt` instead of `**/*.txt` for example. If there is a `.ignore.yaml` file both in the hook type folder and in `.githooks`, the files whose filename matches any pattern from either of those two files will be excluded. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md), and consult this help for futher information on pattern syntax.
 
 Hooks in individual shared repositories can be disabled as well, running [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore_add.md)` by specifing patterns or namespace paths.
 
@@ -494,9 +517,9 @@ git lfs install # Important if you use Git LFS!. It never hurts doing this.
 
 In this approach, the install script installs the hook templates into a centralized location (`~/.githooks/templates/` by default) and sets the global `core.hooksPath` variable to that location. Git will then, for all relevant actions, check the `core.hooksPath` location, instead of the default `${GIT_DIR}/hooks` location.
 
-This approach works more like a *blanket* solution, where **all repositories** (\*) will start using the hook templates, regardless of their location.
+This approach works more like a *blanket* solution, where **all repositories**<span id="a2">[<sup>2</sup>](#2)</span> will start using the hook templates, regardless of their location.
 
-**Note**(\*): It is possible to override the behavior for a specific repository, by setting a local `core.hooksPath` variable with value `${GIT_DIR}/hooks`, which will revert Git back to its default behavior for that specific repository.
+**<span id="2"><sup>2</sup></span>[⏎](#a2) Note:** It is possible to override the behavior for a specific repository, by setting a local `core.hooksPath` variable with value `${GIT_DIR}/hooks`, which will revert Git back to its default behavior for that specific repository.
 You don't need to initialize `git lfs install`, because they presumably be already in `${GIT_DIR}/hooks` from any `git clone/init`.
 
 ### Supported Platforms:
@@ -569,7 +592,7 @@ This will delete the run-wrappers installed in the template directory, optionall
 
 ## YAML Specifications
 
-You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks config files `.shared.yaml` [here](docs/cli/yaml-spec.md).
+You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks config files `.shared.yaml` [here](docs/yaml-spec.md).
 
 ## Migration
 

@@ -458,7 +458,7 @@ func runInstaller(installer string, args *Arguments) {
 	// Run the installer binary
 	err = cm.RunExecutable(
 		&cm.ExecContext{},
-		&cm.Executable{Path: installer},
+		&cm.Executable{Cmd: installer},
 		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetErrorWriter()),
 		"--config", file.Name())
 

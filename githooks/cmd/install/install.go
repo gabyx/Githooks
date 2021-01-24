@@ -66,7 +66,7 @@ func runUninstall(ctx *ccm.CmdContext, nonInteractive bool, global bool) {
 
 	err := cm.RunExecutable(
 		&cm.ExecContext{},
-		&cm.Executable{Path: exec},
+		&cm.Executable{Cmd: exec},
 		cm.UseStreams(nil, ctx.Log.GetInfoWriter(), ctx.Log.GetInfoWriter()), args...)
 
 	ctx.Log.AssertNoErrorPanic(err, "Uninstaller failed.")
@@ -89,7 +89,7 @@ func runInstall(ctx *ccm.CmdContext, nonInteractive bool, global bool) {
 
 	err := cm.RunExecutable(
 		&cm.ExecContext{},
-		&cm.Executable{Path: exec},
+		&cm.Executable{Cmd: exec},
 		cm.UseStreams(nil, ctx.Log.GetInfoWriter(), ctx.Log.GetInfoWriter()), args...)
 
 	ctx.Log.AssertNoErrorPanic(err, "Installer failed.")
