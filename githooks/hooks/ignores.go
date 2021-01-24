@@ -276,6 +276,12 @@ func LoadIgnorePatterns(file string) (patterns HookPatterns, err error) {
 		return
 	}
 
+	if data.Version == 0 {
+		err = cm.ErrorF("Version '%v' needs to be greater than 0.", data.Version)
+
+		return
+	}
+
 	patterns.Patterns = data.Patterns
 	patterns.NamespacePaths = data.NamespacePaths
 

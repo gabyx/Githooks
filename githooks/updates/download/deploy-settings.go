@@ -29,6 +29,10 @@ func LoadDeploySettings(file string) (IDeploySettings, error) {
 		return nil, err
 	}
 
+	if settings.Version == 0 {
+		return nil, cm.ErrorF("Key 'Version' > 0 needs to be specified.")
+	}
+
 	switch {
 	case settings.Gitea != nil:
 		return settings.Gitea, nil

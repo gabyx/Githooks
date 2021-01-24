@@ -571,7 +571,7 @@ func runUpdate(
 				"is not existing.", installerPath)
 	}
 
-	exec := cm.Executable{Path: installerPath}
+	exec := cm.Executable{Cmd: installerPath}
 
 	if pipeSetup == nil {
 		output, err := cm.GetCombinedOutputFromExecutable(

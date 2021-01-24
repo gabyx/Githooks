@@ -1,45 +1,72 @@
 package hooks
 
 import (
-	"io/ioutil"
 	"os"
+	"path"
 	"regexp"
 	cm "rycus86/githooks/common"
-
-	"github.com/google/shlex"
 )
 
-// GetHookRunCmd gets the command string for the hook `hookPath`.
-// It returns the command arguments which is `nil` if its an executable.
-func GetHookRunCmd(hookPath string) (exec cm.Executable, err error) {
-	exec.Path = hookPath
+// The data for the runner config file.
+type runnerConfigFile struct {
+	Cmd  string   `yaml:"cmd"`
+	Args []string `yaml:"args"`
+
+	Version int `yaml:"version"`
+}
+
+// The current runner config gile version.
+var runnerConfigFileVersion int = 1
+
+// createHookIgnoreFile creates the data for the runner config file.
+func createRunnerConfig() runnerConfigFile {
+	return runnerConfigFile{Version: runnerConfigFileVersion}
+}
+
+// Load a runner configuration file.
+func loadRunnerConfig(hookPath string) (data runnerConfigFile, err error) {
+	data = createRunnerConfig()
+	err = cm.LoadYAML(hookPath, &data)
+
+	if data.Version == 0 {
+		err = cm.ErrorF("Version '%v' needs to be greater than 0.", data.Version)
+
+		return
+	}
+
+	return
+}
+
+// GetHookRunCmd gets the executable for the hook `hookPath`.
+func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err error) {
 
 	if cm.IsExecutable(hookPath) {
+		exec.Cmd = hookPath
+
 		return
 	}
 
-	runnerFile := hookPath + ".runner"
+	if path.Ext(hookPath) != ".yaml" {
+		// No run configuration YAML -> get the default runner.
+		exec = GetDefaultRunner(hookPath, args)
 
-	if !cm.IsFile(runnerFile) {
-		// It does not exists -> get the default runner.
-		return GetDefaultRunner(hookPath), nil
+		return
 	}
 
-	content, e := ioutil.ReadFile(runnerFile)
+	config, e := loadRunnerConfig(hookPath)
 	if e != nil {
-		err = cm.CombineErrors(err, cm.ErrorF("Could not read runner file '%s'", runnerFile))
+		err = cm.ErrorF("Could not read runner config '%s'", hookPath)
 
 		return
 	}
 
-	args, e := shlex.Split(replaceEnvVariables(string(content)))
-	if e != nil {
-		err = cm.CombineErrors(err, cm.ErrorF("Could not parse runner file '%s'", runnerFile))
+	exec.Cmd = replaceEnvVariables(config.Cmd)
+	exec.Args = config.Args
 
-		return
+	for i := range config.Args {
+		exec.Args[i] = replaceEnvVariables(exec.Args[i])
 	}
-
-	exec.RunCmd = args
+	exec.Args = append(exec.Args, args...)
 
 	return
 }

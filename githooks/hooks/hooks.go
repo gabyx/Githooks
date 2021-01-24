@@ -15,6 +15,9 @@ type Hook struct {
 	// The executable of the hook.
 	cm.Executable
 
+	// The path to the file which configured this executable.
+	Path string
+
 	// The namespaced path of the hook `<namespace>/<relPath>`.
 	NamespacePath string
 
@@ -110,7 +113,8 @@ func GetAllHooksIn(
 	hookNamespace string,
 	isIgnored IngoreCallback,
 	isTrusted TrustCallback,
-	lazyIfIgnored bool) (allHooks []Hook, err error) {
+	lazyIfIgnored bool,
+	args []string) (allHooks []Hook, err error) {
 
 	appendHook := func(hookPath string, hookNamespace string) error {
 		// Namespace the path to check ignores
@@ -124,7 +128,8 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			if runCmd, err = GetHookRunCmd(hookPath); err != nil {
+			runCmd, err = GetHookRunCmd(hookPath, args)
+			if err != nil {
 				return cm.CombineErrors(err,
 					cm.ErrorF("Could not detect runner for hook\n'%s'", hookPath))
 			}
@@ -133,6 +138,7 @@ func GetAllHooksIn(
 		allHooks = append(allHooks,
 			Hook{
 				Executable:    runCmd,
+				Path:          hookPath,
 				NamespacePath: namespacedPath,
 				Active:        !ignored,
 				Trusted:       trusted,
@@ -144,7 +150,8 @@ func GetAllHooksIn(
 	dirOrFile := path.Join(hooksDir, hookName)
 
 	// Collect all hooks in e.g. `path/pre-commit/*`
-	if cm.IsDirectory(dirOrFile) {
+	switch {
+	case cm.IsDirectory(dirOrFile):
 
 		err = cm.WalkFiles(dirOrFile,
 			func(hookPath string, _ os.FileInfo) error {
@@ -163,8 +170,14 @@ func GetAllHooksIn(
 			return
 		}
 
-	} else if cm.IsFile(dirOrFile) { // Check hook in `path/pre-commit`
+	case cm.IsFile(dirOrFile): // Check hook in `path/pre-commit`
 		err = appendHook(dirOrFile, hookNamespace)
+
+	default:
+		runConfig := dirOrFile + ".yaml"
+		if cm.IsFile(runConfig) { // Check hook in `path/pre-commit.yaml`
+			err = appendHook(runConfig, hookNamespace)
+		}
 	}
 
 	return
@@ -176,6 +189,7 @@ func ExecuteHooksParallel(
 	exec cm.IExecContext,
 	hs *HookPrioList,
 	res []HookResult,
+	outputCallback func(res ...HookResult),
 	args ...string) ([]HookResult, error) {
 
 	// Count number of results we need
@@ -191,6 +205,19 @@ func ExecuteHooksParallel(
 		res = res[:nResults]
 	}
 
+	call := func(hookRes *HookResult, hook *Hook) {
+		var err error
+		hookRes.Output, err =
+			cm.GetCombinedOutputFromExecutable(
+				exec,
+				hook,
+				cm.UseOnlyStdin(os.Stdin),
+				args...)
+
+		hookRes.Error = err
+		hookRes.Hook = hook
+	}
+
 	currIdx := 0
 	for _, hooksGroup := range *hs {
 		nHooks := len(hooksGroup)
@@ -201,34 +228,21 @@ func ExecuteHooksParallel(
 
 		if pool == nil {
 			for idx := range hooksGroup {
-				var err error
+				hookRes := &res[currIdx+idx]
+				hook := &hooksGroup[idx]
 
-				res[currIdx+idx].Output, err =
-					cm.GetCombinedOutputFromExecutable(
-						exec,
-						&hooksGroup[idx],
-						cm.UseOnlyStdin(os.Stdin),
-						args...)
-
-				res[currIdx+idx].Error = err
-				res[currIdx+idx].Hook = &hooksGroup[idx]
+				call(hookRes, hook)
+				outputCallback(*hookRes)
 			}
 		} else {
 			g := pool.NewJobGroup()
 
 			err := pool.AddRangeJob(0, nHooks, g,
 				func(idx int, pool thx.ThreadPool, erf func() error) error {
+					hookRes := &res[currIdx+idx]
 					hook := &hooksGroup[idx]
-					var err error
 
-					res[currIdx+idx].Output, err =
-						cm.GetCombinedOutputFromExecutable(
-							exec,
-							hook,
-							cm.UseOnlyStdin(os.Stdin), args...)
-
-					res[currIdx+idx].Error = err
-					res[currIdx+idx].Hook = hook
+					call(hookRes, hook)
 
 					return nil
 				})
@@ -241,6 +255,7 @@ func ExecuteHooksParallel(
 				return nil, err
 			}
 
+			outputCallback(res[currIdx : currIdx+nHooks]...)
 		}
 
 		currIdx += nHooks

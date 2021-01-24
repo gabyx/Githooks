@@ -375,7 +375,10 @@ func executeOldHook(settings *HookSettings,
 		return trusted, sha
 	}
 
-	hooks, err := hooks.GetAllHooksIn(settings.HookDir, hookName, hookNamespace, isIgnored, isTrusted, true)
+	hooks, err := hooks.GetAllHooksIn(
+		settings.HookDir, hookName, hookNamespace,
+		isIgnored, isTrusted, true,
+		settings.Args)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
 	if len(hooks) == 0 {
@@ -654,12 +657,9 @@ func getHooksIn(
 	}
 
 	allHooks, err := hooks.GetAllHooksIn(
-		hooksDir,
-		settings.HookName,
-		hookNamespace,
-		isIgnored,
-		isTrusted,
-		true)
+		hooksDir, settings.HookName, hookNamespace,
+		isIgnored, isTrusted, true,
+		settings.Args)
 
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
@@ -678,7 +678,7 @@ func getHooksIn(
 
 		if !hook.Active || !hook.Trusted {
 			log.DebugF("Hook '%s' is skipped [active: '%v', trusted: '%v']",
-				hook.Path, hook.Active, hook.Trusted)
+				hook.Cmd, hook.Active, hook.Trusted)
 
 			continue
 		}
@@ -724,7 +724,7 @@ func logBatches(title string, hooks hooks.HookPrioList) {
 		for bIdx, batch := range hooks {
 			l += strs.Fmt(" Batch: %v\n", bIdx)
 			for i := range batch {
-				l += strs.Fmt("  - '%s' [runner: '%q']\n", batch[i].Path, batch[i].RunCmd)
+				l += strs.Fmt("  - '%s' %+q\n", batch[i].Cmd, batch[i].Args)
 			}
 		}
 		log.DebugF("%s :\n%s", title, l)
@@ -818,27 +818,35 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 	var err error
 
 	log.DebugIf(len(hs.LocalHooks) != 0, "Launching local hooks ...")
-	results, err = hooks.ExecuteHooksParallel(pool, &settings.ExecX, &hs.LocalHooks, results, settings.Args...)
+	results, err = hooks.ExecuteHooksParallel(
+		pool, &settings.ExecX, &hs.LocalHooks,
+		results, logHookResults,
+		settings.Args...)
 	log.AssertNoErrorPanic(err, "Local hook execution failed.")
-	logHookResults(results)
 
 	log.DebugIf(len(hs.RepoSharedHooks) != 0, "Launching repository shared hooks ...")
-	results, err = hooks.ExecuteHooksParallel(pool, &settings.ExecX, &hs.RepoSharedHooks, results, settings.Args...)
-	log.AssertNoErrorPanic(err, "Local hook execution failed.")
-	logHookResults(results)
+	results, err = hooks.ExecuteHooksParallel(
+		pool, &settings.ExecX, &hs.RepoSharedHooks,
+		results, logHookResults,
+		settings.Args...)
+	log.AssertNoErrorPanic(err, "Shared repository hook execution failed.")
 
 	log.DebugIf(len(hs.LocalSharedHooks) != 0, "Launching local shared hooks ...")
-	results, err = hooks.ExecuteHooksParallel(pool, &settings.ExecX, &hs.LocalSharedHooks, results, settings.Args...)
-	log.AssertNoErrorPanic(err, "Local hook execution failed.")
-	logHookResults(results)
+	results, err = hooks.ExecuteHooksParallel(
+		pool, &settings.ExecX, &hs.LocalSharedHooks,
+		results, logHookResults,
+		settings.Args...)
+	log.AssertNoErrorPanic(err, "Local shared hook execution failed.")
 
 	log.DebugIf(len(hs.GlobalSharedHooks) != 0, "Launching global shared hooks ...")
-	results, err = hooks.ExecuteHooksParallel(pool, &settings.ExecX, &hs.GlobalSharedHooks, results, settings.Args...)
-	log.AssertNoErrorPanic(err, "Local hook execution failed.")
-	logHookResults(results)
+	_, err = hooks.ExecuteHooksParallel(
+		pool, &settings.ExecX, &hs.GlobalSharedHooks,
+		results, logHookResults,
+		settings.Args...)
+	log.AssertNoErrorPanic(err, "Gobal shared hook execution failed.")
 }
 
-func logHookResults(res []hooks.HookResult) {
+func logHookResults(res ...hooks.HookResult) {
 	for _, r := range res {
 		if r.Error == nil {
 			if len(r.Output) != 0 {
@@ -848,7 +856,7 @@ func logHookResults(res []hooks.HookResult) {
 			if len(r.Output) != 0 {
 				_, _ = log.GetErrorWriter().Write(r.Output)
 			}
-			log.AssertNoErrorPanicF(r.Error, "Hook '%s %q' failed!",
+			log.AssertNoErrorPanicF(r.Error, "Hook '%s' %q' failed!",
 				r.Hook.GetCommand(), r.Hook.GetArgs())
 		}
 	}

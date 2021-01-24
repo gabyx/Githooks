@@ -5,9 +5,8 @@ package hooks
 import cm "rycus86/githooks/common"
 
 // GetDefaultRunner gets the default hook runner.
-func GetDefaultRunner(hookPath string) cm.Executable {
+func GetDefaultRunner(hookPath string, args []string) cm.Executable {
 	return cm.Executable{
-		Path:      hookPath,
-		RunCmd:    []string{"sh"},
-		QuotePath: false}
+		Cmd:  "sh",
+		Args: append([]string{hookPath}, args...)}
 }

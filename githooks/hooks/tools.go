@@ -24,7 +24,7 @@ func GetToolScript(installDir string, tool string) (cm.IExecutable, error) {
 		return nil, nil
 	}
 
-	runCmd, err := GetHookRunCmd(tool)
+	runCmd, err := GetHookRunCmd(tool, nil)
 
 	return &runCmd, err
 }
