@@ -4,6 +4,7 @@ project_name: githooks
 before:
   hooks:
     - go mod download
+    - go mod vendor
     - go generate -mod=vendor ./...
 builds:
   - id: runner
@@ -80,7 +81,7 @@ signs:
   - artifacts: checksum
     cmd: gpg
     # Signing with the private key where 'deploy.asc' is this public key in this repo.
-    args: ["-u", "BF056E9F49CAACF0", "--output", "${signature}", "--detach-sign", "${artifact}"]
+    args: ["-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
     signature: "${artifact}.sig"
 release:
   github:
