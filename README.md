@@ -596,7 +596,7 @@ This will delete the run-wrappers installed in the template directory, optionall
 
 ## YAML Specifications
 
-You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks config files `.shared.yaml` [here](docs/yaml-spec.md).
+You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks config files `.shared.yaml` [here](docs/yaml-specs.md).
 
 ## Migration
 
@@ -606,12 +606,14 @@ and other not so important settings.
 However, you can take the following steps for your old `.shared` and `.ignore` files inside your repositories to make them work
 directly with a new install:
 
-1 Convert all entries in `.ignore` files to a pattern in a YAML file `.ignore.yaml` (see [specs](#yaml-specification)). Each old glob pattern needs to be prepended by
-  `**/` (if not already existin) to make it work correctly (because of namespaces), e.g. a pattner `.*md` becomes `**/.*md`.
-  Disable shared repositories in the old version need to be reconfigured, be ignore patterns.
+1. Convert all entries in `.ignore` files to a pattern in a YAML
+  file `.ignore.yaml` (see [specs](#yaml-specification)).
+  Each old glob pattern needs to be prepended by
+  `**/` (if not already existing) to make it work correctly (because of namespaces), e.g. a pattern `.*md` becomes `**/.*md`.
+  Disable shared repositories in the old version need to be reconfigured, by using ignore patterns.
   Check if the ignore is working by running `[git hooks list](docs/cli/git_hooks_list.md)`.
 
-2. Convert all entries in `.shared` files to an url in a YAML file `.shared.yaml`.
+2. Convert all entries in `.shared` files to an url in a YAML file `.shared.yaml` [here](docs/yaml-spec.md).
 
 3. It's heartly recommended to **first** uninstalling the old version, to get rid of any old settings.
 
