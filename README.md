@@ -526,14 +526,6 @@ This approach works more like a *blanket* solution, where **all repositories**<s
 **<span id="2"><sup>2</sup></span>[⏎](#a2) Note:** It is possible to override the behavior for a specific repository, by setting a local `core.hooksPath` variable with value `${GIT_DIR}/hooks`, which will revert Git back to its default behavior for that specific repository.
 You don't need to initialize `git lfs install`, because they presumably be already in `${GIT_DIR}/hooks` from any `git clone/init`.
 
-### Supported Platforms:
-
-The following platforms are tested:
-
-- Linux
-- MacOs
-- Windows
-
 ### Updates
 
 You can update the scripts any time by running one of the install commands above. It will simply overwrite the run-wrappers with the new ones, and if you opt-in to install into existing local repositories, those will get overwritten too.
@@ -621,6 +613,14 @@ directly with a new install:
 
 Trusted hooks will be needed to be trusted again.
 To port Git configuration variables use the file `githooks/hooks/gitconfig.go` which contains all used Git config keys.
+
+### Supported Platforms
+
+The following platforms are tested:
+
+- Linux
+- macOs
+- Windows
 
 ## Acknowledgements
 
