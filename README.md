@@ -7,13 +7,13 @@
 **STILL BETA: Any changes with out notice!**
 <br><br><br><br>
 
-A **platform-independend hooks managger** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
+A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are installed into the `.git/hooks`
 folders automatically on `git init` and `git clone`. There's more [to the story though](#templates-or-global-hooks).
-When one of the Githooks run-wrappers executes, Githooks tries to find matching hooks in the
-`.githooks` directory under the project root,
-and invoke them one-by-one. Also it searches for hooks in configured shared hook repositories.
+When one of the Githooks run-wrappers executes, Githooks starts up and tries to find matching hooks in the
+`.githooks` directory under the project root, and invoke them one-by-one.
+Also it searches for hooks in configured shared hook repositories.
 
 **This Git hook manager supports:**
 
@@ -21,7 +21,7 @@ and invoke them one-by-one. Also it searches for hooks in configured shared hook
 - Running shared hooks from other Git repositories (with auto-update).
 - Command line interface.
 - Fast execution due to compiled Go executable.
-- Fast parallel execution over threadpool (not yet finished)
+- Fast parallel execution over threadpool (not yet finished).
 - Ignoring non-shared and shared hooks with patterns.
 - Automatic Githooks updates:
   Fully configurable for your own company by url/branch and deploy settings.
