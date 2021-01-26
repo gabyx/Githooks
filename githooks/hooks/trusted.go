@@ -1,12 +1,12 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"path/filepath"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
 )
 
 // GetTrustMarkerFile get the trust marker file in the current repo.

@@ -1,10 +1,10 @@
 package download
 
 import (
+	cm "gabyx/githooks/common"
 	"io"
 	"os"
 	"path"
-	cm "rycus86/githooks/common"
 
 	"code.gitea.io/sdk/gitea"
 )

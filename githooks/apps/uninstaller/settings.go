@@ -1,9 +1,9 @@
 package main
 
 import (
-	"rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
-	strs "rycus86/githooks/strings"
+	"gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
+	strs "gabyx/githooks/strings"
 )
 
 type UninstallSet = strs.StringSet

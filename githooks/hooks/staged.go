@@ -1,6 +1,6 @@
 package hooks
 
-import "rycus86/githooks/git"
+import "gabyx/githooks/git"
 
 // GetStagedFiles gets all currently staged files.
 func GetStagedFiles(gitx *git.Context) (string, error) {

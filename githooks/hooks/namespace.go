@@ -1,9 +1,9 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
 	"io/ioutil"
 	"path"
-	cm "rycus86/githooks/common"
 	"strings"
 )
 

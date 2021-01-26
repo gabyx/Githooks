@@ -1,9 +1,9 @@
 package ccm
 
 import (
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/prompt"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/prompt"
 )
 
 // CmdContext is the context for the CLI.

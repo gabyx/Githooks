@@ -1,24 +1,24 @@
 package cmd
 
 import (
+	inst "gabyx/githooks/apps/install"
+	"gabyx/githooks/build"
+	ccm "gabyx/githooks/cmd/common"
+	"gabyx/githooks/cmd/config"
+	"gabyx/githooks/cmd/disable"
+	"gabyx/githooks/cmd/ignore"
+	"gabyx/githooks/cmd/install"
+	"gabyx/githooks/cmd/list"
+	"gabyx/githooks/cmd/readme"
+	"gabyx/githooks/cmd/shared"
+	"gabyx/githooks/cmd/tools"
+	"gabyx/githooks/cmd/trust"
+	"gabyx/githooks/cmd/update"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
 	"os"
-	inst "rycus86/githooks/apps/install"
-	"rycus86/githooks/build"
-	ccm "rycus86/githooks/cmd/common"
-	"rycus86/githooks/cmd/config"
-	"rycus86/githooks/cmd/disable"
-	"rycus86/githooks/cmd/ignore"
-	"rycus86/githooks/cmd/install"
-	"rycus86/githooks/cmd/list"
-	"rycus86/githooks/cmd/readme"
-	"rycus86/githooks/cmd/shared"
-	"rycus86/githooks/cmd/tools"
-	"rycus86/githooks/cmd/trust"
-	"rycus86/githooks/cmd/update"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
 
 	"github.com/spf13/cobra"
 )
@@ -68,7 +68,7 @@ func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 	rootCmd = &cobra.Command{
 		Use:   "git hooks", // Contains a en-space (utf-8: U+2002) to make it work...
 		Short: "Githooks CLI application",
-		Long:  "See further information at https://github.com/rycus86/githooks/blob/master/README.md"}
+		Long:  "See further information at https://github.com/gabyx/githooks/blob/master/README.md"}
 
 	ccm.ModifyTemplate(rootCmd, ctx.Log.GetIndent())
 

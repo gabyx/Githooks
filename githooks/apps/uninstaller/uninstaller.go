@@ -2,17 +2,17 @@
 package main
 
 import (
+	"gabyx/githooks/apps/install"
+	"gabyx/githooks/build"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
+	strs "gabyx/githooks/strings"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
-	"rycus86/githooks/apps/install"
-	"rycus86/githooks/build"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
-	strs "rycus86/githooks/strings"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 	Use:   "uninstaller",
 	Short: "Githooks uninstaller application",
 	Long: "Githooks uninstaller application\n" +
-		"See further information at https://github.com/rycus86/githooks/blob/master/README.md",
+		"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
 	Run: runUninstall}
 
 // Run adds all child commands to the root command and sets flags appropriately.

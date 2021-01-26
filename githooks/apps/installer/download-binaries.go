@@ -3,15 +3,15 @@
 package main
 
 import (
+	"gabyx/githooks/build"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
+	"gabyx/githooks/updates"
+	"gabyx/githooks/updates/download"
 	"net/url"
 	"path"
 	"runtime"
-	"rycus86/githooks/build"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
-	"rycus86/githooks/updates"
-	"rycus86/githooks/updates/download"
 	"strings"
 )
 

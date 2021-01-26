@@ -1,13 +1,13 @@
 package config
 
 import (
-	ccm "rycus86/githooks/cmd/common"
-	"rycus86/githooks/cmd/disable"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	strs "rycus86/githooks/strings"
-	"rycus86/githooks/updates"
+	ccm "gabyx/githooks/cmd/common"
+	"gabyx/githooks/cmd/disable"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	strs "gabyx/githooks/strings"
+	"gabyx/githooks/updates"
 	"strings"
 	"time"
 

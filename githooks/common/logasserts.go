@@ -1,6 +1,6 @@
 package common
 
-import strs "rycus86/githooks/strings"
+import strs "gabyx/githooks/strings"
 
 // AssertWarn Assert a condition is `true`, otherwise log.
 func (c *LogContext) AssertWarn(condition bool, lines ...string) {

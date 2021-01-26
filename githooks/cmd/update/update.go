@@ -1,13 +1,13 @@
 package update
 
 import (
-	"rycus86/githooks/build"
-	ccm "rycus86/githooks/cmd/common"
-	"rycus86/githooks/cmd/config"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/prompt"
-	strs "rycus86/githooks/strings"
-	"rycus86/githooks/updates"
+	"gabyx/githooks/build"
+	ccm "gabyx/githooks/cmd/common"
+	"gabyx/githooks/cmd/config"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/prompt"
+	strs "gabyx/githooks/strings"
+	"gabyx/githooks/updates"
 
 	"github.com/spf13/cobra"
 )

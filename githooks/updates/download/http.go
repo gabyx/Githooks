@@ -1,7 +1,7 @@
 package download
 
 import (
-	cm "rycus86/githooks/common"
+	cm "gabyx/githooks/common"
 )
 
 // The deploy settings for Gitea.

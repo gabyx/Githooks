@@ -1,16 +1,16 @@
 package hooks
 
 import (
+	"gabyx/githooks/build"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
 	"os"
 	"path"
 	"regexp"
 	"runtime"
-	"rycus86/githooks/build"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
 )
 
-var runWrapperDetectionRegex = regexp.MustCompile("https://github.com/rycus86/githooks")
+var runWrapperDetectionRegex = regexp.MustCompile("https://github.com/gabyx/githooks")
 
 // IsRunWrapper answers the question if `filePath`
 // is a Githooks hook template file.

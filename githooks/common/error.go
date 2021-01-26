@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
-	strs "rycus86/githooks/strings"
+	strs "gabyx/githooks/strings"
 	"strings"
 )
 

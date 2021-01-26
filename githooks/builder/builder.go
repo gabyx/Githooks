@@ -1,14 +1,14 @@
 package builder
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"regexp"
 	"runtime"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	strs "rycus86/githooks/strings"
 	"strings"
 
 	"github.com/hashicorp/go-version"

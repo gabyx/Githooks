@@ -1,9 +1,9 @@
 package common
 
 import (
+	strs "gabyx/githooks/strings"
 	"os"
 	"os/exec"
-	strs "rycus86/githooks/strings"
 	"strings"
 )
 

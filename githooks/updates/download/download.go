@@ -1,8 +1,8 @@
 package download
 
 import (
+	cm "gabyx/githooks/common"
 	"net/http"
-	cm "rycus86/githooks/common"
 )
 
 // DownloadFile downloads a file from a `url`.

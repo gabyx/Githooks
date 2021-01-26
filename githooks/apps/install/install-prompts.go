@@ -1,11 +1,11 @@
 package install
 
 import (
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
-	strs "rycus86/githooks/strings"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
+	strs "gabyx/githooks/strings"
 	"strings"
 	"time"
 

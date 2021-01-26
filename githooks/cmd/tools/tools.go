@@ -1,13 +1,13 @@
 package tools
 
 import (
+	ccm "gabyx/githooks/cmd/common"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/hooks"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"path/filepath"
-	ccm "rycus86/githooks/cmd/common"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/hooks"
-	strs "rycus86/githooks/strings"
 
 	"github.com/spf13/cobra"
 )

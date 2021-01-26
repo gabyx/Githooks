@@ -1,9 +1,9 @@
 package git
 
 import (
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"os"
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
 	"sort"
 	"strings"
 )

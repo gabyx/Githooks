@@ -3,7 +3,7 @@
 package main
 
 import (
-	cm "rycus86/githooks/common"
+	cm "gabyx/githooks/common"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

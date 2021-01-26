@@ -1,8 +1,8 @@
 package main
 
 import (
-	hooks "rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
+	hooks "gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
 )
 
 // UISettings defines user interface settings made by the user over prompts.

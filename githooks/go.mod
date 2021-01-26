@@ -1,4 +1,4 @@
-module rycus86/githooks
+module gabyx/githooks
 
 go 1.15
 

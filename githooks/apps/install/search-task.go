@@ -1,9 +1,9 @@
 package install
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
 	"path"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
 	"sort"
 )
 

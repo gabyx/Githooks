@@ -2,21 +2,21 @@
 package main
 
 import (
+	"gabyx/githooks/apps/install"
+	"gabyx/githooks/build"
+	"gabyx/githooks/builder"
+	ccm "gabyx/githooks/cmd/common"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
+	strs "gabyx/githooks/strings"
+	"gabyx/githooks/updates"
+	"gabyx/githooks/updates/download"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
-	"rycus86/githooks/apps/install"
-	"rycus86/githooks/build"
-	"rycus86/githooks/builder"
-	ccm "rycus86/githooks/cmd/common"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
-	strs "rycus86/githooks/strings"
-	"rycus86/githooks/updates"
-	"rycus86/githooks/updates/download"
 	"strings"
 	"time"
 
@@ -34,7 +34,7 @@ var rootCmd = &cobra.Command{
 	Use:   "installer [flags]",
 	Short: "Githooks installer application",
 	Long: "Githooks installer application\n" +
-		"See further information at https://github.com/rycus86/githooks/blob/master/README.md",
+		"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
 	PreRun: ccm.PanicIfAnyArgs(log),
 	Run:    runInstall}
 

@@ -1,7 +1,7 @@
 package install
 
 import (
-	"rycus86/githooks/prompt"
+	"gabyx/githooks/prompt"
 )
 
 // UISettings defines user interface settings made by the user over prompts.

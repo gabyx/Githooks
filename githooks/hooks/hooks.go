@@ -1,10 +1,10 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
 	"strings"
 
 	thx "github.com/pbenner/threadpool"

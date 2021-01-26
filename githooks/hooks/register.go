@@ -1,11 +1,11 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
 	"path"
 	"path/filepath"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
 )
 
 // RegisterRepos is the format of the register file

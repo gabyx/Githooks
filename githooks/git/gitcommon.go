@@ -1,13 +1,13 @@
 package git
 
 import (
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
 	"strings"
 
 	"github.com/hashicorp/go-version"

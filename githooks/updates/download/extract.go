@@ -1,8 +1,8 @@
 package download
 
 import (
+	cm "gabyx/githooks/common"
 	"os"
-	cm "rycus86/githooks/common"
 )
 
 // Exctact extracts a file int dir.

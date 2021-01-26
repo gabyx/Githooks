@@ -2,9 +2,9 @@ package download
 
 import (
 	"bytes"
+	cm "gabyx/githooks/common"
 	"io/ioutil"
 	"os"
-	cm "rycus86/githooks/common"
 	"strings"
 )
 

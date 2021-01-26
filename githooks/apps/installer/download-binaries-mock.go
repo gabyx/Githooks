@@ -3,13 +3,13 @@
 package main
 
 import (
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
+	"gabyx/githooks/updates"
+	"gabyx/githooks/updates/download"
 	"os"
 	"path"
 	"runtime"
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
-	"rycus86/githooks/updates"
-	"rycus86/githooks/updates/download"
 )
 
 // detectDeploySettings tries to detect the deploy settings.

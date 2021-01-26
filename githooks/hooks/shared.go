@@ -1,12 +1,12 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"regexp"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
 	"strings"
 )
 

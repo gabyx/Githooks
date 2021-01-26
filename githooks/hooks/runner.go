@@ -1,10 +1,10 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
 	"os"
 	"path"
 	"regexp"
-	cm "rycus86/githooks/common"
 )
 
 // The data for the runner config file.

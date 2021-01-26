@@ -1,8 +1,8 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
 	"path"
-	cm "rycus86/githooks/common"
 )
 
 // GetToolsDir returns the tools directory of Githooks.

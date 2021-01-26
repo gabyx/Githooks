@@ -1,11 +1,11 @@
 package main
 
 import (
+	"gabyx/githooks/cmd"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/hooks"
 	"os"
 	"path/filepath"
-	"rycus86/githooks/cmd"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/hooks"
 )
 
 func main() {

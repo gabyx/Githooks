@@ -1,24 +1,24 @@
 package hooks
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
 	"strings"
 )
 
 // HooksDirName denotes the directory name used for repository specific hooks.
 const HooksDirName = ".githooks"
 
-const GithooksWebpage = "https://github.com/rycus86/githooks"
+const GithooksWebpage = "https://github.com/gabyx/githooks"
 
 // DefaultBugReportingURL is the default url to report errors.
-const DefaultBugReportingURL = "https://github.com/rycus86/githooks/issues"
+const DefaultBugReportingURL = "https://github.com/gabyx/githooks/issues"
 
 // ManagedServerHookNames are hook names managed by Githooks for normal repositories.
 var ManagedHookNames = []string{

@@ -1,12 +1,12 @@
 package ignore
 
 import (
+	ccm "gabyx/githooks/cmd/common"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/hooks"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
-	ccm "rycus86/githooks/cmd/common"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/hooks"
-	strs "rycus86/githooks/strings"
 	"strings"
 
 	"github.com/spf13/cobra"

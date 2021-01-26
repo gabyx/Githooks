@@ -1,8 +1,8 @@
 package updates
 
 import (
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
 )
 
 // SetAutomaticUpdateSettings set the automatic update settings.

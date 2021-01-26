@@ -3,8 +3,8 @@
 package hooks
 
 import (
+	"gabyx/githooks/git"
 	"os"
-	"rycus86/githooks/git"
 )
 
 const (

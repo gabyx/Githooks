@@ -2,12 +2,12 @@ package download
 
 import (
 	"bytes"
+	cm "gabyx/githooks/common"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
-	cm "rycus86/githooks/common"
 	"strings"
 )
 

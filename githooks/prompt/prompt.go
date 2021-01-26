@@ -2,11 +2,11 @@ package prompt
 
 import (
 	"bufio"
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"io"
 	"os"
 	"runtime"
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
 	"strings"
 )
 

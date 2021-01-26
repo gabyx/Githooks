@@ -3,8 +3,8 @@
 package hooks
 
 import (
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"strings"
 )
 

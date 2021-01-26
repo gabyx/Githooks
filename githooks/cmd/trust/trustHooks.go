@@ -1,12 +1,12 @@
 package trust
 
 import (
+	ccm "gabyx/githooks/cmd/common"
+	"gabyx/githooks/cmd/ignore"
+	"gabyx/githooks/cmd/list"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/hooks"
 	"path"
-	ccm "rycus86/githooks/cmd/common"
-	"rycus86/githooks/cmd/ignore"
-	"rycus86/githooks/cmd/list"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/hooks"
 
 	"github.com/spf13/cobra"
 )

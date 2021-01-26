@@ -2,10 +2,10 @@ package download
 
 import (
 	"context"
+	cm "gabyx/githooks/common"
 	"io"
 	"os"
 	"path"
-	cm "rycus86/githooks/common"
 
 	"github.com/google/go-github/v33/github"
 )

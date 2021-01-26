@@ -1,10 +1,10 @@
 package install
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/hooks"
 	"path"
 	"path/filepath"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/hooks"
 
 	"github.com/mitchellh/go-homedir"
 )

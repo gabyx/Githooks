@@ -1,8 +1,8 @@
 package main
 
 import (
-	"rycus86/githooks/hooks"
-	strs "rycus86/githooks/strings"
+	"gabyx/githooks/hooks"
+	strs "gabyx/githooks/strings"
 )
 
 type InstallSet = strs.StringSet

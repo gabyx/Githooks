@@ -1,10 +1,10 @@
 package download
 
 import (
+	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"regexp"
 	"runtime"
-	cm "rycus86/githooks/common"
-	strs "rycus86/githooks/strings"
 )
 
 type Asset struct {

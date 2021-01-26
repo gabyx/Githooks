@@ -1,10 +1,10 @@
 package common
 
 import (
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"path/filepath"
-	strs "rycus86/githooks/strings"
 	"strings"
 	"time"
 

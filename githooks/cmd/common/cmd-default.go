@@ -1,9 +1,9 @@
 package ccm
 
 import (
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/hooks"
-	strs "rycus86/githooks/strings"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/hooks"
+	strs "gabyx/githooks/strings"
 	"strings"
 
 	"github.com/spf13/cobra"

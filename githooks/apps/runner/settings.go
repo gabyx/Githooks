@@ -1,9 +1,9 @@
 package main
 
 import (
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
 )
 
 // HookSettings defines hooks related settings for this run.

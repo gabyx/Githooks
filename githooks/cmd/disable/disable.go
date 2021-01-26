@@ -1,9 +1,9 @@
 package disable
 
 import (
-	ccm "rycus86/githooks/cmd/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
+	ccm "gabyx/githooks/cmd/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
 
 	"github.com/spf13/cobra"
 )

@@ -1,11 +1,11 @@
 package install
 
 import (
-	inst "rycus86/githooks/apps/install"
-	ccm "rycus86/githooks/cmd/common"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
+	inst "gabyx/githooks/apps/install"
+	ccm "gabyx/githooks/cmd/common"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
 
 	"github.com/spf13/cobra"
 )

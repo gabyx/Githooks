@@ -1,13 +1,13 @@
 package updates
 
 import (
+	"gabyx/githooks/build"
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
+	"gabyx/githooks/prompt"
+	strs "gabyx/githooks/strings"
 	"regexp"
-	"rycus86/githooks/build"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
-	"rycus86/githooks/prompt"
-	strs "rycus86/githooks/strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-version"

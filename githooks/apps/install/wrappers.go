@@ -1,11 +1,11 @@
 package install
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	"gabyx/githooks/hooks"
 	"os"
 	"path"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	"rycus86/githooks/hooks"
 )
 
 // InstallIntoRepo installs run wrappers into a repositories

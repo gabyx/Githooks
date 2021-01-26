@@ -1,11 +1,11 @@
 package install
 
 import (
+	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+	strs "gabyx/githooks/strings"
 	"os"
 	"path"
-	cm "rycus86/githooks/common"
-	"rycus86/githooks/git"
-	strs "rycus86/githooks/strings"
 )
 
 // Checks the target directory and if valid

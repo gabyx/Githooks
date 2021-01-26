@@ -2,10 +2,10 @@ package common
 
 import (
 	"fmt"
+	strs "gabyx/githooks/strings"
 	"io"
 	"os"
 	"runtime/debug"
-	strs "rycus86/githooks/strings"
 	"strings"
 
 	"github.com/gookit/color"
