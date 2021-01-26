@@ -111,7 +111,7 @@ args:
 version: 1
 ```
 
-All additional arguments given by Git to `<hookName>` will be appended last ont `args`.
+All additional arguments given by Git to `<hookName>` will be appended last onto `args`.
 
 **Sidenote**: You might ask why we split this configuration into one for each hook instead of one collocated YAML file. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
 
@@ -212,7 +212,7 @@ urls:
 The install script offers to set up shared hooks in the global Git config.
 but you can do it any time by changing the global configuration variable.
 
-### Supproted URLS
+### Supported URLS
 
 Supported URL for shared hooks are:
 
