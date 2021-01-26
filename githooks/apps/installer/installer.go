@@ -800,11 +800,13 @@ func setupHookTemplates(
 		hookNames = hooks.ManagedHookNames
 	}
 
+	log.InfoF("Saving Githooks run wrapper to '%s' :", hookTemplateDir)
+
 	err := hooks.InstallRunWrappers(
 		hookTemplateDir,
 		hookNames,
 		func(dest string) {
-			log.InfoF("Saving Githooks run wrapper to '%s'.", dest)
+			log.InfoF(" %s '%s'", cm.ListItemLiteral, path.Base(dest))
 		},
 		install.GetHookDisableCallback(log, nonInteractive, uiSettings),
 		log)

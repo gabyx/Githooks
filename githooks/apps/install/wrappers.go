@@ -38,13 +38,14 @@ func InstallIntoRepo(
 		log.InfoF("[dry run] Hooks would have been installed into\n'%s'.",
 			repoGitDir)
 	} else {
+
+		log.InfoF("Saving Githooks run wrapper to '%s'.", hookDir)
 		err := hooks.InstallRunWrappers(
 			hookDir, hookNames,
-			func(dest string) {
-				log.InfoF("Saving Githooks run wrapper to '%s'.", dest)
-			},
+			nil,
 			GetHookDisableCallback(log, nonInteractive, uiSettings),
 			nil)
+		log.InfoF("Saving Githooks run wrapper to '%s' :", hookDir)
 		log.AssertNoErrorPanicF(err, "Could not install run wrappers into '%s'.", hookDir)
 		log.InfoF("Githooks run wrappers installed into '%s'.",
 			repoGitDir)

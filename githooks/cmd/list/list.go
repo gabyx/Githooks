@@ -140,7 +140,7 @@ func printPendingShared(ctx *ccm.CmdContext, shared hooks.SharedRepos) {
 	listPending := func(shRepos []hooks.SharedRepo, indent string, category string) {
 		for _, sh := range shRepos {
 			_, err := strs.FmtW(&sb,
-				"\n%s%s '%s' state: ['pending'], type: '%s'", indent, ccm.ListItemLiteral, sh.OriginalURL, category)
+				"\n%s%s '%s' state: ['pending'], type: '%s'", indent, cm.ListItemLiteral, sh.OriginalURL, category)
 			cm.AssertNoErrorPanic(err, "Could not write pending hooks.")
 		}
 	}
@@ -344,7 +344,7 @@ func formatHookState(
 	padding int,
 	indent string) {
 
-	hooksFmt := strs.Fmt("%s%s %%-%vs : ", indent, ccm.ListItemLiteral, padding)
+	hooksFmt := strs.Fmt("%s%s %%-%vs : ", indent, cm.ListItemLiteral, padding)
 	const stateFmt = " state: ['%s', '%s']"
 	const disabledStateFmt = " state: ['disabled']"
 	const categeoryFmt = ", type: '%s'"

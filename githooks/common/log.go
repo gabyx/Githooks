@@ -20,6 +20,8 @@ const (
 	errorSuffix    = "⛔ "
 	promptSuffix   = "❓ " + githooksSuffix
 	indent         = "   "
+
+	ListItemLiteral = "•"
 )
 
 // ILogContext defines the log interface.

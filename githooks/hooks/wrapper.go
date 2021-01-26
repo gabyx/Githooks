@@ -191,7 +191,9 @@ func InstallRunWrappers(
 			return err
 		}
 
-		beforeSaveCallback(dest)
+		if beforeSaveCallback != nil {
+			beforeSaveCallback(dest)
+		}
 
 		if cm.IsFile(dest) {
 			// If still existing, it is a run-wrapper:

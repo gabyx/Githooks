@@ -113,7 +113,7 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 
 			_, err := strs.FmtW(
 				&sb, " %s '%s' : exists: '%v', type: '%s'\n",
-				ccm.ListItemLiteral, file, exists, catergory)
+				cm.ListItemLiteral, file, exists, catergory)
 			cm.AssertNoErrorPanic(err, "Could not format ignore files.")
 
 			count += 1

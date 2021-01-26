@@ -163,7 +163,7 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 
 		for i := range pairs {
 			key := strs.Fmt("'%s'", pairs[i][0])
-			_, err = strs.FmtW(&sb, "\n%s "+keyFmt+" : '%s'", ccm.ListItemLiteral, key, pairs[i][1])
+			_, err = strs.FmtW(&sb, "\n%s "+keyFmt+" : '%s'", cm.ListItemLiteral, key, pairs[i][1])
 			cm.AssertNoErrorPanic(err, "Could not write message.")
 		}
 
@@ -240,7 +240,7 @@ func runSharedRepos(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) 
 
 			return strs.Fmt("[%v]:\n%s", len(sh),
 				strings.Join(strs.Map(sh,
-					func(s string) string { return strs.Fmt("%s '%s'", ccm.ListItemLiteral, s) }),
+					func(s string) string { return strs.Fmt("%s '%s'", cm.ListItemLiteral, s) }),
 					"\n"))
 		}
 

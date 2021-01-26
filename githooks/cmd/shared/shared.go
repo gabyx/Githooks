@@ -134,13 +134,13 @@ func runSharedList(ctx *ccm.CmdContext, opts *SharedOpts) {
 			}
 		}
 
-		return strs.Fmt(" %s '%s' : state: '%s'", ccm.ListItemLiteral, s.OriginalURL, state)
+		return strs.Fmt(" %s '%s' : state: '%s'", cm.ListItemLiteral, s.OriginalURL, state)
 	}
 
 	format := func(sharedHooks []hooks.SharedRepo) string {
 		var lst []string
 		if len(sharedHooks) == 0 {
-			lst = append(lst, strs.Fmt(" %s None", ccm.ListItemLiteral))
+			lst = append(lst, strs.Fmt(" %s None", cm.ListItemLiteral))
 		} else {
 			for _, s := range sharedHooks {
 				lst = append(lst, formatLine(&s))

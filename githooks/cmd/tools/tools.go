@@ -107,7 +107,7 @@ If 'run' is executable, then the following is executed`+"\n\n"+
   e.g. 'Yes', 'no', 'disable'.
 
 The script needs to return one of the short-options on 'stdout'.
-Non-zero exit code triggers the fallback of reading from 'stdin'.`, ccm.ListItemLiteral)}
+Non-zero exit code triggers the fallback of reading from 'stdin'.`, cm.ListItemLiteral)}
 
 	registerCmd := &cobra.Command{
 		Use:   "register [flags] <toolName> <scriptFolder>",

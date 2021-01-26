@@ -47,7 +47,7 @@ func AssertRepoRoot(ctx *CmdContext) (repoRoot, gitDir, gitDirWorktree string) {
 func GetFormattedHookList(indent string) string {
 	return strings.Join(strs.Map(hooks.ManagedHookNames,
 		func(s string) string {
-			return strs.Fmt("%s%s '%s'", indent, ListItemLiteral, s)
+			return strs.Fmt("%s%s '%s'", indent, cm.ListItemLiteral, s)
 		}),
 		"\n")
 }
