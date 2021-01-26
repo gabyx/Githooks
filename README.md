@@ -384,10 +384,11 @@ The installer will:
 
 ### Normal Installation
 
-To install Githooks on your system, simply the installer executable `installer`.
-It will guide you through the installation process. Check the `installer --help` for available options. Some of them are described below:
+To install Githooks on your system, simply execute the executable `installer`.
+It will guide you through the installation process.
+Check the `installer --help` for available options. Some of them are described below:
 
-If you want, you can try out what the script would do first, without changing anything.
+If you want, you can try out what the script would do first, without changing anything by using:
 
 ```shell
 $ installer --dry-run
@@ -425,7 +426,8 @@ $ installer --use-core-hookspath --template-dir /home/public/.githooks
 ```
 
 ### Install from different URL and Branch
-If you want to install from another Git repository (e.g. from your own or your companies fork), you can specify the repository clone url as well as the branch name (default: `main`) when installing with:
+If you want to install from another Git repository (e.g. from your own or your companies fork),
+you can specify the repository clone url as well as the branch name (default: `main`) when installing with:
 
 ```shell
 $ installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
@@ -435,7 +437,9 @@ Because the installer **always** downloads the latest release (here from another
 to know where to get the binaries from. Either your fork has setup
 these settings in their Githooks release (you hopefully downloaded) already or you can specify them by using
 `--deploy-api <type>` or the full settings file `--deploy-settings <file>`.
-The `<type>` can either be `gitea` ( or `github` which is not needed since it can be autodetected by the URL) and it will automatically get the binaries over the implemented API. Credentials will be collected over [`git credential`](https://git-scm.com/docs/cli/git-credential) to access the API. [@todo].
+The `<type>` can either be `gitea` ( or `github` which is not needed since it can be auto-detected from the URL) and
+it will automatically download and **verify** the binaries over the implemented API.
+Credentials will be collected over [`git credential`](https://git-scm.com/docs/cli/git-credential) to access the API. [@todo].
 
 The clone URL and branch will then be used for further updates.
 
