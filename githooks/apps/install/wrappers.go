@@ -39,16 +39,14 @@ func InstallIntoRepo(
 			repoGitDir)
 	} else {
 
-		log.InfoF("Saving Githooks run wrapper to '%s'.", hookDir)
 		err := hooks.InstallRunWrappers(
 			hookDir, hookNames,
 			nil,
 			GetHookDisableCallback(log, nonInteractive, uiSettings),
 			nil)
-		log.InfoF("Saving Githooks run wrapper to '%s' :", hookDir)
+
 		log.AssertNoErrorPanicF(err, "Could not install run wrappers into '%s'.", hookDir)
-		log.InfoF("Githooks run wrappers installed into '%s'.",
-			repoGitDir)
+		log.InfoF("Githooks run wrappers installed into '%s'.", hookDir)
 	}
 
 	// Offer to setup the intro README if running in interactive mode

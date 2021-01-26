@@ -10,7 +10,7 @@ import (
 	"runtime"
 )
 
-var runWrapperDetectionRegex = regexp.MustCompile("https://github.com/gabyx/githooks")
+var runWrapperDetectionRegex = regexp.MustCompile(`https://github\.com/(gabyx|rycus86)/githooks`)
 
 // IsRunWrapper answers the question if `filePath`
 // is a Githooks hook template file.
