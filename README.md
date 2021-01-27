@@ -99,12 +99,14 @@ Each supported hook can also be specified by a configuration file `<hookName>.ya
 
 ```yaml
 # The command to run.
-cmd: "my-command.exe"
+cmd: "command-of-${env:USER}.exe"
 
 # The arguments given to `cmd`.
 args:
   - "-s"
   - "--all"
+  - "${env:GPG_PUBLIC_KEY}"
+  - "--test ${git-l:my-local-git-config-var}"
 
 # If you want to make sure your file is not
 # treated always as the newest version. Fix the version by:
@@ -112,9 +114,18 @@ version: 1
 ```
 
 All additional arguments given by Git to `<hookName>` will be appended last onto `args`.
-@todo: Describe Env and Git config replacment.
+All environment and Git config variables in `args` and `cmd` are substituted with the following syntax:
 
-**Sidenote**: You might ask why we split this configuration into one for each hook instead of one collocated YAML file. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
+- `${env:VAR}` : Denotes an environment variable `VAR`.
+- `${git:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config 'VAR'`.
+- `${git-l:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config --local 'VAR'`.
+- `${git-g:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config --global 'VAR'`.
+- `${git-s:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config --system 'VAR'`.
+
+Not existing environment variables or Git config variables are replaced with the empty string by default. If you use `${!...:VAR}` (e.g `${!git-s:VAR }`) it will trigger an error and fail the hook if the variable `VAR` is not found.
+Escaping a above syntax works with `\${...}`.
+
+**Sidenote**: You might wonder why this configuration is not collocated in one YAML file for all hooks. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
 
 ## Supported Hooks
 

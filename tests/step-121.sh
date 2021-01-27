@@ -25,17 +25,18 @@ EOF
 
 go build -o custom-runner.exe ./... || exit 4
 
+git config --local 'githooks.monkey' "git-monkey"
+
 # shellcheck disable=SC2016
 mkdir -p .githooks &&
-    cat <<"EOF" >>".githooks/pre-commit.yaml" || exit 5
-cmd: "$GH_TEST_TMP/test121/custom-runner.exe"
+    cat <<"EOF" >".githooks/pre-commit.yaml" || exit 5
+cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
 args:
     - "my-file.py"
-    - '${MONKEY}'
-    - "$MONKEY"
-    - "${MONKEY}"
-    - "$$MONKEY"
-    - "$${MONKEY}"
+    - '${env:MONKEY}'
+    - "\${env:MONKEY}"
+    - "${git-l:githooks.monkey}"
+    - "${git:githooks.monkey}"
 version: 1
 EOF
 
@@ -46,8 +47,25 @@ OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Hello" ||
     ! echo "$OUT" | grep "my-file.py" ||
-    ! echo "$OUT" | grep 'Args:mon key,mon key,mon key,$MONKEY,${MONKEY}'; then
+    ! echo "$OUT" | grep 'Args:mon key,${env:MONKEY},git-monkey,git-monkey'; then
     echo "! Expected hook with runner command to be executed."
     echo "$OUT"
     exit 6
+fi
+
+# Test if it fails!
+cat <<"EOF" >".githooks/pre-commit.yaml" || exit 5
+cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
+args:
+    - "my-file.py"
+    - '${!env:MONKEY}'
+    - "\${env:MONKEY}"
+version: 1
+EOF
+
+OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+# shellcheck disable=SC2181,SC2016
+if [ "$?" -eq 0 ] || ! echo "$OUT" | grep "Error in hook run config"; then
+    echo "! Expected hook to fail."
+    exit 7
 fi

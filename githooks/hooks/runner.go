@@ -2,9 +2,12 @@ package hooks
 
 import (
 	cm "gabyx/githooks/common"
+	"gabyx/githooks/git"
+
 	"os"
 	"path"
-	"regexp"
+
+	"github.com/agext/regexp"
 )
 
 // The data for the runner config file.
@@ -60,37 +63,71 @@ func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err erro
 		return
 	}
 
-	exec.Cmd = replaceEnvVariables(config.Cmd)
+	subst := getEnvSubstitution(os.LookupEnv, git.Ctx().LookupConfig)
+
+	if exec.Cmd, err = subst(config.Cmd); err != nil {
+		err = cm.CombineErrors(err,
+			cm.Error("Error in hook run config '%s'.", hookPath))
+
+		return
+	}
+
 	exec.Args = config.Args
 
 	for i := range config.Args {
-		exec.Args[i] = replaceEnvVariables(exec.Args[i])
+		if exec.Args[i], err = subst(exec.Args[i]); err != nil {
+			err = cm.CombineErrors(err,
+				cm.Error("Error in hook run config '%s'.", hookPath))
+
+			return
+		}
+
 	}
 	exec.Args = append(exec.Args, args...)
 
 	return
 }
 
-var reEnvVariable = regexp.MustCompile(`\$?\$(\{[a-zA-Z]\w*\}|[a-zA-Z]\w*)`)
+var reEnvVariable = regexp.MustCompile(`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s):([a-zA-Z.][a-zA-Z0-9_.]+)\}`)
 
-func replaceEnvVariables(s string) string {
-	return reEnvVariable.ReplaceAllStringFunc(s, substituteEnvVariable)
-}
+func getEnvSubstitution(
+	getEnv func(string) (string, bool),
+	gitGet func(string, git.ConfigScope) (string, bool)) func(string) (string, error) {
 
-func substituteEnvVariable(s string) string {
-	r := []rune(s)
+	return func(s string) (res string, err error) {
 
-	if r[0] == '$' && r[1] == '$' {
-		// Escape '$$var' or '$${var}' => '$var' or '${var}'
-		return string(r[1:])
+		res = reEnvVariable.ReplaceAllStringSubmatchFunc(s, func(match []string) (subs string) {
+
+			// Escape '\${var}' => '${var}'
+			if len(match[1]) != 0 {
+				return string([]rune(match[0])[1:])
+			}
+
+			var exists bool
+
+			switch match[3] {
+			case "env":
+				subs, exists = getEnv(match[4])
+			case "git":
+				subs, exists = gitGet(match[4], git.Traverse)
+			case "git-l":
+				subs, exists = gitGet(match[4], git.LocalScope)
+			case "git-g":
+				subs, exists = gitGet(match[4], git.GlobalScope)
+			case "git-s":
+				subs, exists = gitGet(match[4], git.System)
+			default:
+				cm.DebugAssert(false, "This should not happen.")
+			}
+
+			if len(match[2]) != 0 && !exists {
+				err = cm.ErrorF("Config variable '%s' could not be substituted\n"+
+					"because it does not exist!", match[0])
+			}
+
+			return
+		})
+
+		return
 	}
-
-	if r[1] == '{' {
-		// Case: '${var}'
-		return os.Getenv(string(r[2 : len(r)-1]))
-	}
-
-	// Case '$var'
-	return os.Getenv(string(r[1:]))
-
 }

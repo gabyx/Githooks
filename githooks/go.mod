@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	code.gitea.io/sdk/gitea v0.13.2
+	github.com/agext/regexp v1.3.0
 	github.com/bmatcuk/doublestar/v3 v3.0.0
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/goccy/go-yaml v1.8.2
@@ -21,7 +22,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
-	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sys v0.0.0-20201113135734-0a15ea8d9b02
 	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221
