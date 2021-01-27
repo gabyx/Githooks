@@ -91,7 +91,7 @@ done
 The `ACMR` filter in the `git diff` will include staged
 files that are added, copied, modified or renamed.
 
-**<span id="1"><sup>1</sup></span>[⏎](#a1) Note:** This caveat is basically there because stdandard output and error might get interleaved badly and so far no solution to this small problem has been tackled yet. It is far better to output both streams in the correct order, and therefore send it the error stream because that will not conflict in anyway with Git (see [fsmonitor-watchman](https://git-scm.com/docs/githooks#_fsmonitor_watchman), unsupported right now.). If that poses a real problem for you, open an issue.
+**<span id="1"><sup>1</sup></span>[⏎](#a1) Note:** This caveat is basically there because standard output and error might get interleaved badly and so far no solution to this small problem has been tackled yet. It is far better to output both streams in the correct order, and therefore send it to the error stream because that will not conflict in anyway with Git (see [fsmonitor-watchman](https://git-scm.com/docs/githooks#_fsmonitor_watchman), unsupported right now.). If that poses a real problem for you, open an issue.
 
 ### Hook Run Configuration
 
@@ -116,11 +116,11 @@ version: 1
 All additional arguments given by Git to `<hookName>` will be appended last onto `args`.
 All environment and Git config variables in `args` and `cmd` are substituted with the following syntax:
 
-- `${env:VAR}` : Denotes an environment variable `VAR`.
-- `${git:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config 'VAR'`.
-- `${git-l:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config --local 'VAR'`.
-- `${git-g:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config --global 'VAR'`.
-- `${git-s:VAR}` : Denotes an Git config variable `VAR` which corresponds to `git config --system 'VAR'`.
+- `${env:VAR}` : An environment variable `VAR`.
+- `${git:VAR}` : A Git config variable `VAR` which corresponds to `git config 'VAR'`.
+- `${git-l:VAR}` : A Git config variable `VAR` which corresponds to `git config --local 'VAR'`.
+- `${git-g:VAR}` : A Git config variable `VAR` which corresponds to `git config --global 'VAR'`.
+- `${git-s:VAR}` : A Git config variable `VAR` which corresponds to `git config --system 'VAR'`.
 
 Not existing environment variables or Git config variables are replaced with the empty string by default. If you use `${!...:VAR}` (e.g `${!git-s:VAR }`) it will trigger an error and fail the hook if the variable `VAR` is not found.
 Escaping a above syntax works with `\${...}`.
