@@ -112,6 +112,7 @@ version: 1
 ```
 
 All additional arguments given by Git to `<hookName>` will be appended last onto `args`.
+@todo: Describe Env and Git config replacment.
 
 **Sidenote**: You might ask why we split this configuration into one for each hook instead of one collocated YAML file. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
 
