@@ -493,7 +493,7 @@ func GetSharedHookTypeString(sharedType SharedHookType) string {
 	case SharedHookTypeV.Global:
 		return "global"
 	default:
-		cm.DebugAssertF(false, "Wrong type '%s'", sharedType)
+		cm.DebugAssertF(false, "Wrong type '%v'", sharedType)
 
 		return "wrong-value" // nolint:nlreturn
 	}
