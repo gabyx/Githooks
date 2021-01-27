@@ -18,7 +18,7 @@ paths:
 version: 1
 ```
 
-## Shared Hooks Configuration `.sahred.yaml`
+## Shared Hooks Configuration `.shared.yaml`
 
 ### Version 1
 
