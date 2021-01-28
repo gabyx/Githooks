@@ -1215,7 +1215,7 @@ func main() {
 	cm.AssertNoErrorPanic(err, "Could not get current working dir.")
 	cwd = filepath.ToSlash(cwd)
 
-	log, err = cm.CreateLogContext(cm.IsRunInDocker)
+	log, err = cm.CreateLogContext(false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
 
 	exitCode := 0
@@ -1224,7 +1224,7 @@ func main() {
 	// Handle all panics and report the error
 	defer func() {
 		r := recover()
-		if hooks.HandleCLIErrors(r, cwd, log) {
+		if cm.HandleCLIErrors(r, cwd, log, hooks.GetBugReportingInfo) {
 			exitCode = 1
 		}
 	}()

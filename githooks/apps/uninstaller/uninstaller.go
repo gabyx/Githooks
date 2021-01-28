@@ -393,7 +393,7 @@ func runUninstall(cmd *cobra.Command, auxArgs []string) {
 }
 
 func setupLog() {
-	l, err := cm.CreateLogContext(cm.IsRunInDocker)
+	l, err := cm.CreateLogContext(false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
 
 	l2 := cm.LogContext(*l)
@@ -417,7 +417,7 @@ func main() {
 	// Handle all panics and report the error
 	defer func() {
 		r := recover()
-		if hooks.HandleCLIErrors(r, cwd, log) {
+		if cm.HandleCLIErrors(r, cwd, log, hooks.GetBugReportingInfo) {
 			exitCode = 1
 		}
 	}()
