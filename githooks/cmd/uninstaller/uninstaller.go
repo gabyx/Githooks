@@ -111,9 +111,9 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings
 
 func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
 
-	uninstaller := hooks.GetUninstallerExecutable(settings.InstallDir)
-	if !cm.IsFile(uninstaller) {
-		log.WarnF("There is no existing Githooks uninstaller present\n"+
+	cliPath := hooks.GetCLIExecutable(settings.InstallDir)
+	if !cm.IsFile(cliPath) {
+		log.WarnF("There is no existing Githooks executable present\n"+
 			"in install dir '%s'.\n"+
 			"Your installation is corrupt.\n"+
 			"We will continue to uninstall agnostically with this installer.",
@@ -125,15 +125,14 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 	// Set variables for further uninstall procedure.
 	args.InternalPostDispatch = true
 
-	runUninstaller(log, uninstaller, args)
+	runUninstaller(log, &cm.Executable{Cmd: cliPath, Args: []string{"uninstaller"}}, args)
 
 	return true
 }
 
-func runUninstaller(log cm.ILogContext, uninstaller string, args *Arguments) {
+func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Arguments) {
 
 	log.Info("Dispatching to uninstaller ...")
-	log.PanicIfF(!cm.IsFile(uninstaller), "Uninstaller '%s' is not existing.", uninstaller)
 
 	file, err := ioutil.TempFile("", "*uninstall-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
@@ -146,7 +145,7 @@ func runUninstaller(log cm.ILogContext, uninstaller string, args *Arguments) {
 	// Run the uninstaller binary
 	err = cm.RunExecutable(
 		&cm.ExecContext{},
-		&cm.Executable{Cmd: uninstaller},
+		uninstaller,
 		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetInfoWriter()),
 		"--config", file.Name())
 

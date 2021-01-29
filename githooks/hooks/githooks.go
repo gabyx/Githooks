@@ -168,26 +168,6 @@ func GetRunnerExecutable(installDir string) (p string) {
 	return
 }
 
-// GetInstallerExecutable gets the global Githooks installer executable.
-func GetInstallerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "installer")
-	if runtime.GOOS == cm.WindowsOsName {
-		p += cm.WindowsExecutableSuffix
-	}
-
-	return
-}
-
-// GetUninstallerExecutable gets the global Githooks installer executable.
-func GetUninstallerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "uninstaller")
-	if runtime.GOOS == cm.WindowsOsName {
-		p += cm.WindowsExecutableSuffix
-	}
-
-	return
-}
-
 // GetCLIExecutable gets the global Githooks CLI executable.
 func GetCLIExecutable(installDir string) (p string) {
 	p = path.Join(GetBinaryDir(installDir), "cli")

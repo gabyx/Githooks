@@ -270,8 +270,8 @@ func buildFromSource(
 	binaries := updates.Binaries{BinDir: binPath}
 	strs.Map(bins, func(s string) string {
 		if cm.IsExecutable(s) {
-			if strings.HasPrefix(path.Base(s), "installer") {
-				binaries.Installer = s
+			if strings.HasPrefix(path.Base(s), "cli") {
+				binaries.Cli = s
 			} else {
 				binaries.Others = append(binaries.Others, s)
 			}
@@ -290,8 +290,8 @@ func buildFromSource(
 
 	log.PanicIfF(
 		len(binaries.All) == 0 ||
-			strs.IsEmpty(binaries.Installer),
-		"No binaries or installer found in '%s'", binPath)
+			strs.IsEmpty(binaries.Cli),
+		"No binaries or Githooks executable found in '%s'", binPath)
 
 	// Remember to build from source
 	err = gitx.SetConfig(hooks.GitCK_BuildFromSource, true, git.GlobalScope)
@@ -376,8 +376,9 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 	cm.PanicIfF(args.InternalAutoUpdate && !updateAvailable,
 		"An autoupdate should only be triggered when and update is found.")
 
-	installer := hooks.GetInstallerExecutable(settings.InstallDir)
-	haveInstaller := cm.IsFile(installer)
+	cliPath := hooks.GetCLIExecutable(settings.InstallDir)
+	haveInstaller := cm.IsFile(cliPath)
+	installer := cm.Executable{Cmd: cliPath, Args: []string{"installer"}}
 
 	// We download/build the binaries if an update is available
 	// or the installer is missing.
@@ -414,7 +415,7 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 			binaries = downloadBinaries(log, deploySettings, tempDir, tag)
 		}
 
-		installer = binaries.Installer
+		installer.Cmd = binaries.Cli
 	}
 
 	// Set variables for further update procedure...
@@ -429,15 +430,15 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 		return false
 	}
 
-	runInstaller(log, installer, args)
+	log.PanicIfF(!cm.IsFile(installer.Cmd), "Githooks executable '%s' is not existing.", installer)
+	runInstaller(log, &installer, args)
 
 	return true
 }
 
-func runInstaller(log cm.ILogContext, installer string, args *Arguments) {
+func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) {
 
 	log.Info("Dispatching to new installer ...")
-	log.PanicIfF(!cm.IsFile(installer), "Installer '%s' is not existing.", installer)
 
 	file, err := ioutil.TempFile("", "*install-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
@@ -450,7 +451,7 @@ func runInstaller(log cm.ILogContext, installer string, args *Arguments) {
 	// Run the installer binary
 	err = cm.RunExecutable(
 		&cm.ExecContext{},
-		&cm.Executable{Cmd: installer},
+		installer,
 		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetErrorWriter()),
 		"--config", file.Name())
 
