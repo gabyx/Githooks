@@ -6,6 +6,8 @@ assertStaged
 
 autoRegenerate="true"
 
+repoDir=$(pwd)
+
 for FILE in $STAGED_FILES; do
     if echo "$FILE" | grep -qE '^.*/cmd/.*\.go$'; then
 
@@ -13,10 +15,14 @@ for FILE in $STAGED_FILES; do
 
         if [ "$((docDate + 60 * 5))" -lt "$(date +%s)" ]; then
             if [ "$autoRegenerate" = "true" ]; then
-                "githooks/scripts/build-doc.sh" || {
+                # shellcheck disable=SC2015
+                cd githooks && "scripts/build-doc.sh" || {
                     echo "! Doc regeneration failed!"
                     exit 1
                 }
+
+                git add "$repoDir/docs/cli/"*
+
                 echo "Docs regenerated."
             else
                 echo "! You need to regenerate the CLI docs (its too old)!"

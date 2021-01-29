@@ -1,6 +1,6 @@
 // +build !mock
 
-package main
+package installer
 
 import (
 	"github.com/spf13/cobra"

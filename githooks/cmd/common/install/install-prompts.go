@@ -21,7 +21,7 @@ var existingPrompt = []string{
 	"Do you want to uninstall Githooks from\nexisting repositories?"}
 
 var existingWarn = []string{
-	"Existing repositories won't get Githooks run wrappers.",
+	"Existing repositories won't get Githooks run-wrappers.",
 	"Existing repositories won't have Githooks uninstalled.",
 }
 

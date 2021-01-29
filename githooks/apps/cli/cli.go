@@ -28,5 +28,5 @@ func main() {
 		}
 	}()
 
-	cmd.Run(log)
+	cmd.Run(log, log)
 }

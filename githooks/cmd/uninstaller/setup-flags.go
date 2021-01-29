@@ -1,6 +1,6 @@
 // +build !mock
 
-package main
+package uninstaller
 
 import (
 	"github.com/spf13/cobra"

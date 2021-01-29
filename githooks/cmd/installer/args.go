@@ -1,4 +1,4 @@
-package main
+package installer
 
 // Arguments repesents all CLI arguments for the installer.
 type Arguments struct {

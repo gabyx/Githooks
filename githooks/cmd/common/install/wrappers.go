@@ -8,7 +8,7 @@ import (
 	"path"
 )
 
-// InstallIntoRepo installs run wrappers into a repositories
+// InstallIntoRepo installs run-wrappers into a repositories
 // It prompts for disabling detected LFS hooks and offers to
 // setup a README file.
 func InstallIntoRepo(
@@ -45,8 +45,8 @@ func InstallIntoRepo(
 			GetHookDisableCallback(log, nonInteractive, uiSettings),
 			nil)
 
-		log.AssertNoErrorPanicF(err, "Could not install run wrappers into '%s'.", hookDir)
-		log.InfoF("Githooks run wrappers installed into '%s'.", hookDir)
+		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookDir)
+		log.InfoF("Githooks run-wrappers installed into '%s'.", hookDir)
 	}
 
 	// Offer to setup the intro README if running in interactive mode
@@ -101,7 +101,7 @@ func UninstallFromRepo(
 		err := hooks.UninstallRunWrappers(hookDir, hooks.ManagedHookNames)
 
 		log.AssertNoErrorF(err,
-			"Could not uninstall Githooks run wrappers from\n'%s'.",
+			"Could not uninstall Githooks run-wrappers from\n'%s'.",
 			hookDir)
 
 		if err == nil {

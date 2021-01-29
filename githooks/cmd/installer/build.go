@@ -1,6 +1,6 @@
 // +build !mock
 
-package main
+package installer
 
 const (
 	// DevIsDispatchSkipped tells if the dispatch (to the build installer) is skipped.

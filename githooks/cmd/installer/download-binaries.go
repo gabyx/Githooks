@@ -1,6 +1,6 @@
 // +build !mock
 
-package main
+package installer
 
 import (
 	"gabyx/githooks/build"

@@ -1,6 +1,6 @@
 // +build mock
 
-package main
+package uninstaller
 
 import (
 	cm "gabyx/githooks/common"

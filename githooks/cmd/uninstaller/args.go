@@ -1,4 +1,4 @@
-package main
+package uninstaller
 
 // Arguments repesents all CLI arguments for the uninstaller.
 type Arguments struct {

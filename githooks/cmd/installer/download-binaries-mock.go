@@ -1,6 +1,6 @@
 // +build mock
 
-package main
+package installer
 
 import (
 	cm "gabyx/githooks/common"

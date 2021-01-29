@@ -1,9 +1,8 @@
 package install
 
 import (
-	inst "gabyx/githooks/apps/install"
 	ccm "gabyx/githooks/cmd/common"
-	cm "gabyx/githooks/common"
+	inst "gabyx/githooks/cmd/common/install"
 	"gabyx/githooks/git"
 	"gabyx/githooks/hooks"
 
@@ -31,7 +30,7 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, nonInteractive bool) {
 	inst.InstallIntoRepo(ctx.Log, gitDir, nonInteractive, false, &uiSettings)
 }
 
-func runUninstallFromRepo(ctx *ccm.CmdContext, nonInteractive bool) {
+func runUninstallFromRepo(ctx *ccm.CmdContext) {
 	_, gitDir, _ := ccm.AssertRepoRoot(ctx)
 
 	// Read registered file if existing.
@@ -50,85 +49,39 @@ func runUninstallFromRepo(ctx *ccm.CmdContext, nonInteractive bool) {
 	}
 }
 
-func runUninstall(ctx *ccm.CmdContext, nonInteractive bool, global bool) {
-	exec := hooks.GetUninstallerExecutable(ctx.InstallDir)
-
-	if !global {
-		runUninstallFromRepo(ctx, nonInteractive)
-
-		return
-	}
-
-	var args []string
-	if nonInteractive {
-		args = append(args, "--non-interactive")
-	}
-
-	err := cm.RunExecutable(
-		&cm.ExecContext{},
-		&cm.Executable{Cmd: exec},
-		cm.UseStreams(nil, ctx.Log.GetInfoWriter(), ctx.Log.GetInfoWriter()), args...)
-
-	ctx.Log.AssertNoErrorPanic(err, "Uninstaller failed.")
+func runUninstall(ctx *ccm.CmdContext) {
+	runUninstallFromRepo(ctx)
 }
 
-func runInstall(ctx *ccm.CmdContext, nonInteractive bool, global bool) {
-
-	exec := hooks.GetInstallerExecutable(ctx.InstallDir)
-
-	if !global {
-		runInstallIntoRepo(ctx, nonInteractive)
-
-		return
-	}
-
-	var args []string
-	if nonInteractive {
-		args = append(args, "--non-interactive")
-	}
-
-	err := cm.RunExecutable(
-		&cm.ExecContext{},
-		&cm.Executable{Cmd: exec},
-		cm.UseStreams(nil, ctx.Log.GetInfoWriter(), ctx.Log.GetInfoWriter()), args...)
-
-	ctx.Log.AssertNoErrorPanic(err, "Installer failed.")
+func runInstall(ctx *ccm.CmdContext, nonInteractive bool) {
+	runInstallIntoRepo(ctx, nonInteractive)
 }
 
 func NewCmd(ctx *ccm.CmdContext) []*cobra.Command {
 
-	global := false
 	nonInteractive := false
 
 	installCmd := &cobra.Command{
 		Use:   "install",
-		Short: "Installs Githooks locally or globally.",
-		Long: `Installs the Githooks run wrappers into the current repository.
-
-If the '--global' flag is given, it executes the installation
-globally, including the hook templates for future repositories.`,
+		Short: "Installs Githooks run-wrappers into the current repository.",
+		Long: `Installs the Githooks run-wrappers and Git config settings
+into the current repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runInstall(ctx, nonInteractive, global)
+			runInstall(ctx, nonInteractive)
 		},
 	}
 
-	installCmd.Flags().BoolVar(&global, "global", false, "Execute the global installation.")
-	installCmd.Flags().BoolVar(&nonInteractive, "non-interactive", false, "Uninstall non-interactively.")
+	installCmd.Flags().BoolVar(&nonInteractive, "non-interactive", false, "Install non-interactively.")
 
 	uninstallCmd := &cobra.Command{
 		Use:   "uninstall",
-		Short: "Uninstalls Githooks locally or globally.",
-		Long: `Uninstalls the Githooks hooks from the current repository.
-
-If the '--global' flag is given, it executes the uninstallation
-globally, including the hook templates and all local repositories.`,
+		Short: "Uninstalls Githooks run-wrappers into the current repository.",
+		Long: `Uninstall the Githooks run-wrappers and Git config settings
+into the current repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runUninstall(ctx, nonInteractive, global)
+			runUninstall(ctx)
 		},
 	}
-
-	uninstallCmd.Flags().BoolVar(&global, "global", false, "Execute the global uninstallation.")
-	uninstallCmd.Flags().BoolVar(&nonInteractive, "non-interactive", false, "Uninstall non-interactively.")
 
 	return []*cobra.Command{installCmd, uninstallCmd}
 }

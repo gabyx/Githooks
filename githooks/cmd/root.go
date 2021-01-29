@@ -1,18 +1,20 @@
 package cmd
 
 import (
-	inst "gabyx/githooks/apps/install"
 	"gabyx/githooks/build"
 	ccm "gabyx/githooks/cmd/common"
+	inst "gabyx/githooks/cmd/common/install"
 	"gabyx/githooks/cmd/config"
 	"gabyx/githooks/cmd/disable"
 	"gabyx/githooks/cmd/ignore"
 	"gabyx/githooks/cmd/install"
+	"gabyx/githooks/cmd/installer"
 	"gabyx/githooks/cmd/list"
 	"gabyx/githooks/cmd/readme"
 	"gabyx/githooks/cmd/shared"
 	"gabyx/githooks/cmd/tools"
 	"gabyx/githooks/cmd/trust"
+	"gabyx/githooks/cmd/uninstaller"
 	"gabyx/githooks/cmd/update"
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/git"
@@ -23,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewSettings(log cm.ILogContext) ccm.CmdContext {
+func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 
 	var promptCtx prompt.IContext
 	var err error
@@ -42,7 +44,8 @@ func NewSettings(log cm.ILogContext) ccm.CmdContext {
 		InstallDir: installDir,
 		CloneDir:   hooks.GetReleaseCloneDir(installDir),
 		PromptCtx:  promptCtx,
-		Log:        log}
+		Log:        log,
+		LogStats:   logStats}
 }
 
 func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
@@ -56,6 +59,9 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 	cmd.AddCommand(tools.NewCmd(ctx))
 	cmd.AddCommand(trust.NewCmd(ctx))
 	cmd.AddCommand(update.NewCmd(ctx))
+
+	cmd.AddCommand(installer.NewCmd(ctx))
+	cmd.AddCommand(uninstaller.NewCmd(ctx))
 }
 
 func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
@@ -89,9 +95,9 @@ func initArgs() {
 	// not yet needed...
 }
 
-func Run(log cm.ILogContext) {
+func Run(log cm.ILogContext, logStats cm.ILogStats) {
 
-	ctx := NewSettings(log)
+	ctx := NewSettings(log, logStats)
 	cmd := MakeGithooksCtl(&ctx)
 
 	err := cmd.Execute()
