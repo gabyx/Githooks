@@ -35,7 +35,7 @@ $GH_TEST_TMP
 y
 
 n
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if [ -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be deleted'
@@ -88,7 +88,7 @@ y
 $GH_TEST_TMP
 N
 a
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if [ ! -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be moved'

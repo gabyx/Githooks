@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: run an update
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test063" &&
     cd "$GH_TEST_TMP/test063" &&

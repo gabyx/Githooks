@@ -11,15 +11,15 @@ mkdir -p "$GH_TEST_TMP/test074/.githooks/pre-commit" &&
 echo "y
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 echo 'y
 
-' | "$GH_TEST_BIN/uninstaller" --stdin || exit 2
+' | "$GH_TEST_BIN/cli" uninstaller --stdin || exit 2
 
 echo 'y
 /not/found
-' | "$GH_TEST_BIN/uninstaller" --stdin
+' | "$GH_TEST_BIN/cli" uninstaller --stdin
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ]; then

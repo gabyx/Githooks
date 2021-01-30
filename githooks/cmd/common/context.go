@@ -18,5 +18,4 @@ type CmdContext struct {
 	LogStats cm.ILogStats   // The statistics of the log context.
 
 	PromptCtx prompt.IContext // The prompt context.
-
 }

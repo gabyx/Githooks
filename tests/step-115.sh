@@ -4,7 +4,7 @@
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
-if ! "$GH_TEST_BIN/installer"; then
+if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
 fi

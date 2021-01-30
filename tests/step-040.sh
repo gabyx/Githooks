@@ -11,7 +11,7 @@ mkdir -p "$GH_TEST_TMP/start/dir" && cd "$GH_TEST_TMP/start/dir" || exit 1
 
 git init || exit 1
 
-if ! "$GH_TEST_BIN/installer" --non-interactive; then
+if ! "$GH_TEST_BIN/cli" installer --non-interactive; then
     echo "! Installation failed"
     exit 1
 fi

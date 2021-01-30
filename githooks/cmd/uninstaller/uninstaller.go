@@ -21,6 +21,8 @@ import (
 
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
+	vi := viper.New()
+
 	var cmd = &cobra.Command{
 		Use:   "uninstaller",
 		Short: "Githooks uninstaller application.",
@@ -28,24 +30,24 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 			"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
 		Run: func(cmd *cobra.Command, _ []string) {
-			runUninstall(ctx)
+			runUninstall(ctx, vi)
 		}}
 
-	defineArguments(cmd)
+	defineArguments(cmd, vi)
 
 	return ccm.SetCommandDefaults(ctx.Log, cmd)
 }
 
-func initArgs(log cm.ILogContext, args *Arguments) {
+func initArgs(log cm.ILogContext, args *Arguments, vi *viper.Viper) {
 
-	config := viper.GetString("config")
+	config := vi.GetString("config")
 	if strs.IsNotEmpty(config) {
-		viper.SetConfigFile(config)
-		err := viper.ReadInConfig()
+		vi.SetConfigFile(config)
+		err := vi.ReadInConfig()
 		log.AssertNoErrorPanicF(err, "Could not read config file '%s'.", config)
 	}
 
-	err := viper.Unmarshal(&args)
+	err := vi.Unmarshal(&args)
 	log.AssertNoErrorPanicF(err, "Could not unmarshal parameters.")
 }
 
@@ -54,7 +56,7 @@ func writeArgs(log cm.ILogContext, file string, args *Arguments) {
 	log.AssertNoErrorPanicF(err, "Could not write arguments to '%s'.", file)
 }
 
-func defineArguments(cmd *cobra.Command) {
+func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	// Internal commands
 	cmd.PersistentFlags().String("config", "",
 		"JSON config according to the 'Arguments' struct.")
@@ -68,11 +70,11 @@ func defineArguments(cmd *cobra.Command) {
 			"without showing prompts.")
 
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
+		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
+		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
 
-	setupMockFlags(cmd)
+	setupMockFlags(cmd, vi)
 }
 
 func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings) {
@@ -360,14 +362,15 @@ func runUninstallSteps(
 	cleanGitConfig(log)
 }
 
-func runUninstall(ctx *ccm.CmdContext) {
+func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log := ctx.Log
 	args := Arguments{}
 
-	initArgs(log, &args)
-
 	log.InfoF("Githooks Uninstaller [version: %s]", build.BuildVersion)
+
+	initArgs(log, &args, vi)
+
 	log.DebugF("Arguments: %+v", args)
 
 	settings, uiSettings := setMainVariables(log, &args)

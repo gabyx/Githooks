@@ -16,14 +16,14 @@ if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "n
 y
 $GH_TEST_TMP/shared/hooks-005.git
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 else
     echo "n
 n
 y
 $GH_TEST_TMP/shared/hooks-005.git
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 fi
 

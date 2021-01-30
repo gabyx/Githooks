@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: accept changes to a hook
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test058/.githooks/pre-commit" &&
     echo 'echo "Hello 1"' >"$GH_TEST_TMP/test058/.githooks/pre-commit/first" &&

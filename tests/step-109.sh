@@ -25,7 +25,7 @@ templateDir=$(git config --global init.templateDir)
 echo "n
 y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if ! grep -qr 'github.com/rycus86/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
     ! grep -qr 'github.com/rycus86/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then
@@ -58,7 +58,7 @@ done
 
 echo "y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/uninstaller" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" uninstaller --stdin || exit 1
 
 if grep -qr 'github.com/rycus86/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
     grep -qr 'github.com/rycus86/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then
@@ -70,7 +70,7 @@ fi
 echo "n
 y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/installer" --stdin --only-server-hooks || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin --only-server-hooks || exit 1
 
 # check if only server hooks are inside the template folder.
 for hook in pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc; do

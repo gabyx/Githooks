@@ -68,10 +68,11 @@
         "--build-flags",
         "-tags debug",
         "--api-version=2",
-        "./apps/installer",
+        "./apps/cli",
         "--",
-        "--clone-url=${env:GITHOOKS_REPO}",
-        "--clone-branch=feature/go-refactoring"
+        "installer",
+        "--config",
+        "asd"
       ],
       "options": {
         "cwd": "${workspaceFolder}/githooks",
@@ -80,6 +81,7 @@
           "args": ["-c"]
         },
         "env": {
+          "CGO_ENABLED": "0",
           "GOBIN": "${workspaceFolder}/githooks/bin",
         }
       },
@@ -105,7 +107,9 @@
         "--build-flags",
         "-tags debug",
         "--api-version=2",
-        "./apps/uninstaller"
+        "./apps/cli",
+        "--",
+        "uninstaller",
       ],
       "options": {
         "cwd": "${workspaceFolder}/githooks",
@@ -114,6 +118,7 @@
           "args": ["-c"]
         },
         "env": {
+          "CGO_ENABLED": "0",
           "GOBIN": "${workspaceFolder}/githooks/bin",
         }
       },
@@ -151,6 +156,7 @@
           "args": ["-c"]
         },
         "env": {
+          "CGO_ENABLED": "0",
           "GOBIN": "${workspaceFolder}/githooks/bin",
         }
       },
@@ -186,6 +192,7 @@
           "args": ["-c"]
         },
         "env": {
+          "CGO_ENABLED": "0",
           "GOBIN": "${workspaceFolder}/githooks/bin",
         }
       },

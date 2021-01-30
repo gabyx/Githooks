@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func setupMockFlags(rootCmd *cobra.Command) {
-	rootCmd.PersistentFlags().Bool(
+func setupMockFlags(cmd *cobra.Command, vi *viper.Viper) {
+	cmd.PersistentFlags().Bool(
 		"stdin", false,
 		"Use standard input to read prompt answers.")
 
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("useStdin", rootCmd.PersistentFlags().Lookup("stdin")))
+		vi.BindPFlag("useStdin", cmd.PersistentFlags().Lookup("stdin")))
 }

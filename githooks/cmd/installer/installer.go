@@ -28,6 +28,8 @@ import (
 
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
+	vi := viper.New()
+
 	var cmd = &cobra.Command{
 		Use:   "installer [flags]",
 		Short: "Githooks installer application",
@@ -35,24 +37,24 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 			"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
 		Run: func(cmd *cobra.Command, _ []string) {
-			runInstall(cmd, ctx)
+			runInstall(cmd, ctx, vi)
 		}}
 
-	defineArguments(cmd)
+	defineArguments(cmd, vi)
 
-	return cmd
+	return ccm.SetCommandDefaults(ctx.Log, cmd)
 }
 
-func initArgs(log cm.ILogContext, args *Arguments) {
+func initArgs(log cm.ILogContext, args *Arguments, vi *viper.Viper) {
 
-	config := viper.GetString("config")
+	config := vi.GetString("config")
 	if strs.IsNotEmpty(config) {
-		viper.SetConfigFile(config)
-		err := viper.ReadInConfig()
+		vi.SetConfigFile(config)
+		err := vi.ReadInConfig()
 		log.AssertNoErrorPanicF(err, "Could not read config file '%s'.", config)
 	}
 
-	err := viper.Unmarshal(&args)
+	err := vi.Unmarshal(&args)
 	log.AssertNoErrorPanicF(err, "Could not unmarshal parameters.")
 }
 
@@ -61,108 +63,106 @@ func writeArgs(log cm.ILogContext, file string, args *Arguments) {
 	log.AssertNoErrorPanicF(err, "Could not write arguments to '%s'.", file)
 }
 
-func defineArguments(rootCmd *cobra.Command) {
+func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	// Internal commands
-	rootCmd.PersistentFlags().String("config", "",
+	cmd.PersistentFlags().String("config", "",
 		"JSON config according to the 'Arguments' struct.")
-	cm.AssertNoErrorPanic(rootCmd.MarkPersistentFlagDirname("config"))
-	cm.AssertNoErrorPanic(rootCmd.PersistentFlags().MarkHidden("config"))
+	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("config"))
+	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("config"))
 
-	rootCmd.PersistentFlags().Bool("internal-auto-update", false,
+	cmd.PersistentFlags().Bool("internal-auto-update", false,
 		"Internal argument, do not use!") // @todo Remove this...
-	cm.AssertNoErrorPanic(rootCmd.PersistentFlags().MarkHidden("internal-auto-update"))
+	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("internal-auto-update"))
 
 	// User commands
-	rootCmd.PersistentFlags().Bool("dry-run", false,
+	cmd.PersistentFlags().Bool("dry-run", false,
 		"Dry run the installation showing whats being done.")
-	rootCmd.PersistentFlags().Bool(
+	cmd.PersistentFlags().Bool(
 		"non-interactive", false,
 		"Run the installation non-interactively\n"+
 			"without showing prompts.")
-	rootCmd.PersistentFlags().Bool(
+	cmd.PersistentFlags().Bool(
 		"skip-install-into-existing", false,
 		"Skip installation into existing repositories\n"+
 			"defined by a search path.")
-	rootCmd.PersistentFlags().String(
+	cmd.PersistentFlags().String(
 		"prefix", "",
 		"Githooks installation prefix such that\n"+
 			"'<prefix>/.githooks' will be the installation directory.")
-	cm.AssertNoErrorPanic(rootCmd.MarkPersistentFlagDirname("prefix"))
+	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("prefix"))
 
-	rootCmd.PersistentFlags().String(
+	cmd.PersistentFlags().String(
 		"template-dir", "",
 		"The preferred template directory to use.")
-	rootCmd.PersistentFlags().Bool(
+	cmd.PersistentFlags().Bool(
 		"only-server-hooks", false,
 		"Only install and maintain server hooks.")
-	rootCmd.PersistentFlags().Bool(
+	cmd.PersistentFlags().Bool(
 		"use-core-hookspath", false,
 		"If the install mode 'core.hooksPath' should be used.")
 
-	rootCmd.PersistentFlags().String(
+	cmd.PersistentFlags().String(
 		"clone-url", "",
 		"The clone url from which Githooks should clone\n"+
 			"and install/update itself. Githooks tries to\n"+
 			"auto-detect the deploy setting for downloading binaries.\n"+
 			"You can however provide a deploy settings file yourself if\n"+
 			"the auto-detection does not work (see '--deploy-settings').")
-	rootCmd.PersistentFlags().String(
+	cmd.PersistentFlags().String(
 		"clone-branch", "",
 		"The clone branch from which Githooks should\n"+
 			"clone and install/update itself.")
-	rootCmd.PersistentFlags().String(
+	cmd.PersistentFlags().String(
 		"deploy-api", "",
 		"The deploy api type (e.g. ['gitea', 'github']) to use for updates\n"+
 			"of the specified 'clone-url' for helping the deploy settings\n"+
 			"auto-detection. For Github urls, this is not needed.")
-	rootCmd.PersistentFlags().String(
+	cmd.PersistentFlags().String(
 		"deploy-settings", "",
 		"The deploy settings YAML file to use for updates of the specified\n"+
 			"'--clone-url'. See the documentation for further details.")
 
-	rootCmd.PersistentFlags().Bool(
+	cmd.PersistentFlags().Bool(
 		"build-from-source", false,
 		"If the binaries are built from source instead of\n"+
 			"downloaded from the deploy url.")
-	rootCmd.PersistentFlags().StringArray(
+	cmd.PersistentFlags().StringArray(
 		"build-tags", nil,
 		"Build tags for building from source (get extended with defaults).")
 
-	rootCmd.Args = cobra.NoArgs
-
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config")))
+		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
 	// @todo Remove this internalAutoUpdate...
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("internalAutoUpdate", rootCmd.PersistentFlags().Lookup("internal-auto-update")))
+		vi.BindPFlag("internalAutoUpdate", cmd.PersistentFlags().Lookup("internal-auto-update")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("dryRun", rootCmd.PersistentFlags().Lookup("dry-run")))
+		vi.BindPFlag("dryRun", cmd.PersistentFlags().Lookup("dry-run")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("nonInteractive", rootCmd.PersistentFlags().Lookup("non-interactive")))
+		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("skipInstallIntoExisting", rootCmd.PersistentFlags().Lookup("skip-install-into-existing")))
+		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("onlyServerHooks", rootCmd.PersistentFlags().Lookup("only-server-hooks")))
+		vi.BindPFlag("onlyServerHooks", cmd.PersistentFlags().Lookup("only-server-hooks")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("useCoreHooksPath", rootCmd.PersistentFlags().Lookup("use-core-hookspath")))
+		vi.BindPFlag("useCoreHooksPath", cmd.PersistentFlags().Lookup("use-core-hookspath")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("cloneURL", rootCmd.PersistentFlags().Lookup("clone-url")))
+		vi.BindPFlag("cloneURL", cmd.PersistentFlags().Lookup("clone-url")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("cloneBranch", rootCmd.PersistentFlags().Lookup("clone-branch")))
+		vi.BindPFlag("cloneBranch", cmd.PersistentFlags().Lookup("clone-branch")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("deploySettings", rootCmd.PersistentFlags().Lookup("deploy-settings")))
+		vi.BindPFlag("deploySettings", cmd.PersistentFlags().Lookup("deploy-settings")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("deployAPI", rootCmd.PersistentFlags().Lookup("deploy-api")))
+		vi.BindPFlag("deployAPI", cmd.PersistentFlags().Lookup("deploy-api")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("buildFromSource", rootCmd.PersistentFlags().Lookup("build-from-source")))
+		vi.BindPFlag("buildFromSource", cmd.PersistentFlags().Lookup("build-from-source")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("buildTags", rootCmd.PersistentFlags().Lookup("build-tags")))
+		vi.BindPFlag("buildTags", cmd.PersistentFlags().Lookup("build-tags")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("installPrefix", rootCmd.PersistentFlags().Lookup("prefix")))
+		vi.BindPFlag("installPrefix", cmd.PersistentFlags().Lookup("prefix")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("templateDir", rootCmd.PersistentFlags().Lookup("template-dir")))
+		vi.BindPFlag("templateDir", cmd.PersistentFlags().Lookup("template-dir")))
 
-	setupMockFlags(rootCmd)
+	setupMockFlags(cmd, vi)
 }
 
 func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
@@ -1197,16 +1197,17 @@ func runUpdate(
 	thankYou(log)
 }
 
-func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext) {
+func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	args := Arguments{}
 	log := ctx.Log
 
 	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
-	log.DebugF("Arguments: %+v", args)
 
+	initArgs(log, &args, vi)
 	validateArgs(log, cmd, &args)
-	initArgs(log, &args)
+
+	log.InfoF("Arguments: %+v", args)
 
 	settings, uiSettings := setMainVariables(log, &args)
 

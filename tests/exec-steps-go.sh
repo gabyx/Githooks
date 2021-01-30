@@ -98,7 +98,7 @@ for STEP in "$GH_TESTS"/step-*.sh; do
 
     cleanDirs
 
-    UNINSTALL_OUTPUT=$(printf "n\\n" | "$GH_TEST_BIN/uninstaller" --stdin 2>&1)
+    UNINSTALL_OUTPUT=$(printf "n\\n" | "$GH_TEST_BIN/cli" uninstaller --stdin 2>&1)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
         echo "! Uninstall failed in $STEP, output:"

@@ -3,7 +3,7 @@
 #   Run a simple install non-interactively and verify the hooks are in place
 
 # run the default install
-"$GH_TEST_BIN/installer" --non-interactive || exit 1
+"$GH_TEST_BIN/cli" installer --non-interactive || exit 1
 
 mkdir -p "$GH_TEST_TMP/test1" && cd "$GH_TEST_TMP/test1" || exit 1
 git init || exit 1

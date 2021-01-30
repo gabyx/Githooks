@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: print help and usage
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 if ! "$GH_TEST_BIN/cli" --help | grep -q "See further information at"; then
     echo "! Unexpected cli help output"
