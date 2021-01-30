@@ -24,15 +24,17 @@ import (
 var log cm.ILogContext
 
 func main() {
+	os.Exit(mainRun())
+}
+
+func mainRun() (exitCode int) {
 
 	createLog()
 
 	log.DebugF("Githooks Runner [version: %s]", build.BuildVersion)
 
 	startTime := cm.GetStartTime()
-	exitCode := 0
 
-	defer func() { os.Exit(exitCode) }()
 	defer func() {
 		log.DebugF("Runner execution time: '%v'.",
 			cm.GetDuration(startTime))
@@ -92,6 +94,8 @@ func main() {
 
 	uiSettings.PromptCtx.Close()
 	log.Debug("All done.\n")
+
+	return
 }
 
 func createLog() {
