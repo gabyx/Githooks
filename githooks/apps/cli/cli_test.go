@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"gabyx/githooks/apps/coverage"
+	"gabyx/githooks/coverage"
 
 	"testing"
 )

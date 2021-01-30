@@ -168,16 +168,6 @@ func GetRunnerExecutable(installDir string) (p string) {
 	return
 }
 
-// GetCLIExecutable gets the global Githooks CLI executable.
-func GetCLIExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "cli")
-	if runtime.GOOS == cm.WindowsOsName {
-		p += cm.WindowsExecutableSuffix
-	}
-
-	return
-}
-
 // SetRunnerExecutableAlias sets the global Githooks runner executable.
 func SetRunnerExecutableAlias(path string) error {
 	if !cm.IsFile(path) {

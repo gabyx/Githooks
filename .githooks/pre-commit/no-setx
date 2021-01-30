@@ -10,7 +10,7 @@ checkSetX() {
     LINES=$(grep -rnHE "(set.*[-+]x)" "$FILE")
 
     if [ -n "$LINES" ]; then
-        echo "! Found \`set -x\`: $LINES"
+        echo "! Found \`set -x\`: $LINES" >&2
         SUCCESS=1
     fi
 }
@@ -20,7 +20,7 @@ for FILE in $STAGED_FILES; do
 done
 
 if [ "$SUCCESS" = "0" ]; then
-    echo "* No \`set -x\` found"
+    echo "* No \`set -x\` found" >&2
 else
     exit "$SUCCESS"
 fi
