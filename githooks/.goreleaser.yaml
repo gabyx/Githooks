@@ -36,18 +36,6 @@ builds:
         goarch: arm64
       - goos: windows
         goarch: arm64
-  - id: installer
-    binary: installer
-    main: ./apps/installer
-    env: *ENV
-    goos: *GOOS
-    goarch: *GOARCH
-  - id: uninstaller
-    binary: uninstaller
-    main: ./apps/uninstaller
-    env: *ENV
-    goos: *GOOS
-    goarch: *GOARCH
   - id: cli
     binary: cli
     main: ./apps/cli
@@ -58,8 +46,6 @@ archives:
   - id: githooks
     builds:
       - runner
-      - installer
-      - uninstaller
       - cli
     name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}.{{ .Arch }}"
     format: tar.gz
