@@ -28,10 +28,10 @@ func getRunWrapperContent() ([]byte, error) {
 	return build.Asset(path.Join("githooks/run-wrapper.sh"))
 }
 
-// WriteRunWrapper writes the run wrapper to the file `filePath`.
+// WriteRunWrapper writes the run-wrapper to the file `filePath`.
 func WriteRunWrapper(filePath string) (err error) {
 	runWrapperContent, err := getRunWrapperContent()
-	cm.AssertNoErrorPanic(err, "Could not get embedded run wrapper content.")
+	cm.AssertNoErrorPanic(err, "Could not get embedded run-wrapper content.")
 
 	file, err := os.Create(filePath)
 	if err != nil {
@@ -116,7 +116,7 @@ func moveExistingHooks(
 
 	if err != nil {
 		return cm.CombineErrors(err,
-			cm.ErrorF("Could not detect if '%s' is a Githooks run wrapper.", dest))
+			cm.ErrorF("Could not detect if '%s' is a Githooks run-wrapper.", dest))
 	}
 
 	if !isRunWrapper {
@@ -171,7 +171,7 @@ func assertHookDirTemp(hookDir string) (dir string, err error) {
 	return
 }
 
-// InstallRunWrappers installs run wrappers for the given `hookNames` in `dir`.
+// InstallRunWrappers installs run-wrappers for the given `hookNames` in `dir`.
 // Existing custom hooks get renamed.
 // All deleted hooks by this function get moved to the `tempDir` directory, because
 // we should not delete them yet.
@@ -233,14 +233,14 @@ func InstallRunWrappers(
 		err = WriteRunWrapper(dest)
 		if err != nil {
 			return cm.CombineErrors(err,
-				cm.ErrorF("Could not write Githooks run wrapper to '%s'.", dest))
+				cm.ErrorF("Could not write Githooks run-wrapper to '%s'.", dest))
 		}
 	}
 
 	return nil
 }
 
-// UninstallRunWrappers deletes run wrappers in `dir`.
+// UninstallRunWrappers deletes run-wrappers in `dir`.
 // Existing replaced hooks get renamed.
 func UninstallRunWrappers(dir string, hookNames []string) (err error) {
 
@@ -256,9 +256,9 @@ func UninstallRunWrappers(dir string, hookNames []string) (err error) {
 
 		if e != nil {
 			err = cm.CombineErrors(err,
-				cm.ErrorF("Run wrapper detection for '%s' failed.", dest))
+				cm.ErrorF("Run-wrapper detection for '%s' failed.", dest))
 		} else if isRunWrapper {
-			// Delete the run wrapper
+			// Delete the run-wrapper
 			e := os.Remove(dest)
 
 			if e == nil {

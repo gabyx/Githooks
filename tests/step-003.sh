@@ -3,7 +3,7 @@
 #   Run a simple install and verify multiple hooks trigger properly
 
 # run the default install
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test3" && cd "$GH_TEST_TMP/test3" || exit 1
 git init || exit 1

@@ -17,7 +17,7 @@ y
 $GH_TEST_TMP/test044
 n
 y
-" | "$GH_TEST_BIN/installer" --stdin || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 find "$GH_TEST_TMP/test044"
 

@@ -13,7 +13,7 @@ rm -rf "$GH_TEST_GIT_CORE/templates" || exit 1
 # run the install, and let it search for the templates
 echo 'n
 y
-' | "$GH_TEST_BIN/installer" --stdin || exit 1
+' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 mkdir -p "$GH_TEST_TMP/test7" && cd "$GH_TEST_TMP/test7" || exit 1
 git init || exit 1

@@ -7,7 +7,7 @@ mkdir -p "$GH_TEST_TMP/test094/a" "$GH_TEST_TMP/test094/b" "$GH_TEST_TMP/test094
     cd "$GH_TEST_TMP/test094/b" && git init ||
     exit 1
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 git config --global githooks.previousSearchDir "$GH_TEST_TMP"
 

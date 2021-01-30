@@ -1,6 +1,6 @@
 // +build !mock
 
-package main
+package installer
 
 import (
 	"gabyx/githooks/build"
@@ -111,10 +111,8 @@ func downloadBinaries(
 	}
 
 	all := []string{
-		path.Join(tempDir, "installer"+ext),
-		path.Join(tempDir, "uninstaller"+ext),
 		path.Join(tempDir, "cli"+ext),
 		path.Join(tempDir, "runner"+ext)}
 
-	return updates.Binaries{All: all, Installer: all[0], Others: all[1:]}
+	return updates.Binaries{All: all, Cli: all[0], Others: all[1:]}
 }

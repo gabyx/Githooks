@@ -1,4 +1,4 @@
-package main
+package uninstaller
 
 import (
 	"gabyx/githooks/hooks"
@@ -22,7 +22,7 @@ type Settings struct {
 	// Registered Repos loaded from the install dir.
 	RegisteredGitDirs hooks.RegisterRepos
 
-	// All repositories Git directories where Githooks run wrappers have been installed.
+	// All repositories Git directories where Githooks run-wrappers have been installed.
 	// Bool indicates if it is already registered.
 	UninstalledGitDirs UninstallSet
 

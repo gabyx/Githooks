@@ -19,7 +19,7 @@ echo 'y
 y
 y
 y
-' | "$GH_TEST_BIN/installer" --stdin || exit 1
+' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if ! [ -f "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit" ]; then
     # verify that a new hook file was installed

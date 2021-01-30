@@ -1,6 +1,6 @@
 // +build mock
 
-package main
+package installer
 
 import (
 	cm "gabyx/githooks/common"
@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func setupMockFlags(rootCmd *cobra.Command) {
+func setupMockFlags(rootCmd *cobra.Command, vi *viper.Viper) {
 	rootCmd.PersistentFlags().Bool(
 		"stdin", false,
 		"Use standard input to read prompt answers.")
 
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("useStdin", rootCmd.PersistentFlags().Lookup("stdin")))
+		vi.BindPFlag("useStdin", rootCmd.PersistentFlags().Lookup("stdin")))
 }

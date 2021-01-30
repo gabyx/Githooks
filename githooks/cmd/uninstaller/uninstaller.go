@@ -1,9 +1,10 @@
 //go:generate go run -mod=vendor ../../tools/embed-files.go
-package main
+package uninstaller
 
 import (
-	"gabyx/githooks/apps/install"
 	"gabyx/githooks/build"
+	ccm "gabyx/githooks/cmd/common"
+	"gabyx/githooks/cmd/common/install"
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/git"
 	"gabyx/githooks/hooks"
@@ -11,7 +12,6 @@ import (
 	strs "gabyx/githooks/strings"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -19,75 +19,65 @@ import (
 	"github.com/spf13/viper"
 )
 
-var log cm.ILogContext
-var logStats cm.ILogStats
-var logN cm.ILogContext //nolint: unused // Acopy of `log` with no stats tracking.
-var args = Arguments{}
+func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
-// rootCmd represents the base command when called without any subcommands.
-var rootCmd = &cobra.Command{
-	Use:   "uninstaller",
-	Short: "Githooks uninstaller application",
-	Long: "Githooks uninstaller application\n" +
-		"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
-	Run: runUninstall}
+	vi := viper.New()
 
-// Run adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Run() {
-	cobra.OnInitialize(initArgs)
+	var cmd = &cobra.Command{
+		Use:   "uninstaller",
+		Short: "Githooks uninstaller application.",
+		Long: "Githooks uninstaller application\n" +
+			"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
+		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
+		Run: func(cmd *cobra.Command, _ []string) {
+			runUninstall(ctx, vi)
+		}}
 
-	rootCmd.SetOut(cm.ToInfoWriter(log))
-	rootCmd.SetErr(cm.ToErrorWriter(log))
-	rootCmd.Version = build.BuildVersion
+	defineArguments(cmd, vi)
 
-	defineArguments(rootCmd)
-
-	cm.AssertNoErrorPanic(rootCmd.Execute())
+	return ccm.SetCommandDefaults(ctx.Log, cmd)
 }
 
-func initArgs() {
+func initArgs(log cm.ILogContext, args *Arguments, vi *viper.Viper) {
 
-	config := viper.GetString("config")
+	config := vi.GetString("config")
 	if strs.IsNotEmpty(config) {
-		viper.SetConfigFile(config)
-		err := viper.ReadInConfig()
+		vi.SetConfigFile(config)
+		err := vi.ReadInConfig()
 		log.AssertNoErrorPanicF(err, "Could not read config file '%s'.", config)
 	}
 
-	err := viper.Unmarshal(&args)
+	err := vi.Unmarshal(&args)
 	log.AssertNoErrorPanicF(err, "Could not unmarshal parameters.")
 }
 
-func writeArgs(file string, args *Arguments) {
+func writeArgs(log cm.ILogContext, file string, args *Arguments) {
 	err := cm.StoreJSON(file, args)
 	log.AssertNoErrorPanicF(err, "Could not write arguments to '%s'.", file)
 }
 
-func defineArguments(rootCmd *cobra.Command) {
+func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	// Internal commands
-	rootCmd.PersistentFlags().String("config", "",
+	cmd.PersistentFlags().String("config", "",
 		"JSON config according to the 'Arguments' struct.")
-	cm.AssertNoErrorPanic(rootCmd.MarkPersistentFlagDirname("config"))
-	cm.AssertNoErrorPanic(rootCmd.PersistentFlags().MarkHidden("config"))
+	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("config"))
+	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("config"))
 
 	// User commands
-	rootCmd.PersistentFlags().Bool(
+	cmd.PersistentFlags().Bool(
 		"non-interactive", false,
 		"Run the uninstallation non-interactively\n"+
 			"without showing prompts.")
 
-	rootCmd.Args = cobra.NoArgs
-
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config")))
+		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
 	cm.AssertNoErrorPanic(
-		viper.BindPFlag("nonInteractive", rootCmd.PersistentFlags().Lookup("non-interactive")))
+		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
 
-	setupMockFlags(rootCmd)
+	setupMockFlags(cmd, vi)
 }
 
-func setMainVariables(args *Arguments) (Settings, UISettings) {
+func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings) {
 
 	var promptCtx prompt.IContext
 	var err error
@@ -121,11 +111,11 @@ func setMainVariables(args *Arguments) (Settings, UISettings) {
 		UISettings{PromptCtx: promptCtx}
 }
 
-func prepareDispatch(settings *Settings, args *Arguments) bool {
+func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
 
-	uninstaller := hooks.GetUninstallerExecutable(settings.InstallDir)
-	if !cm.IsFile(uninstaller) {
-		log.WarnF("There is no existing Githooks uninstaller present\n"+
+	cliPath := hooks.GetCLIExecutable(settings.InstallDir)
+	if !cm.IsFile(cliPath) {
+		log.WarnF("There is no existing Githooks executable present\n"+
 			"in install dir '%s'.\n"+
 			"Your installation is corrupt.\n"+
 			"We will continue to uninstall agnostically with this installer.",
@@ -137,15 +127,14 @@ func prepareDispatch(settings *Settings, args *Arguments) bool {
 	// Set variables for further uninstall procedure.
 	args.InternalPostDispatch = true
 
-	runUninstaller(uninstaller, args)
+	runUninstaller(log, &cm.Executable{Cmd: cliPath, Args: []string{"uninstaller"}}, args)
 
 	return true
 }
 
-func runUninstaller(uninstaller string, args *Arguments) {
+func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Arguments) {
 
 	log.Info("Dispatching to uninstaller ...")
-	log.PanicIfF(!cm.IsFile(uninstaller), "Uninstaller '%s' is not existing.", uninstaller)
 
 	file, err := ioutil.TempFile("", "*uninstall-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
@@ -153,19 +142,19 @@ func runUninstaller(uninstaller string, args *Arguments) {
 
 	// Write the config to
 	// make the uninstaller gettings all settings
-	writeArgs(file.Name(), args)
+	writeArgs(log, file.Name(), args)
 
 	// Run the uninstaller binary
 	err = cm.RunExecutable(
 		&cm.ExecContext{},
-		&cm.Executable{Cmd: uninstaller},
+		uninstaller,
 		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetInfoWriter()),
 		"--config", file.Name())
 
 	log.AssertNoErrorPanic(err, "Running uninstaller failed.")
 }
 
-func thankYou() {
+func thankYou(log cm.ILogContext) {
 	log.InfoF(
 		"All done! Enjoy!\n"+
 			"If you ever want to reinstall the hooks, just follow\n"+
@@ -173,6 +162,7 @@ func thankYou() {
 }
 
 func uninstallFromExistingRepos(
+	log cm.ILogContext,
 	lfsAvailable bool,
 	tempDir string,
 	nonInteractive bool,
@@ -197,6 +187,7 @@ func uninstallFromExistingRepos(
 }
 
 func uninstallFromRegisteredRepos(
+	log cm.ILogContext,
 	lfsAvailable bool,
 	tempDir string,
 	nonInteractive bool,
@@ -229,7 +220,7 @@ func uninstallFromRegisteredRepos(
 		})
 }
 
-func cleanTemplateDir() {
+func cleanTemplateDir(log cm.ILogContext) {
 	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCK_UseCoreHooksPath, git.GlobalScope)
 
 	hookTemplateDir, err := install.FindHookTemplateDir(installUsesCoreHooksPath == "true")
@@ -241,11 +232,11 @@ func cleanTemplateDir() {
 				"Installation is corrupt!")
 	} else {
 		err = hooks.UninstallRunWrappers(hookTemplateDir, hooks.ManagedHookNames)
-		log.AssertNoErrorF(err, "Could not uninstall Githooks run wrappers in\n'%s'.", hookTemplateDir)
+		log.AssertNoErrorF(err, "Could not uninstall Githooks run-wrappers in\n'%s'.", hookTemplateDir)
 	}
 }
 
-func cleanSharedClones(installDir string) {
+func cleanSharedClones(log cm.ILogContext, installDir string) {
 	sharedDir := hooks.GetSharedDir(installDir)
 
 	if cm.IsDirectory(sharedDir) {
@@ -255,7 +246,7 @@ func cleanSharedClones(installDir string) {
 	}
 }
 
-func deleteDir(dir string, tempDir string) {
+func deleteDir(log cm.ILogContext, dir string, tempDir string) {
 	if runtime.GOOS == cm.WindowsOsName {
 		// On Windows we cannot move binaries which we execute at the moment.
 		// We move everything to a new random folder inside tempDir
@@ -274,17 +265,19 @@ func deleteDir(dir string, tempDir string) {
 }
 
 func cleanBinaries(
+	log cm.ILogContext,
 	installDir string,
 	tempDir string) {
 
 	binDir := hooks.GetBinaryDir(installDir)
 
 	if cm.IsDirectory(binDir) {
-		deleteDir(binDir, tempDir)
+		deleteDir(log, binDir, tempDir)
 	}
 }
 
 func cleanReleaseClone(
+	log cm.ILogContext,
 	installDir string) {
 
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
@@ -296,7 +289,7 @@ func cleanReleaseClone(
 	}
 }
 
-func cleanGitConfig() {
+func cleanGitConfig(log cm.ILogContext) {
 	gitx := git.Ctx()
 
 	// Remove core.hooksPath if we are using it.
@@ -316,7 +309,7 @@ func cleanGitConfig() {
 	}
 }
 
-func cleanRegister(installDir string) {
+func cleanRegister(log cm.ILogContext, installDir string) {
 
 	registerFile := hooks.GetRegisterFile(installDir)
 
@@ -328,6 +321,7 @@ func cleanRegister(installDir string) {
 }
 
 func runUninstallSteps(
+	log cm.ILogContext,
 	settings *Settings,
 	uiSettings *UISettings,
 	args *Arguments) {
@@ -341,6 +335,7 @@ func runUninstallSteps(
 	log.InfoF("Running uninstall at version '%s' ...", build.BuildVersion)
 
 	uninstallFromExistingRepos(
+		log,
 		settings.LFSAvailable,
 		settings.TempDir,
 		args.NonInteractive,
@@ -349,6 +344,7 @@ func runUninstallSteps(
 		uiSettings)
 
 	uninstallFromRegisteredRepos(
+		log,
 		settings.LFSAvailable,
 		settings.TempDir,
 		args.NonInteractive,
@@ -356,76 +352,43 @@ func runUninstallSteps(
 		&settings.RegisteredGitDirs,
 		uiSettings)
 
-	cleanTemplateDir()
+	cleanTemplateDir(log)
 
-	cleanSharedClones(settings.InstallDir)
-	cleanReleaseClone(settings.InstallDir)
-	cleanBinaries(settings.InstallDir, settings.TempDir)
-	cleanRegister(settings.InstallDir)
+	cleanSharedClones(log, settings.InstallDir)
+	cleanReleaseClone(log, settings.InstallDir)
+	cleanBinaries(log, settings.InstallDir, settings.TempDir)
+	cleanRegister(log, settings.InstallDir)
 
-	cleanGitConfig()
-
-	if logStats.ErrorCount() == 0 {
-		thankYou()
-	} else {
-		log.ErrorF("Tried my best at uninstalling, but\n"+
-			" • %v errors\n"+
-			" • %v warnings\n"+
-			"occurred!", logStats.ErrorCount(), logStats.WarningCount())
-	}
+	cleanGitConfig(log)
 }
 
-func runUninstall(cmd *cobra.Command, auxArgs []string) {
+func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
+
+	log := ctx.Log
+	args := Arguments{}
 
 	log.InfoF("Githooks Uninstaller [version: %s]", build.BuildVersion)
 
+	initArgs(log, &args, vi)
+
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setMainVariables(&args)
+	settings, uiSettings := setMainVariables(log, &args)
 
 	if !args.InternalPostDispatch {
-		if isDispatched := prepareDispatch(&settings, &args); isDispatched {
+		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {
 			return
 		}
 	}
 
-	runUninstallSteps(&settings, &uiSettings, &args)
-}
+	runUninstallSteps(log, &settings, &uiSettings, &args)
 
-func setupLog() {
-	l, err := cm.CreateLogContext(cm.IsRunInDocker)
-	cm.AssertOrPanic(err == nil, "Could not create log")
-
-	l2 := cm.LogContext(*l)
-	l2.DisableStats()
-	log = l
-	logStats = l
-	logN = &l2
-}
-
-func main() {
-
-	cwd, err := os.Getwd()
-	cm.AssertNoErrorPanic(err, "Could not get current working dir.")
-	cwd = filepath.ToSlash(cwd)
-
-	setupLog()
-
-	exitCode := 0
-	defer func() { os.Exit(exitCode) }()
-
-	// Handle all panics and report the error
-	defer func() {
-		r := recover()
-		if hooks.HandleCLIErrors(r, cwd, log) {
-			exitCode = 1
-		}
-	}()
-
-	Run()
-
-	if logStats.ErrorCount() != 0 {
-		exitCode = 1
+	if ctx.LogStats.ErrorCount() == 0 {
+		thankYou(log)
+	} else {
+		log.ErrorF("Tried my best at uninstalling, but\n"+
+			" • %v errors\n"+
+			" • %v warnings\n"+
+			"occurred!", ctx.LogStats.ErrorCount(), ctx.LogStats.WarningCount())
 	}
-
 }

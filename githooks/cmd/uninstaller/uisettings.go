@@ -1,4 +1,4 @@
-package main
+package uninstaller
 
 import (
 	"gabyx/githooks/prompt"

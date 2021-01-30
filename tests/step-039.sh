@@ -7,7 +7,7 @@ mkdir -p "$GH_TEST_TMP/start/dir" && cd "$GH_TEST_TMP/start/dir" || exit 1
 mkdir -p "$GH_TEST_TMP/empty" &&
     GIT_TEMPLATE_DIR="$GH_TEST_TMP/empty" git init || exit 1
 
-if ! "$GH_TEST_BIN/installer"; then
+if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Installation failed"
     exit 1
 fi

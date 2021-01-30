@@ -8,7 +8,7 @@ git init || exit 1
 echo "n
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/installer" --stdin --dry-run || exit 1
+" | "$GH_TEST_BIN/cli" installer --stdin --dry-run || exit 1
 
 mkdir -p "$GH_TEST_TMP/test10/b" && cd "$GH_TEST_TMP/test10/b" || exit 1
 git init || exit 1

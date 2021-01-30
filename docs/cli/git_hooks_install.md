@@ -1,13 +1,11 @@
 ## git hooks install
 
-Installs Githooks locally or globally.
+Installs Githooks run-wrappers into the current repository.
 
 ### Synopsis
 
-Installs the Githooks run wrappers into the current repository.
-
-If the `--global` flag is given, it executes the installation
-globally, including the hook templates for future repositories.
+Installs the Githooks run-wrappers and Git config settings
+into the current repository.
 
 ```
 git hooks install [flags]
@@ -16,9 +14,8 @@ git hooks install [flags]
 ### Options
 
 ```
-      --global            Execute the global installation.
   -h, --help              help for install
-      --non-interactive   Uninstall non-interactively.
+      --non-interactive   Install non-interactively.
 ```
 
 ### SEE ALSO

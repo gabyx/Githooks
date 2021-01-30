@@ -73,7 +73,7 @@ func main() {
 	log, err := cm.CreateLogContext(false)
 	cm.AssertNoErrorPanic(err, "Could not create log")
 
-	ctx := cmd.NewSettings(log)
+	ctx := cmd.NewSettings(log, log)
 	cmd := cmd.MakeGithooksCtl(&ctx)
 	cmd.Use = "git_hooks" // Fix, because we use a special whitespace...
 

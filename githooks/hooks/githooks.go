@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
 // HooksDirName denotes the directory name used for repository specific hooks.
@@ -109,44 +108,6 @@ func GetSharedGithooksDir(repoDir string) string {
 	return path.Join(repoDir, "githooks")
 }
 
-// HandleCLIErrors generally handles errors for the Githooks executables. Argument `cwd` can be empty.
-func HandleCLIErrors(err interface{}, cwd string, log cm.ILogContext) bool {
-	if err == nil {
-		return false
-	}
-
-	var message []string
-	withTrace := false
-
-	switch v := err.(type) {
-	case cm.GithooksFailure:
-		message = append(message, "Fatal error -> Abort.")
-	case error:
-		info, e := GetBugReportingInfo(cwd)
-		v = cm.CombineErrors(v, e)
-		message = append(message, v.Error(), info)
-		withTrace = true
-
-	default:
-		info, e := GetBugReportingInfo(cwd)
-		e = cm.CombineErrors(cm.Error("Panic 💩: Unknown error: "), e)
-		message = append(message, e.Error(), info)
-		withTrace = true
-	}
-
-	if log != nil {
-		if withTrace {
-			log.ErrorWithStacktrace(message...)
-		} else {
-			log.Error(message...)
-		}
-	} else {
-		os.Stderr.WriteString(strings.Join(message, "\n"))
-	}
-
-	return true
-}
-
 // GetInstallDir returns the Githooks install directory.
 func GetInstallDir() string {
 	return filepath.ToSlash(git.Ctx().GetConfig(GitCK_InstallDir, git.GlobalScope))
@@ -200,26 +161,6 @@ func CleanTemporaryDir(installDir string) (string, error) {
 // GetRunnerExecutable gets the installed Githooks runner executable.
 func GetRunnerExecutable(installDir string) (p string) {
 	p = path.Join(GetBinaryDir(installDir), "runner")
-	if runtime.GOOS == cm.WindowsOsName {
-		p += cm.WindowsExecutableSuffix
-	}
-
-	return
-}
-
-// GetInstallerExecutable gets the global Githooks installer executable.
-func GetInstallerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "installer")
-	if runtime.GOOS == cm.WindowsOsName {
-		p += cm.WindowsExecutableSuffix
-	}
-
-	return
-}
-
-// GetUninstallerExecutable gets the global Githooks installer executable.
-func GetUninstallerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "uninstaller")
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}

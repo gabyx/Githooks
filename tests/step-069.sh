@@ -4,7 +4,7 @@
 
 mkdir "$GH_TEST_TMP/not-a-git-repo" && cd "$GH_TEST_TMP/not-a-git-repo" || exit 1
 
-if ! "$GH_TEST_BIN/installer"; then
+if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
 fi

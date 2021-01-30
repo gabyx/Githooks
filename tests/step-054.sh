@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: list current hooks per type
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test054/.githooks/pre-commit" &&
     mkdir -p "$GH_TEST_TMP/test054/.githooks/post-commit" &&

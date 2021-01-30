@@ -42,7 +42,7 @@ RUN cd \$GH_TEST_REPO/githooks && \\
     git tag "v9.9.0" >/dev/null 2>&1 && \\
      ./scripts/clean.sh && \\
     ./scripts/build.sh --build-flags "-tags debug,mock" && \\
-    ./bin/installer --version
+    ./bin/cli --version
 RUN echo "Commit build v9.9.0 to repo ..." && \\
     cd \$GH_TEST_REPO && \\
     git add . >/dev/null 2>&1 && \\
@@ -56,14 +56,14 @@ RUN cd \$GH_TEST_REPO/githooks && \\
     git tag -f "v9.9.1" && \\
     ./scripts/clean.sh && \\
     ./scripts/build.sh --build-flags "-tags debug,mock" && \\
-    ./bin/installer --version
+    ./bin/cli --version
 RUN echo "Commit build v9.9.1 to repo ..." && \\
     cd \$GH_TEST_REPO && \\
     git commit -a --allow-empty -m "Version 9.9.1" >/dev/null 2>&1 && \\
     git tag -f "v9.9.1"
 
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
-        sed -i -E 's|(.*)/installer\"|\1/installer" \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
+        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
     fi
 
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)

@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: list hooks for all types of hook sources
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 url1="ssh://git@github.com/test/repo1.git"
 location1=$("$GITHOOKS_INSTALL_BIN_DIR/cli" shared location "$url1") || exit 1

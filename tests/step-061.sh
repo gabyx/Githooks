@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: update shared hook repos
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/shared/first-shared.git/pre-commit" &&
     cd "$GH_TEST_TMP/shared/first-shared.git" &&

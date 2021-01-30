@@ -21,7 +21,7 @@ fi
 echo 'n
 y
 ~/test021
-' | "$GH_TEST_BIN/installer" --stdin || exit 1
+' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if ! grep -r 'github.com/rycus86/githooks' ~/test021/p001/.git/hooks; then
     echo "! Hooks were not installed successfully"

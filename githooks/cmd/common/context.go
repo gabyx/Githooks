@@ -14,7 +14,8 @@ type CmdContext struct {
 	InstallDir string // The install directory.
 	CloneDir   string // The release clone dir inside the install dir.
 
-	Log       cm.ILogContext  // The log context.
-	PromptCtx prompt.IContext // The prompt context.
+	Log      cm.ILogContext // The log context.
+	LogStats cm.ILogStats   // The statistics of the log context.
 
+	PromptCtx prompt.IContext // The prompt context.
 }

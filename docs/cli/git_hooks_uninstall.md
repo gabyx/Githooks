@@ -1,13 +1,11 @@
 ## git hooks uninstall
 
-Uninstalls Githooks locally or globally.
+Uninstalls Githooks run-wrappers into the current repository.
 
 ### Synopsis
 
-Uninstalls the Githooks hooks from the current repository.
-
-If the `--global` flag is given, it executes the uninstallation
-globally, including the hook templates and all local repositories.
+Uninstall the Githooks run-wrappers and Git config settings
+into the current repository.
 
 ```
 git hooks uninstall [flags]
@@ -16,9 +14,7 @@ git hooks uninstall [flags]
 ### Options
 
 ```
-      --global            Execute the global uninstallation.
-  -h, --help              help for uninstall
-      --non-interactive   Uninstall non-interactively.
+  -h, --help   help for uninstall
 ```
 
 ### SEE ALSO

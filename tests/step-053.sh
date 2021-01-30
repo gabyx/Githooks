@@ -2,7 +2,7 @@
 # Test:
 #   Cli tool: list current hooks
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test053/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test053/.githooks/pre-commit/example" &&

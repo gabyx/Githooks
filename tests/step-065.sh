@@ -5,7 +5,7 @@
 rm -rf "$GH_TEST_GIT_CORE/templates/hooks"
 
 echo 'n
-' | "$GH_TEST_BIN/installer" --stdin
+' | "$GH_TEST_BIN/cli" installer --stdin
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ]; then

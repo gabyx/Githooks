@@ -559,19 +559,19 @@ func runUpdate(
 	execC cm.IExecContext,
 	pipeSetup cm.PipeSetupFunc) error {
 
-	installerPath := hooks.GetInstallerExecutable(installDir)
+	cliPath := hooks.GetCLIExecutable(installDir)
 
 	execX := cm.ExecContext{Cwd: execC.GetWorkingDir()}
 	execX.Env = git.SanitizeEnv(execC.GetEnv())
 
-	if !cm.IsFile(installerPath) {
+	if !cm.IsFile(cliPath) {
 		return cm.ErrorF(
-			"Could not execute update, because the installer:\n"+
+			"Could not execute update, because Githooks executable:\n"+
 				"'%s'\n"+
-				"is not existing.", installerPath)
+				"is not existing.", cliPath)
 	}
 
-	exec := cm.Executable{Cmd: installerPath}
+	exec := cm.Executable{Cmd: cliPath, Args: []string{"installer"}}
 
 	if pipeSetup == nil {
 		output, err := cm.GetCombinedOutputFromExecutable(

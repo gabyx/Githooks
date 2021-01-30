@@ -15,7 +15,7 @@ mkdir -p ~/.test-019/hooks &&
     git config --global init.templateDir '~/.test-019' ||
     exit 1
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test19" && cd "$GH_TEST_TMP/test19" || exit 1
 git init || exit 1

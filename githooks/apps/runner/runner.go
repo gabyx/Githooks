@@ -45,7 +45,7 @@ func main() {
 	// Handle all panics and report the error
 	defer func() {
 		r := recover()
-		if hooks.HandleCLIErrors(r, cwd, log) {
+		if cm.HandleCLIErrors(r, cwd, log, hooks.GetBugReportingInfo) {
 			exitCode = 1
 		}
 	}()

@@ -15,7 +15,7 @@ MANAGED_HOOK_NAMES="
 mkdir -p "$GH_TEST_TMP/test097/.git/hooks" &&
     cd "$GH_TEST_TMP/test097" &&
     git init &&
-    "$GH_TEST_BIN/installer" &&
+    "$GH_TEST_BIN/cli" installer &&
     git config githooks.autoUpdateEnabled false ||
     exit 1
 

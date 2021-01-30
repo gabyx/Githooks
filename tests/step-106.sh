@@ -57,7 +57,7 @@ else
     export PATH="$GH_TEST_TMP/test106-lfs:$PATH" || exit 4
 fi
 
-"$GH_TEST_BIN/installer" || exit 5
+"$GH_TEST_BIN/cli" installer || exit 5
 
 cd "$GH_TEST_TMP/test106" &&
     git init &&

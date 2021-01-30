@@ -5,7 +5,7 @@
 TEST_PREFIX_DIR=""$GH_TEST_TMP/githooks""
 GITHOOKS_INSTALL_BIN_DIR="$TEST_PREFIX_DIR/.githooks/bin"
 
-"$GH_TEST_BIN/installer" --prefix "$TEST_PREFIX_DIR" || exit 1
+"$GH_TEST_BIN/cli" installer --prefix "$TEST_PREFIX_DIR" || exit 1
 
 if [ ! -d "$TEST_PREFIX_DIR/.githooks" ]; then
     echo "! Expected the install directory to be in \`$TEST_PREFIX_DIR\`"

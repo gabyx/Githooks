@@ -2,7 +2,7 @@
 # Test:
 #   Git worktrees: list hooks
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test099/.git/hooks" &&
     cd "$GH_TEST_TMP/test099" &&

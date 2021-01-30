@@ -1,6 +1,6 @@
 // +build !windows
 
-package main
+package installer
 
 // GetDefaultTemplateSearchDir returns the search directories for potential template dirs.
 func GetDefaultTemplateSearchDir() ([]string, []string) {

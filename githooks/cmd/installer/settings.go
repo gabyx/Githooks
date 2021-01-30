@@ -1,4 +1,4 @@
-package main
+package installer
 
 import (
 	"gabyx/githooks/hooks"
@@ -20,6 +20,6 @@ type Settings struct {
 	// New registered repos will be added here.
 	RegisteredGitDirs hooks.RegisterRepos
 
-	// All repositories Git directories where Githooks run wrappers have been installed.
+	// All repositories Git directories where Githooks run-wrappers have been installed.
 	InstalledGitDirs InstallSet
 }

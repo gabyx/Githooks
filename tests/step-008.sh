@@ -8,7 +8,7 @@ cd "$GH_TEST_GIT_CORE/templates/hooks" &&
     chmod +x pre-commit ||
     exit 1
 
-"$GH_TEST_BIN/installer" || exit 1
+"$GH_TEST_BIN/cli" installer || exit 1
 
 ls -al "$GH_TEST_GIT_CORE/templates/templates/hooks"
 
