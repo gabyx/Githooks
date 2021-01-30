@@ -11,14 +11,21 @@ mkdir -p "$GH_TEST_TMP/test094/a" "$GH_TEST_TMP/test094/b" "$GH_TEST_TMP/test094
 
 git config --global githooks.previousSearchDir "$GH_TEST_TMP"
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" install --global; then
+if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" installer; then
     echo "! Failed to run the global installation"
     exit 1
 fi
 
-if ! grep 'rycus86/githooks' "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit"; then
-    echo "! Global installation was unsuccessful"
-    exit 1
+if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+    if [ -f "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit" ]; then
+        echo "! Expected hooks not installed"
+        exit 1
+    fi
+else
+    if ! grep 'rycus86/githooks' "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit"; then
+        echo "! Expected hooks installed"
+        exit 1
+    fi
 fi
 
 if (cd "$GH_TEST_TMP/test094/c" && "$GITHOOKS_INSTALL_BIN_DIR/cli" install); then
@@ -33,7 +40,7 @@ if ! (cd ~/.githooks/release && git status && git reset --hard HEAD^); then
 fi
 
 CURRENT="$(cd ~/.githooks/release && git rev-parse HEAD)"
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" install --global; then
+if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" installer; then
     echo "! Expected global installation to succeed"
     exit 1
 fi
