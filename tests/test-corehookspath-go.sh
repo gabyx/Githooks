@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TEST_DIR=$(dirname "$0")
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-go-corehookspath-base -
 FROM golang:1.15.6-alpine

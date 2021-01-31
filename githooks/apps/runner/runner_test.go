@@ -1,25 +1,19 @@
 package main
 
 import (
-	"flag"
 	"gabyx/githooks/apps/coverage"
 
 	"testing"
 )
 
-var githooksCoverage *bool
-
-func init() { //nolint: gochecknoinits
-	githooksCoverage = flag.Bool("githooksCoverage", false, "Set to true when running coverage")
-}
-
 func TestCoverage(t *testing.T) {
-
-	if *githooksCoverage {
-
-		coverage.Setup("runner")
+	if coverage.Setup("runner") {
+		// Careful if you print to much stuff, certain tests might fail
+		// fmt.Printf("Forward args: %q\n", os.Args)
 
 		// Run the main binary...
-		mainRun()
+		if mainRun() != 0 {
+			t.Fatal()
+		}
 	}
 }

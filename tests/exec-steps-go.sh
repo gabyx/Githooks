@@ -29,6 +29,11 @@ FAILED_TEST_LIST=""
 export GITHOOKS_INSTALL_BIN_DIR="$HOME/.githooks/bin"
 COMMIT_BEFORE=$(cd "$GH_TEST_REPO" && git rev-parse HEAD)
 
+# Clear coverage dir if we have one
+if [ -n "$GH_COVERAGE_DIR" ]; then
+    rm -rf "${GH_COVERAGE_DIR:?}"/*
+fi
+
 cleanDirs() {
     if [ -w "$GH_TEST_GIT_CORE" ]; then
         mkdir -p "$GH_TEST_GIT_CORE/templates/hooks"
@@ -140,5 +145,18 @@ fi
 if [ $FAILED -ne 0 ]; then
     exit 1
 else
+
+    if [ -n "$GH_COVERAGE_DIR" ]; then
+        gocovmerge /cover/*.cov >/cover/all.cov || {
+            echo "! Cov merge failed."
+            exit 1
+        }
+
+        goveralls -coverprofile=/cover/all.cov -service=travis-ci || {
+            echo "! Goveralls failed."
+            exit 1
+        }
+    fi
+
     exit 0
 fi

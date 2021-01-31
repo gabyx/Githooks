@@ -43,7 +43,7 @@ func Setup(executableName string) {
 
 	// Strip flags till...
 	for i := range os.Args {
-		if os.Args[i] == "-githooksCoverage" {
+		if os.Args[i] == "githooksCoverage" {
 			os.Args = append([]string{os.Args[0]}, os.Args[i+1:]...)
 
 			break

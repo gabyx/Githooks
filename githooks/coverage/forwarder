@@ -1,0 +1,28 @@
+#!/bin/sh
+# Executable wrapper for coverage.
+
+[ -z "$GH_COVERAGE_DIR" ] && {
+    echo "! Env variables 'GH_COVERAGE_DIR' not set"
+    exit 1
+}
+
+# Get the executable.
+EXECUTABLE="$1"
+shift
+NAME=$(basename "$EXECUTABLE")
+
+# Define coverage output.
+COV_DATA="$GH_COVERAGE_DIR/$NAME.yaml"
+COUNTER=$(head -1 "$COV_DATA" | sed -E 's@counter: ([0-9]+)@\1@')
+[ -z "$COUNTER" ] && COUNTER="0"
+COV_FILE="$GH_COVERAGE_DIR/$NAME-$COUNTER.cov"
+[ -f "$COV_FILE" ] && {
+    echo "! Coverage file '$COV_FILE' already existing."
+    exit 1
+}
+
+echo "Writting to '$COV_FILE'"
+exec "$EXECUTABLE" \
+    -test.coverprofile "$COV_FILE" \
+    githooksCoverage \
+    "$@"

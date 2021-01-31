@@ -14,6 +14,8 @@ BIN_DIR=""
 BUILD_FLAGS=""
 BUILD_COVERAGE=""
 
+export CGO_ENABLED=0
+
 parseArgs() {
     prev_p=""
     for p in "$@"; do
@@ -60,6 +62,7 @@ if [ -z "$BUILD_COVERAGE" ]; then
         -tags debug $BUILD_FLAGS ./...
 else
     echo "go test ..."
+    go generate -mod=vendor ./...
     # shellcheck disable=SC2086
     go test ./apps/cli $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/cli"
     # shellcheck disable=SC2086

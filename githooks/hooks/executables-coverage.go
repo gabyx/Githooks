@@ -23,7 +23,7 @@ func GetCLIExecutable(installDir string) cm.Executable {
 		Cmd: p,
 		Args: []string{"-test.coverprofile",
 			path.Join(coverDir, strs.Fmt("cli-%v.cov", covData.Counter)),
-			"-githooksCoverage"}}
+			"githooksCoverage"}}
 }
 
 // GetInstallerExecutable gets the global Githooks installer executable (cli with args).

@@ -13,10 +13,9 @@ type CoverageData struct {
 
 func ReadCoverData(executableName string) (coverDir string, covDataFile string, covData CoverageData) {
 	coverDir = os.Getenv("GH_COVERAGE_DIR")
+	cm.PanicIf(strs.IsEmpty(coverDir), "You need to set 'GH_COVERAGE_DIR'")
 
-	if strs.IsEmpty(coverDir) {
-		cm.Panic("You need to set 'GH_COVERAGE_DIR'")
-	} else if !cm.IsDirectory(coverDir) {
+	if !cm.IsDirectory(coverDir) {
 		err := os.MkdirAll(coverDir, cm.DefaultFileModeDirectory)
 		cm.AssertNoErrorPanicF(err, "Could not make dir '%s'", coverDir)
 	}
@@ -24,7 +23,6 @@ func ReadCoverData(executableName string) (coverDir string, covDataFile string, 
 	covDataFile = path.Join(coverDir, executableName+".yaml")
 
 	if cm.IsFile(covDataFile) {
-		// Increase the counter for the test files
 		err := cm.LoadYAML(covDataFile, &covData)
 		cm.AssertNoErrorPanicF(err, "Could not load '%s'", covDataFile)
 	}
@@ -32,7 +30,7 @@ func ReadCoverData(executableName string) (coverDir string, covDataFile string, 
 	return
 }
 
-func Setup(executableName string) {
+func Setup(executableName string) (run bool) {
 
 	_, covDataFile, covData := ReadCoverData(executableName)
 
@@ -43,10 +41,13 @@ func Setup(executableName string) {
 
 	// Strip flags till...
 	for i := range os.Args {
-		if os.Args[i] == "-githooksCoverage" {
+		if os.Args[i] == "githooksCoverage" {
+			run = true
 			os.Args = append([]string{os.Args[0]}, os.Args[i+1:]...)
 
 			break
 		}
 	}
+
+	return
 }
