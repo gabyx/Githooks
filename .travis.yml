@@ -28,4 +28,5 @@ jobs:
     env: TEST_INSTANCE=test-coverage
 
 script:
+  - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - sh "tests/${TEST_INSTANCE}.sh"
