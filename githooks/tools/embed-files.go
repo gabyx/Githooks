@@ -13,6 +13,18 @@ import (
 var pkg = "build"
 var embeddedFile = "build/embedded-files.go"
 
+func getFiles(root string) []bindata.InputConfig {
+
+	readme := path.Join(root, ".githooks", "README.md")
+	template := path.Join(root, "githooks", "run-wrapper.sh")
+	deployPGP := path.Join(root, "githooks", ".deploy-pgp")
+
+	return []bindata.InputConfig{
+		{Path: template, Recursive: false},
+		{Path: readme, Recursive: false},
+		{Path: deployPGP, Recursive: false}}
+}
+
 func main() {
 
 	root, err := git.Ctx().Get("rev-parse", "--show-toplevel")
@@ -20,15 +32,8 @@ func main() {
 
 	srcRoot := path.Join(root, "githooks")
 
-	template := path.Join(root, "githooks", "run-wrapper.sh")
-	readme := path.Join(root, ".githooks", "README.md")
-	deployPGP := path.Join(root, "githooks", ".deploy-pgp")
-
 	c := bindata.Config{
-		Input: []bindata.InputConfig{
-			{Path: template, Recursive: false},
-			{Path: readme, Recursive: false},
-			{Path: deployPGP, Recursive: false}},
+		Input:          getFiles(root),
 		Package:        pkg,
 		NoMemCopy:      false,
 		NoCompress:     false,
@@ -40,5 +45,5 @@ func main() {
 	err = bindata.Translate(&c)
 
 	cm.AssertNoErrorPanicF(err,
-		"Translating file '%s' into embedded binary failed.", template)
+		"Translating files into embedded binary failed.")
 }

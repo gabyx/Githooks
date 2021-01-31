@@ -1,2 +1,2 @@
 #!/bin/sh
-echo "* Git hooks are set up properly"
+echo "* Git hooks are set up properly" >&2

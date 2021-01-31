@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if ! command -v golangci-lint >/dev/null 2>&1; then
-    echo "! Skipping golangci-lint - not installed"
+    echo "! Skipping golangci-lint - not installed" >&2
     exit 0
 fi
 
@@ -17,8 +17,8 @@ if CGO_ENABLED=0 golangci-lint run -E godot \
     -E exportloopref \
     -E gocritic \
     --max-same-issues 0 ./...; then
-    echo "* golangci-lint OK"
+    echo "* golangci-lint OK" >&2
 else
-    echo "! golangci-lint problems detected"
+    echo "! golangci-lint problems detected" >&2
     exit 1
 fi

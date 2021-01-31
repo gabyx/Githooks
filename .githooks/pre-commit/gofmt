@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if ! command -v gofmt >/dev/null 2>&1; then
-    echo "! Skipping gofmt - not installed"
+    echo "! Skipping gofmt - not installed" >&2
     exit 0
 fi
 
@@ -18,7 +18,7 @@ for PKG_DIR in githooks/*; do
 done
 
 if [ "$SUCCESS" = "0" ]; then
-    echo "* gofmt is OK."
+    echo "* gofmt is OK." >&2
 else
     exit "$SUCCESS"
 fi

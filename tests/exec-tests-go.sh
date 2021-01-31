@@ -20,10 +20,10 @@ ENV GH_TEST_GIT_CORE="/usr/share/git-core"
 ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
 # Add sources
-COPY --chown=${OS_USER}:${OS_USER} githooks \${GH_TEST_REPO}/githooks
-RUN sed -i -E 's/^bin//' \${GH_TEST_REPO}/githooks/.gitignore # We use the bin folder
-ADD .githooks/README.md \${GH_TEST_REPO}/.githooks/README.md
-ADD examples \${GH_TEST_REPO}/examples
+COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
+RUN sed -i -E 's/^bin//' "\$GH_TEST_REPO/githooks/.gitignore" # We use the bin folder
+ADD .githooks/README.md "\$GH_TEST_REPO/.githooks/README.md"
+ADD examples "\$GH_TEST_REPO/examples"
 ADD tests "\$GH_TESTS"
 
 RUN git config --global user.email "githook@test.com" && \\
@@ -77,7 +77,7 @@ EOF
 
 docker run --rm \
     -a stdout -a stderr \
-    githooks:"$IMAGE_TYPE" \
+    "githooks:$IMAGE_TYPE" \
     ./exec-steps-go.sh "$@"
 
 RESULT=$?

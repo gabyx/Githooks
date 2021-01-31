@@ -14,32 +14,32 @@ git hooks installer [flags]
 ### Options
 
 ```
-      --build-from-source            If the binaries are built from source instead of
-                                     downloaded from the deploy url.
-      --build-tags stringArray       Build tags for building from source (get extended with defaults).
-      --clone-branch string          The clone branch from which Githooks should
-                                     clone and install/update itself.
+      --dry-run                      Dry run the installation showing whats being done.
+      --non-interactive              Run the installation non-interactively
+                                     without showing prompts.
+      --skip-install-into-existing   Skip installation into existing repositories
+                                     defined by a search path.
+      --prefix string                Githooks installation prefix such that
+                                     `<prefix>/.githooks` will be the installation directory.
+      --template-dir string          The preferred template directory to use.
+      --only-server-hooks            Only install and maintain server hooks.
+      --use-core-hookspath           If the install mode `core.hooksPath` should be used.
       --clone-url string             The clone url from which Githooks should clone
                                      and install/update itself. Githooks tries to
                                      auto-detect the deploy setting for downloading binaries.
                                      You can however provide a deploy settings file yourself if
                                      the auto-detection does not work (see `--deploy-settings`).
+      --clone-branch string          The clone branch from which Githooks should
+                                     clone and install/update itself.
       --deploy-api string            The deploy api type (e.g. [`gitea`, `github`]) to use for updates
                                      of the specified `clone-url` for helping the deploy settings
                                      auto-detection. For Github urls, this is not needed.
       --deploy-settings string       The deploy settings YAML file to use for updates of the specified
                                      `--clone-url`. See the documentation for further details.
-      --dry-run                      Dry run the installation showing whats being done.
+      --build-from-source            If the binaries are built from source instead of
+                                     downloaded from the deploy url.
+      --build-tags stringArray       Build tags for building from source (get extended with defaults).
   -h, --help                         help for installer
-      --non-interactive              Run the installation non-interactively
-                                     without showing prompts.
-      --only-server-hooks            Only install and maintain server hooks.
-      --prefix string                Githooks installation prefix such that
-                                     `<prefix>/.githooks` will be the installation directory.
-      --skip-install-into-existing   Skip installation into existing repositories
-                                     defined by a search path.
-      --template-dir string          The preferred template directory to use.
-      --use-core-hookspath           If the install mode `core.hooksPath` should be used.
 ```
 
 ### SEE ALSO

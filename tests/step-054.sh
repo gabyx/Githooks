@@ -12,17 +12,17 @@ mkdir -p "$GH_TEST_TMP/test054/.githooks/pre-commit" &&
     git init ||
     exit 1
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list pre-commit | grep "pre-example"; then
+if ! git hooks list pre-commit | grep "pre-example"; then
     echo "! Unexpected cli list output"
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list post-commit | grep "post-example"; then
+if ! git hooks list post-commit | grep "post-example"; then
     echo "! Unexpected cli list output"
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list post-commit | grep -v "pre-example"; then
+if ! git hooks list post-commit | grep -v "pre-example"; then
     echo "! Unexpected cli list output"
     exit 1
 fi

@@ -376,9 +376,8 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 	cm.PanicIfF(args.InternalAutoUpdate && !updateAvailable,
 		"An autoupdate should only be triggered when and update is found.")
 
-	cliPath := hooks.GetCLIExecutable(settings.InstallDir)
-	haveInstaller := cm.IsFile(cliPath)
-	installer := cm.Executable{Cmd: cliPath, Args: []string{"installer"}}
+	installer := hooks.GetInstallerExecutable(settings.InstallDir)
+	haveInstaller := cm.IsFile(installer.Cmd)
 
 	// We download/build the binaries if an update is available
 	// or the installer is missing.
@@ -844,10 +843,10 @@ func installBinaries(
 	}
 
 	// Set CLI executable alias.
-	cliTool := hooks.GetCLIExecutable(installDir)
-	err = hooks.SetCLIExecutableAlias(cliTool)
+	cli := hooks.GetCLIExecutable(installDir)
+	err = hooks.SetCLIExecutableAlias(cli.Cmd)
 	log.AssertNoErrorPanicF(err,
-		"Could not set Git config 'alias.hooks' to '%s'.", cliTool)
+		"Could not set Git config 'alias.hooks' to '%s'.", cli.Cmd)
 
 	// Set runner executable alias.
 	runner := hooks.GetRunnerExecutable(installDir)
@@ -974,7 +973,6 @@ func installIntoRegisteredRepos(
 func setupSharedRepositories(
 	log cm.ILogContext,
 	installDir string,
-	cliExectuable string,
 	dryRun bool,
 	uiSettings *install.UISettings) {
 
@@ -1184,7 +1182,6 @@ func runUpdate(
 		setupSharedRepositories(
 			log,
 			settings.InstallDir,
-			hooks.GetCLIExecutable(settings.InstallDir),
 			args.DryRun,
 			uiSettings)
 	}

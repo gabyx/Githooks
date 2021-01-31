@@ -15,7 +15,7 @@ for FILE in $STAGED_FILES; do
 done
 
 if [ "$SUCCESS" = "0" ]; then
-    echo "* No shellcheck ignore format issues found"
+    echo "* No shellcheck ignore format issues found" >&2
 else
     exit 1
 fi

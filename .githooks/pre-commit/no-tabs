@@ -10,7 +10,7 @@ checkTab() {
     LINES=$(grep -rnH "$(printf '\t')" "$1")
 
     if [ -n "$LINES" ]; then
-        echo "! Tab character found in: $LINES"
+        echo "! Tab character found in: $LINES" >&2
         SUCCESS=1
     fi
 }
@@ -22,7 +22,7 @@ for FILE in $STAGED_FILES; do
 done
 
 if [ "$SUCCESS" = "0" ]; then
-    echo "* No tab characters detected"
+    echo "* No tab characters detected" >&2
 else
     exit "$SUCCESS"
 fi

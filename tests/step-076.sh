@@ -24,7 +24,9 @@ if [ -z "$LAST_UPDATE" ]; then
     exit 1
 fi
 
-if ! echo "$OUTPUT" | grep -q "git hooks update disable"; then
+# 'git' is removed in 'hooks update disable'
+# due to covarage replacement issues.
+if ! echo "$OUTPUT" | grep -q "hooks update disable"; then
     echo "! Expected update output not found"
     echo "$OUTPUT"
     exit 1

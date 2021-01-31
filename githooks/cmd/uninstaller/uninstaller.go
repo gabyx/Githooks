@@ -1,4 +1,3 @@
-//go:generate go run -mod=vendor ../../tools/embed-files.go
 package uninstaller
 
 import (
@@ -113,8 +112,8 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings
 
 func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
 
-	cliPath := hooks.GetCLIExecutable(settings.InstallDir)
-	if !cm.IsFile(cliPath) {
+	uninstaller := hooks.GetUninstallerExecutable(settings.InstallDir)
+	if !cm.IsFile(uninstaller.Cmd) {
 		log.WarnF("There is no existing Githooks executable present\n"+
 			"in install dir '%s'.\n"+
 			"Your installation is corrupt.\n"+
@@ -127,7 +126,7 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 	// Set variables for further uninstall procedure.
 	args.InternalPostDispatch = true
 
-	runUninstaller(log, &cm.Executable{Cmd: cliPath, Args: []string{"uninstaller"}}, args)
+	runUninstaller(log, &uninstaller, args)
 
 	return true
 }

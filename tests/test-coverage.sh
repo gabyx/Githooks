@@ -1,137 +1,117 @@
 #!/bin/sh
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 cat <<EOF | docker build --force-rm -t githooks:alpine-coverage-base -
 FROM golang:1.15.6-alpine
-RUN apk add --no-cache build-base cmake ninja python3 \
-      binutils-dev curl-dev elfutils-dev
-WORKDIR /root
-ENV KCOV=https://github.com/SimonKagstrom/kcov/archive/v38.tar.gz
-RUN wget -q $KCOV -O - | tar xz -C ./ --strip-components 1
-RUN mkdir build && cd build \
- && CXXFLAGS="-D__ptrace_request=int" cmake -G Ninja .. \
- && cmake --build . --target install
-
-FROM golang:1.15.6-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash
-
-# Copy kcov
-RUN apk add --no-cache bash python3 binutils-dev curl-dev elfutils-libelf
-COPY --from=builder /usr/local/bin/kcov* /usr/local/bin/
-COPY --from=builder /usr/local/share/doc/kcov /usr/local/share/doc/kcov
+RUN go get github.com/wadey/gocovmerge
+RUN go get github.com/mattn/goveralls
 EOF
 
-# exec sh "$TEST_DIR"/exec-tests-go.sh 'alpine-coverage' "$@"
+IMAGE_TYPE="alpine-coverage"
 
-# RUN_DIR="${RUN_DIR:-"$PWD"}"
+if echo "$IMAGE_TYPE" | grep -q "\-user"; then
+    OS_USER="test"
+else
+    OS_USER="root"
+fi
 
-# TEST_STEP="$1"
+cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - .
+FROM githooks:$IMAGE_TYPE-base
+ENV GH_TESTS="/var/lib/githooks-tests"
+ENV GH_TEST_TMP="/tmp"
+ENV GH_TEST_REPO="/var/lib/githooks"
+ENV GH_TEST_BIN="/var/lib/githooks/githooks/bin"
+ENV GH_TEST_GIT_CORE="/usr/share/git-core"
+ENV GH_COVERAGE_DIR="/cover"
 
-# # Test only sepcific tests
-# if [ -n "$TEST_STEP" ]; then
-#     STEPS_TO_RUN="step-${TEST_STEP}.sh"
-# else
-#     STEPS_TO_RUN="step-*"
-# fi
+${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
-# # Build a Docker image on top of kcov with our scripts
-# cat <<EOF | docker build --force-rm -t githooks:coverage -f - .
-# FROM kcov/kcov:latest
+# Add sources
+COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
+RUN sed -i -E 's/^bin//' "\$GH_TEST_REPO/githooks/.gitignore" # We use the bin folder
+ADD .githooks/README.md \$GH_TEST_REPO/.githooks/README.md
+ADD examples "\$GH_TEST_REPO/examples"
+ADD tests "\$GH_TESTS"
 
-# RUN echo 'deb http://deb.debian.org/debian stretch main' >> /etc/apt/sources.list \
-#     && (apt-get update || true) \
-#     && apt-get install -y git git-lfs
+RUN git config --global user.email "githook@test.com" && \\
+    git config --global user.name "Githook Tests" && \\
+    git config --global init.defaultBranch main && \\
+    git config --global core.autocrlf false
 
-# ADD base-template.sh base-template-wrapper.sh install.sh uninstall.sh cli.sh /var/lib/githooks/
-# RUN chmod +x /var/lib/githooks/*.sh
-# ADD .githooks/README.md /var/lib/githooks/.githooks/README.md
-# ADD examples /var/lib/githooks/examples
+RUN echo "Make test gitrepo to clone from ..." && \\
+    cd \$GH_TEST_REPO && git init  >/dev/null 2>&1  && \\
+    git add . >/dev/null 2>&1  && \\
+    git commit -a -m "Before build" >/dev/null 2>&1
 
-# RUN git config --global user.email "githook@test.com" && \
-#     git config --global user.name "Githook Tests"
+# Replace run-wrapper with coverage run-wrapper
+RUN cd \$GH_TEST_REPO && \\
+    cp githooks/run-wrapper-coverage.sh githooks/run-wrapper.sh
 
-# ADD tests/exec-steps.sh tests/${STEPS_TO_RUN} /var/lib/tests/
+# Build binaries for v9.9.0.
+#################################
+RUN cd \$GH_TEST_REPO/githooks && \\
+    git tag "v9.9.0" >/dev/null 2>&1 && \\
+     ./scripts/clean.sh && \\
+    ./scripts/build.sh --coverage --build-flags "-tags debug,mock,coverage" && \\
+    ./bin/cli githooksCoverage --version
+RUN echo "Commit build v9.9.0 to repo ..." && \\
+    cd \$GH_TEST_REPO && \\
+    git add . >/dev/null 2>&1 && \\
+    git commit -a --allow-empty -m "Version 9.9.0" >/dev/null 2>&1 && \\
+    git tag -f "v9.9.0"
 
-# # Some fixup below:
-# # We overwrite the download to use the current install.sh in all scripts
-# RUN \\
-# # Make sure we're using Bash for kcov
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|#!/bin/sh|#!/bin/bash|g' {} \\; && \\
-#     # at the beginnig of line
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|^( *)sh /|\1bash /|g' {} \\; && \\
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|^( *)sh "|\1bash "|g' {} \\; && \\
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|^( *)sh ~/|\1bash /home/coverage/|g' {} \\; && \\
-#     # in between line
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|( +)sh /|\1bash /|g' {} \\; && \\
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|( +)sh "|\1bash "|g' {} \\; && \\
-#     find /var/lib -name '*.sh' -exec sed -i -E 's|( +)sh ~/|\1bash /home/coverage/|g' {} \\; && \\
-#     # git hooks alias
-#     find /var/lib -name '*.sh' -exec sed -i 's|"!sh |"!bash |g' {} \\; && \\
-# # Revert changed shell script filenames
-#     find /var/lib -name '*.sh' -exec sed -E -i "s|/var/lib/githooks/([a-z-]+)\\.bash|/var/lib/githooks/\\1.sh|g" {} \\; && \\
-# # Change any \`git hooks\` invocation to the shell script for better code coverage
-#     find /var/lib/tests/ -name '*.sh' -exec sed -i -E 's|([^"])git +hooks|\1bash /home/coverage/.githooks/release/cli.sh|g' {} \\; && \\
-#     find /var/lib/tests/ -name '*.sh' -exec sed -i -E 's|^( +)git +hooks|\1bash /home/coverage/.githooks/release/cli.sh|g' {} \\; && \\
-# # Change multiline echos to line-wise echos for kcov
-#     sed -i -E '/echo "$/,/^"/{  s/echo "/echo ""/ ; s/^"$/echo ""/  ;  /^\s*echo/! { s/(.*)/echo "\1"/ } }' /var/lib/githooks/cli.sh && \\
-# # Do not use the terminal in tests
-#     sed -i 's|</dev/tty||g' /var/lib/githooks/install.sh && \\
-# # Change the base template so we can pass in the hook name and accept flags
-#     sed -i -E 's|GITHOOKS_RUNNER=(.*)|GITHOOKS_RUNNER=\1; GITHOOKS_RUNNER="\${GITHOOKS_RUNNER:-/var/lib/githooks/base-template.sh}"|' /var/lib/githooks/base-template-wrapper.sh && \\
-#     sed -i -E 's|HOOK_FOLDER=(.*)|HOOK_FOLDER="\${HOOK_FOLDER:-\1}"|' /var/lib/githooks/base-template.sh && \\
-#     sed -i -E 's|HOOK_NAME=(.*)|HOOK_NAME="\${HOOK_NAME:-\1}"|' /var/lib/githooks/base-template.sh && \\
-#     sed -i 's|ACCEPT_CHANGES=|ACCEPT_CHANGES=\${ACCEPT_CHANGES}|' /var/lib/githooks/base-template.sh && \\
-#     sed -i 's%read -r "\$VARIABLE"%eval "\$VARIABLE=\\\\\$\$(eval echo "\\\\\$VARIABLE")" # disabled for tests: read -r "\$VARIABLE"%' /var/lib/githooks/base-template.sh && \\
-#     sed -i -E 's|GITHOOKS_CLONE_URL="http.*"|GITHOOKS_CLONE_URL="/var/lib/githooks"|' /var/lib/githooks/cli.sh /var/lib/githooks/base-template.sh /var/lib/githooks/install.sh && \\
-# # Conditionally allow file:// for local shared hooks simulating http:// protocol
-#     sed -i -E 's|if(.*grep.*file://.*)|if [ "\$(git config --global githooks.testingTreatFileProtocolAsRemote)" != "true" ] \&\& \1|' /var/lib/githooks/cli.sh /var/lib/githooks/base-template.sh
+# Build binaries for v9.9.1.
+#################################
+RUN cd \$GH_TEST_REPO/githooks && \\
+    git commit -a --allow-empty -m "Before build" >/dev/null 2>&1 && \\
+    git tag -f "v9.9.1" && \\
+    ./scripts/clean.sh && \\
+    ./scripts/build.sh --coverage --build-flags "-tags debug,mock,coverage" && \\
+    ./bin/cli githooksCoverage --version
+RUN echo "Commit build v9.9.1 to repo ..." && \\
+    cd \$GH_TEST_REPO && \\
+    git commit -a --allow-empty -m "Version 9.9.1" >/dev/null 2>&1 && \\
+    git tag -f "v9.9.1"
 
-# # Commit everything
-# RUN echo "Make test gitrepo to clone from ..." && \
-#     cd /var/lib/githooks && git init && \
-#     git add . && \
-#     git commit -a -m "Initial release" && \
-#     git commit -a --allow-empty -m "Empty to reset to trigger update"
+RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
+        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
+    fi
 
-# RUN useradd -ms /bin/bash coverage
-# RUN chown -R coverage:coverage /var /usr/share/git-core
+# Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
+RUN git config --global githooks.deleteDetectedLFSHooks "n"
 
-# USER coverage
-# WORKDIR /home/coverage
-# RUN git config --global user.email "githook@test.com" && \
-#     git config --global user.name "Githook Tests"
+# Replace some statements which rely on proper CLI output
+# The built instrumented executable output test&coverage shit...
+RUN sed -i -E 's@cli" shared location(.*)\)@cli" shared location\1 | grep "^/")@g' \\
+    "\$GH_TESTS"/step-*
 
-# ## Debugging #########################################
-# # If you run into failing coverage, run all tests, and
-# # inspect the failing test.
-# # Uncomment the kvoc run below!
+# Replace all runnner and  cli/'git hooks' invocations.
+# Foward over 'coverage/forwarder'.
+RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/cli"@g' \\
+    "\$GH_TESTS/exec-steps-go.sh" \\
+    "\$GH_TESTS"/step-*
+RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
+    "\$GH_TESTS"/step-*
+RUN sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GITHOOKS_INSTALL_BIN_DIR/cli"@g' \\
+    "\$GH_TESTS"/step-*
 
-# # RUN mkdir -p ~/cover && cp "/var/lib/tests/"${STEPS_TO_RUN} ~/cover
-# # RUN sh /var/lib/tests/exec-steps.sh
 
-# ######################################################
+${ADDITIONAL_INSTALL_STEPS:-}
 
-# RUN kcov \
-#     --coveralls-id="$TRAVIS_JOB_ID" \
-#     --include-pattern="/home/coverage/.githooks/release" \
-#     ~/cover \
-#     "/var/lib/tests/exec-steps.sh"
-# EOF
+RUN echo "Git version: \$(git --version)"
+WORKDIR \$GH_TESTS
+EOF
 
-# # shellcheck disable=SC2181
-# if [ $? -ne 0 ]; then
-#     exit 1
-# fi
+docker run --rm \
+    -a stdout -a stderr \
+    -v "$TEST_DIR/cover":/cover \
+    "githooks:$IMAGE_TYPE" \
+    ./exec-steps-go.sh "$@"
 
-# # Make sure we delete the previous run results
-# docker run --user root --rm --security-opt seccomp=unconfined \
-#     -v "${RUN_DIR}/cover":/cover \
-#     --entrypoint sh \
-#     githooks:coverage \
-#     -c 'rm -rf /cover/*'
+RESULT=$?
 
-# # Collect the coverage info
-# docker run --user root --rm --security-opt seccomp=unconfined \
-#     -v "${RUN_DIR}/cover":/cover \
-#     githooks:coverage \
-#     bash -c 'cp -r /home/coverage/cover /cover/'
+docker rmi "githooks:$IMAGE_TYPE"
+docker rmi "githooks:$IMAGE_TYPE-base"
+exit $RESULT
