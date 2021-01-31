@@ -147,15 +147,22 @@ if [ $FAILED -ne 0 ]; then
 else
 
     if [ -n "$GH_COVERAGE_DIR" ]; then
-        gocovmerge /cover/*.cov >/cover/all.cov || {
+
+        # shellcheck disable=SC2015
+        cd "$GH_TEST_REPO/githooks" &&
+            gocovmerge /cover/*.cov >/cover/all.cov || {
             echo "! Cov merge failed."
             exit 1
         }
 
-        goveralls -coverprofile=/cover/all.cov -service=travis-ci || {
-            echo "! Goveralls failed."
-            exit 1
-        }
+        if [ "$TRAVIS" = true ]; then
+            # shellcheck disable=SC2015
+            cd "$GH_TEST_REPO/githooks" &&
+                goveralls -coverprofile=/cover/all.cov -service=travis-ci || {
+                echo "! Goveralls failed."
+                exit 1
+            }
+        fi
     fi
 
     exit 0
