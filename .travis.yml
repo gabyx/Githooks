@@ -24,8 +24,8 @@ jobs:
     env: TEST_INSTANCE=test-whitespace-go
   - os: linux
     env: TEST_INSTANCE=test-rules
-  # - os: linux
-  #   env: TEST_INSTANCE=test-coverage
+  - os: linux
+    env: TEST_INSTANCE=test-coverage
 
 script:
   - sh "tests/${TEST_INSTANCE}.sh"
