@@ -19,7 +19,7 @@ cd "$GH_TEST_REPO/githooks" &&
     git tag "v9.9.0" &&
     ./scripts/clean.sh &&
     ./scripts/build.sh --build-flags "-tags debug,mock" &&
-    ./bin/installer --version || exit 1
+    ./bin/cli --version || exit 1
 echo "Commit build v9.9.0 to repo ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
@@ -33,12 +33,12 @@ cd "$GH_TEST_REPO/githooks" &&
     git tag -f "v9.9.1" &&
     ./scripts/clean.sh &&
     ./scripts/build.sh --build-flags "-tags debug,mock" &&
-    ./bin/installer --version || exit 1
+    ./bin/cli --version || exit 1
 echo "Commit build v9.9.1 to repo ..." &&
     cd "$GH_TEST_REPO" &&
     git commit -a --allow-empty -m "Version 9.9.1" >/dev/null 2>&1 &&
     git tag -f "v9.9.1" || exit 1
 
 if [ -n "$EXTRA_INSTALL_ARGS" ]; then
-    sed -i -E "s|(.*)/installer\"|\1/installer\" $EXTRA_INSTALL_ARGS|g" "$GH_TESTS"/step-*
+    sed -i -E "s|(.*)/cli\" installer|\1/cli\" installer $EXTRA_INSTALL_ARGS|g" "$GH_TESTS"/step-*
 fi

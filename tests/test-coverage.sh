@@ -76,7 +76,7 @@ RUN echo "Commit build v9.9.1 to repo ..." && \\
     git tag -f "v9.9.1"
 
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
-        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
+        sed -i -E 's|(.*)/cli" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
     fi
 
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
