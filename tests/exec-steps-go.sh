@@ -156,15 +156,14 @@ else
         }
         echo "Coverage created."
 
-        if [ "$TRAVIS" = true ]; then
-            # shellcheck disable=SC2015
-            cd "$GH_TEST_REPO/githooks" &&
-                goveralls -coverprofile=/cover/all.cov -service=travis-ci || {
-                echo "! Goveralls failed."
-                exit 1
-            }
-            echo "Coverage uploaded."
-        fi
+        # shellcheck disable=SC2015
+        cd "$GH_TEST_REPO/githooks" &&
+            goveralls -coverprofile=/cover/all.cov -service=travis-ci || {
+            echo "! Goveralls failed."
+            exit 1
+        }
+        echo "Coverage uploaded."
+
     fi
 
     exit 0
