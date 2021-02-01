@@ -10,6 +10,8 @@ install: skip
 
 jobs:
   include:
+  - os: linux
+    env: TEST_INSTANCE=test-coverage
   - os: windows
     env: TEST_INSTANCE=test-windows-go
   - os: linux
@@ -24,9 +26,6 @@ jobs:
     env: TEST_INSTANCE=test-whitespace-go
   - os: linux
     env: TEST_INSTANCE=test-rules
-  - os: linux
-    env: TEST_INSTANCE=test-coverage
-
 script:
   - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - sh "tests/${TEST_INSTANCE}.sh"
