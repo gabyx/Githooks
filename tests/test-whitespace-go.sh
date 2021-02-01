@@ -13,7 +13,7 @@ EOF
 # shellcheck disable=SC2016
 export ADDITIONAL_INSTALL_STEPS='
 # add a space in paths
-RUN find "$GH_TESTS" -name "*.sh" -exec sed -i -E "s|GH_TEST_TMP/test([0-9.]+)|GH_TEST_TMP/test \1|g" {} \;
+RUN find "$GH_TESTS" -name "*.sh" -exec sed -i -E "s|GH_TEST_TMP(\})?/test([0-9.]+)|GH_TEST_TMP\1/test \2|g" {} \;
 '
 
 exec sh "$TEST_DIR"/exec-tests-go.sh 'alpine-lfs-go-whitespace' "$@"

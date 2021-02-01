@@ -154,6 +154,7 @@ else
             echo "! Cov merge failed."
             exit 1
         }
+        echo "Coverage created."
 
         if [ "$TRAVIS" = true ]; then
             # shellcheck disable=SC2015
@@ -162,6 +163,7 @@ else
                 echo "! Goveralls failed."
                 exit 1
             }
+            echo "Coverage uploaded."
         fi
     fi
 
