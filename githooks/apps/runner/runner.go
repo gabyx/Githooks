@@ -13,6 +13,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -379,7 +380,7 @@ func executeOldHook(settings *HookSettings,
 		return trusted, sha
 	}
 
-	hooks, err := hooks.GetAllHooksIn(
+	hooks, _, err := hooks.GetAllHooksIn(
 		settings.HookDir, hookName, hookNamespace,
 		isIgnored, isTrusted, true,
 		settings.Args)
@@ -660,16 +661,30 @@ func getHooksIn(
 		hookNamespace = ns
 	}
 
-	allHooks, err := hooks.GetAllHooksIn(
+	allHooks, maxBatches, err := hooks.GetAllHooksIn(
 		hooksDir, settings.HookName, hookNamespace,
 		isIgnored, isTrusted, true,
 		settings.Args)
-
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
-	// @todo Make a priority list for executing all batches in parallel
-	// First good solution: all sequential
-	batches = make(hooks.HookPrioList, 0, len(allHooks))
+	if len(allHooks) == 0 {
+		return
+	}
+
+	// Sort allHooks by the given batchName
+	if len(allHooks) > 1 {
+		sort.Slice(allHooks, func(i, j int) bool {
+			return allHooks[i].BatchName < allHooks[j].BatchName
+		})
+	}
+
+	// Split all hooks (sorted by the batch names)
+	// into batches.
+	batches = make(hooks.HookPrioList, 1, maxBatches)
+
+	curBatchIdx := 0
+	curBatchName := &allHooks[0].BatchName
+
 	for i := range allHooks {
 
 		hook := &allHooks[i]
@@ -687,8 +702,13 @@ func getHooksIn(
 			continue
 		}
 
-		batch := []hooks.Hook{*hook}
-		batches = append(batches, batch)
+		if *curBatchName != hook.BatchName {
+			// Batch name changed, add another batch...
+			batches = append(batches, []hooks.Hook{})
+			curBatchIdx += 1
+		}
+
+		batches[curBatchIdx] = append(batches[curBatchIdx], *hook)
 	}
 
 	return
