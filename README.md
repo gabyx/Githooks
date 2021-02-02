@@ -267,20 +267,15 @@ In that case the `<sharedRepo>/.githooks` folder is ignored when other users use
 
 So the priority to find hooks in a shared hook repository is as follows: consider hooks
 
-1. in `<sharedRepo>/githooks`, if it does not exist, consider hooks in
-2. in `<sharedRepo>/.githooks`, if it does not exist consider hooks
-3. in `<sharedRepo>` as the last fallback.
+1. in `<hooksDir>` := `<sharedRepo>/githooks`, if it does not exist, consider hooks in
+2. in `<hooksDir>` := `<sharedRepo>/.githooks`, if it does not exist consider hooks
+3. in `<hooksDir>` := `<sharedRepo>` as the last fallback.
 
 Each of these directories can be of the same format as the normal `.githooks` folder in a single repository.
 
 ### Shared Repository Namespace
 
-A shared repository can optionally have a namespace associated with it. The name can be stored in a file `.namespace` in the hooks directory of the shared repository, e.g. one of the following:
-
-- `<sharedRepo>/githooks/.namespace` if the shared hooks are inside `<sharedRepo>/githooks`
-  (because you use the local hooks `.githooks` for the development of this shared repository).
-- `<sharedRepo>/.githooks/.namespace` if the shared hooks are inside `<sharedRepo>/.githooks`.
-- `<sharedRepo>/.namespace` if the shared hooks are at the root of the repository.
+A shared repository can optionally have a namespace associated with it. The name can be stored in a file `.namespace` in any possible hooks directory `<hooksDir>` of the shared repository, see [layout](#layout-of-shared-hook-repositories).
 
 ## Ignoring Hooks and Files
 
@@ -291,7 +286,7 @@ The `.ignore.yaml` (see [specs](#yaml-specification)) files allow excluding file
 
 They allow *glob* filename patterns (with double-star `**` syntax to match multiple directories) and
 paths to be matched against a hook's (file's) *namespace path* which consists of
-the name of the hook prefixed by a hook namespace , e.g. `<hookNamespace>/<hookName>`.
+the name of the hook prefixed by a hook namespace , e.g. `<hookNamespace>/<relPath>` where `<relPath>`
 A [namespace](#shared-repository-namespace) comes into play when the hook (or file) belongs to a shared hook repository.]
 
 You can ignore executing all sorts of hooks per Git repository by specifying patterns
