@@ -19,6 +19,10 @@ fi
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - .
 FROM githooks:$IMAGE_TYPE-base
+
+# Coveralls token for upload
+ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
+
 ENV GH_TESTS="/var/lib/githooks-tests"
 ENV GH_TEST_TMP="/tmp"
 ENV GH_TEST_REPO="/var/lib/githooks"
