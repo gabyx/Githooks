@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: test a single pre-commit hook file
+#   Direct runner execution: test a single pre-commit hook file
 
 mkdir -p "$GH_TEST_TMP/test12" && cd "$GH_TEST_TMP/test12" || exit 1
 git init || exit 1

@@ -3,6 +3,7 @@ package hooks
 import (
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -42,11 +43,12 @@ type Hook struct {
 type HookPrioList [][]Hook
 
 // Hooks is a collection of all executable hooks.
+// Json serialization is only for debug pruposes.
 type Hooks struct {
-	LocalHooks        HookPrioList
-	RepoSharedHooks   HookPrioList
-	LocalSharedHooks  HookPrioList
-	GlobalSharedHooks HookPrioList
+	LocalHooks        HookPrioList `json:"local"`
+	RepoSharedHooks   HookPrioList `json:"shared-repo"`
+	LocalSharedHooks  HookPrioList `json:"shared-local"`
+	GlobalSharedHooks HookPrioList `json:"global-global"`
 }
 
 // HookResult is the data assembly of the output of an executed hook.
@@ -333,6 +335,11 @@ func ExecuteHooksParallel(
 	}
 
 	return res, nil
+}
+
+// Store stores the hooks priority list in JSON to the writer.
+func (h *Hooks) StoreJSON(writer io.Writer) error {
+	return cm.WriteJSON(writer, h)
 }
 
 // GetHooksCount gets the number of all hooks.

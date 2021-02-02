@@ -9,6 +9,7 @@ import (
 	"gabyx/githooks/prompt"
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
+	"io/ioutil"
 
 	"os"
 	"path"
@@ -708,6 +709,7 @@ func getHooksIn(
 			// Batch name changed, add another batch...
 			batches = append(batches, []hooks.Hook{})
 			curBatchIdx += 1
+			curBatchName = &hook.BatchName
 		}
 
 		batches[curBatchIdx] = append(batches[curBatchIdx], *hook)
@@ -845,6 +847,16 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	var results []hooks.HookResult
 	var err error
+
+	// Dump execution sequence.
+	if cm.IsDebug {
+		file, err := ioutil.TempFile("", "*-githooks-prio-list.json")
+		log.AssertNoErrorPanic(err, "Failed to create execution log.")
+		defer file.Close()
+		err = hs.StoreJSON(file)
+		log.AssertNoErrorPanic(err, "Failed to create execution log.")
+		log.DebugF("Hooks priority list written to '%s'.", file.Name())
+	}
 
 	log.DebugIf(len(hs.LocalHooks) != 0, "Launching local hooks ...")
 	results, err = hooks.ExecuteHooksParallel(

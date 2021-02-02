@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: execute a previously saved hook
+#   Direct runner execution: execute a previously saved hook
 
 mkdir -p "$GH_TEST_TMP/test017" && cd "$GH_TEST_TMP/test017" || exit 1
 git init || exit 1

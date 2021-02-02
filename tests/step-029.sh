@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: execute auto-update
+#   Direct runner execution: execute auto-update
 
 LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
 if [ -n "$LAST_UPDATE" ]; then

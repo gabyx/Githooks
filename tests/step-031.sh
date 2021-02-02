@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: auto-update is not due yet
+#   Direct runner execution: auto-update is not due yet
 
 CURRENT_TIME=$(date +%s)
 MOCK_LAST_RUN=$((CURRENT_TIME - 5))

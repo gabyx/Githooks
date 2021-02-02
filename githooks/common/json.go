@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"os"
 )
@@ -14,13 +15,10 @@ func LoadJSON(file string, repr interface{}) error {
 	}
 	defer jsonFile.Close()
 
-	bytes, err := ioutil.ReadAll(jsonFile)
+	err = ReadJSON(jsonFile, repr)
 	if err != nil {
-		return CombineErrors(err, ErrorF("Could not read file '%s'.", file))
-	}
-
-	if err := json.Unmarshal(bytes, repr); err != nil {
-		return CombineErrors(err, ErrorF("Could not unmarshal file '%s'.", file))
+		return CombineErrors(err,
+			ErrorF("Could not read JSON from file '%s'.", file))
 	}
 
 	return nil
@@ -34,14 +32,33 @@ func StoreJSON(file string, repr interface{}) error {
 	}
 	defer jsonFile.Close()
 
-	bytes, err := json.Marshal(repr)
+	err = WriteJSON(jsonFile, repr)
 	if err != nil {
-		return CombineErrors(err, ErrorF("Could not marshal representation to file '%s'.", file))
-	}
-
-	if _, err := jsonFile.Write(bytes); err != nil {
-		return CombineErrors(err, ErrorF("Could not write file '%s'.", file))
+		return CombineErrors(err,
+			ErrorF("Could not write JSON to file '%s'.", file))
 	}
 
 	return nil
+}
+
+// WriteJSON writes the JSON representation of `repr` to `writer`.
+func WriteJSON(writer io.Writer, repr interface{}) error {
+	bytes, err := json.Marshal(repr)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(bytes)
+
+	return err
+}
+
+// ReadJSON reads the JSON representation of `repr` from `reader`.
+func ReadJSON(reader io.Reader, repr interface{}) error {
+	bytes, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(bytes, repr)
 }

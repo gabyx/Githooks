@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: auto-update is not enabled
+#   Direct runner execution: auto-update is not enabled
 
 mkdir -p "$GH_TEST_TMP/test30" && cd "$GH_TEST_TMP/test30" || exit 1
 git init || exit 1

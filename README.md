@@ -1,11 +1,10 @@
-<img src="docs/githooks-logo.svg" style="margin-right: 20pt" align="left">
+<img src="docs/githooks-logo.svg" style="margin-left: 20pt" align="right">
 <h1>Githooks <span style="font-size:12pt">on Steroids</span></h1>
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
 
 **STILL BETA: Any changes with out notice!**
-<br><br><br><br>
 
 A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 

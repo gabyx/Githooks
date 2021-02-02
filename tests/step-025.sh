@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: break if the previously moved hook is failing
+#   Direct runner execution: break if the previously moved hook is failing
 
 mkdir -p "$GH_TEST_TMP/test25" && cd "$GH_TEST_TMP/test25" || exit 1
 git init || exit 1

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: do not run any hooks in any repos
+#   Direct runner execution: do not run any hooks in any repos
 
 git config --global githooks.disable true || exit 1
 

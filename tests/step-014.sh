@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: disable running custom hooks
+#   Direct runner execution: disable running custom hooks
 
 mkdir -p "$GH_TEST_TMP/test14" && cd "$GH_TEST_TMP/test14" || exit 1
 git init || exit 1
