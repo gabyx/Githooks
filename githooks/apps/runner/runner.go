@@ -9,6 +9,7 @@ import (
 	"gabyx/githooks/prompt"
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
+
 	"os"
 	"path"
 	"path/filepath"
@@ -20,6 +21,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pbenner/threadpool"
+	"github.com/pkg/math"
 )
 
 var log cm.ILogContext
@@ -831,9 +833,12 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 		nThreads = n
 	}
 
+	// Minimal 1 thread.
+	nThreads = math.MaxInt(nThreads, 1)
+
 	var pool *threadpool.ThreadPool
-	if hooks.UseThreadPool && hs.GetHooksCount() >= 2 {
-		log.Debug("Create thread pool")
+	if hooks.UseThreadPool && hs.GetHooksCount() > 1 {
+		log.Debug("Launching with thread pool")
 		p := threadpool.New(nThreads, 15)
 		pool = &p
 	}
