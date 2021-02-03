@@ -13,7 +13,7 @@ jobs:
   - os: linux
     env:
       - TEST_INSTANCE=test-coverage
-      - COVERALL_TOKEN=$COVERALLS_TOKEN
+      - COVERALLS_TOKEN=$COVERALLS_TOKEN
   include:
   - os: windows
     env: TEST_INSTANCE=test-windows-go
