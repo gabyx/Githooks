@@ -136,9 +136,12 @@ Escaping a above syntax works with `\${...}`.
 
 As in the [example](#layout-and-options), all discovered hooks in subfolders `<batchName>`, e.g. `<hooksDir>/<hookName>/<batchName>/*` where
 `<hooksDir>` is either `.githooks` for repository checked-in hooks or
-`githooks`, `.githooks` or `.` for shared repository hooks, are assigned the same batch name `<batchName>` and processed in parallel over a threadpool with threads as many cores you have. The number of threads can be controlled by the Git configuration variable `githooks.numThreads` set anywhere, e.g. in the local or global Git configuration.
+`githooks`, `.githooks` or `.` for shared repository hooks, are assigned the same batch name `<batchName>` and processed in parallel over a threadpool defaulting to as many threads as many cores on the system. Each batch is a synchronisation point and starts after the one before has finished.
+The number of threads can be controlled by the Git configuration variable `githooks.numThreads` set anywhere, e.g. in the local or global Git configuration.
 
 If you place a file `.all-parallel` inside `<hooksDir>/<hookName>`, all discovered hooks inside `<hooksDir>/<hookName>` are assigned to the samme batch name 'all' resulting in executing all hooks in one parallel batch.
+
+You can inspect the computed batch name by running [`git hooks list --batch-name`](/docs/cli/git_hooks_list.md).
 
 ## Supported Hooks
 

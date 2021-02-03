@@ -850,7 +850,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Dump execution sequence.
 	if cm.IsDebug {
-		file, err := ioutil.TempFile("", "*-githooks-prio-list.json")
+		file, err := ioutil.TempFile("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
 		log.AssertNoErrorPanic(err, "Failed to create execution log.")
 		defer file.Close()
 		err = hs.StoreJSON(file)

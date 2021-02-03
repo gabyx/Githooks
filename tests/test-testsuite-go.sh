@@ -3,7 +3,7 @@
 cat <<EOF | docker build --force-rm -t githooks:testsuite-go -
 FROM golang:1.15.6-alpine
 RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash
+RUN apk add bash jq
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.34.1
 

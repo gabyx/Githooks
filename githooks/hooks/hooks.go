@@ -45,10 +45,10 @@ type HookPrioList [][]Hook
 // Hooks is a collection of all executable hooks.
 // Json serialization is only for debug pruposes.
 type Hooks struct {
-	LocalHooks        HookPrioList `json:"local"`
-	RepoSharedHooks   HookPrioList `json:"shared-repo"`
-	LocalSharedHooks  HookPrioList `json:"shared-local"`
-	GlobalSharedHooks HookPrioList `json:"global-global"`
+	LocalHooks        HookPrioList
+	RepoSharedHooks   HookPrioList
+	LocalSharedHooks  HookPrioList
+	GlobalSharedHooks HookPrioList
 }
 
 // HookResult is the data assembly of the output of an executed hook.
