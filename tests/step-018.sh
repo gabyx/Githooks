@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: fail on shared hooks
+#   Direct runner execution: fail on shared hooks
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 

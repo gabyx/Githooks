@@ -14,7 +14,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func runList(ctx *ccm.CmdContext, hookNames []string, warnNotFound bool, onlyListActiveHooks bool) {
+func runList(ctx *ccm.CmdContext,
+	hookNames []string, warnNotFound bool,
+	onlyListActiveHooks bool, withBatchName bool) {
+
 	repoDir, gitDir, gitDirWorktree := ccm.AssertRepoRoot(ctx)
 
 	repoHooksDir := hooks.GetGithooksDir(repoDir)
@@ -30,7 +33,8 @@ func runList(ctx *ccm.CmdContext, hookNames []string, warnNotFound bool, onlyLis
 			repoHooksDir,
 			shared,
 			state,
-			onlyListActiveHooks)
+			onlyListActiveHooks,
+			withBatchName)
 
 		if count != 0 {
 			ctx.Log.InfoF("Hook: '%s' [%v]:%s", hookName, count, list)
@@ -162,7 +166,8 @@ func listHooksForName(
 	repoHooksDir string,
 	shared hooks.SharedRepos,
 	state *ListHookState,
-	onlyListActiveHooks bool) (string, int) {
+	onlyListActiveHooks bool,
+	withBatchName bool) (string, int) {
 
 	// List replaced hooks (normally only one)
 	replacedHooks := GetAllHooksIn(
@@ -201,7 +206,10 @@ func listHooksForName(
 			}
 
 			sb.WriteString("\n")
-			formatHookState(&sb, &hooks[i], category, state.isGithooksDisabled, padding, "  ")
+			formatHookState(
+				&sb, &hooks[i],
+				category, withBatchName,
+				state.isGithooksDisabled, padding, "  ")
 		}
 	}
 
@@ -330,7 +338,7 @@ func GetAllHooksIn(
 		}
 	}
 
-	allHooks, err := hooks.GetAllHooksIn(hooksDir, hookName, hookNamespace, isIgnored, isTrusted, false, nil)
+	allHooks, _, err := hooks.GetAllHooksIn(hooksDir, hookName, hookNamespace, isIgnored, isTrusted, false, nil)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	return allHooks
@@ -340,22 +348,26 @@ func formatHookState(
 	w io.Writer,
 	hook *hooks.Hook,
 	categeory string,
+	withBatchName bool,
 	isGithooksDisabled bool,
 	padding int,
 	indent string) {
 
 	hooksFmt := strs.Fmt("%s%s %%-%vs : ", indent, cm.ListItemLiteral, padding)
-	const stateFmt = " state: ['%s', '%s']"
+	const stateFmt = " state: ['%[2]s', '%[3]s']"
 	const disabledStateFmt = " state: ['disabled']"
-	const categeoryFmt = ", type: '%s'"
-	const namespaceFmt = ", ns-path: '%s'"
+	const categeoryFmt = ", type: '%[4]s'"
+	const namespaceFmt = ", ns-path: '%[5]s'"
+	const batchIdFmt = ", batch: '%[6]s'"
 
 	hookPath := strs.Fmt("'%s'", path.Base(hook.Path))
-
 	if isGithooksDisabled {
-		_, err := strs.FmtW(w,
-			hooksFmt+disabledStateFmt+categeoryFmt+namespaceFmt,
-			hookPath, categeory, hook.NamespacePath)
+		fmt := hooksFmt + disabledStateFmt + categeoryFmt + namespaceFmt
+		if withBatchName {
+			fmt += batchIdFmt
+		}
+		_, err := strs.FmtW(w, fmt,
+			hookPath, "", "", categeory, hook.NamespacePath, hook.BatchName)
 
 		cm.AssertNoErrorPanicF(err, "Could not write hook state.")
 
@@ -373,9 +385,13 @@ func formatHookState(
 		trusted = "untrusted"
 	}
 
-	_, err := strs.FmtW(w,
-		hooksFmt+stateFmt+categeoryFmt+namespaceFmt,
-		hookPath, active, trusted, categeory, hook.NamespacePath)
+	fmt := hooksFmt + stateFmt + categeoryFmt + namespaceFmt
+	if withBatchName {
+		fmt += batchIdFmt
+	}
+
+	_, err := strs.FmtW(w, fmt,
+		hookPath, active, trusted, categeory, hook.NamespacePath, hook.BatchName)
 
 	cm.AssertNoErrorPanicF(err, "Could not write hook state.")
 }
@@ -383,6 +399,7 @@ func formatHookState(
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	onlyListActiveHooks := false
+	withBatchName := false
 
 	listCmd := &cobra.Command{
 		Use:   "list [type]...",
@@ -405,14 +422,15 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 						"Hook type '%s' is not managed by Githooks.", h)
 				}
 
-				runList(ctx, args, true, onlyListActiveHooks)
+				runList(ctx, args, true, onlyListActiveHooks, withBatchName)
 
 			} else {
-				runList(ctx, hooks.ManagedHookNames, false, onlyListActiveHooks)
+				runList(ctx, hooks.ManagedHookNames, false, onlyListActiveHooks, withBatchName)
 			}
 		}}
 
 	listCmd.Flags().BoolVar(&onlyListActiveHooks, "active", false, "Only list hooks with state 'active'.")
+	listCmd.Flags().BoolVar(&withBatchName, "batch-name", false, "Also show the parallel batch name.")
 
 	return ccm.SetCommandDefaults(ctx.Log, listCmd)
 }

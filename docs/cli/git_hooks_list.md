@@ -42,8 +42,9 @@ git hooks list [type]...
 ### Options
 
 ```
-      --active   Only list hooks with state `active`.
-  -h, --help     help for list
+      --active       Only list hooks with state `active`.
+      --batch-name   Also show the parallel batch name.
+  -h, --help         help for list
 ```
 
 ### SEE ALSO

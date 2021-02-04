@@ -4,9 +4,12 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 cat <<EOF | docker build --force-rm -t githooks:alpine-coverage-base -
 FROM golang:1.15.6-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash
+RUN apk add bash jq
 RUN go get github.com/wadey/gocovmerge
 RUN go get github.com/mattn/goveralls
+
+# Coveralls env. vars for upload.
+ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
 EOF
 
 IMAGE_TYPE="alpine-coverage"
@@ -20,19 +23,17 @@ fi
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - .
 FROM githooks:$IMAGE_TYPE-base
 
-# Coveralls token for upload
-ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
-
 ENV GH_TESTS="/var/lib/githooks-tests"
 ENV GH_TEST_TMP="/tmp"
 ENV GH_TEST_REPO="/var/lib/githooks"
 ENV GH_TEST_BIN="/var/lib/githooks/githooks/bin"
 ENV GH_TEST_GIT_CORE="/usr/share/git-core"
+
 ENV GH_COVERAGE_DIR="/cover"
 
 ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
-# Add sources
+# Add sources.
 COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
 RUN sed -i -E 's/^bin//' "\$GH_TEST_REPO/githooks/.gitignore" # We use the bin folder
 ADD .githooks/README.md \$GH_TEST_REPO/.githooks/README.md
@@ -108,6 +109,7 @@ RUN echo "Git version: \$(git --version)"
 WORKDIR \$GH_TESTS
 EOF
 
+# Run the tests
 docker run --rm \
     -a stdout -a stderr \
     -v "$TEST_DIR/cover":/cover \
@@ -115,7 +117,18 @@ docker run --rm \
     ./exec-steps-go.sh "$@"
 
 RESULT=$?
-
 docker rmi "githooks:$IMAGE_TYPE"
+[ $RESULT -ne 0 ] && exit $RESULT
+
+# Upload the produced coverage inside the current repo
+docker run --rm \
+    -a stdout -a stderr \
+    -v "$TEST_DIR/..":/githooks \
+    -w /githooks \
+    "githooks:$IMAGE_TYPE-base" \
+    ./tests/upload-coverage.sh "$@"
+
+RESULT=$?
+
 docker rmi "githooks:$IMAGE_TYPE-base"
 exit $RESULT

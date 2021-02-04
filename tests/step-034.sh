@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: update a hook in a trusted repository
+#   Direct runner execution: update a hook in a trusted repository
 
 mkdir -p "$GH_TEST_TMP/test34" && cd "$GH_TEST_TMP/test34" || exit 1
 git init || exit 1

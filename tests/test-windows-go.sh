@@ -8,6 +8,7 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 RUN iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 RUN choco install -y git
+RUN choco install -y jq
 
 # ideally, this would be C:\go to match Linux a bit closer, but C:\go is the recommended install path for Go itself on Windows
 ENV GOPATH C:\\gopath
@@ -41,7 +42,6 @@ RUN $url = 'https://storage.googleapis.com/golang/go1.15.6.windows-amd64.zip'; \
     go version; \
     \
     Write-Host 'Complete.';
-
 
 ENV GH_TESTS="c:/githooks-tests/tests"
 ENV GH_TEST_TMP="c:/githooks-tests/tmp"

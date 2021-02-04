@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: list of staged files (hook types)
+#   Direct runner execution: list of staged files (hook types)
 
 MANAGED_HOOK_NAMES="
     applypatch-msg pre-applypatch post-applypatch

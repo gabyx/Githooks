@@ -4,7 +4,7 @@ if [ "$1" = "--skip-docker-check" ]; then
     shift
 else
     if ! grep '/docker/' </proc/self/cgroup >/dev/null 2>&1; then
-        echo "! This script is only meant to be run in a Docker container"
+        echo "! This script is only meant to be run in a Docker container" >&2
         exit 1
     fi
 fi
@@ -50,7 +50,7 @@ if [ -z "$GH_TESTS" ] ||
     [ -z "$GH_TEST_BIN" ] ||
     [ -z "$GH_TEST_TMP" ] ||
     [ -z "$GH_TEST_GIT_CORE" ]; then
-    echo "!! Missing env. variables."
+    echo "! Missing env. variables." >&2
     exit 1
 fi
 
@@ -85,8 +85,8 @@ for STEP in "$GH_TESTS"/step-*.sh; do
 
     elif [ $TEST_RESULT -ne 0 ]; then
         FAILURE=$(echo "$TEST_OUTPUT" | tail -1)
-        echo "! $STEP has failed with code $TEST_RESULT ($FAILURE), output:"
-        echo "$TEST_OUTPUT" | sed -E "s/^/ x: /g"
+        echo "! $STEP has failed with code $TEST_RESULT ($FAILURE), output:" >&2
+        echo "$TEST_OUTPUT" | sed -E "s/^/ x: /g" >&2
         FAILED=$((FAILED + 1))
         FAILED_TEST_LIST="$FAILED_TEST_LIST
 - $STEP ($TEST_RESULT -- $FAILURE)"
@@ -97,7 +97,7 @@ for STEP in "$GH_TESTS"/step-*.sh; do
     fi
 
     if [ $TEST_RESULT -eq 111 ]; then
-        echo "! $STEP triggered fatal test abort."
+        echo "! $STEP triggered fatal test abort." >&2
         break
     fi
 
@@ -106,8 +106,8 @@ for STEP in "$GH_TESTS"/step-*.sh; do
     UNINSTALL_OUTPUT=$(printf "n\\n" | "$GH_TEST_BIN/cli" uninstaller --stdin 2>&1)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
-        echo "! Uninstall failed in $STEP, output:"
-        echo "$UNINSTALL_OUTPUT"
+        echo "! Uninstall failed in $STEP, output:" >&2
+        echo "$UNINSTALL_OUTPUT" >&2
         FAILED=$((FAILED + 1))
         break # Fail es early as possible
     fi
@@ -138,7 +138,7 @@ echo "$TEST_RUNS tests run: $FAILED failed and $SKIPPED skipped"
 echo
 
 if [ -n "$FAILED_TEST_LIST" ]; then
-    echo "Failed tests: $FAILED_TEST_LIST"
+    echo "Failed tests: $FAILED_TEST_LIST" >&2
     echo
 fi
 
@@ -148,22 +148,14 @@ else
 
     if [ -n "$GH_COVERAGE_DIR" ]; then
 
+        echo "Upload coverage data."
         # shellcheck disable=SC2015
         cd "$GH_TEST_REPO/githooks" &&
             gocovmerge /cover/*.cov >/cover/all.cov || {
-            echo "! Cov merge failed."
+            echo "! Cov merge failed." >&2
             exit 1
         }
         echo "Coverage created."
-
-        # shellcheck disable=SC2015
-        cd "$GH_TEST_REPO/githooks" &&
-            goveralls -coverprofile=/cover/all.cov -service=travis-ci || {
-            echo "! Goveralls failed."
-            exit 1
-        }
-        echo "Coverage uploaded."
-
     fi
 
     exit 0

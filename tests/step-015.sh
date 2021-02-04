@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: ignoring some hooks
+#   Direct runner execution: ignoring some hooks
 
 mkdir -p "$GH_TEST_TMP/test15" && cd "$GH_TEST_TMP/test15" || exit 1
 git init || exit 1

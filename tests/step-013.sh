@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: break on errors
+#   Direct runner execution: break on errors
 
 mkdir -p "$GH_TEST_TMP/test13" && cd "$GH_TEST_TMP/test13" || exit 1
 git init || exit 1

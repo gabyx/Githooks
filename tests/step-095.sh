@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: list of staged files (simple)
+#   Direct runner execution: list of staged files (simple)
 
 mkdir -p "$GH_TEST_TMP/test095/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test095" && git init ||

@@ -265,7 +265,7 @@ func LoadConfigSharedHooks(
 	return parseData(installDir, &config)
 }
 
-// LoadRepoSharedHooks gets all shared hooks that reside inside `hooks.GetRepoSharedFileRel()`
+// LoadRepoSharedHooks gets all shared hooks that reside inside `hooks.GetRepoSharedFile()`
 // No checks are made to the filesystem if paths are existing in `SharedHook`.
 func LoadRepoSharedHooks(installDir string, repoDir string) (hooks []SharedRepo, err error) {
 	file := GetRepoSharedFile(repoDir)

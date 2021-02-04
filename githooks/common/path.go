@@ -81,7 +81,19 @@ func GetAllFiles(root string) (files []string, err error) {
 type FileFunc = func(path string, info os.FileInfo) error
 
 // WalkFiles walks all files in directory `root` (non-recursive) and calls `filter`.
-func WalkFiles(root string, filter FileFunc) (err error) {
+func WalkFiles(root string, filter FileFunc) error {
+	return walkPaths(root, filter, true)
+}
+
+// WalkPaths walks all paths in directory `root` (recursive)
+// and calls `filter`. Filter can return `filepath.SkipDir` which
+// skips the current directory.
+func WalkPaths(root string, filter FileFunc) error {
+	return walkPaths(root, filter, false)
+}
+
+// walkPaths walks all paths in directory `root` (non-recursive) and calls `filter`.
+func walkPaths(root string, filter FileFunc, skipDir bool) (err error) {
 
 	rootDirVisited := false
 
@@ -101,8 +113,11 @@ func WalkFiles(root string, filter FileFunc) (err error) {
 					rootDirVisited = true
 					return nil // nolint:nlreturn // Skip root dir...
 				}
-				// Skip all other dirs...
-				return filepath.SkipDir
+
+				if skipDir {
+					// Skip all other dirs...
+					return filepath.SkipDir
+				}
 			}
 
 			return filter(filepath.ToSlash(path), info)

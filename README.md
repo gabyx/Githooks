@@ -1,11 +1,10 @@
-<img src="docs/githooks-logo.svg" style="margin-right: 20pt" align="left">
+<img src="docs/githooks-logo.svg" style="margin-left: 20pt" align="right">
 <h1>Githooks <span style="font-size:12pt">on Steroids</span></h1>
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
 
 **STILL BETA: Any changes with out notice!**
-<br><br><br><br>
 
 A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
@@ -21,7 +20,7 @@ Also it searches for hooks in configured shared hook repositories.
 - Running shared hooks from other Git repositories (with auto-update).
 - Command line interface.
 - Fast execution due to compiled Go executable.
-- Fast parallel execution over threadpool (not yet finished).
+- Fast parallel execution over threadpool.
 - Ignoring non-shared and shared hooks with patterns.
 - Automatic Githooks updates:
   Fully configurable for your own company by url/branch and deploy settings.
@@ -41,8 +40,13 @@ Take this snippet of a project layout as an example:
         ├── 02-lint
         ├── 03-test.yaml
         ├── docs.md
+        └── final/
+          ├── 01-validate
+          └── 02-upload
         └── .ignore.yaml
     └── post-checkout
+        ├── .all-parallel
+        └── ...
     └── ...
     └── .ignore.yaml
     └── .shared.yaml
@@ -57,7 +61,8 @@ or a file matching the hook name (like `post-checkout` in the example). The file
 do not matter, but the ones starting with a `.` (dotfiles) will be excluded by default.
 All others are executed in lexical order alphabetical order
 according to the Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk).
-rules.
+rules. Subfolders as e.g. `final` get treated as parallel batch and all hooks inside are by default executed
+in parallel over the thread pool. See [Paralell Execution](#parallel-execution) for details.
 
 You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list`
 (a globally configured Git alias `alias.hooks`) to list all the hooks that apply to
@@ -126,6 +131,17 @@ Not existing environment variables or Git config variables are replaced with the
 Escaping a above syntax works with `\${...}`.
 
 **Sidenote**: You might wonder why this configuration is not collocated in one YAML file for all hooks. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
+
+### Parallel Execution
+
+As in the [example](#layout-and-options), all discovered hooks in subfolders `<batchName>`, e.g. `<hooksDir>/<hookName>/<batchName>/*` where
+`<hooksDir>` is either `.githooks` for repository checked-in hooks or
+`githooks`, `.githooks` or `.` for shared repository hooks, are assigned the same batch name `<batchName>` and processed in parallel over a threadpool defaulting to as many threads as many cores on the system. Each batch is a synchronisation point and starts after the one before has finished.
+The number of threads can be controlled by the Git configuration variable `githooks.numThreads` set anywhere, e.g. in the local or global Git configuration.
+
+If you place a file `.all-parallel` inside `<hooksDir>/<hookName>`, all discovered hooks inside `<hooksDir>/<hookName>` are assigned to the samme batch name 'all' resulting in executing all hooks in one parallel batch.
+
+You can inspect the computed batch name by running [`git hooks list --batch-name`](/docs/cli/git_hooks_list.md).
 
 ## Supported Hooks
 

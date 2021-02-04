@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: do not run any hooks in the current repo
+#   Direct runner execution: do not run any hooks in the current repo
 
 mkdir -p "$GH_TEST_TMP/test47" && cd "$GH_TEST_TMP/test47" || exit 1
 git init || exit 1

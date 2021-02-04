@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: choose to ignore the update (non-single)
+#   Direct runner execution: choose to ignore the update (non-single)
 
 mkdir -p "$GH_TEST_TMP/test076" && cd "$GH_TEST_TMP/test076" || exit 1
 git init || exit 1

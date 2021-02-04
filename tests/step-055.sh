@@ -13,36 +13,56 @@ location2=$("$GITHOOKS_INSTALL_BIN_DIR/cli" shared location "$url2") || exit 1
 url3="ftp://github.com/test/repo3.git"
 location3=$("$GITHOOKS_INSTALL_BIN_DIR/cli" shared location "$url3") || exit 1
 
+# Shared with hooks in root directory.
 mkdir -p "$location1"/pre-commit &&
     cd "$location1" &&
     git init &&
     git remote add origin "$url1" &&
     echo 'echo "Hello"' >pre-commit/shared-pre1 &&
-    echo 'echo "Hello"' >commit-msg
+    echo 'echo "Hello"' >commit-msg &&
+    mkdir -p "$location1"/pre-commit/step-1 &&
+    echo 'echo "Hello"' >pre-commit/step-1/step1.1 &&
+    echo 'echo "Hello"' >pre-commit/step-1/step1.2 ||
+    exit 1
 
-mkdir -p "$location2"/pre-push &&
+# Shared with hooks in 'githooks' directory.
+mkdir -p "$location2"/githooks/pre-push &&
     cd "$location2" &&
     git init &&
     git remote add origin "$url2" &&
-    echo 'echo "Hello"' >post-commit &&
-    echo 'echo "Hello"' >pre-push/shared-pre2 ||
+    echo 'echo "Hello"' >githooks/post-commit &&
+    echo 'echo "Hello"' >githooks/pre-push/shared-pre2 &&
+    mkdir -p githooks/pre-push/step-2 &&
+    echo 'echo "Hello"' >githooks/pre-push/step-2/step2.1 &&
+    echo 'echo "Hello"' >githooks/pre-push/step-2/step2.2 ||
     exit 1
 
-mkdir -p "$location3"/post-update &&
+# Shared with hooks in '.githooks' directory.
+mkdir -p "$location3"/.githooks/post-update &&
     cd "$location3" &&
     git init &&
     git remote add origin "$url3" &&
-    echo 'echo "Hello"' >post-rewrite &&
-    echo 'echo "Hello"' >post-update/shared-pre3 ||
+    echo 'echo "Hello"' >.githooks/post-rewrite &&
+    echo 'echo "Hello"' >.githooks/post-update/shared-pre3 &&
+    mkdir -p .githooks/post-update/step-3 &&
+    echo 'echo "Hello"' >.githooks/post-update/step-3/step3.1 &&
+    echo 'echo "Hello"' >.githooks/post-update/step-3/step3.2 ||
     exit 1
 
-mkdir -p "$GH_TEST_TMP/test055/.githooks/pre-commit" &&
-    mkdir -p "$GH_TEST_TMP/test055/.githooks/post-commit" &&
-    echo 'echo "Hello"' >"$GH_TEST_TMP/test055/.githooks/pre-commit/local-pre" &&
-    echo 'echo "Hello"' >"$GH_TEST_TMP/test055/.githooks/post-commit/local-post" &&
-    echo 'echo "Hello"' >"$GH_TEST_TMP/test055/.githooks/post-merge" &&
-    echo "urls: - $url2" >"$GH_TEST_TMP/test055/.githooks/.shared.yaml" &&
+mkdir -p "$GH_TEST_TMP/test055" &&
     cd "$GH_TEST_TMP/test055" &&
+    mkdir -p ".githooks/pre-commit" &&
+    mkdir -p ".githooks/post-commit" &&
+    echo 'echo "Hello"' >.githooks/pre-commit/local-pre &&
+    echo 'echo "Hello"' >.githooks/post-commit/local-post &&
+    echo 'echo "Hello"' >.githooks/post-merge &&
+    echo "urls: - $url2" >.githooks/.shared.yaml &&
+    mkdir -p .githooks/post-commit/step-4 &&
+    echo 'echo "Hello"' >.githooks/post-commit/step-4/step4.1 &&
+    echo 'echo "Hello"' >.githooks/post-commit/step-4/step4.2 ||
+    exit 1
+
+cd "$GH_TEST_TMP/test055" &&
     git init &&
     mkdir -p .git/hooks &&
     echo 'echo "Hello"' >.git/hooks/pre-commit.replaced.githook &&
@@ -102,7 +122,45 @@ if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list post-rewrite | grep "'shared:local'" |
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list | grep -q "Total.*hooks: '10'"; then
-    echo "! Unexpected cli list output (11)"
+if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list | grep -q "Total.*hooks: '18'"; then
+    echo "! Unexpected cli list output (12)"
+    exit 1
+fi
+
+# Check all parallel batch names
+OUT=$("$GITHOOKS_INSTALL_BIN_DIR/cli" list --batch-name) || exit 11
+if ! echo "$OUT" | grep "step1.1" | grep -q -E "ns-path: +'\w+/pre-commit/step-1/step1.1'" ||
+    ! echo "$OUT" | grep "step1.1" | grep -q -E "batch: +'step-1'" ||
+    ! echo "$OUT" | grep "step1.2" | grep -q -E "ns-path: +'\w+/pre-commit/step-1/step1.2'" ||
+    ! echo "$OUT" | grep "step1.2" | grep -q -E "batch: +'step-1'"; then
+    echo "! Unexpected cli list output (11):"
+    echo "$OUT"
+    exit 1
+fi
+
+if ! echo "$OUT" | grep "step2.1" | grep -q -E "ns-path: +'\w+/pre-push/step-2/step2.1'" ||
+    ! echo "$OUT" | grep "step2.1" | grep -q -E "batch: +'step-2'" ||
+    ! echo "$OUT" | grep "step2.2" | grep -q -E "ns-path: +'\w+/pre-push/step-2/step2.2'" ||
+    ! echo "$OUT" | grep "step2.2" | grep -q -E "batch: +'step-2'"; then
+    echo "! Unexpected cli list output (12):"
+    echo "$OUT"
+    exit 1
+fi
+
+if ! echo "$OUT" | grep "step3.1" | grep -q -E "ns-path: +'\w+/post-update/step-3/step3.1'" ||
+    ! echo "$OUT" | grep "step3.1" | grep -q -E "batch: +'step-3'" ||
+    ! echo "$OUT" | grep "step3.2" | grep -q -E "ns-path: +'\w+/post-update/step-3/step3.2'" ||
+    ! echo "$OUT" | grep "step3.2" | grep -q -E "batch: +'step-3'"; then
+    echo "! Unexpected cli list output (13):"
+    echo "$OUT"
+    exit 1
+fi
+
+if ! echo "$OUT" | grep "step4.1" | grep -q -E "ns-path: +'post-commit/step-4/step4.1'" ||
+    ! echo "$OUT" | grep "step4.1" | grep -q -E "batch: +'step-4'" ||
+    ! echo "$OUT" | grep "step4.2" | grep -q -E "ns-path: +'post-commit/step-4/step4.2'" ||
+    ! echo "$OUT" | grep "step4.2" | grep -q -E "batch: +'step-4'"; then
+    echo "! Unexpected cli list output (14):"
+    echo "$OUT"
     exit 1
 fi

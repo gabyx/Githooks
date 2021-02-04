@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: update shared hooks
+#   Direct runner execution: update shared hooks
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 

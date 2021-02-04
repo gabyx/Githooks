@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: do not trust the repository
+#   Direct runner execution: do not trust the repository
 
 mkdir -p "$GH_TEST_TMP/test35" && cd "$GH_TEST_TMP/test35" || exit 1
 git init || exit 1

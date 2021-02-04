@@ -1,6 +1,6 @@
 #!/bin/sh
 # Test:
-#   Direct template execution: accept changes to hooks
+#   Direct runner execution: accept changes to hooks
 
 mkdir -p "$GH_TEST_TMP/test28" && cd "$GH_TEST_TMP/test28" || exit 1
 git init || exit 1
