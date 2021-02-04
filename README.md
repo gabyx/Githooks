@@ -62,11 +62,11 @@ do not matter, but the ones starting with a `.` (dotfiles) will be excluded by d
 All others are executed in lexical order alphabetical order
 according to the Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk).
 rules. Subfolders as e.g. `final` get treated as parallel batch and all hooks inside are by default executed
-in parallel over the thread pool. See [Paralell Execution](#parallel-execution) for details.
+in parallel over the thread pool. See [Parallel Execution](#parallel-execution) for details.
 
 You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list`
-(a globally configured Git alias `alias.hooks`) to list all the hooks that apply to
-the current repository and their current state.
+(a globally configured Git alias `alias.hooks`) to list all hooks and their current state that apply to
+the current repository.
 
 ## Execution
 
