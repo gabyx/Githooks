@@ -13,6 +13,7 @@ die() {
 BIN_DIR=""
 BUILD_FLAGS=""
 BUILD_COVERAGE=""
+DEBUG_FLAGS="-tag sdebug"
 
 export CGO_ENABLED=0
 
@@ -29,6 +30,8 @@ parseArgs() {
             BUILD_FLAGS="$p"
         elif [ "$p" = "--coverage" ]; then
             BUILD_COVERAGE="true"
+        elif [ "$p" = "--prod" ]; then
+            DEBUG_FLAGS=""
         else
             echo "! Unknown argument \`$p\`" >&2
             return 1
@@ -59,12 +62,12 @@ if [ -z "$BUILD_COVERAGE" ]; then
     go generate -mod=vendor ./...
     # shellcheck disable=SC2086
     go install -mod=vendor \
-        -tags debug $BUILD_FLAGS ./...
+        $DEBUG_FLAGS $BUILD_FLAGS ./...
 else
     echo "go test ..."
     go generate -mod=vendor ./...
     # shellcheck disable=SC2086
-    go test ./apps/cli $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/cli"
+    go test ./apps/cli $DEBUG_FLAGS $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/cli"
     # shellcheck disable=SC2086
-    go test ./apps/runner $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/runner"
+    go test ./apps/runner $DEBUG_FLAGS $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/runner"
 fi

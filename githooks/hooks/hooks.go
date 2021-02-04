@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"fmt"
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 	"io"
@@ -302,6 +303,7 @@ func ExecuteHooksParallel(
 		}
 
 		if pool == nil {
+			fmt.Printf("RUN SINGLE THREADED %v\n", nHooks)
 			for idx := range hooksGroup {
 				hookRes := &res[currIdx+idx]
 				hook := &hooksGroup[idx]
@@ -342,9 +344,19 @@ func (h *Hooks) StoreJSON(writer io.Writer) error {
 	return cm.WriteJSON(writer, h)
 }
 
+// GetHooksCount gets the number of all hooks in the priority list.
+func (h *HookPrioList) GetHooksCount() (count int) {
+	for i := range *h {
+		count += len((*h)[i])
+	}
+
+	return
+}
+
 // GetHooksCount gets the number of all hooks.
 func (h *Hooks) GetHooksCount() int {
-	return len(h.LocalHooks) + len(h.RepoSharedHooks) + len(h.LocalSharedHooks) + len(h.GlobalSharedHooks)
+	return h.LocalHooks.GetHooksCount() + h.RepoSharedHooks.GetHooksCount() +
+		h.LocalSharedHooks.GetHooksCount() + h.GlobalSharedHooks.GetHooksCount()
 }
 
 // AllHooksSuccessful returns `true`.

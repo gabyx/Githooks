@@ -3,6 +3,7 @@
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
+![goreleaser](https://github.com/gabyx/githooks/workflows/goreleaser/badge.svg)
 
 **STILL BETA: Any changes with out notice!**
 
