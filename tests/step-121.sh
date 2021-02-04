@@ -2,6 +2,15 @@
 # Test:
 #   Direct runner execution: test a single pre-commit hook file with a runner script
 
+[ "$(id -u)" -eq 0 ] && ROOT_ACCESS="true"
+
+cleanup() {
+    git config --unset --global "githooks.monkey"
+    [ -n "$ROOT_ACCESS" ] && git config --unset --system "githooks.monkey"
+}
+
+trap cleanup EXIT
+
 mkdir -p "$GH_TEST_TMP/test121" &&
     cd "$GH_TEST_TMP/test121" || exit 2
 git init || exit 3
@@ -25,7 +34,10 @@ EOF
 
 go build -o custom-runner.exe ./... || exit 4
 
-git config --local 'githooks.monkey' "git-monkey"
+git config --global 'githooks.monkey' "git-monkey-global"
+[ -n "$ROOT_ACCESS" ] &&
+    SYSTEM_VALUE="git-monkey-system" &&
+    git config --system 'githooks.monkey' "$SYSTEM_VALUE"
 
 # shellcheck disable=SC2016
 mkdir -p .githooks &&
@@ -35,19 +47,46 @@ args:
     - "my-file.py"
     - '${env:MONKEY}'
     - "\${env:MONKEY}"
-    - "${git-l:githooks.monkey}"
     - "${git:githooks.monkey}"
+    - "${git-g:githooks.monkey}"
+    - "${git-s:githooks.monkey}"
 version: 1
 EOF
 
 # Execute pre-commit by the runner
 OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
-
 # shellcheck disable=SC2181,SC2016
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Hello" ||
     ! echo "$OUT" | grep "my-file.py" ||
-    ! echo "$OUT" | grep 'Args:mon key,${env:MONKEY},git-monkey,git-monkey'; then
+    ! echo "$OUT" | grep "Args:mon key,\${env:MONKEY},git-monkey-global,git-monkey-global,$SYSTEM_VALUE"; then
+    echo "! Expected hook with runner command to be executed."
+    echo "$OUT"
+    exit 6
+fi
+
+# Add local git config
+git config --local 'githooks.monkey' "git-monkey"
+
+mkdir -p .githooks &&
+    cat <<"EOF" >".githooks/pre-commit.yaml" || exit 5
+cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
+args:
+    - "my-file.py"
+    - '${env:MONKEY}'
+    - "\${env:MONKEY}"
+    - "${git:githooks.monkey}"
+    - "${git-l:githooks.monkey}"
+    - "${git-g:githooks.monkey}"
+    - "${git-s:githooks.monkey}"
+version: 1
+EOF
+
+# Execute pre-commit by the runner
+OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+# shellcheck disable=SC2181,SC2016
+if [ "$?" -ne 0 ] ||
+    ! echo "$OUT" | grep "Args:mon key,\${env:MONKEY},git-monkey,git-monkey,git-monkey-global,$SYSTEM_VALUE"; then
     echo "! Expected hook with runner command to be executed."
     echo "$OUT"
     exit 6
@@ -58,7 +97,7 @@ cat <<"EOF" >".githooks/pre-commit.yaml" || exit 5
 cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
 args:
     - "my-file.py"
-    - '${!env:MONKEY}'
+    - "${!env:MONKEY}"
     - "\${env:MONKEY}"
 version: 1
 EOF

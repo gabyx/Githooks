@@ -198,11 +198,6 @@ func GetLFSRequiredFile(repoDir string) string {
 	return path.Join(GetGithooksDir(repoDir), ".lfs-required")
 }
 
-// Gets the LFS-Required file relative to the repository.
-func GetLFSRequiredFileRel() string {
-	return path.Join(HooksDirName, ".lfs-required")
-}
-
 // IsGithooksDisabled checks if Githooks is disabled in
 // any config starting from the working dir given by the git context or
 // optional also by the env. variable `GITHOOKS_DISABLE`.
