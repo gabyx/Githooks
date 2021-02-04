@@ -147,8 +147,6 @@ if [ $FAILED -ne 0 ]; then
 else
 
     if [ -n "$GH_COVERAGE_DIR" ]; then
-
-        echo "Upload coverage data."
         # shellcheck disable=SC2015
         cd "$GH_TEST_REPO/githooks" &&
             gocovmerge /cover/*.cov >/cover/all.cov || {
