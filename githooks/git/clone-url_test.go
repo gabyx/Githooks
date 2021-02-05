@@ -52,6 +52,10 @@ func TestCoverage(t *testing.T) {
 	assert.True(t, isLocalPath(url), "Local path")
 	assert.False(t, isLocalURL(url), "No local path")
 
+	url = "c:/a/b/c/d/repo.git"
+	assert.True(t, isLocalPath(url), "Local path")
+	assert.False(t, isLocalURL(url), "No local path")
+
 	// Other protocols
 	url = "git://user@server.com:1234/~//a/b/c/d/repo.git"
 	assert.False(t, isLocalURL(url), "Local url")
@@ -74,8 +78,8 @@ func TestCoverage(t *testing.T) {
 
 	url = "a:~/slightly/wrong/but/ok..."
 	assert.False(t, isLocalURL(url), "Local url")
-	assert.False(t, isLocalPath(url), "Local path")
-	assert.True(t, parsableAsSCP(url), "Scp syntax")
+	assert.True(t, isLocalPath(url), "Local path")
+	assert.False(t, parsableAsSCP(url), "Scp syntax")
 
 	url = ":~/really/wrong/but/ok..."
 	assert.False(t, isLocalURL(url), "Local url")
