@@ -9,7 +9,11 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 
 EOF
 
-if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:testsuite-go sh "tests/exec-testsuite-go.sh"; then
+if ! docker run --rm -it \
+    -v "$(pwd)":/githooks \
+    -w /githooks githooks:testsuite-go \
+    sh "tests/exec-testsuite-go.sh"; then
+
     echo "! Check rules had failures."
     exit 1
 fi

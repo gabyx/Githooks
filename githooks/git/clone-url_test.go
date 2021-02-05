@@ -14,7 +14,7 @@ func parsableAsRemoteHelper(url string) bool {
 	return ParseRemoteHelperSyntax(url) != nil
 }
 
-func TestCoverage(t *testing.T) {
+func TestCloneURLs(t *testing.T) {
 
 	// Local URLS
 	url := "file://"

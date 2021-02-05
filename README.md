@@ -252,7 +252,7 @@ Supported URL for shared hooks are:
 
   - `ssh://github.com/shared/hooks-maven.git@mybranch` and also the short `scp` form
     `git@github.com:shared/hooks-maven.git`
-  - `git://github.com/shared/hooks-python.git`
+  - `git://user@github.com/shared/hooks-python.git`
   - `file:///local/path/to/bare-repo.git@mybranch`
 
   All URLs can include a tag specification syntax at the end like `...@<tag>`, where `<tag>` is a Git tag, branch or commit hash.
@@ -261,7 +261,7 @@ Supported URL for shared hooks are:
 - **Local paths** to bare and non-bare repositories such as:
 
   - `/local/path/to/checkout` (gets used directly)
-  - `/local/path/to/bare-repo.git` (gets cloned internally)
+  - `/local/path/to/bare-repo.git@mybranch` (gets cloned internally)
 
   Note that relative paths are relative to the path of the repository executing the hook.
   These entries are forbidden for **shared hooks** configured by `.githooks/.shared.yaml` per repository
