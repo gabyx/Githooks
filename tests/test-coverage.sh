@@ -2,17 +2,26 @@
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 cat <<EOF | docker build --force-rm -t githooks:alpine-coverage-base -
-FROM golang:1.15.6-alpine
+FROM golang:1.15.8-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
 RUN go get github.com/wadey/gocovmerge
 RUN go get github.com/mattn/goveralls
+
+ENV GH_COVERAGE_DIR="/cover"
 
 # Coveralls env. vars for upload.
 ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
 EOF
 
 IMAGE_TYPE="alpine-coverage"
+
+cleanup() {
+    docker rmi "githooks:$IMAGE_TYPE-base"
+    docker rmi "githooks:$IMAGE_TYPE"
+}
+
+trap cleanup EXIT
 
 if echo "$IMAGE_TYPE" | grep -q "\-user"; then
     OS_USER="test"
@@ -28,8 +37,6 @@ ENV GH_TEST_TMP="/tmp"
 ENV GH_TEST_REPO="/var/lib/githooks"
 ENV GH_TEST_BIN="/var/lib/githooks/githooks/bin"
 ENV GH_TEST_GIT_CORE="/usr/share/git-core"
-
-ENV GH_COVERAGE_DIR="/cover"
 
 ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
@@ -109,26 +116,35 @@ RUN echo "Git version: \$(git --version)"
 WORKDIR \$GH_TESTS
 EOF
 
-# Run the tests
+# Clean all coverage data
+if [ -d "$TEST_DIR/cover" ]; then
+    rm -rf "$TEST_DIR/cover"/*
+fi
+
+# Run the normal tests to add to the coverage
+# inside the current repo
+docker run --rm \
+    -a stdout -a stderr \
+    -v "$TEST_DIR/cover":/cover \
+    -v "$TEST_DIR/..":/githooks \
+    -w /githooks/tests \
+    "githooks:$IMAGE_TYPE-base" \
+    sh ./exec-testsuite-go.sh ||
+    exit $?
+
+# Run the integration tests
 docker run --rm \
     -a stdout -a stderr \
     -v "$TEST_DIR/cover":/cover \
     "githooks:$IMAGE_TYPE" \
-    ./exec-steps-go.sh "$@"
+    ./exec-steps-go.sh "$@" || exit $?
 
-RESULT=$?
-docker rmi "githooks:$IMAGE_TYPE"
-[ $RESULT -ne 0 ] && exit $RESULT
-
-# Upload the produced coverage inside the current repo
+# Upload the produced coverage
+# inside the current repo
 docker run --rm \
     -a stdout -a stderr \
+    -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks \
     "githooks:$IMAGE_TYPE-base" \
-    ./tests/upload-coverage.sh "$@"
-
-RESULT=$?
-
-docker rmi "githooks:$IMAGE_TYPE-base"
-exit $RESULT
+    ./tests/upload-coverage.sh "$@" || exit $?

@@ -1,9 +1,9 @@
 language: go
 os: linux
-dist: xenial
+dist: bionic
 
 go:
-  - 1.15.6
+  - 1.15.8
 
 services:
   - docker
