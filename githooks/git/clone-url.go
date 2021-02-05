@@ -3,13 +3,7 @@ package git
 import "regexp"
 
 var reURLScheme *regexp.Regexp = regexp.MustCompile(`(?m)^[^:/?#]+://`)
-
-// reShortSCPSyntax is the regex for a short scp syntax.
-// The problem arises on Windows with drive letters, since `C:/a/b`
-// can technically be a short SCP syntax, we require at
-// least 2 letters for the host name.
 var reShortSCPSyntax = regexp.MustCompile(`(?m)^(?P<user>.+@)?(?P<host>.+[^:]):(?P<path>[^:].*)`)
-
 var reRemoteHelperSyntax = regexp.MustCompile(`(?m)^(?P<transport>.+)::(?P<address>.+)`)
 var reFileURLScheme = regexp.MustCompile(`(?m)^file://`)
 
@@ -17,6 +11,9 @@ var reFileURLScheme = regexp.MustCompile(`(?m)^file://`)
 // Thats the case if its not a URL Scheme,
 // not a short SCP syntax and not
 // a remote transport helper syntax.
+// The problem arises on Windows with drive letters, since `C:/a/b`
+// can technically be a short SCP syntax, we require at
+// least 2 letters for the host name.
 func IsCloneURLALocalPath(url string) bool {
 	return !reURLScheme.MatchString(url) &&
 		!reShortSCPSyntax.MatchString(url) &&
