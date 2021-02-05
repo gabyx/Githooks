@@ -10,12 +10,13 @@ import (
 	"github.com/google/go-github/v33/github"
 )
 
+// RepoSettings holds repo data for web based Git services such as Github or Gitea.
 type RepoSettings struct {
 	Owner      string // The owner of the repository.
 	Repository string // The repository name.
 }
 
-// The deploy settings for Github.
+// GithubDeploySettings are deploy settings for Github.
 type GithubDeploySettings struct {
 	RepoSettings
 
@@ -24,7 +25,7 @@ type GithubDeploySettings struct {
 	PublicPGP string
 }
 
-// Providing interface `IDeploySettings`.
+// Download downloads the version with `versionTag` to `dir` from a Github instance.
 func (s *GithubDeploySettings) Download(versionTag string, dir string) error {
 	return downloadGithub(s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
 }
@@ -47,7 +48,7 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 		assets = append(assets,
 			Asset{
 				FileName: path.Base(rel.Assets[i].GetName()),
-				Url:      rel.Assets[i].GetBrowserDownloadURL()})
+				URL:      rel.Assets[i].GetBrowserDownloadURL()})
 	}
 
 	target, checksums, err := getGithooksAsset(assets)
@@ -63,9 +64,9 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 				"Something is fishy!"))
 	}
 
-	response, err := DownloadFile(target.Url)
+	response, err := DownloadFile(target.URL)
 	if err != nil {
-		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.Url))
+		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}
 	defer response.Body.Close()
 
@@ -95,7 +96,7 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 	err = Extract(tempFile, target.Extension, dir)
 	if err != nil {
 		return cm.CombineErrors(err,
-			cm.ErrorF("Archive extraction from url '%s' failed.", target.Url))
+			cm.ErrorF("Archive extraction from url '%s' failed.", target.URL))
 	}
 
 	return nil

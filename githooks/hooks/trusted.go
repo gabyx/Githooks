@@ -16,7 +16,7 @@ func GetTrustMarkerFile(repoDir string) string {
 
 // GetTrustAllSetting gets the trust-all setting in the local Git configuration.
 func GetTrustAllSetting(gitx *git.Context) (trustall bool, isSet bool) {
-	conf := gitx.GetConfig(GitCK_TrustAll, git.LocalScope)
+	conf := gitx.GetConfig(GitCKTrustAll, git.LocalScope)
 
 	isSet = strs.IsNotEmpty(conf)
 	trustall = conf == "true"
@@ -28,9 +28,9 @@ func GetTrustAllSetting(gitx *git.Context) (trustall bool, isSet bool) {
 func SetTrustAllSetting(gitx *git.Context, enable bool, reset bool) error {
 	switch {
 	case reset:
-		return gitx.UnsetConfig(GitCK_TrustAll, git.LocalScope)
+		return gitx.UnsetConfig(GitCKTrustAll, git.LocalScope)
 	default:
-		return gitx.SetConfig(GitCK_TrustAll, enable, git.LocalScope)
+		return gitx.SetConfig(GitCKTrustAll, enable, git.LocalScope)
 	}
 }
 
@@ -175,7 +175,7 @@ func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err er
 				return
 			}
 
-			removed += 1
+			removed++
 		}
 	}
 
@@ -220,18 +220,18 @@ func (t *ChecksumStore) Summary() string {
 		len(t.checksumDirs))
 }
 
-// GetChecksumFileGitDir gets the checksum file inside the Git directory.
+// GetChecksumDirectoryGitDir gets the checksum file inside the Git directory.
 func GetChecksumDirectoryGitDir(gitDir string) string {
 	return path.Join(gitDir, ".githooks.checksums")
 }
 
 // GetChecksumStorage loads the checksum store from the Git config
-// 'GitCK_ChecksumCacheDir' and if not possible from the
+// 'GitCKChecksumCacheDir' and if not possible from the
 // current Git directory.
 func GetChecksumStorage(gitx *git.Context, gitDirWorktree string) (store ChecksumStore, err error) {
 
 	// Get the store from the config variable and fallback to Git dir if not existing.
-	cacheDir := gitx.GetConfig(GitCK_ChecksumCacheDir, git.Traverse)
+	cacheDir := gitx.GetConfig(GitCKChecksumCacheDir, git.Traverse)
 	loadFallback := strs.IsEmpty(cacheDir)
 
 	if !loadFallback {

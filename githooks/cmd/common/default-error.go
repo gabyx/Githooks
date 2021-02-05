@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// PanicWrongArgs panics immediately with showing the commands help.
 func PanicWrongArgs(log cm.ILogContext) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
@@ -14,6 +15,7 @@ func PanicWrongArgs(log cm.ILogContext) func(cmd *cobra.Command, args []string) 
 	}
 }
 
+// PanicIfAnyArgs panics if any add. args are given on `cmd`.
 func PanicIfAnyArgs(log cm.ILogContext) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		if len(args) != 0 {
@@ -23,6 +25,7 @@ func PanicIfAnyArgs(log cm.ILogContext) func(cmd *cobra.Command, args []string) 
 	}
 }
 
+// PanicIfNotExactArgs panics if `cmd` has not exact argument count.
 func PanicIfNotExactArgs(log cm.ILogContext, nArgs int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		err := cobra.ExactArgs(nArgs)(cmd, args)
@@ -33,6 +36,7 @@ func PanicIfNotExactArgs(log cm.ILogContext, nArgs int) func(cmd *cobra.Command,
 	}
 }
 
+// PanicIfNotRangeArgs panics if `cmd` has not exact argument count between `[nMinArgs, nMaxArgs]`.
 func PanicIfNotRangeArgs(log cm.ILogContext, nMinArgs int, nMaxArgs int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		if nMaxArgs < 0 {

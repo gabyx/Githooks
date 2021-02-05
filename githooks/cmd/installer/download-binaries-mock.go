@@ -42,7 +42,7 @@ func downloadBinaries(
 
 	for _, exe := range all {
 		src := path.Join(bin, path.Base(exe))
-		err := cm.CopyFile(src, exe)
+		err := cm.CopyFileOrDirectory(src, exe)
 		cm.AssertNoErrorPanicF(err, "Copy from '%s' to '%s' failed.", src, exe)
 	}
 

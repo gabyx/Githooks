@@ -5,6 +5,7 @@ import (
 	strs "gabyx/githooks/strings"
 )
 
+// InstallSet is a type wrapper for installed repo data.
 type InstallSet = strs.StringSet
 
 // Settings are the settings for the installer.

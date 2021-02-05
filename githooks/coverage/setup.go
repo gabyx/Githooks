@@ -7,11 +7,15 @@ import (
 	"path"
 )
 
-type CoverageData struct {
+// Data for coverage tooling.
+// A counter which increments in each run such that we can accumulate different coverage reports.
+// This is a stupid workaround.
+type Data struct {
 	Counter int `yaml:"counter"`
 }
 
-func ReadCoverData(executableName string) (coverDir string, covDataFile string, covData CoverageData) {
+// ReadCoverData reads data for coverage tooling.
+func ReadCoverData(executableName string) (coverDir string, covDataFile string, covData Data) {
 	coverDir = os.Getenv("GH_COVERAGE_DIR")
 
 	if strs.IsEmpty(coverDir) {
@@ -32,12 +36,13 @@ func ReadCoverData(executableName string) (coverDir string, covDataFile string, 
 	return
 }
 
+// Setup setups coverage tooling stuff.
 func Setup(executableName string) {
 
 	_, covDataFile, covData := ReadCoverData(executableName)
 
 	// Write the new counter for the next run.
-	covData.Counter += 1
+	covData.Counter++
 	err := cm.StoreYAML(covDataFile, &covData)
 	cm.AssertNoErrorPanicF(err, "Could not store '%s'", covDataFile)
 

@@ -23,9 +23,9 @@ func GlobMatch(pattern string, path string) (bool, error) {
 	if !strings.Contains(pattern, "**") {
 		// passthru to core package if no double-star
 		return filepath.Match(pattern, path)
-	} else {
-		return glob.Match(pattern, path)
 	}
+
+	return glob.Match(pattern, path)
 }
 
 // Globs represents one filepath glob, with its elements joined by "**".
@@ -72,9 +72,9 @@ func (g globs) expand(ignoreErrors bool) ([]string, error) {
 					if err != nil {
 						if ignoreErrors {
 							return filepath.SkipDir
-						} else {
-							return err
 						}
+
+						return err
 					}
 					// save deduped match from current iteration
 					if _, ok := hitMap[path]; !ok {

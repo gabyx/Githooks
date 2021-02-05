@@ -60,7 +60,7 @@ func UseStdStreams(pipeStdin bool, pipeStdOut bool, pipeStderr bool) PipeSetupFu
 	}
 }
 
-// PipeStdin returns a pipe setup function which pipes stdin.
+// UseOnlyStdin returns a pipe setup function which pipes stdin.
 func UseOnlyStdin(inPipe io.Reader) PipeSetupFunc {
 	return func() (io.Reader, io.Writer, io.Writer) {
 		return inPipe, nil, nil

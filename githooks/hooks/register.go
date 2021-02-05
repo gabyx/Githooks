@@ -33,7 +33,7 @@ func RegisterRepo(absGitDir string, installDir string, filterExisting bool, filt
 // MarkRepoRegistered sets the register flag inside the repo
 // to denote the repository as registered.
 func MarkRepoRegistered(gitx *git.Context) error {
-	return gitx.SetConfig(GitCK_Registered, true, git.LocalScope)
+	return gitx.SetConfig(GitCKRegistered, true, git.LocalScope)
 }
 
 // Load gets the registered repos loaded from the register file in the
@@ -100,6 +100,8 @@ func (r *RegisterRepos) FilterGitDirs() {
 		})
 }
 
+// GetRegisterFile get the register file in the install directory.
+// which holds all Git dirs where run-wrappers have been installed.
 func GetRegisterFile(installDir string) string {
 	return path.Join(installDir, "registered.yaml")
 }

@@ -13,7 +13,7 @@ die() {
 BIN_DIR=""
 BUILD_FLAGS=""
 BUILD_COVERAGE=""
-DEBUG_FLAGS="-tag sdebug"
+DEBUG_FLAGS="-tags debug"
 
 export CGO_ENABLED=0
 

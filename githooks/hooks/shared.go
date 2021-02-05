@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// SharedHook is the data for a shared hook.
+// SharedRepo holds the data for a shared hook.
 type SharedRepo struct {
 	OriginalURL string // Original URL.
 
@@ -32,7 +32,7 @@ type sharedHookType struct {
 	count  int
 }
 
-// SharedHookType enumerates all types of shared hooks.
+// SharedHookTypeV enumerates all types of shared hooks.
 var SharedHookTypeV = &sharedHookType{Repo: 0, Local: 1, Global: 2, count: 3} // nolint:gomnd
 
 // SharedRepos a collection of all shared repos.
@@ -128,11 +128,12 @@ func GetRepoSharedFile(repoDir string) string {
 	return path.Join(GetGithooksDir(repoDir), ".shared.yaml")
 }
 
-// GetRepoSharedFile gets the shared file with respect to the repository.
+// GetRepoSharedFileRel gets the shared file with respect to the repository.
 func GetRepoSharedFileRel() string {
 	return path.Join(HooksDirName, ".shared.yaml")
 }
 
+// GetSharedCloneDir gets the directory for all shared hook repo clones.
 func GetSharedCloneDir(installDir string, url string) string {
 	sha1, err := cm.GetSHA1Hash(strings.NewReader(url))
 	cm.AssertNoErrorPanicF(err, "Could not compute hash.")
@@ -146,12 +147,12 @@ func GetSharedCloneDir(installDir string, url string) string {
 	return path.Join(GetSharedDir(installDir), sha1+"-"+nameAbrev)
 }
 
-func parseSharedUrl(installDir string, url string) (SharedRepo, error) {
+func parseSharedURL(installDir string, url string) (SharedRepo, error) {
 
 	h := SharedRepo{IsCloned: true, IsLocal: false, OriginalURL: url}
 	doSplit := true
 
-	if git.IsCloneUrlALocalPath(url) {
+	if git.IsCloneURLALocalPath(url) {
 
 		h.IsLocal = true
 
@@ -163,7 +164,7 @@ func parseSharedUrl(installDir string, url string) (SharedRepo, error) {
 			h.RepositoryDir = url
 		}
 
-	} else if git.IsCloneUrlALocalURL(url) {
+	} else if git.IsCloneURLALocalURL(url) {
 		h.IsLocal = true
 	}
 
@@ -197,7 +198,7 @@ func parseData(installDir string, config *sharedHookConfig) (hooks []SharedRepo,
 			continue
 		}
 
-		hook, e := parseSharedUrl(installDir, url)
+		hook, e := parseSharedURL(installDir, url)
 		if e == nil {
 			hooks = append(hooks, hook)
 		}
@@ -208,8 +209,8 @@ func parseData(installDir string, config *sharedHookConfig) (hooks []SharedRepo,
 	return
 }
 
-// AddUrl adds an url to the config.
-func (c *sharedHookConfig) AddUrl(url string) (added bool) {
+// AddURL adds an url to the config.
+func (c *sharedHookConfig) AddURL(url string) (added bool) {
 	a := 0
 	c.Urls, a = strs.AppendUnique(c.Urls, url)
 	added = a != 0
@@ -217,8 +218,8 @@ func (c *sharedHookConfig) AddUrl(url string) (added bool) {
 	return
 }
 
-// RemoveUrl removes an url from the config.
-func (c *sharedHookConfig) RemoveUrl(url string) (removed int) {
+// RemoveURL removes an url from the config.
+func (c *sharedHookConfig) RemoveURL(url string) (removed int) {
 	c.Urls, removed = strs.Remove(c.Urls, url)
 
 	return
@@ -226,7 +227,7 @@ func (c *sharedHookConfig) RemoveUrl(url string) (removed int) {
 
 func loadConfigSharedHooks(gitx *git.Context, scope git.ConfigScope) sharedHookConfig {
 	config := createSharedHookConfig()
-	data := gitx.GetConfigAllU(GitCK_Shared, scope)
+	data := gitx.GetConfigAllU(GitCKShared, scope)
 
 	if strs.IsNotEmpty(data) {
 		config = createSharedHookConfig()
@@ -238,12 +239,12 @@ func loadConfigSharedHooks(gitx *git.Context, scope git.ConfigScope) sharedHookC
 
 func saveConfigSharedHooks(gitx *git.Context, scope git.ConfigScope, config *sharedHookConfig) error {
 	// Remove all settings and add them back.
-	if err := gitx.UnsetConfig(GitCK_Shared, scope); err != nil {
+	if err := gitx.UnsetConfig(GitCKShared, scope); err != nil {
 		return err
 	}
 
 	for _, url := range config.Urls {
-		if e := gitx.AddConfig(GitCK_Shared, url, scope); e != nil {
+		if e := gitx.AddConfig(GitCKShared, url, scope); e != nil {
 			return cm.CombineErrors(e,
 				cm.ErrorF("Could not add back all %s shared repository urls: '%q'", scope, config.Urls))
 		}
@@ -289,7 +290,7 @@ func ModifyRepoSharedHooks(repoDir string, url string, remove bool) (modified bo
 	file := GetRepoSharedFile(repoDir)
 
 	// Try parse it...
-	h, err := parseSharedUrl("unneeded", url) // we dont need the install dir...
+	h, err := parseSharedURL("unneeded", url) // we dont need the install dir...
 	if err != nil {
 		err = cm.CombineErrors(err, cm.ErrorF("Cannot parse url '%s'.", url))
 
@@ -312,22 +313,22 @@ func ModifyRepoSharedHooks(repoDir string, url string, remove bool) (modified bo
 	}
 
 	if remove {
-		modified = config.RemoveUrl(url) != 0
+		modified = config.RemoveURL(url) != 0
 	} else {
-		modified = config.AddUrl(url)
+		modified = config.AddURL(url)
 	}
 
 	return modified, saveRepoSharedHooks(file, &config)
 }
 
-// ModifyRepoSharedHooks adds/removes a URL to the local shared hooks.
+// ModifyLocalSharedHooks adds/removes a URL to the local shared hooks.
 func ModifyLocalSharedHooks(gitx *git.Context, url string, remove bool) (modified bool, err error) {
 	config := loadConfigSharedHooks(gitx, git.LocalScope)
 
 	if remove {
-		modified = config.RemoveUrl(url) != 0
+		modified = config.RemoveURL(url) != 0
 	} else {
-		modified = config.AddUrl(url)
+		modified = config.AddURL(url)
 	}
 
 	err = saveConfigSharedHooks(gitx, git.LocalScope, &config)
@@ -335,14 +336,14 @@ func ModifyLocalSharedHooks(gitx *git.Context, url string, remove bool) (modifie
 	return
 }
 
-// ModifyRepoSharedHooks adds/removes a URL to the global shared hooks.
+// ModifyGlobalSharedHooks adds/removes a URL to the global shared hooks.
 func ModifyGlobalSharedHooks(gitx *git.Context, url string, remove bool) (modified bool, err error) {
 	config := loadConfigSharedHooks(gitx, git.GlobalScope)
 
 	if remove {
-		modified = config.RemoveUrl(url) != 0
+		modified = config.RemoveURL(url) != 0
 	} else {
-		modified = config.AddUrl(url)
+		modified = config.AddURL(url)
 	}
 
 	err = saveConfigSharedHooks(gitx, git.GlobalScope, &config)
@@ -397,7 +398,7 @@ func UpdateSharedHooks(
 			log.AssertNoErrorF(e, "Updating hooks '%s' failed.", hook.OriginalURL)
 		}
 
-		updateCount += 1
+		updateCount++
 	}
 
 	return
@@ -447,7 +448,7 @@ func UpdateAllSharedHooks(
 	return
 }
 
-// Purge all shared hook repositories.
+// PurgeSharedDir purges all shared hook repositories.
 func PurgeSharedDir(installDir string) error {
 	dir := GetSharedDir(installDir)
 
@@ -475,12 +476,12 @@ func ClearRepoSharedHooks(repoDir string) error {
 
 // ClearLocalSharedHooks clears the shared hook list in the local Git config.
 func ClearLocalSharedHooks(gitx *git.Context) error {
-	return gitx.UnsetConfig(GitCK_Shared, git.LocalScope)
+	return gitx.UnsetConfig(GitCKShared, git.LocalScope)
 }
 
-// ClearLocalSharedHooks clears the shared hook list in the global Git config.
+// ClearGlobalSharedHooks clears the shared hook list in the global Git config.
 func ClearGlobalSharedHooks() error {
-	return git.Ctx().UnsetConfig(GitCK_Shared, git.GlobalScope)
+	return git.Ctx().UnsetConfig(GitCKShared, git.GlobalScope)
 }
 
 // GetSharedHookTypeString translates the shared type enum to a string.
@@ -504,26 +505,25 @@ func GetSharedHookTypeString(sharedType SharedHookType) string {
 func (s *SharedRepo) IsCloneValid() bool {
 	if s.IsCloned {
 		return git.CtxC(s.RepositoryDir).GetConfig("remote.origin.url", git.LocalScope) == s.URL
-	} else {
-		cm.DebugAssert(false)
-
-		return false
 	}
+	cm.DebugAssert(false)
+
+	return false
 }
 
 // SetFailOnNonExistingSharedHooks sets settings if the hook runner should fail on non existing hooks.
 func SetFailOnNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
 	switch {
 	case reset:
-		return gitx.UnsetConfig(GitCK_FailOnNonExistingSharedHooks, scope)
+		return gitx.UnsetConfig(GitCKFailOnNonExistingSharedHooks, scope)
 	default:
-		return gitx.SetConfig(GitCK_FailOnNonExistingSharedHooks, enable, scope)
+		return gitx.SetConfig(GitCKFailOnNonExistingSharedHooks, enable, scope)
 	}
 }
 
 // GetFailOnNonExistingSharedHooks gets the settings if the hook runner should fail on non existing hooks.
 func GetFailOnNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) (enabled bool, isSet bool) {
-	conf := gitx.GetConfig(GitCK_FailOnNonExistingSharedHooks, scope)
+	conf := gitx.GetConfig(GitCKFailOnNonExistingSharedHooks, scope)
 	switch {
 	case strs.IsEmpty(conf):
 		return

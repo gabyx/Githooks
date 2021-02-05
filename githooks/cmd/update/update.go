@@ -47,6 +47,7 @@ func runUpdate(ctx *ccm.CmdContext, setOpts *config.SetOptions, answer string) {
 	}
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	yes := false

@@ -36,8 +36,8 @@ type ReleaseStatus struct {
 // GetCloneURL get the clone url and clone branch.
 func GetCloneURL() (url string, branch string) {
 	gitx := git.Ctx()
-	url = gitx.GetConfig(hooks.GitCK_CloneUrl, git.GlobalScope)
-	branch = gitx.GetConfig(hooks.GitCK_CloneBranch, git.GlobalScope)
+	url = gitx.GetConfig(hooks.GitCKCloneURL, git.GlobalScope)
+	branch = gitx.GetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 
 	return
 }
@@ -47,7 +47,7 @@ func GetCloneURL() (url string, branch string) {
 func SetCloneURL(url string, branch string) (err error) {
 	cm.DebugAssertF(strs.IsNotEmpty(url), "Wrong input")
 
-	err = git.Ctx().SetConfig(hooks.GitCK_CloneUrl, url, git.GlobalScope)
+	err = git.Ctx().SetConfig(hooks.GitCKCloneURL, url, git.GlobalScope)
 	if err != nil || strs.IsEmpty(branch) {
 		return
 	}
@@ -55,16 +55,16 @@ func SetCloneURL(url string, branch string) (err error) {
 	return SetCloneBranch(branch)
 }
 
-// Set the Githooks clone branch.
+// SetCloneBranch sets the Githooks clone branch.
 func SetCloneBranch(branch string) error {
 	cm.DebugAssertF(strs.IsNotEmpty(branch), "Wrong input")
 
-	return git.Ctx().SetConfig(hooks.GitCK_CloneBranch, branch, git.GlobalScope)
+	return git.Ctx().SetConfig(hooks.GitCKCloneBranch, branch, git.GlobalScope)
 }
 
-// Reset the Githooks clone branch.
+// ResetCloneBranch resets the Githooks clone branch.
 func ResetCloneBranch() error {
-	return git.Ctx().UnsetConfig(hooks.GitCK_CloneBranch, git.GlobalScope)
+	return git.Ctx().UnsetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 }
 
 var unskipTrailerRe = regexp.MustCompile(`Update-NoSkip:\s+true`)
@@ -458,6 +458,8 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 	return
 }
 
+// AcceptUpdateCallback is the callback type
+// for accepting/rejecting updates.
 type AcceptUpdateCallback func(status *ReleaseStatus) bool
 
 // RunUpdate runs the procedure of updating Githooks.
@@ -509,6 +511,8 @@ func RunUpdate(
 	return
 }
 
+// DefaultAcceptUpdateCallback creates a default accept update callback
+// which prompts the user.
 func DefaultAcceptUpdateCallback(
 	log cm.ILogContext,
 	promptCtx prompt.IContext,

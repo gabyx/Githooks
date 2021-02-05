@@ -13,8 +13,11 @@ import (
 )
 
 const (
+	// DefaultFileModeDirectory is the default file mod for directory creation.
 	DefaultFileModeDirectory = os.FileMode(0775) // nolint:gomnd
-	DefaultFileModeFile      = os.FileMode(0664) // nolint:gomnd
+
+	// DefaultFileModeFile is the default file mod for file creation.
+	DefaultFileModeFile = os.FileMode(0664) // nolint:gomnd
 
 )
 
@@ -201,14 +204,9 @@ func TouchFile(filePath string, makeDirs bool) (err error) {
 	return
 }
 
-func CopyFile(src string, dest string) error {
-	return copy.Copy(src, dest,
-		copy.Options{
-			OnSymlink:   func(string) copy.SymlinkAction { return copy.Shallow },
-			OnDirExists: func(string, string) copy.DirExistsAction { return copy.Replace }})
-}
-
-func CopyDirectory(src string, dest string) error {
+// CopyFileOrDirectory copies a directory or file from `src` to `dest` replacing `dest` if it exists.
+// Copies also symlinks.
+func CopyFileOrDirectory(src string, dest string) error {
 	return copy.Copy(src, dest,
 		copy.Options{
 			OnSymlink:   func(string) copy.SymlinkAction { return copy.Shallow },
@@ -250,7 +248,7 @@ func CopyFileWithBackup(src string, dst string, backupDir string, doMoveInstead 
 	if doMoveInstead {
 		action = os.Rename
 	} else {
-		action = CopyFile
+		action = CopyFileOrDirectory
 	}
 
 	if !IsFile(src) {

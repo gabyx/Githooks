@@ -12,12 +12,13 @@ type deploySettings struct {
 
 	Gitea  *GiteaDeploySettings  `yaml:"gitea"`
 	Github *GithubDeploySettings `yaml:"github"`
-	Http   *HttpDeploySettings   `yaml:"http"`
+	HTTP   *HTTPDeploySettings   `yaml:"http"`
 	Local  *LocalDeploySettings  `yaml:"local"`
 }
 
 const deploySettingsVersion = 1
 
+// IDeploySettings is the common interface for all deploy settings.
 type IDeploySettings interface {
 	Download(versionTag string, dir string) error
 }
@@ -38,8 +39,8 @@ func LoadDeploySettings(file string) (IDeploySettings, error) {
 		return settings.Gitea, nil
 	case settings.Github != nil:
 		return settings.Github, nil
-	case settings.Http != nil:
-		return settings.Http, nil
+	case settings.HTTP != nil:
+		return settings.HTTP, nil
 	case settings.Local != nil:
 		return settings.Local, nil
 	}
@@ -60,8 +61,8 @@ func StoreDeploySettings(file string, settings IDeploySettings) error {
 		s.Gitea = v
 	case *GithubDeploySettings:
 		s.Github = v
-	case *HttpDeploySettings:
-		s.Http = v
+	case *HTTPDeploySettings:
+		s.HTTP = v
 	case *LocalDeploySettings:
 		s.Local = v
 	default:
@@ -71,6 +72,7 @@ func StoreDeploySettings(file string, settings IDeploySettings) error {
 	return cm.StoreYAML(file, &s)
 }
 
+// GetDeploySettingsFile gets the deploy settings file inside the install directory.
 func GetDeploySettingsFile(installDir string) string {
 	return path.Join(installDir, "deploy.yaml")
 }

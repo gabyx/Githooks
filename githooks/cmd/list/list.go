@@ -58,7 +58,7 @@ func PrepareListHookState(
 	repoDir string,
 	repoHooksDir string,
 	gitDirWorktree string,
-	hookNames []string) (*ListHookState, hooks.SharedRepos) {
+	hookNames []string) (*ListingState, hooks.SharedRepos) {
 
 	// Load checksum store
 	checksums, err := hooks.GetChecksumStorage(ctx.GitX, gitDirWorktree)
@@ -86,7 +86,7 @@ func PrepareListHookState(
 	isTrusted, _ := hooks.IsRepoTrusted(ctx.GitX, repoDir)
 	isDisabled := hooks.IsGithooksDisabled(ctx.GitX, true)
 
-	return &ListHookState{
+	return &ListingState{
 			Checksums:          &checksums,
 			Ignores:            &ignores,
 			isRepoTrusted:      isTrusted,
@@ -95,7 +95,9 @@ func PrepareListHookState(
 		shared
 }
 
-type ListHookState struct {
+// ListingState contains common state to successfully discover
+// hooks.
+type ListingState struct {
 	Checksums *hooks.ChecksumStore
 	Ignores   *hooks.RepoIgnorePatterns
 
@@ -165,7 +167,7 @@ func listHooksForName(
 	gitDir string,
 	repoHooksDir string,
 	shared hooks.SharedRepos,
-	state *ListHookState,
+	state *ListingState,
 	onlyListActiveHooks bool,
 	withBatchName bool) (string, int) {
 
@@ -237,16 +239,18 @@ func findPaddingListHooks(hooks []hooks.Hook, maxPadding int) int {
 	return math.MinInt(max, maxPadding)
 }
 
+// SharedHooks contains data about a shared hook repository.
 type SharedHooks struct {
 	Repo     *hooks.SharedRepo
 	Category hooks.SharedHookType
 	Hooks    []hooks.Hook
 }
 
+// GetAllHooksInShared gets all hooks in shared repositories.
 func GetAllHooksInShared(
 	log cm.ILogContext,
 	hookName string,
-	state *ListHookState,
+	state *ListingState,
 	sharedRepos []hooks.SharedRepo,
 	category hooks.SharedHookType) (coll []SharedHooks, count int) {
 
@@ -282,12 +286,13 @@ func GetAllHooksInShared(
 	return
 }
 
+// GetAllHooksIn gets all hooks in a hooks directory.
 func GetAllHooksIn(
 	log cm.ILogContext,
 	hooksDir string,
 	hookName string,
 	hookNamespace string,
-	state *ListHookState,
+	state *ListingState,
 	addInternalIgnores bool,
 	isReplacedHook bool) []hooks.Hook {
 
@@ -396,6 +401,7 @@ func formatHookState(
 	cm.AssertNoErrorPanicF(err, "Could not write hook state.")
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	onlyListActiveHooks := false

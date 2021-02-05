@@ -25,6 +25,8 @@ var existingWarn = []string{
 	"Existing repositories won't have Githooks uninstalled.",
 }
 
+// PromptExistingRepos shows user prompts about installing/uninstalling
+// into existing repositories.
 func PromptExistingRepos(
 	log cm.ILogContext,
 	nonInteractive bool,
@@ -42,7 +44,7 @@ func PromptExistingRepos(
 	homeDir, err := homedir.Dir()
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
-	searchDir := gitx.GetConfig(hooks.GitCK_PreviousSearchDir, git.GlobalScope)
+	searchDir := gitx.GetConfig(hooks.GitCKPreviousSearchDir, git.GlobalScope)
 	hasSearchDir := strs.IsNotEmpty(searchDir)
 
 	if nonInteractive {
@@ -88,7 +90,7 @@ func PromptExistingRepos(
 		return
 	}
 
-	err = gitx.SetConfig(hooks.GitCK_PreviousSearchDir, searchDir, git.GlobalScope)
+	err = gitx.SetConfig(hooks.GitCKPreviousSearchDir, searchDir, git.GlobalScope)
 	log.AssertNoError(err, "Could not set git config 'githooks.previousSearchDir'")
 
 	log.InfoF("Searching for Git directories in '%s'...", searchDir)
@@ -121,6 +123,8 @@ var registeredPrompt = []string{
 	"Do you want to uninstall Githooks\nin all of them?",
 }
 
+// PromptRegisteredRepos shows user prompts about installing/uninstalling
+// into registered repositories.
 func PromptRegisteredRepos(
 	log cm.ILogContext,
 	dirs []string,

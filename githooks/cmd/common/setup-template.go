@@ -39,11 +39,13 @@ var helpTemplate = `{{with (or .Long .Short)}}{{. | idnt | trimTrailingWhitespac
 {{end}}{{if or .Runnable .HasSubCommands}}{{ .UsageString | idnt }}{{end}}
 `
 
+// InitTemplates inits all templates from the cobra library.
 func InitTemplates(title string, prefix string, indent string) {
 	cobra.AddTemplateFunc("idnt", func(s string) string { return indentLeft(s, prefix, indent) })
 	helpTemplate = title + "\n\n" + helpTemplate
 }
 
+// ModifyTemplate modifies templates for command `cmd`.
 func ModifyTemplate(cmd *cobra.Command, indent string) {
 	cmd.SetUsageTemplate(usageTemplate)
 	cmd.SetHelpTemplate(helpTemplate)

@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GitOptions for local or global Git configuration.
 type GitOptions struct {
 	Local  bool
 	Global bool
@@ -35,6 +36,8 @@ func wrapToGitScope(log cm.ILogContext, opts *GitOptions) git.ConfigScope {
 	}
 }
 
+// SetOptions holds data for setting Git options to either
+// print/reset/unset/set a value.
 type SetOptions struct {
 	Print bool
 	Reset bool
@@ -44,6 +47,7 @@ type SetOptions struct {
 	Values []string
 }
 
+// AssertOptions  asserts that all set actions are exclusive etc.
 func (s *SetOptions) AssertOptions(log cm.ILogContext, optsMap *OptionsMapping, noValues bool, args []string) {
 
 	log.PanicIf(!s.Set && !s.Unset && !s.Reset && !s.Print, "You need to specify an option.")
@@ -73,6 +77,8 @@ func (s *SetOptions) AssertOptions(log cm.ILogContext, optsMap *OptionsMapping, 
 	}
 }
 
+// OptionsMapping holds mappings for the
+// print/set/unset/reset actions.
 type OptionsMapping struct {
 	Print     string
 	PrintDesc string
@@ -185,7 +191,7 @@ func runDisable(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 }
 
 func runSearchDir(ctx *ccm.CmdContext, opts *SetOptions) {
-	opt := hooks.GitCK_PreviousSearchDir
+	opt := hooks.GitCKPreviousSearchDir
 	switch {
 	case opts.Set:
 		err := ctx.GitX.SetConfig(opt, opts.Values[0], git.GlobalScope)
@@ -210,7 +216,7 @@ func runSearchDir(ctx *ccm.CmdContext, opts *SetOptions) {
 }
 
 func runSharedRepos(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
-	opt := hooks.GitCK_Shared
+	opt := hooks.GitCKShared
 
 	localOrGlobal := "local"
 	if gitOpts.Global {
@@ -259,7 +265,7 @@ func runSharedRepos(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) 
 	}
 }
 
-func runCloneUrl(ctx *ccm.CmdContext, opts *SetOptions) {
+func runCloneURL(ctx *ccm.CmdContext, opts *SetOptions) {
 	switch {
 	case opts.Set:
 		err := updates.SetCloneURL(opts.Values[0], "")
@@ -361,6 +367,7 @@ func runTrust(ctx *ccm.CmdContext, opts *SetOptions) {
 
 }
 
+// RunUpdate runs an automatic Githooks update.
 func RunUpdate(ctx *ccm.CmdContext, opts *SetOptions) {
 	const text = "Automatic Githooks update"
 
@@ -433,7 +440,7 @@ func runNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *G
 }
 
 func runDeleteDetectedLFSHooks(ctx *ccm.CmdContext, opts *SetOptions) {
-	opt := hooks.GitCK_DeleteDetectedLFSHooksAnswer
+	opt := hooks.GitCKDeleteDetectedLFSHooksAnswer
 
 	switch {
 	case opts.Set:
@@ -536,20 +543,20 @@ used during installation.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, searchDirCmd))
 }
 
-func configCloneUrlCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
+func configCloneURLCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
-	cloneUrlCmd := &cobra.Command{
+	cloneURLCmd := &cobra.Command{
 		Use:   "clone-url [flags]",
 		Short: "Changes the Githooks clone url used for any update.",
 		Long:  `Changes the Githooks clone url used for any update.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runCloneUrl(ctx, setOpts)
+			runCloneURL(ctx, setOpts)
 		}}
 
 	optsPrintSet := createOptionMap(true, false, false)
 
-	configSetOptions(cloneUrlCmd, setOpts, &optsPrintSet, ctx.Log, 1, 1)
-	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, cloneUrlCmd))
+	configSetOptions(cloneURLCmd, setOpts, &optsPrintSet, ctx.Log, 1, 1)
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, cloneURLCmd))
 }
 
 func configCloneBranchCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
@@ -726,6 +733,7 @@ disabled and backed up.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, deleteDetectedLFSCmd))
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	configCmd := &cobra.Command{
@@ -744,7 +752,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configSearchDirCmd(ctx, configCmd, &setOpts)
 	configUpdateCmd(ctx, configCmd, &setOpts)
 	configUpdateTimeCmd(ctx, configCmd, &setOpts)
-	configCloneUrlCmd(ctx, configCmd, &setOpts)
+	configCloneURLCmd(ctx, configCmd, &setOpts)
 	configCloneBranchCmd(ctx, configCmd, &setOpts)
 
 	configSharedCmd(ctx, configCmd, &setOpts, &gitOpts)

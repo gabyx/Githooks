@@ -106,21 +106,21 @@ func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{
 	return true
 }
 
-// AssertNoErrorFatal Assert no error, and otherwise log it.
+// AssertNoErrorPanic asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
 		c.Panic(append(lines, strs.SplitLines("-> error: ["+err.Error()+"]")...)...)
 	}
 }
 
-// AssertNoErrorFatalF Assert no error, and otherwise log it.
+// AssertNoErrorPanicF asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...interface{}) {
 	if err != nil {
 		c.PanicF(format+"\n-> error: ["+err.Error()+"]", args...)
 	}
 }
 
-// ErrorOrFatalF logs an error or a fatal error and also with a potential occurred error.
+// ErrorOrPanicF logs an error or a fatal error and also with a potential occurred error.
 func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args ...interface{}) {
 	if isFatal {
 		if err != nil {

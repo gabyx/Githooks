@@ -59,7 +59,7 @@ func findGoExec() (cm.CmdContext, error) {
 	var err error
 
 	// Check from config.
-	goExec := git.Ctx().GetConfig(hooks.GitCK_GoExecutable, git.GlobalScope)
+	goExec := git.Ctx().GetConfig(hooks.GitCKGoExecutable, git.GlobalScope)
 	if strs.IsNotEmpty(goExec) && cm.IsFile(goExec) {
 		gox = cm.CmdContext{BaseCmd: goExec}
 

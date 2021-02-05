@@ -4,8 +4,8 @@ import (
 	cm "gabyx/githooks/common"
 )
 
-// The deploy settings for Gitea.
-type HttpDeploySettings struct {
+// HTTPDeploySettings are deploy settings for HTTP downloading.
+type HTTPDeploySettings struct {
 	// Path template string which can contain
 	// - `{{VersionTag}}` : The version tag to download.
 	// - `{{Version}}` : The version to download (removed prefix 'v' of `VersionTag`).
@@ -17,7 +17,7 @@ type HttpDeploySettings struct {
 	// and a checksum signature file.
 	// `githooks.checksums.sig` which is validated using
 	// the `PublicPGP`.
-	UrlTemplate string
+	URLTemplate string
 
 	// If empty, the internal Githooks binary
 	// embedded PGP is taken from `.deploy.pgp`.
@@ -26,7 +26,7 @@ type HttpDeploySettings struct {
 
 // Download downloads the Githooks from a template URL and
 // extracts it into `dir`.
-func (s *HttpDeploySettings) Download(versionTag string, dir string) error {
+func (s *HTTPDeploySettings) Download(versionTag string, dir string) error {
 	cm.Panic("Not implemented.")
 
 	return nil

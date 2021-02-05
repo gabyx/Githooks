@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// AnswerValidator is the callback type for the answer validator.
 type AnswerValidator func(string) error
 
 // IContext defines the interface to show a prompt to the user.
@@ -124,6 +125,8 @@ func getDefaultAnswer(options []string) string {
 	return ""
 }
 
+// CreateValidatorAnswerOptions creates a validator which validates against
+// a list of options.
 func CreateValidatorAnswerOptions(options []string) AnswerValidator {
 
 	return func(answer string) error {
@@ -142,6 +145,7 @@ func CreateValidatorAnswerOptions(options []string) AnswerValidator {
 	}
 }
 
+// ValidatorAnswerNotEmpty checks that answers are non-empty.
 var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
 	if strs.IsEmpty(strings.TrimSpace(s)) {
 		return cm.Error("Answer must not be empty.")
@@ -150,6 +154,8 @@ var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
 	return nil
 }
 
+// CreateValidatorIsDirectory creates a answer validator
+// which checks existing paths.
 func CreateValidatorIsDirectory(tildeRepl string) AnswerValidator {
 	return func(s string) error {
 		s = cm.ReplaceTildeWith(s, tildeRepl)

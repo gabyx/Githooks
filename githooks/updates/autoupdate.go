@@ -5,9 +5,9 @@ import (
 	"gabyx/githooks/hooks"
 )
 
-// SetAutomaticUpdateSettings set the automatic update settings.
+// SetAutomaticUpdateCheckSettings set the automatic update settings.
 func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
-	opt := hooks.GitCK_AutoUpdateEnabled
+	opt := hooks.GitCKAutoUpdateEnabled
 	gitx := git.Ctx()
 
 	switch {
@@ -20,9 +20,9 @@ func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
 	}
 }
 
-// GetAutomaticUpdateSettings gets the automatic update settings.
+// GetAutomaticUpdateCheckSettings gets the automatic update settings.
 func GetAutomaticUpdateCheckSettings() (enabled bool, isSet bool) {
-	conf := git.Ctx().GetConfig(hooks.GitCK_AutoUpdateEnabled, git.GlobalScope)
+	conf := git.Ctx().GetConfig(hooks.GitCKAutoUpdateEnabled, git.GlobalScope)
 	switch {
 	case conf == "true":
 		return true, true

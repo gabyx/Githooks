@@ -8,7 +8,7 @@ import (
 	"path"
 )
 
-// Checks the target directory and if valid
+// CheckTemplateDir checks the target directory and if valid
 // returns the target hook template directory otherwise empty.
 // If an error occures the directory is empty.
 func CheckTemplateDir(targetDir string, subFolderIfExists string) (string, error) {
@@ -27,6 +27,7 @@ func CheckTemplateDir(targetDir string, subFolderIfExists string) (string, error
 	return "", nil
 }
 
+// FindHookTemplateDir finds the hook template directory.
 func FindHookTemplateDir(useCoreHooksPath bool) (hooksTemplateDir string, err error) {
 	// 1. Try setup from environment variables
 	gitTempDir, exists := os.LookupEnv("GIT_TEMPLATE_DIR")
@@ -41,10 +42,10 @@ func FindHookTemplateDir(useCoreHooksPath bool) (hooksTemplateDir string, err er
 	// 2. Try setup from git config
 	if useCoreHooksPath {
 		hooksTemplateDir, err = CheckTemplateDir(
-			git.Ctx().GetConfig(git.GitCK_CoreHooksPath, git.GlobalScope), "")
+			git.Ctx().GetConfig(git.GitCKCoreHooksPath, git.GlobalScope), "")
 	} else {
 		hooksTemplateDir, err = CheckTemplateDir(
-			git.Ctx().GetConfig(git.GitCK_InitTemplateDir, git.GlobalScope), "hooks")
+			git.Ctx().GetConfig(git.GitCKInitTemplateDir, git.GlobalScope), "hooks")
 	}
 
 	if err != nil {

@@ -7,6 +7,8 @@ import (
 	strs "gabyx/githooks/strings"
 )
 
+// GetHookDisableCallback returns the callback for prompting about hook disabling
+// during install procedure.
 func GetHookDisableCallback(
 	log cm.ILogContext,
 	nonInteractive bool,
@@ -16,7 +18,7 @@ func GetHookDisableCallback(
 
 	if strs.IsEmpty(uiSettings.DeleteDetectedLFSHooks) {
 		// Load default UI value from config.
-		uiSettings.DeleteDetectedLFSHooks = gitx.GetConfig(hooks.GitCK_DeleteDetectedLFSHooksAnswer, git.GlobalScope)
+		uiSettings.DeleteDetectedLFSHooks = gitx.GetConfig(hooks.GitCKDeleteDetectedLFSHooksAnswer, git.GlobalScope)
 	}
 
 	return func(file string) (answer hooks.HookDisableOption) {

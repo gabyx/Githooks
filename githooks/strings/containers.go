@@ -10,7 +10,7 @@ func AppendUnique(slice []string, elems ...string) (sl []string, appended int) {
 			continue
 		}
 
-		appended += 1
+		appended++
 		sl = append(sl, s)
 	}
 
@@ -130,9 +130,10 @@ func Map(vs []string, f func(string) string) []string {
 	return vsm
 }
 
+// StringSet mimics a simple string set type.
 type StringSet map[string]bool
 
-// Add adds `s` to the set.
+// Insert adds `s` to the set.
 func (m StringSet) Insert(s string) {
 	m[s] = true
 }
@@ -147,12 +148,12 @@ func (m StringSet) Exists(s string) bool {
 	return m[s]
 }
 
-// Gets the keys of a string set.
-func (s *StringSet) ToList() (keys []string) {
-	keys = make([]string, len(*s))
+// ToList gets the keys of a string set.
+func (m *StringSet) ToList() (keys []string) {
+	keys = make([]string, len(*m))
 
 	i := 0
-	for k := range *s {
+	for k := range *m {
 		keys[i] = k
 		i++
 	}

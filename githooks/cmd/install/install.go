@@ -14,17 +14,17 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, nonInteractive bool) {
 
 	// Check if useCoreHooksPath or core.hooksPath is set
 	// and if so error out.
-	value, exists := ctx.GitX.LookupConfig(git.GitCK_CoreHooksPath, git.Traverse)
+	value, exists := ctx.GitX.LookupConfig(git.GitCKCoreHooksPath, git.Traverse)
 	ctx.Log.PanicIfF(exists, "You are using already '%s' = '%s'\n"+
 		"Installing Githooks run-wrappers into '%s'\n"+
 		"has no effect.",
-		git.GitCK_CoreHooksPath, value, gitDir)
+		git.GitCKCoreHooksPath, value, gitDir)
 
-	value, exists = ctx.GitX.LookupConfig(hooks.GitCK_UseCoreHooksPath, git.GlobalScope)
+	value, exists = ctx.GitX.LookupConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 	ctx.Log.PanicIfF(exists && value == "true", "It appears you are using Githooks in 'core.hooksPath' mode\n"+
 		"('%s' = '%s'). Installing Githooks run-wrappers into '%s'\n"+
 		"may have no effect.",
-		hooks.GitCK_UseCoreHooksPath, value, gitDir)
+		hooks.GitCKUseCoreHooksPath, value, gitDir)
 
 	uiSettings := inst.UISettings{PromptCtx: ctx.PromptCtx}
 	inst.InstallIntoRepo(ctx.Log, gitDir, nonInteractive, false, &uiSettings)
@@ -57,6 +57,7 @@ func runInstall(ctx *ccm.CmdContext, nonInteractive bool) {
 	runInstallIntoRepo(ctx, nonInteractive)
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) []*cobra.Command {
 
 	nonInteractive := false

@@ -9,22 +9,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type TrustOption = int
+type trustOption = int
 
 const (
-	TrustAdd    TrustOption = 0
-	TrustRevoke TrustOption = 1
-	TrustForget TrustOption = 2
-	TrustDelete TrustOption = 3
+	trustAdd    trustOption = 0
+	trustRevoke trustOption = 1
+	trustForget trustOption = 2
+	trustDelete trustOption = 3
 )
 
-func runTrust(ctx *ccm.CmdContext, opt TrustOption) {
+func runTrust(ctx *ccm.CmdContext, opt trustOption) {
 
 	repoRoot, _, _ := ccm.AssertRepoRoot(ctx)
 	file := hooks.GetTrustMarkerFile(repoRoot)
 
 	switch opt {
-	case TrustAdd:
+	case trustAdd:
 		err := cm.TouchFile(file, true)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not touch trust marker '%s'.", file)
 		ctx.Log.Info("The trust marker is added to the repository.")
@@ -36,7 +36,7 @@ func runTrust(ctx *ccm.CmdContext, opt TrustOption) {
 		if !ctx.GitX.IsBareRepo() {
 			ctx.Log.Info("Do not forget to commit and push it!")
 		}
-	case TrustForget:
+	case trustForget:
 		_, isSet := hooks.GetTrustAllSetting(ctx.GitX)
 		if !isSet {
 			ctx.Log.Info("The current repository does not have trust settings.")
@@ -47,15 +47,15 @@ func runTrust(ctx *ccm.CmdContext, opt TrustOption) {
 
 		ctx.Log.Info("The current repository is no longer trusted.")
 
-	case TrustRevoke:
+	case trustRevoke:
 		fallthrough
-	case TrustDelete:
+	case trustDelete:
 		err := hooks.SetTrustAllSetting(ctx.GitX, false, false)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not set trust settings.")
 		ctx.Log.Info("The current repository is no longer trusted.")
 	}
 
-	if opt == TrustDelete {
+	if opt == trustDelete {
 		err := os.RemoveAll(file)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not remove trust marker '%s'.", file)
 
@@ -67,6 +67,7 @@ func runTrust(ctx *ccm.CmdContext, opt TrustOption) {
 	}
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	trustCmd := &cobra.Command{
@@ -82,28 +83,28 @@ and the 'delete' argument also deletes the trusted marker.
 The 'forget' option unsets the trust setting, asking for accepting
 it again next time, if the repository is marked as trusted.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runTrust(ctx, TrustAdd)
+			runTrust(ctx, trustAdd)
 		}}
 
 	trustRevokeCmd := &cobra.Command{
 		Use:   "revoke",
 		Short: `Revoke repository trust settings.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runTrust(ctx, TrustRevoke)
+			runTrust(ctx, trustRevoke)
 		}}
 
 	trustForgetCmd := &cobra.Command{
 		Use:   "forget",
 		Short: `Forget repository trust settings.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runTrust(ctx, TrustForget)
+			runTrust(ctx, trustForget)
 		}}
 
 	trustDeleteCmd := &cobra.Command{
 		Use:   "delete",
 		Short: `Delete repository trust settings.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runTrust(ctx, TrustDelete)
+			runTrust(ctx, trustDelete)
 		}}
 
 	trustCmd.AddCommand(

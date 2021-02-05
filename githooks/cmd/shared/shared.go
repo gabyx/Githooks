@@ -11,14 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type SharedOpts struct {
+// sharedOpts are options for the shared command.
+type sharedOpts struct {
 	Shared bool
 	Local  bool
 	Global bool
 	All    bool
 }
 
-func sharedOptsSetAll(opts *SharedOpts) {
+func sharedOptsSetAll(opts *sharedOpts) {
 	if opts.All {
 		opts.Shared = true
 		opts.Local = true
@@ -26,7 +27,7 @@ func sharedOptsSetAll(opts *SharedOpts) {
 	}
 }
 
-func addSharedOpts(c *cobra.Command, opts *SharedOpts, withAll bool) *cobra.Command {
+func addSharedOpts(c *cobra.Command, opts *sharedOpts, withAll bool) *cobra.Command {
 	c.Flags().BoolVar(&opts.Shared, "shared", false,
 		strs.Fmt("Modify the shared hooks list '%s' (default).", hooks.GetRepoSharedFileRel()))
 
@@ -42,7 +43,7 @@ func addSharedOpts(c *cobra.Command, opts *SharedOpts, withAll bool) *cobra.Comm
 	return c
 }
 
-func runSharedAdd(ctx *ccm.CmdContext, opts *SharedOpts, remove bool, url string) {
+func runSharedAdd(ctx *ccm.CmdContext, opts *sharedOpts, remove bool, url string) {
 
 	t1 := "add url to"
 	t2 := "Added '%s' to"
@@ -84,7 +85,7 @@ func runSharedAdd(ctx *ccm.CmdContext, opts *SharedOpts, remove bool, url string
 	}
 }
 
-func runSharedClear(ctx *ccm.CmdContext, opts *SharedOpts) {
+func runSharedClear(ctx *ccm.CmdContext, opts *sharedOpts) {
 	sharedOptsSetAll(opts)
 
 	if opts.Shared {
@@ -116,7 +117,7 @@ func runSharedPurge(ctx *ccm.CmdContext) {
 	ctx.Log.Info("Purged all shared repositories.")
 }
 
-func runSharedList(ctx *ccm.CmdContext, opts *SharedOpts) {
+func runSharedList(ctx *ccm.CmdContext, opts *sharedOpts) {
 	sharedOptsSetAll(opts)
 
 	formatLine := func(s *hooks.SharedRepo) string {
@@ -204,9 +205,10 @@ func runSharedLocation(ctx *ccm.CmdContext, urls []string) {
 	}
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
-	var opts = SharedOpts{}
+	var opts = sharedOpts{}
 
 	sharedCmd := &cobra.Command{
 		Use:   "shared",

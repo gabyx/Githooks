@@ -2,7 +2,7 @@ package common
 
 import "time"
 
-// IBackgroundTask is a background task which
+// ITask is a background task which
 // can be run with `RunBackgroundTask`.
 // The exit channel `exitCh` can be used to
 // signal an early exit of the running task
@@ -22,6 +22,7 @@ type ProgressSettings struct {
 	ProgressStillRunningAfter time.Duration
 }
 
+// CreateDefaultProgressSettings creates default progressbar settings.
 func CreateDefaultProgressSettings(title string, titleStillRunning string) ProgressSettings {
 	return ProgressSettings{
 		Title:                     title,

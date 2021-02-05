@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// The deploy settings for Gitea.
+// LocalDeploySettings are deploy settings for accessing the deploy locally.
 type LocalDeploySettings struct {
 	// Path template string which can contain
 	// - `{{VersionTag}}` : The version tag to download.

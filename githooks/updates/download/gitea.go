@@ -9,7 +9,7 @@ import (
 	"code.gitea.io/sdk/gitea"
 )
 
-// The deploy settings for Gitea.
+// GiteaDeploySettings are deploy settings for Gitea.
 type GiteaDeploySettings struct {
 	RepoSettings
 	APIUrl string // API url of the Gitea service.
@@ -19,7 +19,7 @@ type GiteaDeploySettings struct {
 	PublicPGP string
 }
 
-// Providing interface `IDeploySettings`.
+// Download downloads the version with `versionTag` into `dir` from a Gitea instance.
 func (s *GiteaDeploySettings) Download(versionTag string, dir string) error {
 	return downloadGitea(s.APIUrl, s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
 }
@@ -45,7 +45,7 @@ func downloadGitea(url string, owner string, repo string, versionTag string, dir
 		assets = append(assets,
 			Asset{
 				FileName: path.Base(rel.Attachments[i].Name),
-				Url:      rel.Attachments[i].DownloadURL})
+				URL:      rel.Attachments[i].DownloadURL})
 	}
 
 	target, checksums, err := getGithooksAsset(assets)
@@ -61,9 +61,9 @@ func downloadGitea(url string, owner string, repo string, versionTag string, dir
 				"Something is fishy!"))
 	}
 
-	response, err := DownloadFile(target.Url)
+	response, err := DownloadFile(target.URL)
 	if err != nil {
-		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.Url))
+		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}
 	defer response.Body.Close()
 

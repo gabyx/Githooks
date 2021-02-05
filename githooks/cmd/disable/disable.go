@@ -13,6 +13,7 @@ type disableOptions struct {
 	Global bool
 }
 
+// RunDisable disables Githooks completely.
 func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 
 	var scope git.ConfigScope
@@ -28,7 +29,7 @@ func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 	}
 
 	if onlyPrint {
-		conf := ctx.GitX.GetConfig(hooks.GitCK_Disable, scope)
+		conf := ctx.GitX.GetConfig(hooks.GitCKDisable, scope)
 		if conf == "true" {
 			ctx.Log.InfoF("Githooks is disabled %s.", fmt)
 		} else {
@@ -39,17 +40,18 @@ func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 	}
 
 	if reset {
-		err := ctx.GitX.UnsetConfig(hooks.GitCK_Disable, scope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not unset '%s' Git config '%s'.", scope, hooks.GitCK_Disable)
+		err := ctx.GitX.UnsetConfig(hooks.GitCKDisable, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not unset '%s' Git config '%s'.", scope, hooks.GitCKDisable)
 		ctx.Log.InfoF("Enabled Githooks %s.", fmt)
 
 	} else {
-		err := ctx.GitX.SetConfig(hooks.GitCK_Disable, true, scope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not set '%s' Git config '%s'.", scope, hooks.GitCK_Disable)
+		err := ctx.GitX.SetConfig(hooks.GitCKDisable, true, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not set '%s' Git config '%s'.", scope, hooks.GitCKDisable)
 		ctx.Log.InfoF("Disabled Githooks %s.", fmt)
 	}
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	var disableOpts disableOptions

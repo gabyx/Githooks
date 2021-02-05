@@ -7,13 +7,15 @@ import (
 	"runtime"
 )
 
+// Asset holds data for Git web services such as Github or Gitea.
 type Asset struct {
 	FileName string // The file name of the asset.
-	Url      string // The download URL of the asset.
+	URL      string // The download URL of the asset.
 
 	Extension string // Extension of the assert (can be empty).
 }
 
+// Checksums holds the checksum and its signature file.
 type Checksums struct {
 	File          Asset
 	FileSignature Asset
@@ -21,7 +23,7 @@ type Checksums struct {
 
 // IsValid checks if the asset is valid.
 func (a *Asset) IsValid() bool {
-	return strs.IsNotEmpty(a.FileName) && strs.IsNotEmpty(a.Url)
+	return strs.IsNotEmpty(a.FileName) && strs.IsNotEmpty(a.URL)
 }
 
 // IsValid checks if the checksums data is valid.

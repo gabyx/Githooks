@@ -116,7 +116,7 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 				cm.ListItemLiteral, file, exists, catergory)
 			cm.AssertNoErrorPanic(err, "Could not format ignore files.")
 
-			count += 1
+			count++
 		}
 	}
 
@@ -157,9 +157,11 @@ in the subfolder '<hook-name>'.
 	return c
 }
 
+// SeeHookListHelpText contains common used help text.
 const SeeHookListHelpText = `To see the namespace paths of all hooks in the active repository,
 see '<ns-path>' in the output of 'git hooks list'.`
 
+// NamespaceHelpText contains common used help text.
 const NamespaceHelpText = `#### Hook Namespace Path
 
 The namespaced path of a hook file consists of
@@ -190,6 +192,7 @@ For previous replace hooks in '<repo>/.git/hooks/<hookName>.replaced.githook':
 - '<hooksDir>'  ≔ '<repo>/.git/hooks'
 - '<namespace>' ≔ 'hooks'`
 
+// PatternsHelpText contains common used help text.
 const PatternsHelpText = `#### Glob Pattern Syntax
 
 The glob pattern syntax supports the 'globstar' (double star) syntax
@@ -205,6 +208,7 @@ func addFlags(cmd *cobra.Command, patterns *hooks.HookPatterns) {
 		"Specified path fully matching a hook namespace path.")
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	var ignoreActionOpts = ignoreActionOptions{}

@@ -9,6 +9,7 @@ var defaultURL = "https://github.com/gabyx/githooks.git"
 // Empty means we clone the default branch.
 var defaultBranch = ""
 
+// DefaultRemote is the default Git remote name.
 var DefaultRemote = "origin"
 
 // GetDefaultCloneURL get the default clone url.

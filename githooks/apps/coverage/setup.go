@@ -7,11 +7,15 @@ import (
 	"path"
 )
 
-type CoverageData struct {
+// Data holds the counter of the current coverage data file of a run.
+// Gets incremented in each run, to accumulate multiple files.
+// This is a go-coverage tooling workaround.
+type Data struct {
 	Counter int `yaml:"counter"`
 }
 
-func ReadCoverData(executableName string) (coverDir string, covDataFile string, covData CoverageData) {
+// ReadCoverData reads coverage data.
+func ReadCoverData(executableName string) (coverDir string, covDataFile string, covData Data) {
 	coverDir = os.Getenv("GH_COVERAGE_DIR")
 	cm.PanicIf(strs.IsEmpty(coverDir), "You need to set 'GH_COVERAGE_DIR'")
 
@@ -30,12 +34,13 @@ func ReadCoverData(executableName string) (coverDir string, covDataFile string, 
 	return
 }
 
+// Setup setups the coverage stuff.
 func Setup(executableName string) (run bool) {
 
 	_, covDataFile, covData := ReadCoverData(executableName)
 
 	// Write the new counter for the next run.
-	covData.Counter += 1
+	covData.Counter++
 	err := cm.StoreYAML(covDataFile, &covData)
 	cm.AssertNoErrorPanicF(err, "Could not store '%s'", covDataFile)
 

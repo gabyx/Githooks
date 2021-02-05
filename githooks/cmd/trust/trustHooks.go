@@ -17,7 +17,7 @@ func getAllHooks(
 	gitDir string,
 	repoHooksDir string,
 	shared hooks.SharedRepos,
-	state *list.ListHookState) (allHooks []hooks.Hook) {
+	state *list.ListingState) (allHooks []hooks.Hook) {
 
 	allHooks = make([]hooks.Hook, 0, 10+2*shared.GetCount()) // nolint: gomnd
 
@@ -95,7 +95,7 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 		hook := &allHooks[i]
 
 		if all || patterns.Matches(hook.NamespacePath) {
-			countMatches += 1
+			countMatches++
 			apply(ctx.Log, hook, state.Checksums, reset)
 		}
 	}
@@ -105,6 +105,7 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 
 }
 
+// NewTrustHooksCmd creates this new command.
 func NewTrustHooksCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	reset := false
@@ -125,7 +126,7 @@ by '--patterns' or '--paths'.` + "\n\n" +
 
 			count := len(patterns.NamespacePaths) + len(patterns.Patterns)
 			if all {
-				count += 1
+				count++
 			}
 
 			ctx.Log.PanicIfF(count == 0, "You need to provide at least one pattern or namespace path.")

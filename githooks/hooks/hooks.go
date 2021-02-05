@@ -59,6 +59,7 @@ type HookResult struct {
 	Error  error
 }
 
+// TaggedHooksIndex is the index type for hook tags.
 type TaggedHooksIndex int
 type taggedHooksIndex struct {
 	Replaced     TaggedHooksIndex
@@ -69,7 +70,9 @@ type taggedHooksIndex struct {
 	count        int
 }
 
-//nolint: gomnd
+// TaggedHookIndices is a list of indices for all
+// possible hooks Githooks supports.
+// nolint: gomnd
 var TaggedHookIndices = taggedHooksIndex{
 	Replaced:     0,
 	Repo:         1,
@@ -78,7 +81,7 @@ var TaggedHookIndices = taggedHooksIndex{
 	SharedGlobal: 4,
 	count:        5}
 
-// HookMap represents a map for all hooks sorted by tags.
+// TaggedHooks represents a map for all hooks sorted by tags.
 // A list of hooks for each index `TaggedHookIndices`.
 type TaggedHooks [][]Hook
 
@@ -93,11 +96,16 @@ func NewTaggedHooks(capacity int) (res TaggedHooks) {
 }
 
 const (
-	TagNameReplaced     = "replaced"      // Hook tag for replaced hooks.
-	TagNameRepository   = "repo"          // Hook tag for repository hooks.
-	TagNameSharedRepo   = "shared:repo"   // Hook tag for shared hooks inside the repository.
-	TagNameSharedLocal  = "shared:local"  // Hook tag for shared hooks in the local Git config.
-	TagNameSharedGLobal = "shared:global" // Hook tag for shared hooks in the global Git config.
+	// TagNameReplaced is the hook tag for replaced hooks.
+	TagNameReplaced = "replaced"
+	// TagNameRepository is the hook tag for repository hooks.
+	TagNameRepository = "repo"
+	// TagNameSharedRepo is the hook tag for shared hooks inside the repository.
+	TagNameSharedRepo = "shared:repo"
+	// TagNameSharedLocal is the hook tag for shared hooks in the local Git config.
+	TagNameSharedLocal = "shared:local"
+	// TagNameSharedGLobal is the hook tag for shared hooks in the global Git config.
+	TagNameSharedGLobal = "shared:global"
 )
 
 // GetHookTagNameMappings gets the mapping of a hook tag to a name.
@@ -111,7 +119,10 @@ func GetHookTagNameMappings() []string {
 		TagNameSharedGLobal}
 }
 
+// IngoreCallback is the callback type for ignoring hooks.
 type IngoreCallback = func(namespacePath string) (ignored bool)
+
+// TrustCallback is the callback type for trusting hooks.
 type TrustCallback = func(hookPath string) (trusted bool, sha1 string)
 
 // GetAllHooksIn gets all hooks with name `hookName`
@@ -193,7 +204,7 @@ func GetAllHooksIn(
 			base := path.Base(p)
 
 			if !allParallel {
-				maxBatches += 1
+				maxBatches++
 				// The basename of the hook file or batch dir
 				// defines the batch name.
 				batchName = base
@@ -244,14 +255,14 @@ func GetAllHooksIn(
 		}
 
 	case cm.IsFile(dirOrFile):
-		maxBatches += 1
+		maxBatches++
 		// Check hook in `path/pre-commit`
 		err = appendHook(hooksDir, dirOrFile, hookNamespace, path.Base(dirOrFile))
 	default:
 		// Check hook in `path/pre-commit.yaml`
 		runConfig := dirOrFile + ".yaml"
 		if cm.IsFile(runConfig) {
-			maxBatches += 1
+			maxBatches++
 			err = appendHook(hooksDir, runConfig, hookNamespace, path.Base(runConfig))
 		}
 	}
@@ -339,7 +350,7 @@ func ExecuteHooksParallel(
 	return res, nil
 }
 
-// Store stores the hooks priority list in JSON to the writer.
+// StoreJSON stores the hooks priority list in JSON to the writer.
 func (h *Hooks) StoreJSON(writer io.Writer) error {
 	return cm.WriteJSON(writer, h)
 }

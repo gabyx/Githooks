@@ -30,7 +30,7 @@ func SetCommandDefaults(log cm.ILogContext, cmd *cobra.Command) *cobra.Command {
 	return cmd
 }
 
-// cmd.AssertRepoRoot asserts that the current directory is in a repository.
+// AssertRepoRoot asserts that the current directory is in a repository.
 // Returns repository root and its git directory.
 func AssertRepoRoot(ctx *CmdContext) (repoRoot, gitDir, gitDirWorktree string) {
 	repoRoot, gitDir, gitDirWorktree, err := ctx.GitX.GetRepoRoot()
@@ -43,7 +43,7 @@ func AssertRepoRoot(ctx *CmdContext) (repoRoot, gitDir, gitDirWorktree string) {
 	return
 }
 
-// Gets a list of formatted hook names.
+// GetFormattedHookList gets a list of formatted hook names.
 func GetFormattedHookList(indent string) string {
 	return strings.Join(strs.Map(hooks.ManagedHookNames,
 		func(s string) string {

@@ -151,7 +151,7 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
 	}
 
-	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCK_FailOnNonExistingSharedHooks, git.Traverse) == "true"
+	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCKFailOnNonExistingSharedHooks, git.Traverse) == "true"
 
 	s := HookSettings{
 		Args:               os.Args[2:],
@@ -211,8 +211,8 @@ func getInstallDir() string {
 
 func assertRegistered(gitx *git.Context, installDir string) {
 
-	if !gitx.IsConfigSet(hooks.GitCK_Registered, git.LocalScope) &&
-		!gitx.IsConfigSet(git.GitCK_CoreHooksPath, git.Traverse) {
+	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) &&
+		!gitx.IsConfigSet(git.GitCKCoreHooksPath, git.Traverse) {
 
 		gitDir, err := gitx.GetGitDirCommon()
 		log.AssertNoErrorPanicF(err, "Could not get Git common dir.")
@@ -455,7 +455,7 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	if settings.HookName != "post-merge" &&
 		!(settings.HookName == "post-checkout" &&
 			settings.Args[0] == git.NullRef) &&
-		!strs.Includes(settings.GitX.GetConfigAll(hooks.GitCK_SharedUpdateTriggers, git.Traverse),
+		!strs.Includes(settings.GitX.GetConfigAll(hooks.GitCKSharedUpdateTriggers, git.Traverse),
 			settings.HookName) {
 
 		log.Debug("Shared hooks not updated.")
@@ -524,7 +524,7 @@ func getConfigSharedHooks(
 			"Shared hooks are demanded but failed "+
 				"to parse the %s config:\n'%s'",
 			hooks.GetSharedHookTypeString(sharedType),
-			hooks.GitCK_Shared)
+			hooks.GitCKShared)
 	}
 
 	for i := range shared {
@@ -709,7 +709,7 @@ func getHooksIn(
 		if *curBatchName != hook.BatchName {
 			// Batch name changed, add another batch...
 			batches = append(batches, []hooks.Hook{})
-			curBatchIdx += 1
+			curBatchIdx++
 			curBatchName = &hook.BatchName
 		}
 
@@ -767,71 +767,71 @@ func showTrustPrompt(
 
 	if hook.Trusted {
 		return
+	}
+
+	mess := strs.Fmt("New or changed hook found:\n'%s'", hook.Path)
+
+	acceptHook := uiSettings.AcceptAllChanges
+	disableHook := false
+
+	if !acceptHook {
+
+		question := mess + "\nDo you accept the changes?"
+
+		answer, err := uiSettings.PromptCtx.ShowPromptOptions(question,
+			"(Yes, all, no, disable)",
+			"Y/a/n/d",
+			"Yes", "All", "No", "Disable")
+		log.AssertNoError(err, "Could not show prompt.")
+
+		switch answer {
+		case "a":
+			uiSettings.AcceptAllChanges = true
+			fallthrough // nolint:nlreturn
+		case "y":
+			acceptHook = true
+		case "d":
+			disableHook = true
+		default:
+			// Don't run hook ...
+		}
 	} else {
-		mess := strs.Fmt("New or changed hook found:\n'%s'", hook.Path)
+		log.Info("-> Already accepted.")
+	}
 
-		acceptHook := uiSettings.AcceptAllChanges
-		disableHook := false
+	if acceptHook || disableHook {
+		err := hook.AssertSHA1()
+		log.AssertNoError(err, "Could not compute SHA1 hash of '%s'.", hook.Path)
+	}
 
-		if !acceptHook {
+	if acceptHook {
+		hook.Trusted = true
 
-			question := mess + "\nDo you accept the changes?"
+		uiSettings.AppendTrustedHook(
+			hooks.ChecksumResult{
+				SHA1:          hook.SHA1,
+				Path:          hook.Path,
+				NamespacePath: hook.NamespacePath})
 
-			answer, err := uiSettings.PromptCtx.ShowPromptOptions(question,
-				"(Yes, all, no, disable)",
-				"Y/a/n/d",
-				"Yes", "All", "No", "Disable")
-			log.AssertNoError(err, "Could not show prompt.")
+		checksums.AddChecksum(hook.SHA1, hook.Path)
 
-			switch answer {
-			case "a":
-				uiSettings.AcceptAllChanges = true
-				fallthrough // nolint:nlreturn
-			case "y":
-				acceptHook = true
-			case "d":
-				disableHook = true
-			default:
-				// Don't run hook ...
-			}
-		} else {
-			log.Info("-> Already accepted.")
-		}
+	} else if disableHook {
+		log.InfoF("-> Adding hook\n'%s'\nto disabled list.", hook.Path)
 
-		if acceptHook || disableHook {
-			err := hook.AssertSHA1()
-			log.AssertNoError(err, "Could not compute SHA1 hash of '%s'.", hook.Path)
-		}
+		hook.Active = false
 
-		if acceptHook {
-			hook.Trusted = true
-
-			uiSettings.AppendTrustedHook(
-				hooks.ChecksumResult{
-					SHA1:          hook.SHA1,
-					Path:          hook.Path,
-					NamespacePath: hook.NamespacePath})
-
-			checksums.AddChecksum(hook.SHA1, hook.Path)
-
-		} else if disableHook {
-			log.InfoF("-> Adding hook\n'%s'\nto disabled list.", hook.Path)
-
-			hook.Active = false
-
-			uiSettings.AppendDisabledHook(
-				hooks.ChecksumResult{
-					SHA1:          hook.SHA1,
-					Path:          hook.Path,
-					NamespacePath: hook.NamespacePath})
-		}
+		uiSettings.AppendDisabledHook(
+			hooks.ChecksumResult{
+				SHA1:          hook.SHA1,
+				Path:          hook.Path,
+				NamespacePath: hook.NamespacePath})
 	}
 }
 
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	var nThreads = runtime.NumCPU()
-	nThSetting := settings.GitX.GetConfig(hooks.GitCK_NumThreads, git.Traverse)
+	nThSetting := settings.GitX.GetConfig(hooks.GitCKNumThreads, git.Traverse)
 	if n, err := strconv.Atoi(nThSetting); err == nil {
 		nThreads = n
 	}

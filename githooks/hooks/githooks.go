@@ -14,12 +14,13 @@ import (
 // HooksDirName denotes the directory name used for repository specific hooks.
 const HooksDirName = ".githooks"
 
+// GithooksWebpage is the main Githooks webpage.
 const GithooksWebpage = "https://github.com/gabyx/githooks"
 
 // DefaultBugReportingURL is the default url to report errors.
 const DefaultBugReportingURL = "https://github.com/gabyx/githooks/issues"
 
-// ManagedServerHookNames are hook names managed by Githooks for normal repositories.
+// ManagedHookNames are hook names managed by Githooks for normal repositories.
 var ManagedHookNames = []string{
 	"applypatch-msg",
 	"pre-applypatch",
@@ -93,7 +94,7 @@ func GetBugReportingInfo(repoPath string) (info string, err error) {
 	}
 
 	// Check global Git config
-	info = git.Ctx().GetConfig(GitCK_BugReportInfo, git.GlobalScope)
+	info = git.Ctx().GetConfig(GitCKBugReportInfo, git.GlobalScope)
 
 	return
 }
@@ -110,12 +111,12 @@ func GetSharedGithooksDir(repoDir string) string {
 
 // GetInstallDir returns the Githooks install directory.
 func GetInstallDir() string {
-	return filepath.ToSlash(git.Ctx().GetConfig(GitCK_InstallDir, git.GlobalScope))
+	return filepath.ToSlash(git.Ctx().GetConfig(GitCKInstallDir, git.GlobalScope))
 }
 
 // SetInstallDir sets the global Githooks install directory.
 func SetInstallDir(path string) error {
-	return git.Ctx().SetConfig(GitCK_InstallDir, path, git.GlobalScope)
+	return git.Ctx().SetConfig(GitCKInstallDir, path, git.GlobalScope)
 }
 
 // GetBinaryDir returns the Githooks binary directory inside the install directory.
@@ -123,7 +124,7 @@ func GetBinaryDir(installDir string) string {
 	return path.Join(installDir, "bin")
 }
 
-// AssertTemporaryDir returns the Githooks temporary directory inside the install directory.
+// GetTemporaryDir returns the Githooks temporary directory inside the install directory.
 func GetTemporaryDir(installDir string) string {
 	cm.DebugAssert(strs.IsNotEmpty(installDir))
 
@@ -174,7 +175,7 @@ func SetRunnerExecutableAlias(path string) error {
 		return cm.ErrorF("Runner executable '%s' does not exist.", path)
 	}
 
-	return git.Ctx().SetConfig(GitCK_Runner, path, git.GlobalScope)
+	return git.Ctx().SetConfig(GitCKRunner, path, git.GlobalScope)
 }
 
 // SetCLIExecutableAlias sets the global Githooks runner executable.
@@ -183,7 +184,7 @@ func SetCLIExecutableAlias(path string) error {
 		return cm.ErrorF("CLI executable '%s' does not exist.", path)
 	}
 
-	return git.Ctx().SetConfig(GitCK_AliasHooks, strs.Fmt("!\"%s\"", path), git.GlobalScope)
+	return git.Ctx().SetConfig(GitCKAliasHooks, strs.Fmt("!\"%s\"", path), git.GlobalScope)
 }
 
 // GetReleaseCloneDir get the release clone directory inside the install dir.
@@ -193,7 +194,7 @@ func GetReleaseCloneDir(installDir string) string {
 	return path.Join(installDir, "release")
 }
 
-// Gets the LFS-Required file inside the repository.
+// GetLFSRequiredFile gets the LFS-Required file inside the repository.
 func GetLFSRequiredFile(repoDir string) string {
 	return path.Join(GetGithooksDir(repoDir), ".lfs-required")
 }
@@ -212,7 +213,7 @@ func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
 		}
 	}
 
-	disabled := gitx.GetConfig(GitCK_Disable, git.Traverse)
+	disabled := gitx.GetConfig(GitCKDisable, git.Traverse)
 
 	return disabled == "true" || // nolint: goconst
 		disabled == "y" || // Legacy

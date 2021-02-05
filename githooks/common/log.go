@@ -21,6 +21,7 @@ const (
 	promptSuffix   = "❓ " + githooksSuffix
 	indent         = "   "
 
+	// ListItemLiteral is the list item used for CLI and other printing stuff.
 	ListItemLiteral = "•"
 )
 
@@ -76,7 +77,7 @@ type ILogContext interface {
 	IsErrorATerminal() bool
 }
 
-// Interface for log statistics.
+// ILogStats is an interface for log statistics.
 type ILogStats interface {
 	ErrorCount() int
 	WarningCount() int
@@ -153,7 +154,7 @@ func CreateLogContext(onlyStderr bool) (*LogContext, error) {
 	return &log, nil
 }
 
-// HasColors returns if the log uses colors.
+// GetIndent returns the used indent.
 func (c *LogContext) GetIndent() string {
 	return indent
 }
@@ -260,10 +261,10 @@ func (c *LogContext) GetPromptFormatter(withColor bool) func(format string, args
 		return func(format string, args ...interface{}) string {
 			return c.colorPrompt(FormatMessageF(promptSuffix, indent, format, args...))
 		}
-	} else {
-		return func(format string, args ...interface{}) string {
-			return FormatMessageF(promptSuffix, indent, format, args...)
-		}
+	}
+
+	return func(format string, args ...interface{}) string {
+		return FormatMessageF(promptSuffix, indent, format, args...)
 	}
 }
 
@@ -273,10 +274,10 @@ func (c *LogContext) GetErrorFormatter(withColor bool) func(format string, args 
 		return func(format string, args ...interface{}) string {
 			return c.colorError(FormatMessageF(errorSuffix, indent, format, args...))
 		}
-	} else {
-		return func(format string, args ...interface{}) string {
-			return FormatMessageF(errorSuffix, indent, format, args...)
-		}
+	}
+
+	return func(format string, args ...interface{}) string {
+		return FormatMessageF(errorSuffix, indent, format, args...)
 	}
 }
 
@@ -286,10 +287,10 @@ func (c *LogContext) GetInfoFormatter(withColor bool) func(format string, args .
 		return func(format string, args ...interface{}) string {
 			return c.colorInfo(FormatMessageF(infoSuffix, indent, format, args...))
 		}
-	} else {
-		return func(format string, args ...interface{}) string {
-			return FormatMessageF(infoSuffix, indent, format, args...)
-		}
+	}
+
+	return func(format string, args ...interface{}) string {
+		return FormatMessageF(infoSuffix, indent, format, args...)
 	}
 }
 
@@ -305,31 +306,31 @@ func (c *LogContext) ErrorWithStacktraceF(format string, args ...interface{}) {
 	c.ErrorWithStacktrace(strs.Fmt(format, args...))
 }
 
-// Fatal logs an error and calls panic with a GithooksFailure.
+// Panic logs an error and calls panic with a GithooksFailure.
 func (c *LogContext) Panic(lines ...string) {
 	m := FormatMessage(errorSuffix, indent, lines...)
 	fmt.Fprint(c.error, c.colorError(m), "\n")
 	panic(GithooksFailure{m})
 }
 
-// FatalF logs an error and calls panic with a GithooksFailure.
+// PanicF logs an error and calls panic with a GithooksFailure.
 func (c *LogContext) PanicF(format string, args ...interface{}) {
 	m := FormatMessageF(errorSuffix, indent, format, args...)
 	fmt.Fprint(c.error, c.colorError(m), "\n")
 	panic(GithooksFailure{m})
 }
 
-// Warnings gets the number of logged warnings.
+// WarningCount gets the number of logged warnings.
 func (c *LogContext) WarningCount() int {
 	return c.nWarnings
 }
 
-// Errors gets the number of logged errors.
+// ErrorCount gets the number of logged errors.
 func (c *LogContext) ErrorCount() int {
 	return c.nErrors
 }
 
-// Reset resets the log statistics.
+// ResetStats resets the log statistics.
 func (c *LogContext) ResetStats() {
 	c.nErrors = 0
 	c.nWarnings = 0

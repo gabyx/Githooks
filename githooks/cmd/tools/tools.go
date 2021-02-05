@@ -24,7 +24,7 @@ func runToolsRegister(ctx *ccm.CmdContext, args []string) {
 	err := os.MkdirAll(rootDir, cm.DefaultFileModeDirectory)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not registration tool '%s'.", tool)
 
-	err = cm.CopyDirectory(dir, targetDir)
+	err = cm.CopyFileOrDirectory(dir, targetDir)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not registration tool '%s'.", tool)
 
 	ctx.Log.Info("Installed tool '%s'.", tool)
@@ -80,6 +80,7 @@ func validateTool(log cm.ILogContext, nArgs int) func(cmd *cobra.Command, args [
 	}
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	toolsCmd := &cobra.Command{

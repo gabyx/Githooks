@@ -6,6 +6,7 @@ import (
 	strs "gabyx/githooks/strings"
 )
 
+// UninstallSet is a typedef for tracking uninstalled repos.
 type UninstallSet = strs.StringSet
 
 // Settings are the settings for the installer.

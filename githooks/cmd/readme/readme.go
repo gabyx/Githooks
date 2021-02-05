@@ -42,6 +42,7 @@ func runUpdateReadme(ctx *ccm.CmdContext) {
 	updateReadme(ctx, false)
 }
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	readmeCmd := &cobra.Command{

@@ -8,8 +8,10 @@ import (
 )
 
 const (
+	// NamespaceRepositoryHook is the namespace for repository hooks.
 	NamespaceRepositoryHook = ""
-	NamespaceReplacedHook   = "hooks"
+	// NamespaceReplacedHook is the namespace for replace hooks.
+	NamespaceReplacedHook = "hooks"
 )
 
 func getNamespaceFile(hooksDir string) string {

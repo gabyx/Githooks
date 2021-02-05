@@ -18,7 +18,7 @@ func getReadmeFileContent() ([]byte, error) {
 	return build.Asset(path.Join(HooksDirName, "README.md"))
 }
 
-// WriteReadme writes the readme content to `file`.
+// WriteReadmeFile writes the readme content to `file`.
 func WriteReadmeFile(filePath string) (err error) {
 	readmeContent, e := getReadmeFileContent()
 	cm.AssertNoErrorPanic(e, "Could not get embedded readme content.")

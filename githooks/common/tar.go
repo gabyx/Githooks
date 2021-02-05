@@ -9,6 +9,8 @@ import (
 	"runtime"
 )
 
+// ExtractTarGz extracts `.tar.gz` streams to `baseDir` which must not exist.
+// Overwrites everything.
 func ExtractTarGz(gzipStream io.Reader, baseDir string) (err error) {
 	uncompressedStream, err := gzip.NewReader(gzipStream)
 	if err != nil {

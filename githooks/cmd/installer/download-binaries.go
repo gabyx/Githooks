@@ -19,16 +19,16 @@ import (
 // Currently that works for Github automatically.
 // For Gitea you need to specify the deploy api `deployAPI`.
 // Others will fail and need a special deploy settings config file.
-func detectDeploySettings(cloneUrl string, deployAPI string) (download.IDeploySettings, error) {
+func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySettings, error) {
 
 	publicPGP, err := build.Asset(path.Join("githooks", ".deploy-pgp"))
 	cm.AssertNoErrorPanic(err, "Could not get embedded deploy PGP.")
 
-	isLocal := git.IsCloneUrlALocalPath(cloneUrl) ||
-		git.IsCloneUrlALocalURL(cloneUrl)
+	isLocal := git.IsCloneURLALocalPath(cloneURL) ||
+		git.IsCloneURLALocalURL(cloneURL)
 	if isLocal {
 		return nil, cm.ErrorF(
-			"Url '%s' points to a local directory.", cloneUrl)
+			"Url '%s' points to a local directory.", cloneURL)
 	}
 
 	owner := ""
@@ -36,7 +36,7 @@ func detectDeploySettings(cloneUrl string, deployAPI string) (download.IDeploySe
 
 	// Parse the url.
 	host := ""
-	if hostAndPath := git.ParseSCPSyntax(cloneUrl); hostAndPath != nil {
+	if hostAndPath := git.ParseSCPSyntax(cloneURL); hostAndPath != nil {
 		// Parse SCP Syntax.
 		host = hostAndPath[0]
 		owner, repo = path.Split(hostAndPath[1])
@@ -46,9 +46,9 @@ func detectDeploySettings(cloneUrl string, deployAPI string) (download.IDeploySe
 
 	} else {
 		// Parse normal URL.
-		url, err := url.Parse(cloneUrl)
+		url, err := url.Parse(cloneURL)
 		if err != nil {
-			return nil, cm.ErrorF("Cannot parse clone url '%s'.", cloneUrl)
+			return nil, cm.ErrorF("Cannot parse clone url '%s'.", cloneURL)
 		}
 		host = url.Host
 		owner, repo = path.Split(url.Path)

@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewSettings creates common settings to use for all commands.
 func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 
 	var promptCtx prompt.IContext
@@ -64,6 +65,7 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 	cmd.AddCommand(uninstaller.NewCmd(ctx))
 }
 
+// MakeGithooksCtl returns the root command of the Githooks CLI executable.
 func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 
 	fmt := ctx.Log.GetInfoFormatter(false)
@@ -95,6 +97,7 @@ func initArgs() {
 	// not yet needed...
 }
 
+// Run executes the main CLI function.
 func Run(log cm.ILogContext, logStats cm.ILogStats) {
 
 	ctx := NewSettings(log, logStats)

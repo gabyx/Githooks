@@ -60,7 +60,7 @@ func (h *HookPatterns) AddPatterns(pattern ...string) {
 	h.Patterns = append(h.Patterns, pattern...)
 }
 
-// AddNamespacePathsUnique adds a namespace path to the patterns.
+// AddPatternsUnique adds a namespace path to the patterns.
 func (h *HookPatterns) AddPatternsUnique(pattern ...string) (added int) {
 	h.Patterns, added = strs.AppendUnique(h.Patterns, pattern...)
 
@@ -134,7 +134,7 @@ func (h *HookPatterns) RemoveAll() (removed int) {
 }
 
 // Reserve reserves 'nPatterns'.
-func (h *HookPatterns) Reseve(nPatterns int) {
+func (h *HookPatterns) Reserve(nPatterns int) {
 	if h.Patterns == nil {
 		h.Patterns = make([]string, 0, nPatterns)
 	}
@@ -156,7 +156,7 @@ func checkPatternInversion(p string) (string, bool) {
 	return p, false
 }
 
-// Match returns true if `namespacePath` matches any of the patterns and otherwise `false`.
+// Matches returns true if `namespacePath` matches any of the patterns and otherwise `false`.
 func (h *HookPatterns) Matches(namespacePath string) (matched bool) {
 
 	for _, p := range h.Patterns {
@@ -210,7 +210,7 @@ func (h *RepoIgnorePatterns) IsIgnored(namespacePath string) (bool, bool) {
 	return false, false
 }
 
-// GetHookIgnoreFilesHooksDir gets ignores files inside the hook directory.
+// GetHookIngoreFileHooksDir gets ignores files inside the hook directory.
 // The `hookName` can be empty.
 func GetHookIngoreFileHooksDir(repoHooksDir string, hookName string) string {
 	return path.Join(repoHooksDir, hookName, ".ignore.yaml")
@@ -231,7 +231,7 @@ func GetHookIgnoreFilesHooksDir(repoHooksDir string, hookNames []string) (files 
 // GetHookPatternsHooksDir gets all ignored hooks in the hook directory.
 func GetHookPatternsHooksDir(repoHooksDir string, hookNames []string) (patterns HookPatterns, err error) {
 	files := GetHookIgnoreFilesHooksDir(repoHooksDir, hookNames)
-	patterns.Reseve(2 * len(files)) // nolint: gomnd
+	patterns.Reserve(2 * len(files)) // nolint: gomnd
 
 	for _, file := range files {
 		if cm.IsFile(file) {
@@ -267,7 +267,7 @@ func StoreHookPatternsGitDir(patterns HookPatterns, gitDirWorktree string) error
 		path.Join(gitDirWorktree, ".githooks.ignore.yaml"))
 }
 
-// loadIgnorePatterns loads patterns.
+// LoadIgnorePatterns loads patterns.
 func LoadIgnorePatterns(file string) (patterns HookPatterns, err error) {
 	data := createHookIgnoreFile()
 

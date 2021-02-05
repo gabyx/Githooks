@@ -116,7 +116,7 @@ func (c *Context) GetConfigAllU(key string, scope ConfigScope) string {
 	return c.getConfigWithArgs(key, scope, "--get-all")
 }
 
-// GetConfigAll gets all Git configuration values for regex `regex`.
+// GetConfigRegex gets all Git configuration values for regex `regex`.
 // Returns a list of pairs.
 func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]string) {
 	configs, err := c.Get("config", string(scope), "--get-regexp", regex)
@@ -171,9 +171,9 @@ func (c *Context) UnsetConfig(key string, scope ConfigScope) (err error) {
 	if exitC == 5 || exitC == 0 { // nolint: gomnd
 		//See: https: //git-scm.com/docs/git-config#_description
 		return nil
-	} else {
-		return cm.CombineErrors(err, cm.ErrorF("Exit code: '%v'", exitC))
 	}
+
+	return cm.CombineErrors(err, cm.ErrorF("Exit code: '%v'", exitC))
 }
 
 // IsConfigSet tells if a git config is set.
@@ -188,6 +188,8 @@ func (c *Context) IsConfigSet(key string, scope ConfigScope) bool {
 	return err == nil
 }
 
+// SanitizeEnv santizes the environement from unwanted Git (possibly leaking)
+// Git variables which might interfere with certain buggy Git commands.
 func SanitizeEnv(env []string) []string {
 	return strs.Filter(env, func(s string) bool {
 		return !strings.Contains(s, "GIT_DIR") &&

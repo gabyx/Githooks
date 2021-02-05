@@ -10,7 +10,7 @@ const charset = "abcdefghijklmnopqrstuvwxyz" +
 
 var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-// RandomString generates a random string of length `length` with the charset `charset`.
+// RandomStringCharSet generates a random string of length `length` with the charset `charset`.
 func RandomStringCharSet(length int, charset string) string {
 	b := make([]byte, length)
 

@@ -2,93 +2,93 @@ package hooks
 
 // Git config keys for globals config.
 const (
-	GitCK_InstallDir = "githooks.installDir"
-	GitCK_Runner     = "githooks.runner"
-	GitCK_Disable    = "githooks.disable"
+	GitCKInstallDir = "githooks.installDir"
+	GitCKRunner     = "githooks.runner"
+	GitCKDisable    = "githooks.disable"
 
-	GitCK_MaintainOnlyServerHooks = "githooks.maintainOnlyServerHooks"
+	GitCKMaintainOnlyServerHooks = "githooks.maintainOnlyServerHooks"
 
-	GitCK_AutoUpdateEnabled        = "githooks.autoUpdateEnabled"
-	GitCK_AutoUpdateCheckTimestamp = "githooks.autoUpdateCheckTimestamp"
-	GitCK_AutoUpdateUsePrerelease  = "githooks.autoUpdateUsePrerelease"
+	GitCKAutoUpdateEnabled        = "githooks.autoUpdateEnabled"
+	GitCKAutoUpdateCheckTimestamp = "githooks.autoUpdateCheckTimestamp"
+	GitCKAutoUpdateUsePrerelease  = "githooks.autoUpdateUsePrerelease"
 
-	GitCK_BugReportInfo = "githooks.bugReportInfo"
+	GitCKBugReportInfo = "githooks.bugReportInfo"
 
-	GitCK_ChecksumCacheDir = "githooks.checksumCacheDir"
+	GitCKChecksumCacheDir = "githooks.checksumCacheDir"
 
-	GitCK_CloneBranch     = "githooks.cloneBranch"
-	GitCK_CloneUrl        = "githooks.cloneUrl"
-	GitCK_BuildFromSource = "githooks.buildFromSource"
-	GitCK_GoExecutable    = "githooks.goExecutable"
+	GitCKCloneBranch     = "githooks.cloneBranch"
+	GitCKCloneURL        = "githooks.cloneUrl"
+	GitCKBuildFromSource = "githooks.buildFromSource"
+	GitCKGoExecutable    = "githooks.goExecutable"
 
-	GitCK_DeleteDetectedLFSHooksAnswer = "githooks.deleteDetectedLFSHooks"
-	GitCK_FailOnNonExistingSharedHooks = "githooks.failOnNonExistingSharedHooks"
+	GitCKDeleteDetectedLFSHooksAnswer = "githooks.deleteDetectedLFSHooks"
+	GitCKFailOnNonExistingSharedHooks = "githooks.failOnNonExistingSharedHooks"
 
-	GitCK_UseCoreHooksPath        = "githooks.useCoreHooksPath"
-	GitCK_PathForUseCoreHooksPath = "githooks.pathForUseCoreHooksPath"
+	GitCKUseCoreHooksPath        = "githooks.useCoreHooksPath"
+	GitCKPathForUseCoreHooksPath = "githooks.pathForUseCoreHooksPath"
 
-	GitCK_PreviousSearchDir = "githooks.previousSearchDir"
-	GitCK_NumThreads        = "githooks.numThreads"
+	GitCKPreviousSearchDir = "githooks.previousSearchDir"
+	GitCKNumThreads        = "githooks.numThreads"
 
-	GitCK_AliasHooks = "alias.hooks"
+	GitCKAliasHooks = "alias.hooks"
 )
 
 // Git config keys for local config.
 const (
-	GitCK_Registered = "githooks.registered"
-	GitCK_TrustAll   = "githooks.trustAll"
+	GitCKRegistered = "githooks.registered"
+	GitCKTrustAll   = "githooks.trustAll"
 )
 
 // Git config keys for local/global config.
 const (
-	GitCK_Shared               = "githooks.shared"
-	GitCK_SharedUpdateTriggers = "githooks.sharedHooksUpdateTriggers"
+	GitCKShared               = "githooks.shared"
+	GitCKSharedUpdateTriggers = "githooks.sharedHooksUpdateTriggers"
 )
 
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
 func GetGlobalGitConfigKeys() []string {
 	return []string{
-		GitCK_InstallDir,
-		GitCK_Runner,
-		GitCK_Disable,
+		GitCKInstallDir,
+		GitCKRunner,
+		GitCKDisable,
 
-		GitCK_MaintainOnlyServerHooks,
-		GitCK_PreviousSearchDir,
+		GitCKMaintainOnlyServerHooks,
+		GitCKPreviousSearchDir,
 
-		GitCK_AutoUpdateEnabled,
-		GitCK_AutoUpdateCheckTimestamp,
-		GitCK_AutoUpdateUsePrerelease,
+		GitCKAutoUpdateEnabled,
+		GitCKAutoUpdateCheckTimestamp,
+		GitCKAutoUpdateUsePrerelease,
 
-		GitCK_BugReportInfo,
+		GitCKBugReportInfo,
 
-		GitCK_ChecksumCacheDir,
+		GitCKChecksumCacheDir,
 
-		GitCK_CloneBranch,
-		GitCK_CloneUrl,
-		GitCK_GoExecutable,
-		GitCK_BuildFromSource,
+		GitCKCloneBranch,
+		GitCKCloneURL,
+		GitCKGoExecutable,
+		GitCKBuildFromSource,
 
-		GitCK_DeleteDetectedLFSHooksAnswer,
-		GitCK_FailOnNonExistingSharedHooks,
+		GitCKDeleteDetectedLFSHooksAnswer,
+		GitCKFailOnNonExistingSharedHooks,
 
-		GitCK_UseCoreHooksPath,
-		GitCK_PathForUseCoreHooksPath,
+		GitCKUseCoreHooksPath,
+		GitCKPathForUseCoreHooksPath,
 
-		GitCK_NumThreads,
+		GitCKNumThreads,
 
-		GitCK_AliasHooks,
+		GitCKAliasHooks,
 
 		// User and global.
-		GitCK_Shared,
-		GitCK_SharedUpdateTriggers}
+		GitCKShared,
+		GitCKSharedUpdateTriggers}
 }
 
 // GetLocalGitConfigKeys gets all local git config keys relevant for Githooks.
 func GetLocalGitConfigKeys() []string {
 	return []string{
-		GitCK_Registered,
-		GitCK_TrustAll,
+		GitCKRegistered,
+		GitCKTrustAll,
 
-		GitCK_Shared,
-		GitCK_SharedUpdateTriggers}
+		GitCKShared,
+		GitCKSharedUpdateTriggers}
 }

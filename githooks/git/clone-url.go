@@ -6,9 +6,9 @@ var reURLScheme *regexp.Regexp = regexp.MustCompile(`(?m)^[^:/?#]+://`)
 var reShortSCPSyntax = regexp.MustCompile(`(?m)^.+@(:P<host>.+):(:P<path>.+)`)
 var reFileURLScheme = regexp.MustCompile(`(?m)^file://`)
 
-// IsCloneUrlALocalPath checks if the clone url is local path.
+// IsCloneURLALocalPath checks if the clone url is local path.
 // Thats the case if its not a URL Scheme or a short SCP syntax.
-func IsCloneUrlALocalPath(url string) bool {
+func IsCloneURLALocalPath(url string) bool {
 	return !(reURLScheme.MatchString(url) || reShortSCPSyntax.MatchString(url))
 }
 
@@ -22,8 +22,8 @@ func ParseSCPSyntax(url string) []string {
 	return nil
 }
 
-// IsCloneUrlALocalURL checks if the clone url is a url to a local directory.
+// IsCloneURLALocalURL checks if the clone url is a url to a local directory.
 // Thats the case only for `file://`.
-func IsCloneUrlALocalURL(url string) bool {
+func IsCloneURLALocalURL(url string) bool {
 	return reFileURLScheme.MatchString(url)
 }

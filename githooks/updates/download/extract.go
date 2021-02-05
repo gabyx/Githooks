@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Exctact extracts a file int dir.
+// Extract extracts a file int dir.
 // The extension guides the type of extraction.
 func Extract(file string, extension string, dir string) error {
 	// Extract the file.

@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	vi := viper.New()
@@ -220,7 +221,7 @@ func uninstallFromRegisteredRepos(
 }
 
 func cleanTemplateDir(log cm.ILogContext) {
-	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCK_UseCoreHooksPath, git.GlobalScope)
+	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 
 	hookTemplateDir, err := install.FindHookTemplateDir(installUsesCoreHooksPath == "true")
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
@@ -292,11 +293,11 @@ func cleanGitConfig(log cm.ILogContext) {
 	gitx := git.Ctx()
 
 	// Remove core.hooksPath if we are using it.
-	pathForUseCoreHooksPath := gitx.GetConfig(hooks.GitCK_PathForUseCoreHooksPath, git.GlobalScope)
-	coreHooksPath := gitx.GetConfig(git.GitCK_CoreHooksPath, git.GlobalScope)
+	pathForUseCoreHooksPath := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
+	coreHooksPath := gitx.GetConfig(git.GitCKCoreHooksPath, git.GlobalScope)
 
 	if coreHooksPath == pathForUseCoreHooksPath {
-		err := gitx.UnsetConfig(git.GitCK_CoreHooksPath, git.GlobalScope)
+		err := gitx.UnsetConfig(git.GitCKCoreHooksPath, git.GlobalScope)
 		log.AssertNoError(err, "Could not unset global Git config 'core.hooksPath'.")
 	}
 

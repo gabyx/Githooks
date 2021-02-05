@@ -281,7 +281,7 @@ func UninstallRunWrappers(dir string, hookNames []string) (err error) {
 	return
 }
 
-// Installs LFS Hooks into `gitDir`.
+// InstallLFSHooks installs LFS Hooks into `gitDir`.
 func InstallLFSHooks(gitDir string) error {
 	return git.CtxC(gitDir).Check("lfs", "install")
 }

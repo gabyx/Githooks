@@ -6,12 +6,12 @@ import (
 	"strings"
 )
 
-// NotEmpty returns `true` if the string is not empty.
+// IsNotEmpty returns `true` if the string is not empty.
 func IsNotEmpty(s string) bool {
 	return s != ""
 }
 
-// NotEmpty returns `true` if the string is not empty.
+// IsEmpty returns `true` if the string is not empty.
 func IsEmpty(s string) bool {
 	return s == ""
 }
@@ -31,7 +31,7 @@ func Fmt(format string, a ...interface{}) string {
 	return fmt.Sprintf(format, a...)
 }
 
-// Fmt returns a formatted string.
+// FmtW returns a formatted string.
 func FmtW(w io.Writer, format string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(w, format, a...)
 }
