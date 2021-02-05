@@ -36,13 +36,17 @@ func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySe
 
 	// Parse the url.
 	host := ""
-	if hostAndPath := git.ParseSCPSyntax(cloneURL); hostAndPath != nil {
+	if userHostPath := git.ParseSCPSyntax(cloneURL); userHostPath != nil { //nolint: gocritic
 		// Parse SCP Syntax.
-		host = hostAndPath[0]
-		owner, repo = path.Split(hostAndPath[1])
+		host = userHostPath[1]
+		owner, repo = path.Split(userHostPath[2])
 
 		owner = strings.TrimSpace(strings.TrimPrefix(owner, "/"))
 		repo = strings.TrimSpace(strings.TrimSuffix(repo, ".git"))
+	} else if git.ParseRemoteHelperSyntax(cloneURL) != nil {
+
+		return nil,
+			cm.ErrorF("Cannot auto-determine deploy API for url '%s'.", cloneURL)
 
 	} else {
 		// Parse normal URL.
@@ -56,8 +60,6 @@ func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySe
 		owner = strings.TrimSpace(strings.ReplaceAll(owner, "/", ""))
 		repo = strings.TrimSpace(strings.TrimSuffix(repo, ".git"))
 	}
-
-	// For SCP we don't know the protocol, we take https as default.
 
 	// If deploy API hint is not given,
 	// define it by the parsed host.

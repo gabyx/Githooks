@@ -13,15 +13,21 @@ GO_SRC="$REPO_DIR/githooks"
 cd "$GO_SRC" || exit 1
 
 echo "Go generate ..."
-
 export CGO_ENABLED=0
 
 go mod vendor
 go generate -mod vendor ./...
 
-if ! go test ./...; then
-    echo "Go testsuite reported errors."
-    exit 1
+if [ -d /cover ]; then
+    if ! go test ./... -test.coverprofile /cover/tests.cov -covermode=count -coverpkg ./...; then
+        echo "! Go testsuite reported errors." >&2
+        exit 1
+    fi
+else
+    if ! go test ./...; then
+        echo "! Go testsuite reported errors." >&2
+        exit 1
+    fi
 fi
 
 exit 0
