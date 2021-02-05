@@ -292,7 +292,7 @@ func showPromptMulti(
 	}
 
 	ans := ""
-	isPromptDisplayed := false
+	var isPromptDisplayed bool
 	prompt := p.promptFmt(text + " : ")
 
 	for doParse {

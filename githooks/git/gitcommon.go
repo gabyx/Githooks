@@ -369,7 +369,7 @@ func FetchOrClone(
 		isNewClone = false
 
 		if repoCheck != nil {
-			reclone := false
+			var reclone bool
 			if reclone, err = repoCheck(*gitx, url, branch); err != nil {
 				return
 			}

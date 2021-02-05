@@ -875,7 +875,7 @@ func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, 
 		promptMsg = "Would you like to re-enable them,\ndone once a day after a commit?"
 	}
 
-	activate := false
+	var activate bool
 
 	if nonInteractive {
 		activate = true

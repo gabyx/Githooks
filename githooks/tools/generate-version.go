@@ -73,5 +73,5 @@ func main() {
 	defer f.Close()
 
 	_, err = f.Write(src)
-	cm.AssertNoErrorPanicF(err, "Writting template file failed.")
+	cm.AssertNoErrorPanicF(err, "Writing template file failed.")
 }
