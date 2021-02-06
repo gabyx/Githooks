@@ -79,7 +79,9 @@ If a file is executable, it is directly invoked, otherwise it is interpreted wit
 On Windows that mostly means dispatching to the `bash.exe` from [https://gitforwindows.org](https://gitforwindows.org).
 
 **All parameters and standard input** are forwarded from Git to the hooks.
-The standard output and standard error of any hook which Githooks runs is captured **together**<span id="a1">[<sup>1</sup>](#1)</span>. and printed to the standard error stream which might or might not get read by Git itself (e.g. `pre-push`).
+The standard output and standard error of any hook which Githooks runs is captured
+**together**<span id="a1">[<sup>1</sup>](#1)</span>. and printed to the standard error stream which might or might
+ not get read by Git itself (e.g. `pre-push`).
 
 Hooks can also be specified by a run configuration in a corresponding YAML file,
 see [#hook-run-configuration](Hook Run Configuration).
@@ -101,11 +103,16 @@ done
 The `ACMR` filter in the `git diff` will include staged
 files that are added, copied, modified or renamed.
 
-**<span id="1"><sup>1</sup></span>[⏎](#a1) Note:** This caveat is basically there because standard output and error might get interleaved badly and so far no solution to this small problem has been tackled yet. It is far better to output both streams in the correct order, and therefore send it to the error stream because that will not conflict in anyway with Git (see [fsmonitor-watchman](https://git-scm.com/docs/githooks#_fsmonitor_watchman), unsupported right now.). If that poses a real problem for you, open an issue.
+**<span id="1"><sup>1</sup></span>[⏎](#a1) Note:** This caveat is basically there because standard output and
+error might get interleaved badly and so far no solution to this small problem has been tackled yet.
+It is far better to output both streams in the correct order, and therefore send it to the error stream
+because that will not conflict in anyway with Git (see [fsmonitor-watchman](https://git-scm.com/docs/githooks#_fsmonitor_watchman),
+unsupported right now.). If that poses a real problem for you, open an issue.
 
 ### Hook Run Configuration
 
-Each supported hook can also be specified by a configuration file `<hookName>.yaml` where `<hookName>` is any [supported hook name](#supported-hooks). An example might look like the following:
+Each supported hook can also be specified by a configuration file `<hookName>.yaml` where `<hookName>` is
+any [supported hook name](#supported-hooks). An example might look like the following:
 
 ```yaml
 # The command to run.
@@ -132,19 +139,26 @@ All environment and Git config variables in `args` and `cmd` are substituted wit
 - `${git-g:VAR}` : A Git config variable `VAR` which corresponds to `git config --global 'VAR'`.
 - `${git-s:VAR}` : A Git config variable `VAR` which corresponds to `git config --system 'VAR'`.
 
-Not existing environment variables or Git config variables are replaced with the empty string by default. If you use `${!...:VAR}` (e.g `${!git-s:VAR }`) it will trigger an error and fail the hook if the variable `VAR` is not found.
+Not existing environment variables or Git config variables are replaced with the empty string by default.
+If you use `${!...:VAR}` (e.g `${!git-s:VAR }`) it will trigger an error and fail the hook if the variable `VAR` is not found.
 Escaping a above syntax works with `\${...}`.
 
-**Sidenote**: You might wonder why this configuration is not collocated in one YAML file for all hooks. The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times needs time and since we want speed and only an opt-in solution this is avoided.
+**Sidenote**: You might wonder why this configuration is not collocated in one YAML file for all hooks.
+The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times
+needs time and since we want speed and only an opt-in solution this is avoided.
 
 ### Parallel Execution
 
 As in the [example](#layout-and-options), all discovered hooks in subfolders `<batchName>`, e.g. `<hooksDir>/<hookName>/<batchName>/*` where
 `<hooksDir>` is either `.githooks` for repository checked-in hooks or
-`githooks`, `.githooks` or `.` for shared repository hooks, are assigned the same batch name `<batchName>` and processed in parallel over a threadpool defaulting to as many threads as many cores on the system. Each batch is a synchronisation point and starts after the one before has finished.
-The number of threads can be controlled by the Git configuration variable `githooks.numThreads` set anywhere, e.g. in the local or global Git configuration.
+`githooks`, `.githooks` or `.` for shared repository hooks, are assigned the same batch name `<batchName>` and processed
+in parallel over a threadpool defaulting to as many threads as many cores on the system. Each batch is a synchronisation
+point and starts after the one before has finished.
+The number of threads can be controlled by the Git configuration variable `githooks.numThreads` set anywhere, e.g. in
+the local or global Git configuration.
 
-If you place a file `.all-parallel` inside `<hooksDir>/<hookName>`, all discovered hooks inside `<hooksDir>/<hookName>` are assigned to the samme batch name `all` resulting in executing all hooks in one parallel batch.
+If you place a file `.all-parallel` inside `<hooksDir>/<hookName>`, all discovered hooks inside `<hooksDir>/<hookName>`
+are assigned to the samme batch name `all` resulting in executing all hooks in one parallel batch.
 
 You can inspect the computed batch name by running [`git hooks list --batch-name`](/docs/cli/git_hooks_list.md).
 
@@ -388,7 +402,8 @@ This installs and uninstalls wrappers from `${GIT_DIR}/hooks` as well as sets an
 
 ## Installation
 
-- [Download the latest release](https://github.com/gabyx/githooks/releases), exctract it and execute the installer command by the below instructions.
+- [Download the latest release](https://github.com/gabyx/githooks/releases), exctract it and execute the
+  installer command by the below instructions.
 
 The installer will:
 
@@ -424,7 +439,9 @@ $ cli installer --dry-run
 
 ### Non-Interactive Installation
 
-You can also run the installation in **non-interactive** mode with the command below. This will determine an appropriate template directory (detect and use the existing one, or use the one passed by `--template-dir`, or use a default one), install the hooks automatically into this directory, and enable periodic update checks.
+You can also run the installation in **non-interactive** mode with the command below. This will determine
+an appropriate template directory (detect and use the existing one, or use the one passed by `--template-dir`,
+or use a default one), install the hooks automatically into this directory, and enable periodic update checks.
 
 The global install prefix defaults to `${HOME}` but can be changed by using the options `--prefix <installPrefix>`:
 
@@ -432,7 +449,8 @@ The global install prefix defaults to `${HOME}` but can be changed by using the 
 $ cli installer --non-interactive [--prefix <installPrefix>]
 ```
 
-It's possible to specify which template directory should be used, by passing the `--template-dir <dir>` parameter, where `<dir>` is the directory where you wish the templates to be installed.
+It's possible to specify which template directory should be used, by passing the `--template-dir <dir>`
+parameter, where `<dir>` is the directory where you wish the templates to be installed.
 
 ```shell
 $ cli installer --template-dir "/home/public/.githooks-templates"
@@ -441,13 +459,15 @@ $ cli installer --template-dir "/home/public/.githooks-templates"
 By default the script will install the hooks into the `~/.githooks/templates/` directory.
 
 ### Install Mode: Centralized Hooks
-Lastly, you have the option to install the templates to, and use them from a centralized location. You can read more about the difference between this option and default one [below](#templates-or-central-hooks). For this, run the command below.
+Lastly, you have the option to install the templates to, and use them from a centralized location.
+You can read more about the difference between this option and default one [below](#templates-or-central-hooks). For this, run the command below.
 
 ```shell
 $ cli installer --use-core-hookspath
 ```
 
-Optionally, you can also pass the template directory to which you want to install the centralized hooks by appending `--template-dir <path>` to the command above, for example:
+Optionally, you can also pass the template directory to which you want to install the centralized
+hooks by appending `--template-dir <path>` to the command above, for example:
 
 ```shell
 $ cli installer --use-core-hookspath --template-dir /home/public/.githooks
@@ -531,10 +551,13 @@ In both cases, the installer command will make sure Git will find the Githooks r
 
 #### Template Folder (`init.templateDir`)
 
-In this approach, the install script creates hook templates (global Git config `init.templateDir`) that are installed into the `.git/hooks` folders automatically on `git init` and `git clone`. For bare repositories, the hooks are installed into the `./hooks` folder on `git init --bare`.
+In this approach, the install script creates hook templates (global Git config `init.templateDir`) that are installed
+into the `.git/hooks` folders automatically on `git init` and `git clone`. For bare repositories, the hooks are
+installed into the `./hooks` folder on `git init --bare`.
 This is the recommended approach, especially if you want to selectively control which repositories use Githooks or not.
 
-The install script offers to search for repositories to which it will install the run-wrappers, and any new repositories you clone will have these hooks configured.
+The install script offers to search for repositories to which it will install the run-wrappers, and any new
+repositories you clone will have these hooks configured.
 
 You can disable installing Githooks run-wrappers by using:
 
@@ -543,22 +566,31 @@ git clone --template= <url> <repoPath>
 git lfs install # Important if you use Git LFS!. It never hurts doing this.
 ```
 
-**Note**: It's recommended that you do `git lfs install` again. With the latest `git` version 2.30, and `git lfs` version 2.9.2, `--template=` will not result in **no** LFS hooks inside `${GIT_DIR}/hooks` if your repository **contains** LFS objects.
+**Note**: It's recommended that you do `git lfs install` again. With the latest `git` version 2.30, and `git lfs` version 2.9.2,
+`--template=` will not result in **no** LFS hooks inside `${GIT_DIR}/hooks` if your repository **contains** LFS objects.
 
 #### Global Hooks Location (`core.hooksPath`)
 
-In this approach, the install script installs the hook templates into a centralized location (`~/.githooks/templates/` by default) and sets the global `core.hooksPath` variable to that location. Git will then, for all relevant actions, check the `core.hooksPath` location, instead of the default `${GIT_DIR}/hooks` location.
+In this approach, the install script installs the hook templates into a centralized location (`~/.githooks/templates/` by default)
+and sets the global `core.hooksPath` variable to that location. Git will then, for all relevant actions, check the
+`core.hooksPath` location, instead of the default `${GIT_DIR}/hooks` location.
 
-This approach works more like a *blanket* solution, where **all repositories**<span id="a2">[<sup>2</sup>](#2)</span> will start using the hook templates, regardless of their location.
+This approach works more like a *blanket* solution, where **all repositories**<span id="a2">[<sup>2</sup>](#2)</span>
+will start using the hook templates, regardless of their location.
 
-**<span id="2"><sup>2</sup></span>[⏎](#a2) Note:** It is possible to override the behavior for a specific repository, by setting a local `core.hooksPath` variable with value `${GIT_DIR}/hooks`, which will revert Git back to its default behavior for that specific repository.
+**<span id="2"><sup>2</sup></span>[⏎](#a2) Note:** It is possible to override the behavior for a specific repository,
+by setting a local `core.hooksPath` variable with value `${GIT_DIR}/hooks`, which will revert Git back to its default
+behavior for that specific repository.
 You don't need to initialize `git lfs install`, because they presumably be already in `${GIT_DIR}/hooks` from any `git clone/init`.
 
 ### Updates
 
-You can update the scripts any time by running one of the install commands above. It will simply overwrite the run-wrappers with the new ones, and if you opt-in to install into existing local repositories, those will get overwritten too.
+You can update the scripts any time by running one of the install commands above. It will simply overwrite the run-wrappers
+with the new ones, and if you opt-in to install into existing local repositories, those will get overwritten too.
 
-You can also enable automatic update checks during the installation, that is executed once a day after a successful commit. It checks for a new version and asks whether you want to install it. It then downloads the binaries and dispatches to the new installer to install the new version.
+You can also enable automatic update checks during the installation, that is executed once a day after a successful commit.
+It checks for a new version and asks whether you want to install it. It then downloads the binaries and dispatches
+to the new installer to install the new version.
 
 Automatic updates can be enabled or disabled at any time by running the command below.
 
@@ -602,7 +634,8 @@ The arguments for the dialog tool are:
 The script needs to return one of the short-options on the standard output.
 If the exit code is not `0`, the normal prompt on the standard input is shown as a fallback mechanism.
 
-**Note:** Githooks will probably in the future provide a default cross-platform Dialog implementation, which will render this feature obsolete. (PRs welcome, see [https://github.com/gen2brain/dlgs](https://github.com/gen2brain/dlgs))
+**Note:** Githooks will probably in the future provide a default cross-platform Dialog implementation, which will render this feature obsolete.
+(PRs welcome, see [https://github.com/gen2brain/dlgs](https://github.com/gen2brain/dlgs))
 
 ## Uninstalling
 
@@ -612,7 +645,8 @@ If you want to get rid of this hook manager, you can execute the uninstaller `<i
 $ git hooks uninstall --global
 ```
 
-This will delete the run-wrappers installed in the template directory, optionally the installed hooks from the existing local repositories, and reinstates any previous hooks that were moved during the installation.
+This will delete the run-wrappers installed in the template directory, optionally the installed hooks from
+the existing local repositories, and reinstates any previous hooks that were moved during the installation.
 
 ## YAML Specifications
 
@@ -620,7 +654,8 @@ You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks
 
 ## Migration
 
-Migrating from the `sh` [implementation here](https://github.com/rycus86/githooks) is easy, but unfortunately we do not yet provide an migration option during install (PRs welcome) to take over Git configuration values
+Migrating from the `sh` [implementation here](https://github.com/rycus86/githooks) is easy, but unfortunately
+we do not yet provide an migration option during install (PRs welcome) to take over Git configuration values
 and other not so important settings.
 
 However, you can take the following steps for your old `.shared` and `.ignore` files inside your repositories to make them work
