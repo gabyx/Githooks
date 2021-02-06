@@ -5,7 +5,7 @@ Githooks uninstaller application.
 ### Synopsis
 
 Githooks uninstaller application
-See further information at https://github.com/gabyx/githooks/blob/master/README.md
+See further information at https://github.com/gabyx/githooks/blob/main/README.md
 
 ```
 git hooks uninstaller

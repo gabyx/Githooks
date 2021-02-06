@@ -22,6 +22,7 @@ Also it searches for hooks in configured shared hook repositories.
 
 - Running repository checked-in hooks.
 - Running shared hooks from other Git repositories (with auto-update).
+- Git LFS support.
 - Command line interface.
 - Fast execution due to compiled Go executable.
 - Fast parallel execution over threadpool.
@@ -379,7 +380,7 @@ Also, as mentioned above, all hook executions can be bypassed with a non-empty v
 
 > See the documentation of the command line helper tool on its [docs page](https://github.com/rycus86/githooks/blob/master/docs/cli/command-line-tool.md)!
 
-### Removing Run-Wrappers
+### Installing or Removing Run-Wrappers
 
 You can install and uninstall run-wrappers inside a repository with [`git hooks install`](docs/cli/git_hooks_install.md).
 or [`git hooks uninstall`](docs/cli/git_hooks_install.md).
@@ -387,7 +388,7 @@ This installs and uninstalls wrappers from `${GIT_DIR}/hooks` as well as sets an
 
 ## Installation
 
-- [Download the latest release](https://github.com/gabyx/githooks/releases), exctract it and execute the installer by the below instructions.
+- [Download the latest release](https://github.com/gabyx/githooks/releases), exctract it and execute the installer command by the below instructions.
 
 The installer will:
 
@@ -413,12 +414,12 @@ The installer will:
 
 To install Githooks on your system, simply execute the executable `installer`.
 It will guide you through the installation process.
-Check the `installer --help` for available options. Some of them are described below:
+Check the `cli installer --help` for available options. Some of them are described below:
 
 If you want, you can try out what the script would do first, without changing anything by using:
 
 ```shell
-$ installer --dry-run
+$ cli installer --dry-run
 ```
 
 ### Non-Interactive Installation
@@ -428,13 +429,13 @@ You can also run the installation in **non-interactive** mode with the command b
 The global install prefix defaults to `${HOME}` but can be changed by using the options `--prefix <installPrefix>`:
 
 ```shell
-$ installer --non-interactive [--prefix <installPrefix>]
+$ cli installer --non-interactive [--prefix <installPrefix>]
 ```
 
 It's possible to specify which template directory should be used, by passing the `--template-dir <dir>` parameter, where `<dir>` is the directory where you wish the templates to be installed.
 
 ```shell
-$ installer --template-dir "/home/public/.githooks-templates"
+$ cli installer --template-dir "/home/public/.githooks-templates"
 ```
 
 By default the script will install the hooks into the `~/.githooks/templates/` directory.
@@ -443,13 +444,13 @@ By default the script will install the hooks into the `~/.githooks/templates/` d
 Lastly, you have the option to install the templates to, and use them from a centralized location. You can read more about the difference between this option and default one [below](#templates-or-central-hooks). For this, run the command below.
 
 ```shell
-$ installer --use-core-hookspath
+$ cli installer --use-core-hookspath
 ```
 
 Optionally, you can also pass the template directory to which you want to install the centralized hooks by appending `--template-dir <path>` to the command above, for example:
 
 ```shell
-$ installer --use-core-hookspath --template-dir /home/public/.githooks
+$ cli installer --use-core-hookspath --template-dir /home/public/.githooks
 ```
 
 ### Install from different URL and Branch
@@ -457,7 +458,7 @@ If you want to install from another Git repository (e.g. from your own or your c
 you can specify the repository clone url as well as the branch name (default: `main`) when installing with:
 
 ```shell
-$ installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
+$ cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
 ```
 
 Because the installer **always** downloads the latest release (here from another URL/branch), it needs deploy settings
@@ -476,7 +477,7 @@ On a server infrastructure where only *bare* repositories are maintained, it is 
 This can be achieved by installing with the additional flag `--only-server-hooks` by:
 
 ```shell
-$ installer --only-server-hooks
+$ cli installer --only-server-hooks
 ```
 
 The global template directory then **only** maintain contains the following run-wrappers for Githooks:
@@ -519,14 +520,14 @@ git hooks config update --disable
 
 ### Templates or Global Hooks
 
-This installer can work in one of 2 ways:
+This installer command can work in one of 2 ways:
 
 - Using the git template folder `init.templateDir` (default behavior)
 - Using the git `core.hooksPath` variable (set by passing the `--use-core-hookspath` parameter to the install script)
 
 Read about the differences between these 2 approaches below.
 
-In both cases, the installer will make sure Git will find the Githooks run-wrappers.
+In both cases, the installer command will make sure Git will find the Githooks run-wrappers.
 
 #### Template Folder (`init.templateDir`)
 

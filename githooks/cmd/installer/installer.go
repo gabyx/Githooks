@@ -36,7 +36,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 		Use:   "installer [flags]",
 		Short: "Githooks installer application",
 		Long: "Githooks installer application\n" +
-			"See further information at https://github.com/gabyx/githooks/blob/master/README.md",
+			"See further information at https://github.com/gabyx/githooks/blob/main/README.md",
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
 		Run: func(cmd *cobra.Command, _ []string) {
 			runInstall(cmd, ctx, vi)

@@ -76,7 +76,7 @@ func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 	rootCmd = &cobra.Command{
 		Use:   "git hooks", // Contains a en-space (utf-8: U+2002) to make it work...
 		Short: "Githooks CLI application",
-		Long:  "See further information at https://github.com/gabyx/githooks/blob/master/README.md"}
+		Long:  "See further information at https://github.com/gabyx/githooks/blob/main/README.md"}
 
 	ccm.ModifyTemplate(rootCmd, ctx.Log.GetIndent())
 

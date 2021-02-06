@@ -4,7 +4,7 @@ Githooks CLI application
 
 ### Synopsis
 
-See further information at https://github.com/gabyx/githooks/blob/master/README.md
+See further information at https://github.com/gabyx/githooks/blob/main/README.md
 
 ```
 git hooks

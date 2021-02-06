@@ -5,7 +5,7 @@ Githooks installer application
 ### Synopsis
 
 Githooks installer application
-See further information at https://github.com/gabyx/githooks/blob/master/README.md
+See further information at https://github.com/gabyx/githooks/blob/main/README.md
 
 ```
 git hooks installer [flags]
