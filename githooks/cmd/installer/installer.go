@@ -1206,7 +1206,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	initArgs(log, &args, vi)
 	validateArgs(log, cmd, &args)
 
-	log.InfoF("Arguments: %+v", args)
+	log.DebugF("Arguments: %+v", args)
 
 	settings, uiSettings := setMainVariables(log, &args)
 

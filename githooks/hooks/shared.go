@@ -4,6 +4,7 @@ import (
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/git"
 	strs "gabyx/githooks/strings"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -147,18 +148,70 @@ func GetSharedCloneDir(installDir string, url string) string {
 	return path.Join(GetSharedDir(installDir), sha1+"-"+nameAbrev)
 }
 
-func parseSharedURL(installDir string, url string) (SharedRepo, error) {
+func trimBranchSuffix(s string) (prefix, branch string) {
+	lastIdx := strings.LastIndexAny(s, "@")
 
-	h := SharedRepo{IsCloned: true, IsLocal: false, OriginalURL: url}
+	if lastIdx > 0 {
+		r := []rune(s)
+		prefix = string(r[:lastIdx])
+		branch = string(r[lastIdx+1:])
+	} else {
+		prefix = s
+	}
+
+	return
+}
+
+func parseSharedURLBranch(sharedUrl string) (prefix string, branch string, err error) {
+
+	if !strings.ContainsAny(sharedUrl, "@") {
+		prefix = sharedUrl
+
+		return
+	}
+
+	if git.IsCloneURLANormalURL(sharedUrl) {
+
+		// Parse normal URL.
+		var u *url.URL
+		u, err = url.Parse(sharedUrl)
+		if err != nil {
+			return
+		}
+
+		u.Path, branch = trimBranchSuffix(u.Path)
+		prefix = u.String()
+
+		return
+
+	} else if scp := git.ParseSCPSyntax(sharedUrl); scp != nil {
+		// Try parse as SCP syntax.
+		scp[2], branch = trimBranchSuffix(scp[2])
+		prefix = scp.String()
+
+		return
+
+	} else if git.IsCloneURLARemoteHelperSyntax(sharedUrl) {
+		// Don't do anything for remote helper syntax.
+		return
+	}
+
+	// Otherwise its a local path, try our best to remove the branch '...@(.*)'
+	prefix, branch = trimBranchSuffix(sharedUrl)
+
+	return
+}
+
+func parseSharedURL(installDir string, url string) (h SharedRepo, err error) {
+
+	h = SharedRepo{IsCloned: true, IsLocal: false, OriginalURL: url}
 	doSplit := true
 
 	if git.IsCloneURLALocalPath(url) {
 
 		h.IsLocal = true
 
-		if git.CtxC(url).IsBareRepo() {
-			doSplit = false
-		} else {
+		if !git.CtxC(url).IsBareRepo() {
 			// We have a local path to a non-bare repo
 			h.IsCloned = false
 			h.RepositoryDir = url
@@ -170,14 +223,13 @@ func parseSharedURL(installDir string, url string) (SharedRepo, error) {
 
 	if h.IsCloned {
 		// Here we now have a supported Git URL or
-		// a local bare-repo `<localpath>`
+		// a local bare-repo `<localpath>` which we clone.
 
 		// Split "...@(.*)"
-		if doSplit && strings.ContainsAny(url, "@") {
-			lastIdx := strings.LastIndexAny(url, "@")
-			if lastIdx > 0 {
-				h.URL = url[:lastIdx]
-				h.Branch = url[lastIdx+1:]
+		if doSplit {
+			h.URL, h.Branch, err = parseSharedURLBranch(url)
+			if err != nil {
+				return
 			}
 		} else {
 			h.URL = url

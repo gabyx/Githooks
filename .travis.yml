@@ -20,6 +20,8 @@ jobs:
       env:
         - TEST_INSTANCE=test-coverage
         - COVERALLS_TOKEN=$COVERALLS_TOKEN
+    - os: linux
+      env: TEST_INSTANCE=test-testsuite-go
     - os: windows
       env: TEST_INSTANCE=test-windows-go
     - os: linux
