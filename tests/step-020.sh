@@ -20,7 +20,7 @@ mkdir -p "$GH_TEST_TMP/test20" && cd "$GH_TEST_TMP/test20" || exit 1
 git init || exit 1
 
 # verify that the hooks are installed and are working
-if ! grep 'github.com/rycus86/githooks' "$GH_TEST_TMP/test20/.git/hooks/pre-commit"; then
+if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/test20/.git/hooks/pre-commit"; then
     echo "! Githooks were not installed into a new repo"
     exit 1
 fi

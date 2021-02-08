@@ -13,7 +13,7 @@ mkdir -p "$GH_TEST_TMP/test113/.githooks/pre-commit" &&
     git init ||
     exit 1
 
-if grep -r 'github.com/rycus86/githooks' "$GH_TEST_TMP/test113/.git"; then
+if grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test113/.git"; then
     echo "! Hooks were installed ahead of time"
     exit 2
 fi

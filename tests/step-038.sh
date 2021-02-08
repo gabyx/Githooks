@@ -23,7 +23,7 @@ cd "$GH_TEST_TMP/start/dir" && git init || exit 1
 
 "$GH_TEST_BIN/cli" installer || exit 1
 
-if ! grep -r 'github.com/rycus86/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
+if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
     echo "! Hooks were not installed"
     exit 1
 fi

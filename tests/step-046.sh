@@ -20,12 +20,12 @@ $GH_TEST_TMP/test046
 y
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
-if ! grep "github.com/rycus86/githooks" "$GH_TEST_TMP/test046/.git/hooks/pre-commit"; then
+if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test046/.git/hooks/pre-commit"; then
     echo "! Hooks were not installed"
     exit 1
 fi
 
-if ! grep "github.com/rycus86/githooks" "$GH_TEST_TMP/test046/.githooks/README.md"; then
+if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test046/.githooks/README.md"; then
     echo "! README was not installed"
     exit 1
 fi

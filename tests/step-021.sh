@@ -12,7 +12,7 @@ mkdir -p ~/test021/p001 && mkdir -p ~/test021/p002 || exit 1
 cd ~/test021/p001 && git init || exit 1
 cd ~/test021/p002 && git init || exit 1
 
-if grep -r 'github.com/rycus86/githooks' ~/test021/; then
+if grep -r 'github.com/gabyx/githooks' ~/test021/; then
     echo "! Hooks were installed ahead of time"
     exit 1
 fi
@@ -23,12 +23,12 @@ y
 ~/test021
 ' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
-if ! grep -r 'github.com/rycus86/githooks' ~/test021/p001/.git/hooks; then
+if ! grep -r 'github.com/gabyx/githooks' ~/test021/p001/.git/hooks; then
     echo "! Hooks were not installed successfully"
     exit 1
 fi
 
-if ! grep -r 'github.com/rycus86/githooks' ~/test021/p002/.git/hooks; then
+if ! grep -r 'github.com/gabyx/githooks' ~/test021/p002/.git/hooks; then
     echo "! Hooks were not installed successfully"
     exit 1
 fi

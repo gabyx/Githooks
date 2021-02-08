@@ -392,8 +392,6 @@ $ git hooks config disable --set --global # Same thing... Config: `githooks.disa
 
 Also, as mentioned above, all hook executions can be bypassed with a non-empty value in the `$GITHOOKS_DISABLE` environment variable.
 
-> See the documentation of the command line helper tool on its [docs page](https://github.com/rycus86/githooks/blob/master/docs/cli/command-line-tool.md)!
-
 ### Installing or Removing Run-Wrappers
 
 You can install and uninstall run-wrappers inside a repository with [`git hooks install`](docs/cli/git_hooks_install.md).
@@ -654,7 +652,7 @@ You can find YAML examples for hook ignore files `.ignore.yaml` and shared hooks
 
 ## Migration
 
-Migrating from the `sh` [implementation here](https://github.com/rycus86/githooks) is easy, but unfortunately
+Migrating from the `sh` [implementation here](https://github.com/gabyx/githooks) is easy, but unfortunately
 we do not yet provide an migration option during install (PRs welcome) to take over Git configuration values
 and other not so important settings.
 

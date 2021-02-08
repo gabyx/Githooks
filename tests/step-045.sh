@@ -18,22 +18,22 @@ $GH_TEST_TMP/test045
 s
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
-if ! grep "github.com/rycus86/githooks" "$GH_TEST_TMP/test045/001/.git/hooks/pre-commit"; then
+if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/001/.git/hooks/pre-commit"; then
     echo "! Hooks were not installed into 001"
     exit 1
 fi
 
-if grep "github.com/rycus86/githooks" "$GH_TEST_TMP/test045/001/.githooks/README.md"; then
+if grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/001/.githooks/README.md"; then
     echo "! README was unexpectedly installed into 001"
     exit 1
 fi
 
-if ! grep "github.com/rycus86/githooks" "$GH_TEST_TMP/test045/002/.git/hooks/pre-commit"; then
+if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/002/.git/hooks/pre-commit"; then
     echo "! Hooks were not installed into 002"
     exit 1
 fi
 
-if grep "github.com/rycus86/githooks" "$GH_TEST_TMP/test045/002/.githooks/README.md"; then
+if grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/002/.githooks/README.md"; then
     echo "! README was unexpectedly installed into 002"
     exit 1
 fi

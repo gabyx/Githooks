@@ -22,7 +22,7 @@ if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
         exit 1
     fi
 else
-    if ! grep 'rycus86/githooks' "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit"; then
+    if ! grep 'gabyx/githooks' "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit"; then
         echo "! Expected hooks installed"
         exit 1
     fi

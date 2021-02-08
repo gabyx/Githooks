@@ -21,7 +21,7 @@ if ! "$GH_TEST_BIN/cli" install --non-interactive; then
     exit 1
 fi
 
-if ! grep -r 'github.com/rycus86/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
+if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
     echo "! Hooks were not installed"
     exit 1
 fi
