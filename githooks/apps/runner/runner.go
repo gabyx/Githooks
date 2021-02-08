@@ -287,8 +287,12 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	updateAvailable, accepted, err := updates.RunUpdate(
 		settings.InstallDir,
 		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, false),
-		&settings.ExecX,
-		cm.UseStreams(nil, log.GetInfoWriter(), log.GetErrorWriter()))
+		func() error {
+			return updates.RunUpdateOverExecutable(settings.InstallDir,
+				&settings.ExecX,
+				cm.UseStreams(nil, log.GetInfoWriter(), log.GetErrorWriter()),
+				"--internal-auto-update")
+		})
 
 	log.AssertNoErrorPanic(err, "Running update failed.")
 

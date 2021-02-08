@@ -8,8 +8,6 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 
-**STILL BETA: Any changes with out notice!**
-
 A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are installed into the `.git/hooks`
@@ -488,6 +486,20 @@ it will automatically download and **verify** the binaries over the implemented 
 Credentials will be collected over [`git credential`](https://git-scm.com/docs/cli/git-credential) to access the API. [@todo].
 
 The clone URL and branch will then be used for further updates.
+
+### No Installation
+
+You can use this hook manager also without a global installation. For that you can clone this repository anywhere (e.g. `<repository>`) and build
+the executables with Go by running `githooks/scripts/build.sh`.
+You can then use the hooks by setting `core.hooksPath` (in any suitable Git config)
+to the checked in run-wrappers in `<repository>/hooks` like so:
+
+```shell
+git clone https://github.com/gabyx/githooks.git githooks
+cd githooks
+scripts/build.sh
+git config --global core.hooksPath "$(pwd)/hooks"
+```
 
 ### Install on the Server
 
