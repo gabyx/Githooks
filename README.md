@@ -223,7 +223,7 @@ However there are use-cases for common hooks, shared between many repositories w
 For example, you could make sure Python dependencies are updated on projects that have a `requirements.txt` file,
 or an `mvn verify` is executed on `pre-commit` for Maven projects, etc.
 
-For this reason, you can place a `.shared.yaml` file (see [specs](#yaml-specification)) inside the `.githooks` repository, which can hold a list of repositories which hold common and shared hooks. Alternatively, you can have a shared repositories set by multiple `githooks.shared` local or global Git configuration variables, and the hooks in these repositories will execute for all local projects where Githooks is installed.
+For this reason, you can place a `.shared.yaml` file (see [specs](#yaml-specifications)) inside the `.githooks` repository, which can hold a list of repositories which hold common and shared hooks. Alternatively, you can have a shared repositories set by multiple `githooks.shared` local or global Git configuration variables, and the hooks in these repositories will execute for all local projects where Githooks is installed.
 See [git hooks shared](docs/cli/git_hooks_shared.md) for configuring all 3 types of shared hooks repositories.
 
 Below are example values for these setting.
@@ -247,7 +247,7 @@ ssh://user@github.com/shared/special-hooks.git@v3.3.3
 
 ### Repository Configuration
 
-A example config `<repoPath>/.githooks/shared.yaml` (see [specs](#yaml-specification)):
+A example config `<repoPath>/.githooks/shared.yaml` (see [specs](#yaml-specifications)):
 
 ```yaml
 version: 1
@@ -314,23 +314,23 @@ A shared repository can optionally have a namespace associated with it. The name
 
 ## Ignoring Hooks and Files
 
-The `.ignore.yaml` (see [specs](#yaml-specification)) files allow excluding files
+The `.ignore.yaml` (see [specs](#yaml-specifications)) files allow excluding files
 
 - from being treated as hook scripts or
 - hooks from beeing run.
 
-They allow *glob* filename patterns (with double-star `**` syntax to match multiple directories) and
-paths to be matched against a hook's (file's) *namespace path* which consists of
-the name of the hook prefixed by a hook namespace , e.g. `<hookNamespace>/<relPath>` where `<relPath>`
-A [namespace](#shared-repository-namespace) comes into play when the hook (or file) belongs to a shared hook repository.]
-
 You can ignore executing all sorts of hooks per Git repository by specifying patterns
-or paths to ignore which match against this namespace path.
+or paths which match against a hook's (file's) *namespace path*.
+
+The *namespace path* consists of the name of the hook prefixed by a hook namespace , e.g. `<hookNamespace>/<relPath>` where
+`<relPath>` is the relative path to the current hook directory.
+A [namespace](#shared-repository-namespace) comes into play when the hook belongs to a shared hook repository.
 
 Each hook either in the current repository `.githooks/...` or inside a shared hooks
-repository has a so called *namespace path*. All ignore entries (patterns or paths) will match against these
-paths. Each shared repository can provide a namespace (see )
-You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md) in the current repository.
+repository has a so called *namespace path*. All ignore entries in `.ignore.yaml` (patterns or paths) will match against these
+*namespace paths*. Each shared repository can provide its own [namespace](#shared-repository-namespace).
+You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md)
+in the current repository.
 
 ```shell
 # Disable certain hooks by a pattern in this repository:
@@ -342,13 +342,11 @@ $ git hooks ignore add --pattern "pre-commit/**" # Store: `.git/.githooks.ignore
 $ git hooks ignore add --pattern "my-shared-super-hooks/pre-commit/**"
 ```
 
-In the above example, one of the `.ignore.yaml` files should contain a pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file.
+In the above [example](#layout-and-options]), one of the `.ignore.yaml` files should contain a pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file. Patterns can contain double star syntax to match multiple directories, e.g. `**/*.txt` instead of `*.txt`.
 
-The `.githooks/.ignore.yaml` file applies to each of the hook directories, and should still define filename patterns, `*.txt` instead of `**/*.txt` for example. If there is a `.ignore.yaml` file both in the hook type folder and in `.githooks`, the files whose filename matches any pattern from either of those two files will be excluded. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md), and consult this help for futher information on pattern syntax.
+The `.githooks/.ignore.yaml` file applies to each of the hook directories. If there is a `.ignore.yaml` file both in the hook type folder and in `.githooks`, the files whose filename matches any pattern from either of those two files will be excluded. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on pattern syntax.
 
-Hooks in individual shared repositories can be disabled as well, running [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore_add.md)` by specifing patterns or namespace paths.
-
-Finally, all hook execution can be bypassed with a non-empty value in the `$GITHOOKS_DISABLE` environment variable too.
+Hooks in individual shared repositories can be disabled as well, with [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore_add.md)` by specifing patterns or namespace paths.
 
 ## Trusting Hooks
 
@@ -674,7 +672,7 @@ However, you can take the following steps for your old `.shared` and `.ignore` f
 directly with a new install:
 
 1. Convert all entries in `.ignore` files to a pattern in a YAML
-  file `.ignore.yaml` (see [specs](#yaml-specification)).
+  file `.ignore.yaml` (see [specs](#yaml-specifications)).
   Each old glob pattern needs to be prepended by
   `**/` (if not already existing) to make it work correctly (because of namespaces), e.g. a pattern `.*md` becomes `**/.*md`.
   Disable shared repositories in the old version need to be reconfigured, by using ignore patterns.
