@@ -8,7 +8,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 
-**STILL BETA: Any changes with out notice!**
+**STILL BETA: Any changes without notice!**
 
 A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
@@ -685,12 +685,12 @@ The following platforms are tested:
 
 ## Acknowledgements
 
-- [Original Githooks implementation in `sh`](http://github.com/rycus86/githooks) by Victor Adams.
+- [Original Githooks implementation in `sh`](http://github.com/rycus86/githooks) by Viktor Adam.
 
 ## Authors
 
 - Gabriel Nützi (`go` implementation)
-- Viktor Adams (Initial `sh` implementation)
+- Viktor Adam (Initial `sh` implementation)
 - and community.
 
 ## License
