@@ -1,7 +1,6 @@
 package hooks
 
 import (
-	"fmt"
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 	"io"
@@ -314,7 +313,6 @@ func ExecuteHooksParallel(
 		}
 
 		if pool == nil {
-			fmt.Printf("RUN SINGLE THREADED %v\n", nHooks)
 			for idx := range hooksGroup {
 				hookRes := &res[currIdx+idx]
 				hook := &hooksGroup[idx]

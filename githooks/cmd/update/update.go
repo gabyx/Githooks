@@ -4,7 +4,7 @@ import (
 	"gabyx/githooks/build"
 	ccm "gabyx/githooks/cmd/common"
 	"gabyx/githooks/cmd/config"
-	cm "gabyx/githooks/common"
+	"gabyx/githooks/cmd/installer"
 	"gabyx/githooks/prompt"
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
@@ -28,8 +28,12 @@ func runUpdate(ctx *ccm.CmdContext, setOpts *config.SetOptions, answer string) {
 		updateAvailable, accepted, err := updates.RunUpdate(
 			ctx.InstallDir,
 			updates.DefaultAcceptUpdateCallback(ctx.Log, promptCtx, answer == "y"),
-			&cm.ExecContext{},
-			cm.UseStreams(nil, ctx.Log.GetInfoWriter(), ctx.Log.GetErrorWriter()))
+			func() error {
+				installer := installer.NewCmd(ctx)
+				installer.SetArgs([]string{})
+
+				return installer.Execute()
+			})
 
 		ctx.Log.AssertNoErrorPanic(err, "Running update failed.")
 

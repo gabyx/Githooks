@@ -466,8 +466,7 @@ type AcceptUpdateCallback func(status *ReleaseStatus) bool
 func RunUpdate(
 	installDir string,
 	acceptUpdate AcceptUpdateCallback,
-	execX cm.IExecContext,
-	pipeSetup cm.PipeSetupFunc) (updateAvailable bool, accepted bool, err error) {
+	run func() error) (updateAvailable bool, accepted bool, err error) {
 
 	err = RecordUpdateCheckTimestamp()
 
@@ -505,7 +504,7 @@ func RunUpdate(
 			return
 		}
 
-		err = runUpdate(installDir, execX, pipeSetup)
+		err = run()
 	}
 
 	return
@@ -557,11 +556,12 @@ func DefaultAcceptUpdateCallback(
 	}
 }
 
-// runUpdate executes the installer to run the update.
-func runUpdate(
+// RunUpdateOverExecutbale executes the installer to run the update.
+func RunUpdateOverExecutable(
 	installDir string,
 	execC cm.IExecContext,
-	pipeSetup cm.PipeSetupFunc) error {
+	pipeSetup cm.PipeSetupFunc,
+	args ...string) error {
 
 	installer := hooks.GetInstallerExecutable(installDir)
 
@@ -580,8 +580,7 @@ func runUpdate(
 			&execX,
 			&installer,
 			nil,
-			"--internal-auto-update")
-		// @todo installer: remove "--internal-autoupdate"
+			args...)
 
 		if err != nil {
 			return cm.CombineErrors(err, cm.ErrorF("Update output:\n%s", output))
@@ -592,7 +591,7 @@ func runUpdate(
 			&execX,
 			&installer,
 			pipeSetup,
-			"--internal-auto-update")
+			args...)
 
 		if err != nil {
 			return cm.CombineErrors(err, cm.Error("Update failed. See output"))
