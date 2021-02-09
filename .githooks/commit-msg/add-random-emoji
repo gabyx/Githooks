@@ -13,6 +13,5 @@ fi
 # POSITION=$(($(od -A n -t d -N 1 /dev/urandom | tr -d ' ') % 11 + 1))
 SELECTED=":anchor:" #$(echo "$EMOJIS" | awk -v N=$POSITION '{ print $N }')
 
-sed -i -E '1s/(.*)\s*:\w+:/\1/' "$1"
+sed -i -E '1s/(\s*:\w+:)+$//' "$1"
 sed -i -E "1s/(.*)/\1 $SELECTED/" "$1"
-

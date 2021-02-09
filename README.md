@@ -489,6 +489,20 @@ Credentials will be collected over [`git credential`](https://git-scm.com/docs/c
 
 The clone URL and branch will then be used for further updates.
 
+### No Installation
+
+You can use this hook manager also without a global installation. For that you can clone this repository anywhere (e.g. `<repository>`) and build
+the executables with Go by running `githooks/scripts/build.sh`.
+You can then use the hooks by setting `core.hooksPath` (in any suitable Git config)
+to the checked in run-wrappers in `<repository>/hooks` like so:
+
+```shell
+git clone https://github.com/gabyx/githooks.git githooks
+cd githooks
+scripts/build.sh
+git config --global core.hooksPath "$(pwd)/hooks"
+```
+
 ### Install on the Server
 
 On a server infrastructure where only *bare* repositories are maintained, it is best to maintain only server hooks.

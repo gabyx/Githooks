@@ -63,6 +63,7 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 
 	cmd.AddCommand(installer.NewCmd(ctx))
 	cmd.AddCommand(uninstaller.NewCmd(ctx))
+
 }
 
 // MakeGithooksCtl returns the root command of the Githooks CLI executable.
