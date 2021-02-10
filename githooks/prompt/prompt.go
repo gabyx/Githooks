@@ -83,7 +83,6 @@ func CreateContext(
 	var input *os.File
 	printAnswer := false
 	maxTries := uint(3) //nolint: gomnd
-	useGUI := false
 
 	if useStdIn {
 		input = os.Stdin
@@ -105,16 +104,12 @@ func CreateContext(
 		output = log.GetInfoWriter()
 	}
 
-	// In case we have no terminal input, and no output to show the prompt
-	// fallback to using the GUI if enabled.
-	if useGUIFallback && (input == nil || output == nil) {
-		useGUI = false
-	}
-
 	p := Context{
 		log: log,
 
-		useGUI: useGUI,
+		// In case we have no terminal input, and no output to show the prompt
+		// fallback to using the GUI if enabled.
+		useGUI: EnableGUI && useGUIFallback && (input == nil || output == nil),
 
 		errorFmt:      log.GetErrorFormatter(true),
 		promptFmt:     log.GetPromptFormatter(true),

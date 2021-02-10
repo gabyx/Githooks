@@ -6,6 +6,10 @@ package prompt
 // is really a terminal.
 const AssertOutputIsTerminal = true
 
+// In general we enable the GUI dialogs
+// For testing this mostly disabled.
+var EnableGUI = true
+
 // ShowPromptOptions shows a prompt to the user with `text`
 // with the options `shortOptions` and optional long options `longOptions`.
 func (p *Context) ShowPromptOptions(text string,

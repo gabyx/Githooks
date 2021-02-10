@@ -13,6 +13,6 @@ mkdir -p .githooks/pre-commit &&
     echo "echo 'From githooks' > '$GH_TEST_TMP/hooktest'" >.githooks/pre-commit/test ||
     exit 1
 
-git commit -m '' 2>/dev/null
+git commit -m ''
 
 grep -q 'From githooks' "$GH_TEST_TMP/hooktest"

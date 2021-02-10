@@ -9,6 +9,8 @@ import (
 
 const AssertOutputIsTerminal = false
 
+var EnableGUI bool = os.Getenv("GH_ENABLE_GUI") == "true"
+
 // ShowPromptOptions mocks the real ShowPromptOptions by reading
 // from the environment or if not defined calls the normal implementation.
 // This is only for tests.

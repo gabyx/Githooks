@@ -47,6 +47,7 @@ func showPromptOptions(
 	}
 
 	if p.useGUI {
+
 		// Use the GUI dialog.
 		answer, e := showPromptOptionsGUI(
 			p,
