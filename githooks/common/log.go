@@ -13,9 +13,11 @@ import (
 )
 
 const (
+	GithooksEmoji = "🦎"
+
 	githooksSuffix = "" // If you like you can make it: "Githooks: "
 	debugSuffix    = "🛠 " + githooksSuffix
-	infoSuffix     = "🦎 " + githooksSuffix
+	infoSuffix     = GithooksEmoji + " " + githooksSuffix
 	warnSuffix     = "⛑ " + githooksSuffix
 	errorSuffix    = "⛔ "
 	promptSuffix   = "❓ " + githooksSuffix

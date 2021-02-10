@@ -2,24 +2,38 @@ package prompt
 
 import (
 	cm "gabyx/githooks/common"
+	strs "gabyx/githooks/strings"
 	"strings"
 
 	"github.com/gen2brain/dlgs"
 )
 
+func formatTitle(p *Context) string {
+	return p.log.GetInfoFormatter(false)("Githooks - Git Hook Manager")
+}
+
+func formatTitleQuestion(p *Context) string {
+	return p.log.GetPromptFormatter(false)("Githooks - Git Hook Manager")
+}
+
 func showPromptDialog(
+	p *Context,
 	text string,
 	defaultAnswer string) (string, error) {
-	ans, success, err := dlgs.Entry("Githooks needs your attention:", text, defaultAnswer)
 
-	if err != nil || !success {
+	ans, success, err := dlgs.Entry(formatTitle(p), text, defaultAnswer)
+
+	if err != nil {
 		return "", cm.CombineErrors(err, cm.Error("GUI prompt dialog failed."))
+	} else if !success {
+		return "", PromptCanceled
 	}
 
 	return ans, nil
 }
 
 func showPromptOptionDialog(
+	p *Context,
 	question string,
 	defaultAnswerIdx int,
 	options []string,
@@ -37,7 +51,7 @@ func showPromptOptionDialog(
 			defaultCancel := (defaultAnswerIdx == 0 && o1 == "n") ||
 				(defaultAnswerIdx == 1 && o2 == "n")
 
-			yes, err := dlgs.Question("Githooks needs your attention:", question, defaultCancel)
+			yes, err := dlgs.Question(formatTitleQuestion(p), question, defaultCancel)
 			if err != nil {
 				return "",
 					cm.CombineErrors(err, cm.Error("GUI option dialog failed."))
@@ -52,9 +66,11 @@ func showPromptOptionDialog(
 	}
 
 	// Make a list dialog
-	selected, success, err := dlgs.List("Githooks needs your attention:", question, longOptions)
-	if err != nil || !success {
+	selected, success, err := dlgs.List(formatTitle(p), question, longOptions)
+	if err != nil {
 		return "", cm.CombineErrors(err, cm.Error("GUI option dialog failed."))
+	} else if !success {
+		return "", PromptCanceled
 	}
 
 	// Get the chosen answer
@@ -74,19 +90,18 @@ func showPromptLoop(
 	runPrompt func() (string, error),
 	validator AnswerValidator) (string, error) {
 
-	var err error // all errors
+	var err error
+	var ans string
 
 	nPrompts := uint(0) // How many times we showed the prompt
 	maxPrompts := p.maxTries
 
 	for nPrompts < maxPrompts {
 
-		ans, e := runPrompt()
+		ans, err = runPrompt()
 		nPrompts++
 
 		if err != nil {
-			err = cm.CombineErrors(err, e)
-
 			break
 		}
 
@@ -99,17 +114,22 @@ func showPromptLoop(
 			return ans, nil
 		}
 
-		e = validator(ans)
-		if e == nil {
+		err = validator(ans)
+		if err == nil {
 			return ans, nil
 		}
 
-		p.log.WarnF("Answer validation error: %s", e.Error())
+		p.log.WarnF("Answer validation error: %s", err.Error())
 
 		if nPrompts < maxPrompts {
 			p.log.WarnF("Remaining tries %v.", maxPrompts-nPrompts)
-		} else if p.panicIfMaxTries {
-			p.log.PanicF("Could not validate answer in '%v' tries.", maxPrompts)
+		} else {
+			msg := strs.Fmt("Could not validate answer in '%v' tries.", maxPrompts)
+			if p.panicIfMaxTries {
+				p.log.PanicF(msg)
+			} else {
+				return defaultAnswer, err
+			}
 		}
 	}
 
@@ -135,7 +155,7 @@ func showPromptOptionsGUI(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return showPromptOptionDialog(question, defaultAnswerIdx, options, longOptions)
+			return showPromptOptionDialog(p, question, defaultAnswerIdx, options, longOptions)
 		},
 		validator)
 }
@@ -150,7 +170,7 @@ func showPromptGUI(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return showPromptDialog(text, defaultAnswer)
+			return showPromptDialog(p, text, defaultAnswer)
 		},
 		validator)
 }

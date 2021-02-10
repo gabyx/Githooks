@@ -139,6 +139,15 @@ func getDefaultAnswer(options []string) (string, int) {
 	return "", -1
 }
 
+// ValidationError represents a validation error.
+type ValidationError struct {
+	error
+}
+
+func newValidationError(format string, args ...interface{}) ValidationError {
+	return ValidationError{cm.ErrorF(format, args...)}
+}
+
 // CreateValidatorAnswerOptions creates a validator which validates against
 // a list of options.
 func CreateValidatorAnswerOptions(options []string) AnswerValidator {
@@ -152,7 +161,7 @@ func CreateValidatorAnswerOptions(options []string) AnswerValidator {
 			})
 
 		if !correct {
-			return cm.ErrorF("Answer '%s' not in '%q'.", answer, options)
+			return newValidationError("Answer '%s' not in '%q'.", answer, options)
 		}
 
 		return nil
@@ -162,7 +171,7 @@ func CreateValidatorAnswerOptions(options []string) AnswerValidator {
 // ValidatorAnswerNotEmpty checks that answers are non-empty.
 var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
 	if strs.IsEmpty(strings.TrimSpace(s)) {
-		return cm.Error("Answer must not be empty.")
+		return newValidationError("Answer must not be empty.")
 	}
 
 	return nil
@@ -174,7 +183,7 @@ func CreateValidatorIsDirectory(tildeRepl string) AnswerValidator {
 	return func(s string) error {
 		s = cm.ReplaceTildeWith(s, tildeRepl)
 		if !cm.IsDirectory(s) {
-			return cm.Error("Answer must be an existing directory.")
+			return newValidationError("Answer must be an existing directory.")
 		}
 
 		return nil

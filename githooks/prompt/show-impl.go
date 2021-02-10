@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"errors"
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 	"os"
@@ -113,22 +114,21 @@ func showPromptLoopTerminal(
 	}
 
 	// Write to terminal output.
-	writeOut := func(s string) error {
+	writeOut := func(s string) {
 		_, e := p.termOut.Write([]byte(s))
-		return e // nolint: nlreturn
+		err = cm.CombineErrors(err, e)
 	}
 
 	for nPrompts < maxPrompts {
 
-		err = writeOut(text)
+		writeOut(text)
 		nPrompts++
 
 		success := p.termInScanner.Scan()
 
 		if !success {
-			err = cm.CombineErrors(err,
-				writeOut("\n"),
-				cm.ErrorF("Could not read from terminal."))
+			writeOut("\n")
+			err = cm.CombineErrors(err, cm.ErrorF("Could not read from terminal."))
 
 			break
 		}
@@ -136,7 +136,7 @@ func showPromptLoopTerminal(
 		ans := p.termInScanner.Text()
 
 		if p.printAnswer {
-			_ = writeOut(strs.Fmt(" -> Received: '%s'\n", ans))
+			writeOut(strs.Fmt(" -> Received: '%s'\n", ans))
 		}
 
 		// Fallback to default answer.
@@ -152,24 +152,29 @@ func showPromptLoopTerminal(
 			return ans, true, nil
 		}
 
-		e := validator(ans)
-		if e == nil {
+		valErr := validator(ans)
+		if valErr == nil {
 			return ans, true, nil
 		}
 
-		warning := p.errorFmt("Answer validation error: %s", e.Error())
-		err = cm.CombineErrors(err, writeOut(warning+"\n"))
+		warning := p.errorFmt("Answer validation error: %s", err.Error())
+		writeOut(warning + "\n")
 
 		if nPrompts < maxPrompts {
 			warning := p.errorFmt("Remaining tries %v.", maxPrompts-nPrompts)
-			err = cm.CombineErrors(err, writeOut(warning+"\n"))
-		} else if p.panicIfMaxTries {
-			p.log.PanicF("Could not validate answer in '%v' tries.", maxPrompts)
+			writeOut(warning + "\n")
+		} else {
+			msg := strs.Fmt("Could not validate answer in '%v' tries.", maxPrompts)
+			if p.panicIfMaxTries {
+				p.log.PanicF(msg)
+			} else {
+				return defaultAnswer, nPrompts != 0, valErr
+			}
 		}
 	}
 
 	warning := p.errorFmt("Could not get answer, taking default '%s'.", defaultAnswer)
-	err = cm.CombineErrors(err, writeOut(warning+"\n"))
+	writeOut(warning + "\n")
 
 	return defaultAnswer, nPrompts != 0, err
 }
@@ -200,12 +205,10 @@ func showPrompt(
 	cm.PanicIf(p.tool != nil, "Not yet implemented.")
 
 	if p.useGUI {
-		ans, e := showPromptGUI(p, text, defaultAnswer, validator)
+		answer, err = showPromptGUI(p, text, defaultAnswer, validator)
 		if err == nil {
-			return ans, nil
+			return
 		}
-
-		err = cm.CombineErrors(err, e)
 
 	} else {
 		if strs.IsNotEmpty(defaultAnswer) {
@@ -214,13 +217,13 @@ func showPrompt(
 			text = p.promptFmt("%s : ", text)
 		}
 
-		answer, isPromptDisplayed, e :=
+		isPromptDisplayed := false
+		answer, isPromptDisplayed, err =
 			showPromptTerminal(p, text, defaultAnswer, validator)
 
-		if e == nil {
-			return answer, nil
+		if err == nil {
+			return
 		}
-		err = cm.CombineErrors(err, e)
 
 		if !isPromptDisplayed {
 			// Show the prompt in the log output
@@ -238,6 +241,8 @@ func showPromptTerminal(
 	validator AnswerValidator) (string, bool, error) {
 	return showPromptLoopTerminal(p, text, defaultAnswer, true, validator)
 }
+
+var PromptCanceled = errors.New("Cancled")
 
 func showPromptMulti(
 	p *Context,
@@ -260,13 +265,25 @@ func showPromptMulti(
 		return validator(s)
 	}
 
-	for {
-		ans, err := showPrompt(p, text, "", val)
+	var ans string
 
-		if exitReceived {
+	for {
+		ans, err = showPrompt(p, text, "", val)
+
+		if err != nil {
+
+			if _, ok := err.(ValidationError); ok {
+				continue
+			} else if &err == &PromptCanceled {
+				err = nil
+
+				break
+			}
+
 			break
-		} else if err != nil {
-			continue
+
+		} else if exitReceived {
+			break
 		}
 
 		// Add the entry.

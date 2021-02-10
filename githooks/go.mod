@@ -12,6 +12,7 @@ require (
 	github.com/google/go-github/v33 v33.0.0
 	github.com/google/uuid v1.1.2
 	github.com/gookit/color v1.3.1
+	github.com/gopherjs/gopherjs v0.0.0-20210202160940-bed99a852dfe // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
 	github.com/loov/hrtime v1.0.2
@@ -28,3 +29,5 @@ require (
 	golang.org/x/sys v0.0.0-20201113135734-0a15ea8d9b02
 	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221
 )
+
+replace github.com/gen2brain/dlgs v0.0.0-20201118155338-03fe7f81ad25 => github.com/gabyx/dlgs v0.0.0-20210210230718-8902de769c8d
