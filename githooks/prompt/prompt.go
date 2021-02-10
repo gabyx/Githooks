@@ -28,6 +28,7 @@ type IContext interface {
 
 	ShowPromptMulti(
 		text string,
+		exitAnswer string,
 		validator AnswerValidator) ([]string, error)
 
 	Close()
@@ -41,19 +42,22 @@ type Formatter func(format string, args ...interface{}) string
 type Context struct {
 	log cm.ILogContext
 
-	promptFmt Formatter
-	errorFmt  Formatter
+	useGUI bool
 
-	termOut io.Writer
-
+	// Terminal data
+	promptFmt     Formatter
+	errorFmt      Formatter
+	termOut       io.Writer
 	termIn        *os.File
 	termInScanner *bufio.Scanner
 
+	// Promp settings
 	printAnswer     bool
 	maxTries        uint
 	panicIfMaxTries bool
 
-	// Prompt over the tool script if existing.
+	// Prompt over the tool script
+	// if existing.
 	execCtx cm.IExecContext
 	tool    cm.IExecutable
 }
@@ -65,24 +69,21 @@ func (p *Context) Close() {
 	}
 }
 
-// CreateContext creates a `PrompContext`.
+// CreateContext creates a prompt context `IContext`.
+// The GUI dialog gets only used if no terminal is attached on the output.
 func CreateContext(
 	log cm.ILogContext,
 	execCtx cm.IExecContext,
 	tool cm.IExecutable,
-	assertOutputIsTerminal bool,
+	useGUIFallback,
 	useStdIn bool) (IContext, error) {
 
 	var err error
 
-	var output io.Writer // If this output is nil, we fallback to taking default answer.
-	if !assertOutputIsTerminal || log.IsInfoATerminal() {
-		output = log.GetInfoWriter()
-	}
-
 	var input *os.File
 	printAnswer := false
 	maxTries := uint(3) //nolint: gomnd
+	useGUI := false
 
 	if useStdIn {
 		input = os.Stdin
@@ -90,12 +91,30 @@ func CreateContext(
 		maxTries = uint(1) //nolint: gomnd
 	} else {
 		input, err = cm.GetCtty()
-		// if err != nil => input == nil and we fallback
-		// to taking default answers.
+		// if err != nil => we don't have a terminal attached.
+	}
+
+	var output io.Writer
+	if useStdIn || (!AssertOutputIsTerminal || log.IsInfoATerminal()) {
+		// We use the output of the log:
+		// - If we are using stdin it does not matter if the output is really a terminal.
+		// - Otherwise its crucial that it is a terminal, since the prompt can not
+		//   be shown and the user has not notion what to input, in that case
+		//   output == nil, which results in the default answer.
+		// For tests: AssertOutputIsTerminal == false, which always sets the output.
+		output = log.GetInfoWriter()
+	}
+
+	// In case we have no terminal input, and no output to show the prompt
+	// fallback to using the GUI if enabled.
+	if useGUIFallback && (input == nil || output == nil) {
+		useGUI = false
 	}
 
 	p := Context{
 		log: log,
+
+		useGUI: useGUI,
 
 		errorFmt:      log.GetErrorFormatter(true),
 		promptFmt:     log.GetPromptFormatter(true),
@@ -115,14 +134,14 @@ func CreateContext(
 	return &p, err
 }
 
-func getDefaultAnswer(options []string) string {
-	for _, r := range options {
+func getDefaultAnswer(options []string) (string, int) {
+	for idx, r := range options {
 		if strings.ToLower(r) != r { // is it an upper case letter?
-			return strings.ToLower(r)
+			return strings.ToLower(r), idx
 		}
 	}
 
-	return ""
+	return "", -1
 }
 
 // CreateValidatorAnswerOptions creates a validator which validates against

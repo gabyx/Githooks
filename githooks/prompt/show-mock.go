@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const AssertOutputIsTerminal = false
+
 // ShowPromptOptions mocks the real ShowPromptOptions by reading
 // from the environment or if not defined calls the normal implementation.
 // This is only for tests.
@@ -49,6 +51,7 @@ func (p *Context) ShowPrompt(
 // validates it with a validator. An empty answer exits the prompt.
 func (p *Context) ShowPromptMulti(
 	text string,
+	exitAnswer string,
 	validator AnswerValidator) (answers []string, err error) {
-	return showPromptMulti(p, text, validator)
+	return showPromptMulti(p, text, exitAnswer, validator)
 }

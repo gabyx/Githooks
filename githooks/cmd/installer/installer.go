@@ -197,7 +197,9 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, install.UI
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	if !args.NonInteractive {
-		promptCtx, err = prompt.CreateContext(log, &cm.ExecContext{}, nil, false, args.UseStdin)
+		// Use GUI fallback if we are running an auto-update triggered from the runner.
+		useGUIFallback := args.InternalAutoUpdate
+		promptCtx, err = prompt.CreateContext(log, &cm.ExecContext{}, nil, useGUIFallback, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
@@ -1009,6 +1011,7 @@ func setupSharedRepositories(
 
 	entries, err := uiSettings.PromptCtx.ShowPromptMulti(
 		"Enter the clone URL of a shared repository",
+		"", // exit answer
 		prompt.ValidatorAnswerNotEmpty)
 
 	if err != nil {
