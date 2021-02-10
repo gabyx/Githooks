@@ -911,6 +911,7 @@ func installIntoExistingRepos(
 	tempDir string,
 	nonInteractive bool,
 	dryRun bool,
+	skipReadme bool,
 	installedRepos InstallSet,
 	registeredRepos *hooks.RegisterRepos,
 	uiSettings *install.UISettings) {
@@ -926,7 +927,8 @@ func installIntoExistingRepos(
 
 			if install.InstallIntoRepo(
 				log, gitDir,
-				nonInteractive, dryRun, uiSettings) {
+				nonInteractive, dryRun,
+				skipReadme, uiSettings) {
 
 				registeredRepos.Insert(gitDir)
 				installedRepos.Insert(gitDir)
@@ -940,6 +942,7 @@ func installIntoRegisteredRepos(
 	tempDir string,
 	nonInteractive bool,
 	dryRun bool,
+	skipReadme bool,
 	installedRepos InstallSet,
 	registeredRepos *hooks.RegisterRepos,
 	uiSettings *install.UISettings) {
@@ -963,7 +966,8 @@ func installIntoRegisteredRepos(
 		func(gitDir string) {
 			if install.InstallIntoRepo(
 				log, gitDir,
-				nonInteractive, dryRun, uiSettings) {
+				nonInteractive, dryRun,
+				skipReadme, uiSettings) {
 
 				registeredRepos.Insert(gitDir)
 				installedRepos.Insert(gitDir)
@@ -1155,18 +1159,19 @@ func runUpdate(
 		setupAutomaticUpdate(log, args.NonInteractive, args.DryRun, uiSettings.PromptCtx)
 	}
 
-	if !args.SkipInstallIntoExisting && !args.UseCoreHooksPath {
+	if !args.SkipInstallIntoExisting && !args.UseCoreHooksPath &&
+		!args.InternalAutoUpdate {
 
-		if !args.InternalAutoUpdate {
-			installIntoExistingRepos(
-				log,
-				settings.TempDir,
-				args.NonInteractive,
-				args.DryRun,
-				settings.InstalledGitDirs,
-				&settings.RegisteredGitDirs,
-				uiSettings)
-		}
+		installIntoExistingRepos(
+			log,
+			settings.TempDir,
+			args.NonInteractive,
+			args.DryRun,
+			false,
+			settings.InstalledGitDirs,
+			&settings.RegisteredGitDirs,
+			uiSettings)
+
 	}
 
 	if !args.UseCoreHooksPath {
@@ -1175,6 +1180,7 @@ func runUpdate(
 			settings.TempDir,
 			args.NonInteractive,
 			args.DryRun,
+			args.InternalAutoUpdate, // skipReadme if auto-update.
 			settings.InstalledGitDirs,
 			&settings.RegisteredGitDirs,
 			uiSettings)
