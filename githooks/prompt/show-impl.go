@@ -1,12 +1,20 @@
 package prompt
 
 import (
-	"errors"
 	cm "gabyx/githooks/common"
+	pcm "gabyx/githooks/prompt/common"
 	strs "gabyx/githooks/strings"
 	"os"
 	"strings"
 )
+
+func formatTitle(p *Context) string {
+	return p.log.GetInfoFormatter(false)("Githooks - Git Hook Manager")
+}
+
+func formatTitleQuestion(p *Context) string {
+	return p.log.GetPromptFormatter(false)("Githooks - Git Hook Manager")
+}
 
 // showPromptOptions shows a prompt to the user with `text`
 // with the options `shortOptions` and optional long options `longOptions`.
@@ -52,6 +60,7 @@ func showPromptOptions(
 		// Use the GUI dialog.
 		answer, e := showPromptOptionsGUI(
 			p,
+			formatTitleQuestion(p),
 			text,
 			defaultAnswerIdx,
 			options, longOptions,
@@ -205,7 +214,7 @@ func showPrompt(
 	cm.PanicIf(p.tool != nil, "Not yet implemented.")
 
 	if p.useGUI {
-		answer, err = showPromptGUI(p, text, defaultAnswer, validator)
+		answer, err = showPromptGUI(p, formatTitle(p), text, defaultAnswer, validator)
 		if err == nil {
 			return
 		}
@@ -242,8 +251,6 @@ func showPromptTerminal(
 	return showPromptLoopTerminal(p, text, defaultAnswer, true, validator)
 }
 
-var PromptCanceled = errors.New("Cancled")
-
 func showPromptMulti(
 	p *Context,
 	text string,
@@ -272,9 +279,9 @@ func showPromptMulti(
 
 		if err != nil {
 
-			if _, ok := err.(ValidationError); ok {
+			if _, ok := err.(pcm.ValidationError); ok {
 				continue
-			} else if &err == &PromptCanceled {
+			} else if &err == &pcm.CancledError {
 				err = nil
 
 				break

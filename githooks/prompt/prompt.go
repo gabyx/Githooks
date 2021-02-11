@@ -3,11 +3,9 @@ package prompt
 import (
 	"bufio"
 	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"io"
 	"os"
 	"runtime"
-	"strings"
 )
 
 // AnswerValidator is the callback type for the answer validator.
@@ -34,7 +32,7 @@ type IContext interface {
 	Close()
 }
 
-// Formatter is the format function to format a prompt.
+// Formatter is the format function to format a prompt or error.
 type Formatter func(format string, args ...interface{}) string
 
 // Context defines the prompt context based on a `ILogContext`
@@ -127,65 +125,4 @@ func CreateContext(
 	runtime.SetFinalizer(&p, func(p *Context) { p.Close() })
 
 	return &p, err
-}
-
-func getDefaultAnswer(options []string) (string, int) {
-	for idx, r := range options {
-		if strings.ToLower(r) != r { // is it an upper case letter?
-			return strings.ToLower(r), idx
-		}
-	}
-
-	return "", -1
-}
-
-// ValidationError represents a validation error.
-type ValidationError struct {
-	error
-}
-
-func newValidationError(format string, args ...interface{}) ValidationError {
-	return ValidationError{cm.ErrorF(format, args...)}
-}
-
-// CreateValidatorAnswerOptions creates a validator which validates against
-// a list of options.
-func CreateValidatorAnswerOptions(options []string) AnswerValidator {
-
-	return func(answer string) error {
-
-		correct := strs.Any(
-			options,
-			func(o string) bool {
-				return strings.EqualFold(answer, o)
-			})
-
-		if !correct {
-			return newValidationError("Answer '%s' not in '%q'.", answer, options)
-		}
-
-		return nil
-	}
-}
-
-// ValidatorAnswerNotEmpty checks that answers are non-empty.
-var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
-	if strs.IsEmpty(strings.TrimSpace(s)) {
-		return newValidationError("Answer must not be empty.")
-	}
-
-	return nil
-}
-
-// CreateValidatorIsDirectory creates a answer validator
-// which checks existing paths.
-func CreateValidatorIsDirectory(tildeRepl string) AnswerValidator {
-	return func(s string) error {
-		s = cm.ReplaceTildeWith(s, tildeRepl)
-		if !cm.IsDirectory(s) {
-			return newValidationError("Answer must be an existing directory.")
-		}
-
-		return nil
-	}
 }
