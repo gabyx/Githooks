@@ -16,6 +16,7 @@ func InstallIntoRepo(
 	repoGitDir string,
 	nonInteractive bool,
 	dryRun bool,
+	skipReadme bool,
 	uiSettings *UISettings) bool {
 
 	hookDir := path.Join(repoGitDir, "hooks")
@@ -52,7 +53,7 @@ func InstallIntoRepo(
 	// Offer to setup the intro README if running in interactive mode
 	// Let's skip this in non-interactive mode or in a bare repository
 	// to avoid polluting the repos with README files
-	if !nonInteractive && !isBare {
+	if !skipReadme && !nonInteractive && !isBare {
 		setupReadme(log, repoGitDir, dryRun, uiSettings)
 	}
 
