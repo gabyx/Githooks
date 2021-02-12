@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"errors"
 	cm "gabyx/githooks/common"
 	pcm "gabyx/githooks/prompt/common"
 	strs "gabyx/githooks/strings"
@@ -281,7 +282,7 @@ func showPromptMulti(
 
 			if _, ok := err.(pcm.ValidationError); ok {
 				continue
-			} else if &err == &pcm.CancledError {
+			} else if errors.Is(err, pcm.CancledError) {
 				err = nil
 
 				break

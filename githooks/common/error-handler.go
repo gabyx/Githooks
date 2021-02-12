@@ -43,6 +43,7 @@ func HandleCLIErrors(
 		}
 	} else {
 		os.Stderr.WriteString(strings.Join(message, "\n"))
+		os.Stderr.WriteString("\n")
 	}
 
 	return true

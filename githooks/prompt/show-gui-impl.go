@@ -1,9 +1,25 @@
 package prompt
 
 import (
-	"gabyx/githooks/prompt/gui"
 	strs "gabyx/githooks/strings"
 )
+
+func ShowPromptDialog(
+	title string,
+	text string,
+	defaultAnswer string) (string, error) {
+
+	return "", nil
+}
+
+func ShowOptionsDialog(
+	title string,
+	question string,
+	defaultAnswerIdx int,
+	options []string,
+	longOptions []string) (string, error) {
+	return "", nil
+}
 
 func showPromptLoopGUI(
 	p *Context,
@@ -77,7 +93,7 @@ func showPromptOptionsGUI(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return gui.ShowOptionsDialog(title, question, defaultAnswerIdx, options, longOptions)
+			return ShowOptionsDialog(title, question, defaultAnswerIdx, options, longOptions)
 		},
 		validator)
 }
@@ -93,7 +109,7 @@ func showPromptGUI(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return gui.ShowPromptDialog(title, text, defaultAnswer)
+			return ShowPromptDialog(title, text, defaultAnswer)
 		},
 		validator)
 }
