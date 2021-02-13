@@ -15,18 +15,25 @@ func indicesToList(l []uint) (s []string) {
 	return
 }
 
-// OutputArray outputs a string array to std output.
+// OutputArray outputs a string array to std output with an appended line break.
 func OutputArray(l []string, sep string) (err error) {
 	if len(l) > 0 {
-		_, err = os.Stdout.WriteString(strings.Join(l, sep) + LineBreak)
+		_, err = os.Stdout.WriteString(strings.Join(l, sep))
 	}
 
 	return
 }
 
+// Outputs a single string.
+func OutputString(s string) (err error) {
+	_, err = os.Stdout.WriteString(s)
+
+	return
+}
+
 // OutputArray outputs an index array to std output.
-func OutputIndexArray(l []uint) error {
-	return OutputArray(indicesToList(l), ",")
+func OutputIndexArray(l []uint, sep string) error {
+	return OutputArray(indicesToList(l), sep)
 }
 
 func HandleGeneralResult(ctx *CmdContext,

@@ -25,7 +25,14 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 		Use:   "message",
 		Short: "Shows a message  dialog.",
 		Long: `Shows a message dialog similar to 'zenity'.
-See 'https://help.gnome.org/users/zenity/3.32' for details.`,
+
+# Exit Codes:
+
+- '0' : User pressed 'Ok'.
+- '1' : User pressed 'Cancel' or closed the dialog.
+- '2' : The user pressed an extra button.
+		The output contains the index of that button.`,
+
 		Run: func(cmd *cobra.Command, args []string) {
 
 			var cancel func()

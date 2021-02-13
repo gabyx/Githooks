@@ -99,3 +99,47 @@ type Notification struct {
 
 	Text string
 }
+
+// FileFilter is file filter for the file dialog.
+type FileFilter struct {
+	Name     string   // Name that describes the filter (optional).
+	Patterns []string // Filter patterns for the display string.
+}
+
+// GeneralFile are general options for file dialog.
+type GeneralFile struct {
+	// Root directory of the file dialog. (default is current working dir)
+	Root string
+
+	// Default file/directory name in the dialog.
+	Filename string
+
+	// File filter.
+	FileFilters []FileFilter
+
+	// Show hidden files.
+	ShowHidden bool // Windows and macOS only.
+
+	// Select only directories.
+	OnlyDirectories bool
+}
+
+// FileSave are options for the file dialog.
+type FileSave struct {
+	General
+	GeneralFile
+
+	// Confirm if the file get overwritten.
+	ConfirmOverwrite bool
+
+	// Confirm if the file does not exist.
+	ConfirmCreate bool // Windows only.
+}
+
+// FileSelection are options for the file dialog.
+type FileSelection struct {
+	General
+	GeneralFile
+
+	MultipleSelection bool
+}

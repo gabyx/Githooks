@@ -62,3 +62,11 @@ type Entry struct {
 	// The entered text.
 	Text string
 }
+
+// File is the result type for file dialogs.
+type File struct {
+	General
+
+	// The selected paths.
+	Paths []string
+}

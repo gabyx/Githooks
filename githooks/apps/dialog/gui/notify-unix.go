@@ -42,7 +42,7 @@ func ShowNotification(ctx context.Context, s *set.Notification) error {
 		args = append(args, "--text", s.Text, "--no-markup")
 	}
 
-	_, err := gunix.RunZenity(ctx, args)
+	_, err := gunix.RunZenity(ctx, args, "")
 
 	return err
 }

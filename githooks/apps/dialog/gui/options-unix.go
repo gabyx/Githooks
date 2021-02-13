@@ -16,7 +16,7 @@ import (
 )
 
 func getChoices(output string) (indices []uint) {
-	out := strings.Split(strings.TrimSpace(output), "|")
+	out := strings.Split(strings.TrimSpace(output), "\x00")
 
 	indices = make([]uint, 0, len(out))
 
@@ -96,7 +96,7 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 	// List options
 	if s.MultipleSelection {
 		args = append(args, "--multiple")
-		args = append(args, "--separator=|")
+		args = append(args, "--separator", "\x00")
 	}
 
 	// Add choices with ids.
@@ -104,7 +104,7 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		args = append(args, fmt.Sprintf("%d", i), s.Options[i])
 	}
 
-	out, err := gunix.RunZenity(ctx, args)
+	out, err := gunix.RunZenity(ctx, args, "")
 	if err == nil {
 		return res.Options{
 			General:   res.OkResult(),

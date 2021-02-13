@@ -92,7 +92,7 @@ func ShowMessage(ctx context.Context, s *set.Message) (res.Message, error) {
 		args = append(args, "--icon-name=dialog-question")
 	}
 
-	out, err := gunix.RunZenity(ctx, args)
+	out, err := gunix.RunZenity(ctx, args, "")
 	if err == nil {
 		return res.Message{General: res.OkResult()}, nil
 	}

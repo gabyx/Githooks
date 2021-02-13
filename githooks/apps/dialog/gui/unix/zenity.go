@@ -4,6 +4,7 @@ package gui
 
 import (
 	"context"
+	strs "gabyx/githooks/strings"
 	"os/exec"
 )
 
@@ -19,18 +20,26 @@ func GetZenityExecutable() string {
 }
 
 // RunZenity runs the a Zenity executable.
-func RunZenity(ctx context.Context, args []string) ([]byte, error) {
+func RunZenity(ctx context.Context, args []string, workingDir string) ([]byte, error) {
 
 	zenity := GetZenityExecutable()
+	var cmd *exec.Cmd
 
 	if ctx != nil {
-		out, err := exec.CommandContext(ctx, zenity, args...).Output()
-		if ctx.Err() != nil {
-			err = ctx.Err()
-		}
+		cmd = exec.CommandContext(ctx, zenity, args...)
 
-		return out, err
+	} else {
+		cmd = exec.Command(zenity, args...)
 	}
 
-	return exec.Command(zenity, args...).Output()
+	if strs.IsNotEmpty(workingDir) {
+		cmd.Dir = workingDir
+	}
+
+	out, err := cmd.Output()
+	if ctx != nil && ctx.Err() != nil {
+		err = ctx.Err()
+	}
+
+	return out, err
 }

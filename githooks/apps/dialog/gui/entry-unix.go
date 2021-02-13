@@ -79,7 +79,7 @@ func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
 		args = append(args, "--hide-text")
 	}
 
-	out, err := gunix.RunZenity(ctx, args)
+	out, err := gunix.RunZenity(ctx, args, "")
 	if err == nil {
 		return res.Entry{
 			General: res.OkResult(),

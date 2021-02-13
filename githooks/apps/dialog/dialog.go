@@ -3,6 +3,7 @@ package main
 import (
 	dcm "gabyx/githooks/apps/dialog/cmd/common"
 	"gabyx/githooks/apps/dialog/cmd/entry"
+	"gabyx/githooks/apps/dialog/cmd/file"
 	"gabyx/githooks/apps/dialog/cmd/message"
 	"gabyx/githooks/apps/dialog/cmd/notify"
 	"gabyx/githooks/apps/dialog/cmd/options"
@@ -21,6 +22,7 @@ func addSubCommands(cmd *cobra.Command, ctx *dcm.CmdContext) {
 	cmd.AddCommand(message.NewCmd(ctx))
 	cmd.AddCommand(entry.NewCmd(ctx))
 	cmd.AddCommand(notify.NewCmd(ctx))
+	cmd.AddCommand(file.NewCmd(ctx)...)
 }
 
 // makeDialogCtl returns the root command of the Githooks dialog executable.
