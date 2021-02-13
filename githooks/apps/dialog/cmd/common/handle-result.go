@@ -1,8 +1,7 @@
 package common
 
 import (
-	"errors"
-	dcm "gabyx/githooks/apps/dialog/common"
+	res "gabyx/githooks/apps/dialog/result"
 	strs "gabyx/githooks/strings"
 	"os"
 	"strings"
@@ -16,43 +15,59 @@ func indicesToList(l []uint) (s []string) {
 	return
 }
 
-func HandleOtherErrors(ctx *CmdContext, err error) error {
+// OutputArray outputs a string array to std output.
+func OutputArray(l []string, sep string) (err error) {
+	if len(l) > 0 {
+		_, err = os.Stdout.WriteString(strings.Join(l, sep) + LineBreak)
+	}
 
-	if e, ok := err.(*dcm.ErrExtraButton); ok { //nolint: gocritic
+	return
+}
 
-		os.Stdout.WriteString(strs.Fmt("%d", e.ButtonIndex))
-		os.Stdout.WriteString("\n")
-		ctx.ExitCode = 1
+// OutputArray outputs an index array to std output.
+func OutputIndexArray(l []uint) error {
+	return OutputArray(indicesToList(l), ",")
+}
 
-		return nil
+func HandleGeneralResult(ctx *CmdContext,
+	g *res.General,
+	err error,
+	okCallback func() error,
+	cancelCallback func() error) error {
 
-	} else if errors.Is(err, dcm.ErrCancled) {
-		ctx.ExitCode = 1
-
-		return nil
-
-	} else if os.IsTimeout(err) {
+	// Handle expected errors first.
+	if os.IsTimeout(err) {
 		ctx.ExitCode = 5
 
 		return nil
 
+	} else if err != nil {
+		// All other errors are not handled.
+		return err
 	}
 
-	// All other errors are not handled.
-	return err
-}
-
-func HandleOutputIndices(ctx *CmdContext, l []uint, err error) error {
-
-	if err == nil {
-
-		if len(l) > 0 {
-			os.Stdout.WriteString(strings.Join(indicesToList(l), ","))
-			os.Stdout.WriteString("\n")
+	// Handle non-errors.
+	if g.IsOk() {
+		ctx.ExitCode = 0
+		if okCallback != nil {
+			e := okCallback()
+			if e != nil {
+				return e // callback error...
+			}
 		}
-
-		return nil
+	} else if g.IsCanceled() {
+		ctx.ExitCode = 1
+		if cancelCallback != nil {
+			e := cancelCallback()
+			if e != nil {
+				return e // callback error...
+			}
+		}
+	} else if clicked, idx := g.IsExtraButton(); clicked {
+		os.Stdout.WriteString(strs.Fmt("%d", idx))
+		os.Stdout.WriteString(LineBreak)
+		ctx.ExitCode = 2
 	}
 
-	return HandleOtherErrors(ctx, err)
+	return nil
 }

@@ -1,4 +1,4 @@
-package gui
+package settings
 
 // DialogIcon is the enumeration for dialog icons.
 type DialogIcon uint
@@ -13,7 +13,7 @@ const (
 )
 
 // General Dialog settings are default settings for all dialogs.
-type GeneralSettings struct {
+type General struct {
 	Title  string
 	Width  uint
 	Height uint
@@ -21,8 +21,8 @@ type GeneralSettings struct {
 	WindowIcon DialogIcon
 }
 
-// DefaultButtonSettings are default settings for the standard buttons on certain dialogs.
-type DefaultButtonSettings struct {
+// DefaultButton are default settings for the standard buttons on certain dialogs.
+type DefaultButton struct {
 	OkLabel       string
 	CancelLabel   string
 	DefaultCancel bool
@@ -30,8 +30,8 @@ type DefaultButtonSettings struct {
 	ExtraButtons []string
 }
 
-// GeneralTextSettings are default text settings for certain dialogs.
-type GeneralTextSettings struct {
+// GeneralText are default text settings for certain dialogs.
+type GeneralText struct {
 	Text      string
 	NoWrap    bool
 	Ellipsize bool
@@ -48,11 +48,11 @@ const (
 	ErrorStyle
 )
 
-// MessageSettings are options for the message dialog.
-type MessageSettings struct {
-	GeneralSettings
-	GeneralTextSettings
-	DefaultButtonSettings
+// Message are options for the message dialog.
+type Message struct {
+	General
+	GeneralText
+	DefaultButton
 
 	Style MessageStyle
 	Icon  DialogIcon
@@ -70,11 +70,11 @@ const (
 	OptionsStyleButtons
 )
 
-// OptionsSettings are options for the options dialog.
-type OptionsSettings struct {
-	GeneralSettings
-	GeneralTextSettings
-	DefaultButtonSettings
+// Options are options for the options dialog.
+type Options struct {
+	General
+	GeneralText
+	DefaultButton
 
 	Options       []string
 	DefaultOption uint
@@ -83,12 +83,19 @@ type OptionsSettings struct {
 	MultipleSelection bool
 }
 
-// EntrySettings are options for the entry dialog.
-type EntrySettings struct {
-	GeneralSettings
-	GeneralTextSettings
-	DefaultButtonSettings
+// Entry are options for the entry dialog.
+type Entry struct {
+	General
+	GeneralText
+	DefaultButton
 
-	EntryText string
-	HideEntry bool
+	EntryText     string
+	HideEntryText bool
+}
+
+// Notification are options for the notification.
+type Notification struct {
+	General
+
+	Text string
 }

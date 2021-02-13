@@ -1,4 +1,4 @@
-//+ build linux
+// +build !windows,!darwin
 
 package gui
 
@@ -7,23 +7,24 @@ import (
 	"fmt"
 	"os/exec"
 
-	dcm "gabyx/githooks/apps/dialog/common"
 	gunix "gabyx/githooks/apps/dialog/gui/unix"
+	res "gabyx/githooks/apps/dialog/result"
+	set "gabyx/githooks/apps/dialog/settings"
 	strs "gabyx/githooks/strings"
 )
 
-func ShowMessage(ctx context.Context, s *MessageSettings) (bool, error) {
+func ShowMessage(ctx context.Context, s *set.Message) (res.Message, error) {
 
 	var args []string
 
 	switch s.Style {
-	case QuestionStyle:
+	case set.QuestionStyle:
 		args = append(args, "--question")
-	case InfoStyle:
+	case set.InfoStyle:
 		args = append(args, "--info")
-	case WarningStyle:
+	case set.WarningStyle:
 		args = append(args, "--warning")
-	case ErrorStyle:
+	case set.ErrorStyle:
 		args = append(args, "--error")
 	}
 
@@ -34,18 +35,19 @@ func ShowMessage(ctx context.Context, s *MessageSettings) (bool, error) {
 	if s.Width > 0 {
 		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
 	}
+
 	if s.Height > 0 {
 		args = append(args, "--height", fmt.Sprintf("%d", s.Height))
 	}
 
 	switch s.WindowIcon {
-	case ErrorIcon:
+	case set.ErrorIcon:
 		args = append(args, "--window-icon=error")
-	case WarningIcon:
+	case set.WarningIcon:
 		args = append(args, "--window-icon=warning")
-	case InfoIcon:
+	case set.InfoIcon:
 		args = append(args, "--window-icon=info")
-	case QuestionIcon:
+	case set.QuestionIcon:
 		args = append(args, "--window-icon=question")
 	}
 
@@ -80,19 +82,19 @@ func ShowMessage(ctx context.Context, s *MessageSettings) (bool, error) {
 	}
 
 	switch s.Icon {
-	case ErrorIcon:
+	case set.ErrorIcon:
 		args = append(args, "--icon-name=dialog-error")
-	case WarningIcon:
+	case set.WarningIcon:
 		args = append(args, "--icon-name=dialog-warning")
-	case InfoIcon:
+	case set.InfoIcon:
 		args = append(args, "--icon-name=dialog-information")
-	case QuestionIcon:
+	case set.QuestionIcon:
 		args = append(args, "--icon-name=dialog-question")
 	}
 
 	out, err := gunix.RunZenity(ctx, args)
 	if err == nil {
-		return true, nil
+		return res.Message{General: res.OkResult()}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
@@ -103,14 +105,15 @@ func ShowMessage(ctx context.Context, s *MessageSettings) (bool, error) {
 				button := string(out[:len(out)-1])
 				for i := range s.ExtraButtons {
 					if button == s.ExtraButtons[i] {
-						return false, &dcm.ErrExtraButton{ButtonIndex: uint(i)}
+						return res.Message{
+							General: res.ExtraButtonResult(uint(i))}, nil
 					}
 				}
 			}
 
-			return false, dcm.ErrCancled
+			return res.Message{General: res.CancelResult()}, nil
 		}
 	}
 
-	return false, err
+	return res.Message{}, err
 }

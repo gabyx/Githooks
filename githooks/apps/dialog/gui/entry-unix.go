@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	gunix "gabyx/githooks/apps/dialog/gui/unix"
@@ -15,37 +14,12 @@ import (
 	strs "gabyx/githooks/strings"
 )
 
-func getChoices(output string) (indices []uint) {
-	out := strings.Split(strings.TrimSpace(output), "|")
+func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
 
-	indices = make([]uint, 0, len(out))
-
-	for i := range out {
-		idx, err := strconv.ParseUint(out[i], 10, 32)
-		if err == nil {
-			indices = append(indices, uint(idx))
-		}
-	}
-
-	return
-}
-
-func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
-
-	args := []string{
-		"--list",
-		"--hide-header",
-		"--column=id",
-		"--column=",
-		"--hide-column=1",
-		"--print-column=1"}
+	args := []string{"--entry"}
 
 	if strs.IsNotEmpty(s.Title) {
 		args = append(args, "--title", s.Title)
-	}
-
-	if strs.IsNotEmpty(s.Text) {
-		args = append(args, "--text", s.Text, "--no-markup")
 	}
 
 	if s.Width > 0 {
@@ -65,6 +39,10 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		args = append(args, "--window-icon=info")
 	case set.QuestionIcon:
 		args = append(args, "--window-icon=question")
+	}
+
+	if strs.IsNotEmpty(s.Text) {
+		args = append(args, "--text", s.Text, "--no-markup")
 	}
 
 	if strs.IsNotEmpty(s.OkLabel) {
@@ -93,22 +71,19 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		args = append(args, "--default-cancel")
 	}
 
-	// List options
-	if s.MultipleSelection {
-		args = append(args, "--multiple")
-		args = append(args, "--separator=|")
+	if strs.IsNotEmpty(s.EntryText) {
+		args = append(args, "--entry-text", s.EntryText)
 	}
 
-	// Add choices with ids.
-	for i := range s.Options {
-		args = append(args, fmt.Sprintf("%d", i), s.Options[i])
+	if s.HideEntryText {
+		args = append(args, "--hide-text")
 	}
 
 	out, err := gunix.RunZenity(ctx, args)
 	if err == nil {
-		return res.Options{
-			General:   res.OkResult(),
-			Selection: getChoices(string(out))}, nil
+		return res.Entry{
+			General: res.OkResult(),
+			Text:    strings.TrimSpace(string(out))}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
@@ -119,15 +94,15 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 				button := string(out[:len(out)-1])
 				for i := range s.ExtraButtons {
 					if button == s.ExtraButtons[i] {
-						return res.Options{
+						return res.Entry{
 							General: res.ExtraButtonResult(uint(i))}, nil
 					}
 				}
 			}
 
-			return res.Options{General: res.CancelResult()}, nil
+			return res.Entry{General: res.CancelResult()}, nil
 		}
 	}
 
-	return res.Options{}, err
+	return res.Entry{}, err
 }

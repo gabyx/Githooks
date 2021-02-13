@@ -1,10 +1,9 @@
-package message
+package notify
 
 import (
 	"context"
 	dcm "gabyx/githooks/apps/dialog/cmd/common"
 	"gabyx/githooks/apps/dialog/gui"
-	res "gabyx/githooks/apps/dialog/result"
 	set "gabyx/githooks/apps/dialog/settings"
 	ccm "gabyx/githooks/cmd/common"
 	"time"
@@ -12,19 +11,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func handleResult(ctx *dcm.CmdContext, res *res.Message, err error) error {
-	return dcm.HandleGeneralResult(ctx, &res.General, err, nil, nil)
+func handleResult(ctx *dcm.CmdContext, err error) error {
+	if err == nil {
+		ctx.ExitCode = 0
+	}
+
+	return err
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 
-	settings := set.Message{}
+	settings := set.Notification{}
 	var timeout uint
 
 	cmd := &cobra.Command{
-		Use:   "message",
-		Short: "Shows a message  dialog.",
-		Long: `Shows a message dialog similar to 'zenity'.
+		Use:   "notify",
+		Short: "Shows a notification.",
+		Long: `Shows a notification similar to 'zenity'.
 See 'https://help.gnome.org/users/zenity/3.32' for details.`,
 		Run: func(cmd *cobra.Command, args []string) {
 
@@ -36,14 +39,14 @@ See 'https://help.gnome.org/users/zenity/3.32' for details.`,
 				defer cancel()
 			}
 
-			res, err := gui.ShowMessage(cont, &settings)
-			err = handleResult(ctx, &res, err)
+			err := gui.ShowNotification(cont, &settings)
+			err = handleResult(ctx, err)
 			ctx.Log.AssertNoErrorPanic(err, "Dialog failed")
 		}}
 
 	cmd.Flags().UintVar(&timeout, "timeout", 0, "Timeout for the dialog")
 
-	dcm.AddFlagsMessage(cmd, &settings)
+	dcm.AddFlagsNotification(cmd, &settings)
 	ccm.SetCommandDefaults(ctx.Log, cmd)
 
 	return cmd
