@@ -8,10 +8,22 @@ if [ ! -f "$1" ] || grep -q "fixup!" "$1"; then
     exit 0
 fi
 
+if command -v "gsed" ; then
+    SED="gsed"
+else 
+    SED="sed"
+fi
+
+if ! echo "a" | $SED -E "1s/(.*)/\1 $SELECTED/" >/dev/null 2>&1; then
+    echo "! Install GNU sed for updating the templates." >&2
+    exit 1
+fi
+
+
 # EMOJIS=":heart: :yellow_heart: :blue_heart: :purple_heart: :green_heart:"
 # EMOJIS="$EMOJIS :sparkles: :star: :boom: :fire: :zap: :tada:"
 # POSITION=$(($(od -A n -t d -N 1 /dev/urandom | tr -d ' ') % 11 + 1))
 SELECTED=":anchor:" #$(echo "$EMOJIS" | awk -v N=$POSITION '{ print $N }')
 
-sed -i -E '1s/(\s*:\w+:)+$//' "$1"
-sed -i -E "1s/(.*)/\1 $SELECTED/" "$1"
+$SED -i -E '1s/(?:\s*:\w+:)+$//' "$1"
+$SED -i -E "1s/(.*)/\1 $SELECTED/" "$1"

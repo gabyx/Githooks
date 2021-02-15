@@ -1,12 +1,18 @@
 #!/bin/sh
 
-if [ "$(echo "a" | sed -E 's|a|\n|')" = "n" ]; then
+if command -v "gsed" ; then
+    SED="gsed"
+else 
+    SED="sed"
+fi
+
+if [ "$(echo "a" | $SED -E 's|a|\n|')" = "n" ]; then
     echo "! Install GNU sed for updating the templates." >&2
     exit 1
 fi
 
 # Patch the hooks
-HOOK_NAMES=$(sed -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githooks/hooks/githooks.go) ||
+HOOK_NAMES=$($SED -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githooks/hooks/githooks.go) ||
     {
         echo "update-templates:: Replacement command failed!" >&2
         exit 1
@@ -14,7 +20,7 @@ HOOK_NAMES=$(sed -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githo
 
 for HOOK_NAME in $HOOK_NAMES; do
     # shellcheck disable=SC2015
-    sed -e "s|GITHOOKS_RUNNER=.*|GITHOOKS_RUNNER=\"\$(cd \"\$(dirname \"\$0\")/../\" \&\& pwd)/githooks/bin/runner\"|" \
+    $SED -e "s|GITHOOKS_RUNNER=.*|GITHOOKS_RUNNER=\"\$(cd \"\$(dirname \"\$0\")/../\" \&\& pwd)/githooks/bin/runner\"|" \
         -e "s|\(various Git triggers.*\)|\1\n#\n# This file is auto-generated, do not edit!|" \
         <githooks/run-wrapper.sh >"hooks/$HOOK_NAME" &&
         chmod u+x "hooks/$HOOK_NAME" &&

@@ -6,7 +6,6 @@ require (
 	code.gitea.io/sdk/gitea v0.13.2
 	github.com/agext/regexp v1.3.0
 	github.com/bmatcuk/doublestar/v3 v3.0.0
-	github.com/gen2brain/dlgs v0.0.0-20201118155338-03fe7f81ad25
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/goccy/go-yaml v1.8.2
 	github.com/google/go-github/v33 v33.0.0
@@ -29,5 +28,3 @@ require (
 	golang.org/x/sys v0.0.0-20201113135734-0a15ea8d9b02
 	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221
 )
-
-replace github.com/gen2brain/dlgs v0.0.0-20201118155338-03fe7f81ad25 => github.com/gabyx/dlgs v0.0.0-20210210230718-8902de769c8d

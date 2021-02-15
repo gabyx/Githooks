@@ -27,7 +27,7 @@ type DefaultButton struct {
 	CancelLabel   string
 	DefaultCancel bool
 
-	ExtraButtons []string
+	ExtraButtons []string // On macOS only one additional button is allowed.
 }
 
 // GeneralText are default text settings for certain dialogs.

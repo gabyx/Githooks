@@ -10,7 +10,10 @@ func addFlagsGeneral(cmd *cobra.Command, s *set.General) {
 	cmd.Flags().StringVar(&s.Title, "title", "", "Dialog title.")
 	cmd.Flags().UintVar(&s.Width, "width", 0, "Dialog width.")
 	cmd.Flags().UintVar(&s.Height, "height", 0, "Dialog height.")
-	cmd.Flags().UintVar((*uint)(&s.WindowIcon), "window-icon", 0, "Window icon.")
+
+	a := iconArgs{icon: &s.WindowIcon}
+	cmd.Flags().Var(&a, "window-icon", `Window icon.
+Only Unix supported: One of ['info', 'warning', 'error', 'question']`)
 }
 
 func addFlagsDefaultButton(cmd *cobra.Command, s *set.DefaultButton) {
@@ -18,7 +21,8 @@ func addFlagsDefaultButton(cmd *cobra.Command, s *set.DefaultButton) {
 	cmd.Flags().StringVar(&s.CancelLabel, "cancel-label", "", "Cancel button label.")
 	cmd.Flags().BoolVar(&s.DefaultCancel, "default-cancel", false, "Set 'Cancel' as the default button.")
 
-	cmd.Flags().StringArrayVar(&s.ExtraButtons, "extra-button", nil, "Extra buttons labels.")
+	cmd.Flags().StringArrayVar(&s.ExtraButtons, "extra-button", nil, `Extra buttons labels. 
+On macOS only one add. button is considered.`)
 }
 
 func addFlagsGeneralText(cmd *cobra.Command, s *set.GeneralText) {
@@ -45,8 +49,12 @@ func AddFlagsMessage(cmd *cobra.Command, s *set.Message) {
 	addFlagsGeneralText(cmd, &s.GeneralText)
 	addFlagsDefaultButton(cmd, &s.DefaultButton)
 
-	cmd.Flags().UintVar((*uint)(&s.Style), "style", 0, "Message style.")
-	cmd.Flags().UintVar((*uint)(&s.Icon), "icon", 0, "Message icon.")
+	a1 := msgStyleArgs{style: &s.Style}
+	cmd.Flags().Var(&a1, "style", "Message style.")
+
+	a2 := iconArgs{icon: &s.Icon}
+	cmd.Flags().Var(&a2, "icon", `Message icon.
+One of ['info', 'warning', 'error', 'question']`)
 }
 
 func AddFlagsOptions(cmd *cobra.Command, s *set.Options) {
