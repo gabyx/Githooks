@@ -67,6 +67,7 @@ const (
 
 	// OptionsStyleButtons renders the list dialog with a buttons list.
 	// Multiple selections can therefore not be performed.
+	// Unsupported at the moment.
 	OptionsStyleButtons
 )
 
@@ -76,8 +77,8 @@ type Options struct {
 	GeneralText
 	DefaultButton
 
-	Options       []string
-	DefaultOption uint
+	Options        []string
+	DefaultOptions []uint
 
 	Style             OptionsStyle
 	MultipleSelection bool
@@ -91,6 +92,8 @@ type Entry struct {
 
 	EntryText     string
 	HideEntryText bool
+
+	Icon DialogIcon // Only on macOS supported.
 }
 
 // Notification are options for the notification.
@@ -130,6 +133,7 @@ type FileSave struct {
 	GeneralFile
 
 	// Confirm if the file get overwritten.
+	// Cannot be disabled on macOS.
 	ConfirmOverwrite bool
 
 	// Confirm if the file does not exist.

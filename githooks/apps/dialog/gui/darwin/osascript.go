@@ -27,7 +27,6 @@ func RunOSAScript(ctx context.Context, script string, data interface{}, workingD
 	}
 
 	script = buf.String()
-
 	lang := "JavaScript"
 
 	var cmd *exec.Cmd

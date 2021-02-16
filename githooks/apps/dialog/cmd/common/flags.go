@@ -36,12 +36,12 @@ func addFlagsGeneralFile(cmd *cobra.Command, s *set.GeneralFile) {
 
 	cmd.Flags().StringVar(&s.Filename, "filename", "", "Default filename in the dialog.")
 
-	a := fileFilterArgs{Filters: s.FileFilters}
+	a := fileFilterArgs{Filters: &s.FileFilters}
 	cmd.Flags().Var(&a, "file-filter", "Sets a filename filter ('<name> | <pattern> <pattern> ...').")
 
 	cmd.Flags().BoolVar(&s.ShowHidden, "show-hidden", false, "Show hidden files.")
 
-	cmd.Flags().BoolVar(&s.OnlyDirectories, "directories", false, "Activate directory-only selection.")
+	cmd.Flags().BoolVar(&s.OnlyDirectories, "directory", false, "Activate directory-only selection.")
 }
 
 func AddFlagsMessage(cmd *cobra.Command, s *set.Message) {
@@ -62,8 +62,9 @@ func AddFlagsOptions(cmd *cobra.Command, s *set.Options) {
 	addFlagsGeneralText(cmd, &s.GeneralText)
 	addFlagsDefaultButton(cmd, &s.DefaultButton)
 
-	cmd.Flags().StringArrayVar(&s.Options, "option", nil, "Option choice.")
-	cmd.Flags().UintVar(&s.DefaultOption, "default-option", 0, "Default option index.")
+	cmd.Flags().StringArrayVar(&s.Options, "option", nil, "List of options to choose from.")
+	a := indexArgs{indices: &s.DefaultOptions}
+	cmd.Flags().Var(&a, "default-option", "Default selected option indices (only macOS/Windows).")
 
 	cmd.Flags().UintVar((*uint)(&s.Style), "style", 0, "Dialog style: '0' for list, '1' for buttons.")
 	cmd.Flags().BoolVar(&s.MultipleSelection, "multiple", false, "Allow multiple selections.")
@@ -73,6 +74,10 @@ func AddFlagsEntry(cmd *cobra.Command, s *set.Entry) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
 	addFlagsDefaultButton(cmd, &s.DefaultButton)
+
+	a2 := iconArgs{icon: &s.Icon}
+	cmd.Flags().Var(&a2, "icon", `Message icon (only macOS).
+One of ['info', 'warning', 'error', 'question']`)
 
 	cmd.Flags().StringVar(&s.EntryText, "entry-text", "", "The entry text.")
 	cmd.Flags().BoolVar(&s.HideEntryText, "hide-text", false, "Hide the text in the entry field.")
@@ -87,8 +92,12 @@ func AddFlagsFileSave(cmd *cobra.Command, s *set.FileSave) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralFile(cmd, &s.GeneralFile)
 
-	cmd.Flags().BoolVar(&s.ConfirmOverwrite, "confirm-overwrite", false, "Confirm if the chosen path already exists.")
-	cmd.Flags().BoolVar(&s.ShowHidden, "confirm-create", false, "Confirm if the chosen path does not exist.")
+	cmd.Flags().BoolVar(&s.ConfirmOverwrite, "confirm-overwrite", false,
+		`Confirm if the chosen path already exists.
+Cannot be disabled on macOS.`)
+
+	cmd.Flags().BoolVar(&s.ShowHidden, "confirm-create", false,
+		"Confirm if the chosen path does not exist (only Windows)")
 }
 
 func AddFlagsFileSelection(cmd *cobra.Command, s *set.FileSelection) {

@@ -43,6 +43,8 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 		Short: "Shows a options selection dialog.",
 		Long: `Shows a list selection dialog similar to 'zenity'.
 
+Extra buttons are only supported on Unix and Windows.
+
 # Exit Codes:
 
 - '0' : 'Ok' was pressed. The output contains the indices of the selected items

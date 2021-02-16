@@ -4,37 +4,126 @@ package gui
 
 import (
 	"context"
+	"os/exec"
 	"strings"
 
+	gmac "gabyx/githooks/apps/dialog/gui/darwin"
 	res "gabyx/githooks/apps/dialog/result"
 	set "gabyx/githooks/apps/dialog/settings"
+	sets "gabyx/githooks/apps/dialog/settings"
 )
+
+func translateFileSelection(f *sets.FileSelection) (d gmac.FileData, err error) {
+
+	d.Separator = "\x00"
+
+	if f.OnlyDirectories {
+		d.Operation = "chooseFolder"
+	} else {
+		d.Operation = "chooseFile"
+		d.Opts.OfType = initFilters(f.FileFilters)
+	}
+
+	d.Opts.ShowPackages = true
+	d.Opts.WithPrompt = f.Title
+	d.Opts.Invisibles = f.ShowHidden
+	d.Opts.DefaultName = f.Filename
+	d.Opts.DefaultLocation = f.Root
+	d.Opts.Multiple = f.MultipleSelection
+
+	return
+}
+
+func translateFileSave(f *sets.FileSave) (d gmac.FileData, err error) {
+
+	d.Separator = "\x00"
+
+	if f.OnlyDirectories {
+		d.Operation = "chooseFolder"
+	} else {
+		d.Operation = "chooseFileName"
+		d.Opts.OfType = initFilters(f.FileFilters)
+	}
+
+	d.Opts.ShowPackages = true
+	d.Opts.WithPrompt = f.Title
+	d.Opts.Invisibles = f.ShowHidden
+	d.Opts.DefaultName = f.Filename
+	d.Opts.DefaultLocation = f.Root
+	d.Opts.Multiple = false
+
+	return
+}
 
 func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
 
-	return res.File{}, nil
+	data, err := translateFileSave(s)
+	if err != nil {
+		return res.File{}, err
+	}
+
+	out, err := gmac.RunOSAScript(ctx, "file", data, "")
+
+	if err == nil {
+		// Any linebreak at the end will be trimmed away.
+		s := strings.TrimSuffix(string(out), "\n")
+
+		return res.File{
+			General: res.OkResult(),
+			Paths:   strings.Split(s, "\x00")}, nil
+	}
+
+	if err, ok := err.(*exec.ExitError); ok {
+		if err.ExitCode() == 1 {
+			return res.File{General: res.CancelResult()}, nil
+		}
+	}
+
+	return res.File{}, err
 }
 
 func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, error) {
 
-	return res.File{}, nil
+	data, err := translateFileSelection(s)
+	if err != nil {
+		return res.File{}, err
+	}
+
+	out, err := gmac.RunOSAScript(ctx, "file", data, "")
+
+	if err == nil {
+		return res.File{
+			General: res.OkResult(),
+			Paths:   strings.Split(string(out), "\x00")}, nil
+	}
+
+	if err, ok := err.(*exec.ExitError); ok {
+		if err.ExitCode() == 1 {
+			return res.File{General: res.CancelResult()}, nil
+		}
+	}
+
+	return res.File{}, err
 }
 
 func initFilters(filters []set.FileFilter) []string {
-	var res []string
+	var filter []string
 	for _, f := range filters {
-		var buf strings.Builder
-		buf.WriteString("--file-filter=")
-		if f.Name != "" {
-			buf.WriteString(f.Name)
-			buf.WriteRune('|')
-		}
 		for _, p := range f.Patterns {
-			buf.WriteString(p)
-			buf.WriteRune(' ')
+			star := strings.LastIndexByte(p, '*')
+			if star >= 0 {
+				dot := strings.LastIndexByte(p, '.')
+				if star > dot {
+					return nil // we got ".*" -> return no filter
+				}
+
+				filter = append(filter, p[dot+1:]) // append the *.()
+
+			} else {
+				filter = append(filter, p)
+			}
 		}
-		res = append(res, buf.String())
 	}
 
-	return res
+	return filter
 }

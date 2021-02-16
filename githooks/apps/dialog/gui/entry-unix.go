@@ -81,9 +81,13 @@ func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
 
 	out, err := gunix.RunZenity(ctx, args, "")
 	if err == nil {
+
+		// Any linebreak at the end will be trimmed away.
+		s := strings.TrimSuffix(string(out), "\n")
+
 		return res.Entry{
 			General: res.OkResult(),
-			Text:    strings.TrimSpace(string(out))}, nil
+			Text:    s}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {

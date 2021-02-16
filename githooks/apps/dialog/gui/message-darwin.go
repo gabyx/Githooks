@@ -5,6 +5,7 @@ package gui
 import (
 	"context"
 	"os/exec"
+	"strings"
 
 	gmac "gabyx/githooks/apps/dialog/gui/darwin"
 	res "gabyx/githooks/apps/dialog/result"
@@ -15,11 +16,11 @@ import (
 
 const idPrefix rune = '\u200B'
 
-func translateMessage(msg *sets.Message) (interface{}, error) {
-	d := gmac.MsgData{}
+func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
+	d = gmac.MsgData{}
 
-	d.Text = msg.Text
 	d.Operation = "displayDialog"
+	d.Text = msg.Text
 	d.Opts.WithTitle = msg.Title
 
 	switch msg.Style {
@@ -52,12 +53,11 @@ func translateMessage(msg *sets.Message) (interface{}, error) {
 
 	// Workaround: Append invisible spaces before each extra button,
 	// to identify the index afterwards (no string parsing of the label!).
+	extraButtons := make([]string, len(msg.ExtraButtons))
+	id := string(idPrefix)
 	for i := range msg.ExtraButtons {
-		id := ""
-		for j := 0; j < i+1; j++ {
-			id += string(idPrefix)
-		}
-		msg.ExtraButtons[i] = id + msg.ExtraButtons[i]
+		id += string(idPrefix)
+		extraButtons[i] = id + msg.ExtraButtons[i]
 	}
 
 	if msg.Style == sets.QuestionStyle {
@@ -65,45 +65,52 @@ func translateMessage(msg *sets.Message) (interface{}, error) {
 			msg.CancelLabel = "No"
 		}
 		if strs.IsEmpty(msg.OkLabel) {
-			msg.OkLabel = "Yes"
+			msg.OkLabel = string(idPrefix) + "Yes"
 		}
 
-		d.Opts.Buttons = append(msg.ExtraButtons, msg.CancelLabel, msg.OkLabel) // nolint: gocritic
-		d.Opts.CancelButton = len(msg.ExtraButtons) + 1
+		d.Opts.Buttons = append(extraButtons, msg.CancelLabel, msg.OkLabel) // nolint: gocritic
+		d.Opts.CancelButton = len(extraButtons) + 1
 
 	} else {
 		if strs.IsEmpty(msg.OkLabel) {
-			msg.OkLabel = "Ok"
+			msg.OkLabel = string(idPrefix) + "Ok"
 		}
 
-		d.Opts.Buttons = append(msg.ExtraButtons, msg.OkLabel) // nolint: gocritic
-		d.Opts.DefaultButton = len(msg.ExtraButtons) + 1
+		d.Opts.Buttons = append(extraButtons, msg.OkLabel) // nolint: gocritic
+		d.Opts.DefaultButton = len(extraButtons) + 1
 	}
 
 	if msg.DefaultCancel && d.Opts.CancelButton != 0 {
 		d.Opts.DefaultButton = d.Opts.CancelButton
+	} else {
+		d.Opts.DefaultButton = len(d.Opts.Buttons)
 	}
 
-	return d, nil
+	return
 }
 
-func getResult(out string, maxExtraButtons int) res.Message {
+func getResult(out string, maxButtons int) res.Message {
+	s := strings.TrimSpace(out)
+	cm.DebugAssert(strs.IsNotEmpty(s))
 
-	r := []rune(out)
+	r := []rune(s)
+
 	i := 0
-	for ; i < maxExtraButtons && i < len(r); i++ {
+	for ; i < maxButtons && i < len(r); i++ {
 		if r[i] != idPrefix {
 			break
 		}
 	}
 
-	// No 'idPrefix' found -> its the ok Button.
-	if i == 0 {
+	cm.DebugAssert(i > 0)
+
+	// 1 'idPrefix' found -> its the ok Button.
+	if i <= 1 {
 		return res.Message{General: res.OkResult()}
 	}
 
 	// otherwise its an extra button
-	return res.Message{General: res.ExtraButtonResult(uint(i))}
+	return res.Message{General: res.ExtraButtonResult(uint(i - 1))}
 }
 
 func ShowMessage(ctx context.Context, s *sets.Message) (res.Message, error) {
@@ -113,9 +120,9 @@ func ShowMessage(ctx context.Context, s *sets.Message) (res.Message, error) {
 		return res.Message{}, err
 	}
 
-	out, err := gmac.RunOSAScript(ctx, "msg", data, "")
+	out, err := gmac.RunOSAScript(ctx, "message", data, "")
 	if err == nil {
-		return getResult(string(out), len(s.ExtraButtons)), nil
+		return getResult(string(out), len(s.ExtraButtons)+1), nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {

@@ -1,0 +1,17 @@
+ObjC.import("stdlib")
+
+var app = Application.currentApplication()
+app.includeStandardAdditions = true
+app.activate()
+
+var opts = {{json .Opts}}
+
+var res = app[{{json .Operation}}]({{json .Items}}, opts)
+if (Array.isArray(res)) {
+    if (res.length != 0) { // Absolutely no output if list is empty returned
+        res.join({{json .Separator}})
+    }
+} else {
+    // Cancelled
+    $.exit(1)
+}

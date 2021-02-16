@@ -10,8 +10,7 @@ opts.withIcon = Path({{json .WithIcon}})
 try{
 	var res = app[{{json .Operation}}]({{json .Text}}, opts)
 	res.buttonReturned
-}
-catch (e) {
+} catch (e) {
 	if(String(e).includes("cancelled")){
 		$.exit(1)
 	}

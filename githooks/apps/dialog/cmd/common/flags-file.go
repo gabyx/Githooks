@@ -7,7 +7,7 @@ import (
 )
 
 type fileFilterArgs struct {
-	Filters []settings.FileFilter
+	Filters *[]settings.FileFilter
 }
 
 func (f *fileFilterArgs) String() string {
@@ -26,8 +26,8 @@ func (f *fileFilterArgs) Set(s string) error {
 		s = split[1]
 	}
 
-	filter.Patterns = strings.Split(s, " ")
-	f.Filters = append(f.Filters, filter)
+	filter.Patterns = strings.Split(strings.TrimSpace(s), " ")
+	*f.Filters = append(*f.Filters, filter)
 
 	return nil
 }

@@ -115,9 +115,13 @@ func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, err
 
 	out, err := gunix.RunZenity(ctx, args, s.Root)
 	if err == nil {
+
+		// Any linebreak at the end will be trimmed away.
+		s := strings.TrimSuffix(string(out), "\n")
+
 		return res.File{
 				General: res.OkResult(),
-				Paths:   strings.Split(strings.TrimSpace(string(out)), "\x1e")},
+				Paths:   strings.Split(s, "\x1e")},
 			nil
 	}
 

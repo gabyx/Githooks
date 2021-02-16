@@ -14,6 +14,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20210202160940-bed99a852dfe // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
+	github.com/jinzhu/copier v0.2.4
 	github.com/loov/hrtime v1.0.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.4.1
