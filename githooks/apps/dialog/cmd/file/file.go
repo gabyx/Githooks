@@ -34,9 +34,16 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 # Exit Codes:
 
 - '0' : User pressed 'Ok'. The output contains the selected paths
-		separated by '--separator'.
+		separated by '--separator'. All paths use forward slashes
+		on any platform.
 - '1' : User pressed 'Cancel' or closed the dialog.
 - '5' : The dialog was closed due to timeout.`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if !cm.IsDirectory(setSave.Root) {
+				ctx.Log.PanicF("Root '%s' is not existing.", setSave.Root)
+			}
+			ccm.PanicIfAnyArgs(ctx.Log)(cmd, args)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 
 			var cancel func()
@@ -66,9 +73,16 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 # Exit Codes:
 
 - '0' : User pressed 'Ok'. The output contains the selected paths
-		separated by '--separator'.
+		separated by '--separator'. All paths use forward slashes
+		on any platform.
 - '1' : User pressed 'Cancel' or closed the dialog.
 - '5' : The dialog was closed due to timeout.`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if !cm.IsDirectory(setSelection.Root) {
+				ctx.Log.PanicF("Root '%s' is not existing.", setSelection.Root)
+			}
+			ccm.PanicIfAnyArgs(ctx.Log)(cmd, args)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 
 			var cancel func()

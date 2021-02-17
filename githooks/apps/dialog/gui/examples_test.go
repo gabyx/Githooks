@@ -1,8 +1,10 @@
 package gui_test
 
 import (
+	"fmt"
 	"gabyx/githooks/apps/dialog/gui"
 	"gabyx/githooks/apps/dialog/settings"
+	"os"
 )
 
 func ExampleShowMessage() {
@@ -20,7 +22,7 @@ func ExampleShowMessage() {
 	// Output:
 }
 
-func ExampleShowWarning() {
+func ExampleShowWarning() { // nolint
 	t := settings.Message{}
 	t.Title = "SpamMails Alert"
 	t.OkLabel = "Got it"
@@ -35,7 +37,7 @@ func ExampleShowWarning() {
 	// Output:
 }
 
-func ExampleShowQuestion() {
+func ExampleShowQuestion() { // nolint
 	t := settings.Message{}
 	t.Title = "SpamMails Remove"
 	t.OkLabel = "Jeah do it..."
@@ -70,7 +72,7 @@ func ExampleShowEntry() {
 
 func ExampleShowOptions() {
 	t := settings.Options{}
-	t.Title = "Choices"
+	t.Title = "Choices" // nolint
 	t.OkLabel = "Johh"
 	t.CancelLabel = "Nope"
 	t.Text = "Choose some options from below"
@@ -91,12 +93,13 @@ func ExampleShowFileSave() {
 	t.Height = 500
 	t.ConfirmOverwrite = true
 	t.ConfirmCreate = true
-	t.FileFilters = []settings.FileFilter{{Name: "mp3", Patterns: []string{"*.mp3", "*.jpg"}}}
-	t.Filename = "MySuperFile.dat"
-	t.Root = "../.."
+	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
+	t.Filename = "MySuperFile/Name.dat"
+	t.Root = "../.." // nolint
 	t.WindowIcon = settings.QuestionIcon
 
-	_, _ = gui.ShowFileSave(nil, &t) // nolint: staticcheck
+	f, e := gui.ShowFileSave(nil, &t) // nolint: staticcheck
+	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
 	// Output:
 }
 
@@ -105,12 +108,31 @@ func ExampleShowFileSelection() {
 	t.Title = "Choices"
 	t.Width = 300
 	t.Height = 500
-	t.FileFilters = []settings.FileFilter{{Name: "mp3", Patterns: []string{"*.mp3", "*.jpg"}}}
+	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
 	t.Filename = "MySuperFile.dat"
-	t.Root = "../.."
+	t.Root = "../.." // nolint
+	t.MultipleSelection = true
 	t.WindowIcon = settings.QuestionIcon
+	t.ShowHidden = false
 
-	_, _ = gui.ShowFileSelection(nil, &t) // nolint: staticcheck
+	f, e := gui.ShowFileSelection(nil, &t) // nolint: staticcheck
+	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
+	// Output:
+}
+
+func ExampleShowDirectorySelection() { // nolint
+	t := settings.FileSelection{}
+	t.Title = "Choices"
+	t.Width = 300
+	t.Height = 500
+	t.Root = "../.."
+	t.MultipleSelection = true
+	t.OnlyDirectories = true
+	t.WindowIcon = settings.QuestionIcon
+	t.ShowHidden = false
+
+	f, e := gui.ShowFileSelection(nil, &t) // nolint: staticcheck
+	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
 	// Output:
 }
 

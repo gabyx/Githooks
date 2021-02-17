@@ -19,9 +19,7 @@ func translateEntry(entry *sets.Entry) (d gmac.MsgData, err error) {
 
 	m := sets.Message{}
 	err = copier.Copy(&m, entry)
-	if err != nil {
-		return
-	}
+	cm.AssertNoErrorPanic(err, "Struct copy failed")
 
 	if strs.IsEmpty(m.CancelLabel) {
 		m.CancelLabel = "Cancel"
