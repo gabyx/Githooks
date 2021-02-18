@@ -11,6 +11,7 @@ import (
 	gunix "gabyx/githooks/apps/dialog/gui/unix"
 	res "gabyx/githooks/apps/dialog/result"
 	set "gabyx/githooks/apps/dialog/settings"
+	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 )
 
@@ -55,6 +56,9 @@ func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
 
 	if s.ExtraButtons != nil {
 		for i := range s.ExtraButtons {
+			if strs.IsEmpty(s.ExtraButtons[i]) {
+				return res.Options{}, cm.ErrorF("Empty label for extra button is not allowed")
+			}
 			args = append(args, "--extra-button", s.ExtraButtons[i])
 		}
 	}

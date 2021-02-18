@@ -37,14 +37,19 @@ type BrowseInfo struct {
 	Image        int32
 }
 
-func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
+func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err error) {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
 	hr, _, _ := coInitializeEx.Call(0, 0x6) // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
 
 	if hr != 0x80010106 { // nolint: gomnd // RPC_E_CHANGED_MODE
-		cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'coInitializeEx': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'coInitializeEx': error '%v'", syscall.Errno(hr))
+
+			return
+		}
+
 		defer coUninitialize.Call() //nolint: errcheck
 	}
 
@@ -54,13 +59,17 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 		iIDiFileOpenDialog, uintptr(unsafe.Pointer(&dialog)))
 
 	if int32(hr) < 0 {
-		return browseForFolder(ctx, s) // use fallback...
+		return browseForFolder(ctx, s) // use fallback..
 	}
 	defer dialog.Call(dialog.vtbl.Release) //nolint: errcheck
 
 	var flags int
 	hr, _, _ = dialog.Call(dialog.vtbl.GetOptions, uintptr(unsafe.Pointer(&flags)))
-	cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.GetOptions': error '%v'", syscall.Errno(hr))
+	if int32(hr) < 0 {
+		err = cm.ErrorF("Failed call 'dialog.GetOptions': error '%v'", syscall.Errno(hr))
+
+		return
+	}
 
 	if s.MultipleSelection {
 		flags |= 0x200 // FOS_ALLOWMULTISELECT
@@ -72,14 +81,22 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 
 	hr, _, _ = dialog.Call(dialog.vtbl.SetOptions, uintptr(flags|0x68)) // nolint: gomnd
 	// FOS_NOCHANGEDIR|FOS_PICKFOLDERS|FOS_FORCEFILESYSTEM
-	cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.SetOptions': error '%v'", syscall.Errno(hr))
+	if int32(hr) < 0 {
+		err = cm.ErrorF("Failed call 'dialog.SetOptions': error '%v'", syscall.Errno(hr))
+
+		return
+	}
 
 	if strs.IsNotEmpty(s.Title) {
-		ptr, err := syscall.UTF16PtrFromString(s.Title)
-		cm.AssertNoErrorPanic(err, "Conversion string to UTF16 failed")
+		ptr, e := syscall.UTF16PtrFromString(s.Title)
+		cm.AssertNoErrorPanic(e, "Conversion string to UTF16 failed")
 
 		hr, _, _ = dialog.Call(dialog.vtbl.SetTitle, uintptr(unsafe.Pointer(ptr)))
-		cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.SetTitle': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'dialog.SetTitle': error '%v'", syscall.Errno(hr))
+
+			return
+		}
 	}
 
 	var item *iShellItem
@@ -90,22 +107,28 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 		uintptr(unsafe.Pointer(ptr)), 0,
 		iIDiShellItem,
 		uintptr(unsafe.Pointer(&item)))
-	cm.AssertOrPanicF(int32(hr) >= 0,
-		"Failed call 'shCreateItemFromParsingName': error '%v'", syscall.Errno(hr))
+	if int32(hr) < 0 {
+		err = cm.ErrorF("Failed call 'shCreateItemFromParsingName': error '%v'", syscall.Errno(hr))
+
+		return
+	}
 
 	if item != nil {
 		hr, _, _ = dialog.Call(dialog.vtbl.SetFolder, uintptr(unsafe.Pointer(item)))
-		cm.AssertOrPanicF(int32(hr) >= 0,
-			"Failed call 'dialog.SetFolder': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'dialog.SetFolder': error '%v'", syscall.Errno(hr))
+
+			return
+		}
 
 		item.Call(item.vtbl.Release) // nolint: errcheck
 	}
 
 	// Make the context destroying the window by hooking it.
 	if ctx != nil {
-		unhook, err := hookDialog(ctx, nil)
-		if err != nil {
-			return res.File{}, err
+		unhook, e := hookDialog(ctx, nil)
+		if err = e; err != nil {
+			return
 		}
 		defer unhook()
 	}
@@ -115,20 +138,31 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 	hr, _, _ = dialog.Call(dialog.vtbl.Show, 0)
 
 	if ctx != nil && ctx.Err() != nil {
-		return res.File{}, ctx.Err()
+		err = ctx.Err()
+
+		return
 	}
 
 	if hr == 0x800704c7 { //nolint: gomnd // ERROR_CANCELLED
 		return res.File{General: res.CancelResult()}, nil
 	}
-	cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.Show': error '%v'", syscall.Errno(hr))
+
+	if int32(hr) < 0 {
+		err = cm.ErrorF("Failed call 'dialog.Show': error '%v'", syscall.Errno(hr))
+
+		return
+	}
 
 	var pathsSelected []string
 
 	shellItemPath := func(obj *comObject, trap uintptr, a ...uintptr) {
 		var item *iShellItem
 		hr, _, _ := obj.Call(trap, append(a, uintptr(unsafe.Pointer(&item)))...)
-		cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.GetItem': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'dialog.GetItem': error '%v'", syscall.Errno(hr))
+
+			return
+		}
 
 		defer item.Call(item.vtbl.Release) //nolint: errcheck
 
@@ -137,7 +171,11 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 			item.vtbl.GetDisplayName,
 			0x80058000, // SIGDN_FILESYSPATH
 			uintptr(unsafe.Pointer(&ptr)))
-		cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.GetDisplayName': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'dialog.GetDisplayName': error '%v'", syscall.Errno(hr))
+
+			return
+		}
 
 		defer coTaskMemFree.Call(ptr) //nolint: errcheck
 
@@ -150,13 +188,21 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 	if s.MultipleSelection {
 		var items *iShellItemArray
 		hr, _, _ = dialog.Call(dialog.vtbl.GetResults, uintptr(unsafe.Pointer(&items)))
-		cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.GetResults': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'dialog.GetResults': error '%v'", syscall.Errno(hr))
+
+			return
+		}
 
 		defer items.Call(items.vtbl.Release) //nolint: errcheck
 
 		var count uint32
 		hr, _, _ = items.Call(items.vtbl.GetCount, uintptr(unsafe.Pointer(&count)))
-		cm.AssertOrPanicF(int32(hr) >= 0, "Failed call 'dialog.GetCount': error '%v'", syscall.Errno(hr))
+		if int32(hr) < 0 {
+			err = cm.ErrorF("Failed call 'dialog.GetCount': error '%v'", syscall.Errno(hr))
+
+			return
+		}
 
 		for i := uintptr(0); i < uintptr(count); i++ {
 			shellItemPath(&items.comObject, items.vtbl.GetItemAt, i)
@@ -171,9 +217,8 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 		Paths:   pathsSelected}, nil
 }
 
-func browseForFolder(ctx context.Context, s *sets.FileSelection) (res.File, error) {
+func browseForFolder(ctx context.Context, s *sets.FileSelection) (r res.File, err error) {
 
-	var err error
 	var args BrowseInfo
 	args.Flags = 0x1 // BIF_RETURNONLYFSDIRS
 
@@ -205,10 +250,11 @@ func browseForFolder(ctx context.Context, s *sets.FileSelection) (res.File, erro
 
 	// Make the context destroying the window by hooking it.
 	if ctx != nil {
-		unhook, err := hookDialog(ctx, nil)
-		if err != nil {
-			return res.File{}, err
+		unhook, e := hookDialog(ctx, nil)
+		if err = e; err != nil {
+			return
 		}
+
 		defer unhook()
 	}
 
@@ -216,7 +262,9 @@ func browseForFolder(ctx context.Context, s *sets.FileSelection) (res.File, erro
 
 	ptr, _, _ := shBrowseForFolder.Call(uintptr(unsafe.Pointer(&args)))
 	if ctx != nil && ctx.Err() != nil {
-		return res.File{}, ctx.Err()
+		err = ctx.Err()
+
+		return
 	}
 
 	if ptr == 0 {

@@ -5,7 +5,7 @@ type DialogIcon uint
 
 // The stock dialog icons.
 const (
-	Undefined DialogIcon = iota
+	UndefinedIcon DialogIcon = iota
 	ErrorIcon
 	WarningIcon
 	InfoIcon
@@ -146,4 +146,38 @@ type FileSelection struct {
 	GeneralFile
 
 	MultipleSelection bool
+}
+
+func (s *Message) SetDefaultIcons() {
+
+	switch s.Style {
+	case QuestionStyle:
+		if s.WindowIcon == UndefinedIcon {
+			s.WindowIcon = QuestionIcon
+		}
+		if s.Icon == UndefinedIcon {
+			s.Icon = QuestionIcon
+		}
+	case InfoStyle:
+		if s.WindowIcon == UndefinedIcon {
+			s.WindowIcon = InfoIcon
+		}
+		if s.Icon == UndefinedIcon {
+			s.Icon = InfoIcon
+		}
+	case WarningStyle:
+		if s.WindowIcon == UndefinedIcon {
+			s.WindowIcon = WarningIcon
+		}
+		if s.Icon == UndefinedIcon {
+			s.Icon = WarningIcon
+		}
+	case ErrorStyle:
+		if s.WindowIcon == UndefinedIcon {
+			s.WindowIcon = ErrorIcon
+		}
+		if s.Icon == UndefinedIcon {
+			s.Icon = ErrorIcon
+		}
+	}
 }

@@ -17,6 +17,9 @@ import (
 const idPrefix rune = '\u200B'
 
 func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
+
+	msg.SetDefaultIcons()
+
 	d = gmac.MsgData{}
 
 	d.Operation = "displayDialog"
@@ -36,6 +39,7 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns"
 	}
 
+	// Overwrite icon
 	switch msg.Icon {
 	case sets.ErrorIcon:
 		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertStopIcon.icns"
@@ -57,6 +61,11 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 	id := string(idPrefix)
 	for i := range msg.ExtraButtons {
 		id += string(idPrefix)
+
+		if strs.IsEmpty(s.ExtraButtons[i]) {
+			return res.Message{}, cm.ErrorF("Empty label for extra button is not allowed")
+		}
+
 		extraButtons[i] = id + msg.ExtraButtons[i]
 	}
 

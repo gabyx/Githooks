@@ -15,7 +15,7 @@ import (
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 
-	"github.com/jinzhu/copier"
+	"github.com/ulule/deepcopier"
 )
 
 var (
@@ -158,12 +158,13 @@ func translateFileSelection(s *sets.FileSelection) (ofn openFileNameW, buf []uin
 
 // ShowFileSave displays the file save dialog.
 func ShowFileSave(ctx context.Context, s *sets.FileSave) (res.File, error) {
-	ss := sets.FileSelection{}
-
-	err := copier.Copy(ss, s)
-	cm.AssertNoErrorPanic(err, "Struct copy failed")
 
 	if s.OnlyDirectories {
+		ss := sets.FileSelection{}
+
+		err := deepcopier.Copy(s).To(&ss)
+		cm.AssertNoErrorPanic(err, "Struct copy failed")
+
 		return pickFolders(ctx, &ss)
 	}
 

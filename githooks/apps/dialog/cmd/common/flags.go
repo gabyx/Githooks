@@ -21,8 +21,8 @@ func addFlagsDefaultButton(cmd *cobra.Command, s *set.DefaultButton) {
 	cmd.Flags().StringVar(&s.CancelLabel, "cancel-label", "", "Cancel button label.")
 	cmd.Flags().BoolVar(&s.DefaultCancel, "default-cancel", false, "Set 'Cancel' as the default button.")
 
-	cmd.Flags().StringArrayVar(&s.ExtraButtons, "extra-button", nil, `Extra buttons labels. 
-On macOS only one add. button is considered.`)
+	cmd.Flags().StringArrayVar(&s.ExtraButtons, "extra-button", nil, `Extra buttons labels.
+On macOS/Windows only one extra button is allowed.`)
 }
 
 func addFlagsGeneralText(cmd *cobra.Command, s *set.GeneralText) {

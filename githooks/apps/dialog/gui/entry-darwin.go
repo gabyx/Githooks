@@ -7,18 +7,19 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/jinzhu/copier"
-
 	gmac "gabyx/githooks/apps/dialog/gui/darwin"
 	res "gabyx/githooks/apps/dialog/result"
 	sets "gabyx/githooks/apps/dialog/settings"
+	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
+
+	"github.com/ulule/deepcopier"
 )
 
 func translateEntry(entry *sets.Entry) (d gmac.MsgData, err error) {
 
 	m := sets.Message{}
-	err = copier.Copy(&m, entry)
+	err = deepcopier.Copy(entry).To(&m)
 	cm.AssertNoErrorPanic(err, "Struct copy failed")
 
 	if strs.IsEmpty(m.CancelLabel) {
@@ -27,6 +28,13 @@ func translateEntry(entry *sets.Entry) (d gmac.MsgData, err error) {
 	if strs.IsEmpty(m.OkLabel) {
 		m.OkLabel = "Ok"
 	}
+
+	if entry.ExtraButtons != nil {
+		err = cm.ErrorF("Extra buttons are not supported on macOS")
+
+		return
+	}
+
 	m.Style = sets.QuestionStyle
 
 	d, err = translateMessage(&m)

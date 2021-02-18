@@ -27,27 +27,32 @@ func ExtraButtonResult(i uint) General {
 	return General{extraButton: true, extraButtonIdx: i}
 }
 
-// Ok tells if the user clicked ok.
+// IsUnset tells if result is unset.
+func (g *General) IsUnset() bool {
+	return !g.ok && !g.canceledOrClosed && !g.extraButton
+}
+
+// IsOk tells if the user clicked ok.
 func (g *General) IsOk() bool {
 	return g.ok && !g.canceledOrClosed
 }
 
-// Canceled tells if the user canceled or closed the dialog.
+// IsCanceled tells if the user canceled or closed the dialog.
 func (g *General) IsCanceled() bool {
 	return !g.ok && g.canceledOrClosed
 }
 
-// Canceled tells if the user canceled or closed the dialog.
+// IsExtraButton tells if the user pressed an extra button.
 func (g *General) IsExtraButton() (bool, uint) {
 	return g.extraButton, g.extraButtonIdx
 }
 
-// MessageResult is the result type for message dialogs.
+// Message is the result type for message dialogs.
 type Message struct {
 	General
 }
 
-// OptionsResult is the result type for options dialogs.
+// Options is the result type for options dialogs.
 type Options struct {
 	General
 
@@ -55,7 +60,7 @@ type Options struct {
 	Selection []uint
 }
 
-// OptionsResult is the result type for options dialogs.
+// Entry is the result type for options dialogs.
 type Entry struct {
 	General
 

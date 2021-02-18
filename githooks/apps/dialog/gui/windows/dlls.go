@@ -10,4 +10,5 @@ var (
 	comdlg32 = syscall.NewLazyDLL("comdlg32.dll")
 	shell32  = syscall.NewLazyDLL("shell32.dll")
 	ole32    = syscall.NewLazyDLL("ole32.dll")
+	wtsapi32 = syscall.NewLazyDLL("wtsapi32.dll")
 )

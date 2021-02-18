@@ -1,3 +1,4 @@
+// nolint: goconst,govet
 package gui_test
 
 import (
@@ -10,26 +11,29 @@ import (
 func ExampleShowMessage() {
 	t := settings.Message{}
 	t.Title = "SpamMails Alert"
-	t.OkLabel = "Got it"
-	t.CancelLabel = "Shut up..." // nolint: goconst
+	t.OkLabel = "Okey"
+	t.CancelLabel = "Cancel it"
 	t.Text = "You have 200 spam mails in your mailbox, you should remove them sooooooon."
 	t.Width = 300
 	t.Height = 500
 	t.WindowIcon = settings.ErrorIcon
+	t.Icon = settings.ErrorIcon
 	t.Style = settings.ErrorStyle
 
 	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
 	// Output:
 }
 
-func ExampleShowWarning() { // nolint
+func ExampleShowWarning() {
 	t := settings.Message{}
 	t.Title = "SpamMails Alert"
-	t.OkLabel = "Got it"
-	t.CancelLabel = "Shut up..."
+	t.OkLabel = "Okey"
+	t.CancelLabel = "Cancel it"
+	t.ExtraButtons = []string{"Shut up really..."}
 	t.Text = "You have 200 spam mails in your mailbox, you should remove them sooooooon."
 	t.Width = 300
 	t.Height = 500
+	t.Icon = settings.WarningIcon
 	t.WindowIcon = settings.WarningIcon
 	t.Style = settings.WarningStyle
 
@@ -37,15 +41,17 @@ func ExampleShowWarning() { // nolint
 	// Output:
 }
 
-func ExampleShowQuestion() { // nolint
+func ExampleShowQuestion() {
 	t := settings.Message{}
 	t.Title = "SpamMails Remove"
-	t.OkLabel = "Jeah do it..."
-	t.CancelLabel = "Shut up..."
+	t.OkLabel = "Okey"
+	t.CancelLabel = "Cancel it"
+	t.ExtraButtons = []string{"Shut up really..."}
 	t.DefaultCancel = true
 	t.Text = "You have 200 spam mails in your mailbox, can I remove them?"
 	t.Width = 300
 	t.Height = 500
+	t.Icon = settings.QuestionIcon
 	t.WindowIcon = settings.QuestionIcon
 	t.Style = settings.QuestionStyle
 
@@ -56,8 +62,8 @@ func ExampleShowQuestion() { // nolint
 func ExampleShowEntry() {
 	t := settings.Entry{}
 	t.Title = "SpamMails Remove"
-	t.OkLabel = "Jeah accept it..."
-	t.CancelLabel = "Ahh cancel..."
+	t.OkLabel = "Accept it"
+	t.CancelLabel = "Cancel it"
 	t.DefaultCancel = true
 	t.Text = "Enter the time:"
 	t.EntryText = "10:30"
@@ -72,9 +78,9 @@ func ExampleShowEntry() {
 
 func ExampleShowOptions() {
 	t := settings.Options{}
-	t.Title = "Choices" // nolint
-	t.OkLabel = "Johh"
-	t.CancelLabel = "Nope"
+	t.Title = "Choices"
+	t.OkLabel = "Okey"
+	t.CancelLabel = "Cancel it"
 	t.Text = "Choose some options from below"
 	t.Options = []string{"Options 1", "Option 2", "Option 3"}
 	t.MultipleSelection = true
@@ -87,7 +93,7 @@ func ExampleShowOptions() {
 }
 
 func ExampleShowFileSave() {
-	t := settings.FileSave{}
+	t := &settings.FileSave{}
 	t.Title = "Choices"
 	t.Width = 300
 	t.Height = 500
@@ -95,10 +101,11 @@ func ExampleShowFileSave() {
 	t.ConfirmCreate = true
 	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
 	t.Filename = "MySuperFile/Name.dat"
-	t.Root = "../.." // nolint
+	t.Root = "../.."
+	t.OnlyDirectories = true
 	t.WindowIcon = settings.QuestionIcon
 
-	f, e := gui.ShowFileSave(nil, &t) // nolint: staticcheck
+	f, e := gui.ShowFileSave(nil, t) // nolint: staticcheck
 	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
 	// Output:
 }
@@ -110,7 +117,7 @@ func ExampleShowFileSelection() {
 	t.Height = 500
 	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
 	t.Filename = "MySuperFile.dat"
-	t.Root = "../.." // nolint
+	t.Root = "../.."
 	t.MultipleSelection = true
 	t.WindowIcon = settings.QuestionIcon
 	t.ShowHidden = false
@@ -120,7 +127,7 @@ func ExampleShowFileSelection() {
 	// Output:
 }
 
-func ExampleShowDirectorySelection() { // nolint
+func ExampleShowDirectorySelection() {
 	t := settings.FileSelection{}
 	t.Title = "Choices"
 	t.Width = 300

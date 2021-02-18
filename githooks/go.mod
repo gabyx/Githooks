@@ -14,8 +14,9 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20210202160940-bed99a852dfe // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
-	github.com/jinzhu/copier v0.2.4
 	github.com/loov/hrtime v1.0.2
+	github.com/lxn/walk v0.0.0-20210112085537-c389da54e794
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.4.1
 	github.com/pbenner/threadpool v0.0.0-20200729220145-19cbae573817
@@ -25,7 +26,9 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.6.1
+	github.com/ulule/deepcopier v0.0.0-20200430083143-45decc6639b6
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sys v0.0.0-20201113135734-0a15ea8d9b02
 	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221
+	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
