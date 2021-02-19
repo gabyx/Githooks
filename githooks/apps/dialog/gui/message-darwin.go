@@ -62,8 +62,10 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 	for i := range msg.ExtraButtons {
 		id += string(idPrefix)
 
-		if strs.IsEmpty(s.ExtraButtons[i]) {
-			return res.Message{}, cm.ErrorF("Empty label for extra button is not allowed")
+		if strs.IsEmpty(msg.ExtraButtons[i]) {
+			err = cm.ErrorF("Empty label for extra button is not allowed")
+
+			return
 		}
 
 		extraButtons[i] = id + msg.ExtraButtons[i]
