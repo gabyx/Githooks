@@ -11,27 +11,26 @@ import (
 	gunix "gabyx/githooks/apps/dialog/gui/unix"
 	res "gabyx/githooks/apps/dialog/result"
 	set "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 )
 
-func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
+func ShowEntry(ctx context.Context, entry *set.Entry) (r res.Entry, err error) {
 
 	args := []string{"--entry"}
 
-	if strs.IsNotEmpty(s.Title) {
-		args = append(args, "--title", s.Title)
+	if strs.IsNotEmpty(entry.Title) {
+		args = append(args, "--title", entry.Title)
 	}
 
-	if s.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
+	if entry.Width > 0 {
+		args = append(args, "--width", fmt.Sprintf("%d", entry.Width))
 	}
 
-	if s.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", s.Height))
+	if entry.Height > 0 {
+		args = append(args, "--height", fmt.Sprintf("%d", entry.Height))
 	}
 
-	switch s.WindowIcon {
+	switch entry.WindowIcon {
 	case set.ErrorIcon:
 		args = append(args, "--window-icon=error")
 	case set.WarningIcon:
@@ -42,44 +41,47 @@ func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
 		args = append(args, "--window-icon=question")
 	}
 
-	if strs.IsNotEmpty(s.Text) {
-		args = append(args, "--text", s.Text, "--no-markup")
+	if strs.IsNotEmpty(entry.Text) {
+		args = append(args, "--text", entry.Text, "--no-markup")
 	}
 
-	if strs.IsNotEmpty(s.OkLabel) {
-		args = append(args, "--ok-label", s.OkLabel)
+	if strs.IsNotEmpty(entry.OkLabel) {
+		args = append(args, "--ok-label", entry.OkLabel)
 	}
 
-	if strs.IsNotEmpty(s.CancelLabel) {
-		args = append(args, "--cancel-label", s.CancelLabel)
+	if strs.IsNotEmpty(entry.CancelLabel) {
+		args = append(args, "--cancel-label", entry.CancelLabel)
 	}
 
-	if s.ExtraButtons != nil {
-		for i := range s.ExtraButtons {
-			if strs.IsEmpty(s.ExtraButtons[i]) {
-				return res.Options{}, cm.ErrorF("Empty label for extra button is not allowed")
-			}
-			args = append(args, "--extra-button", s.ExtraButtons[i])
+	if entry.ExtraButtons != nil {
+		var extraButtons []string
+		extraButtons, err = addInvisiblePrefix(entry.ExtraButtons)
+		if err != nil {
+			return
+		}
+
+		for i := range extraButtons {
+			args = append(args, "--extra-button", extraButtons[i])
 		}
 	}
 
-	if s.NoWrap {
+	if entry.NoWrap {
 		args = append(args, "--no-wrap")
 	}
 
-	if s.Ellipsize {
+	if entry.Ellipsize {
 		args = append(args, "--ellipsize")
 	}
 
-	if s.DefaultCancel {
+	if entry.DefaultCancel {
 		args = append(args, "--default-cancel")
 	}
 
-	if strs.IsNotEmpty(s.EntryText) {
-		args = append(args, "--entry-text", s.EntryText)
+	if strs.IsNotEmpty(entry.EntryText) {
+		args = append(args, "--entry-text", entry.EntryText)
 	}
 
-	if s.HideEntryText {
+	if entry.HideEntryText {
 		args = append(args, "--hide-text")
 	}
 
@@ -99,13 +101,7 @@ func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
 
 			// Handle extra buttons.
 			if len(out) > 0 {
-				button := string(out[:len(out)-1])
-				for i := range s.ExtraButtons {
-					if button == s.ExtraButtons[i] {
-						return res.Entry{
-							General: res.ExtraButtonResult(uint(i))}, nil
-					}
-				}
+				return res.Entry{General: getResultButtons(string(out), len(entry.ExtraButtons)+1)}, nil
 			}
 
 			return res.Entry{General: res.CancelResult()}, nil

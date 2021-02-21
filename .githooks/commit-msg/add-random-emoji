@@ -10,7 +10,7 @@ fi
 
 if command -v "gsed" ; then
     SED="gsed"
-else 
+else
     SED="sed"
 fi
 
@@ -25,5 +25,5 @@ fi
 # POSITION=$(($(od -A n -t d -N 1 /dev/urandom | tr -d ' ') % 11 + 1))
 SELECTED=":anchor:" #$(echo "$EMOJIS" | awk -v N=$POSITION '{ print $N }')
 
-$SED -i -E '1s/(?:\s*:\w+:)+$//' "$1"
+$SED -i -E '1s/(\s*:\w+:)+$//' "$1"
 $SED -i -E "1s/(.*)/\1 $SELECTED/" "$1"

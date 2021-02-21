@@ -23,8 +23,12 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "message",
-		Short: "Shows a message  dialog.",
+		Short: "Shows a message dialog.",
 		Long: `Shows a message dialog similar to 'zenity'.
+
+Currently only one extra button is supported on all platforms.
+Only Unix supports multiple extra buttons.
+Use 'options' to have more choices.
 
 # Exit Codes:
 
@@ -32,7 +36,6 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 - '1' : User pressed 'Cancel' or closed the dialog.
 - '2' : The user pressed an extra button.
 		The output contains the index of that button.`,
-
 		Run: func(cmd *cobra.Command, args []string) {
 
 			var cancel func()

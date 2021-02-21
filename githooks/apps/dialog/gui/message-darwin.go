@@ -5,7 +5,6 @@ package gui
 import (
 	"context"
 	"os/exec"
-	"strings"
 
 	gmac "gabyx/githooks/apps/dialog/gui/darwin"
 	res "gabyx/githooks/apps/dialog/result"
@@ -13,8 +12,6 @@ import (
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 )
-
-const idPrefix rune = '\u200B'
 
 func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 
@@ -55,20 +52,9 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 		return d, cm.ErrorF("Only one additional button is allowed on macOS.")
 	}
 
-	// Workaround: Append invisible spaces before each extra button,
-	// to identify the index afterwards (no string parsing of the label!).
-	extraButtons := make([]string, len(msg.ExtraButtons))
-	id := string(idPrefix)
-	for i := range msg.ExtraButtons {
-		id += string(idPrefix)
-
-		if strs.IsEmpty(msg.ExtraButtons[i]) {
-			err = cm.ErrorF("Empty label for extra button is not allowed")
-
-			return
-		}
-
-		extraButtons[i] = id + msg.ExtraButtons[i]
+	extraButtons, err := addInvisiblePrefix(msg.ExtraButtons)
+	if err != nil {
+		return
 	}
 
 	if msg.Style == sets.QuestionStyle {
@@ -100,30 +86,6 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 	return
 }
 
-func getResult(out string, maxButtons int) res.Message {
-	s := strings.TrimSpace(out)
-	cm.DebugAssert(strs.IsNotEmpty(s))
-
-	r := []rune(s)
-
-	i := 0
-	for ; i < maxButtons && i < len(r); i++ {
-		if r[i] != idPrefix {
-			break
-		}
-	}
-
-	cm.DebugAssert(i > 0)
-
-	// 1 'idPrefix' found -> its the ok Button.
-	if i <= 1 {
-		return res.Message{General: res.OkResult()}
-	}
-
-	// otherwise its an extra button
-	return res.Message{General: res.ExtraButtonResult(uint(i - 1))}
-}
-
 func ShowMessage(ctx context.Context, s *sets.Message) (res.Message, error) {
 
 	data, err := translateMessage(s)
@@ -133,7 +95,9 @@ func ShowMessage(ctx context.Context, s *sets.Message) (res.Message, error) {
 
 	out, err := gmac.RunOSAScript(ctx, "message", data, "")
 	if err == nil {
-		return getResult(string(out), len(s.ExtraButtons)+1), nil
+		return res.Message{
+			General: getResultButtons(string(out),
+				len(s.ExtraButtons)+1)}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {

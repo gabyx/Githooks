@@ -96,7 +96,7 @@ func guiDarwinOsascriptsFileJsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gui/darwin/osascripts/file.js.tmpl", size: 326, mode: os.FileMode(420), modTime: time.Unix(1613765490, 0)}
+	info := bindataFileInfo{name: "gui/darwin/osascripts/file.js.tmpl", size: 326, mode: os.FileMode(436), modTime: time.Unix(1613931864, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -116,7 +116,7 @@ func guiDarwinOsascriptsMessageJsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gui/darwin/osascripts/message.js.tmpl", size: 337, mode: os.FileMode(420), modTime: time.Unix(1613765490, 0)}
+	info := bindataFileInfo{name: "gui/darwin/osascripts/message.js.tmpl", size: 337, mode: os.FileMode(436), modTime: time.Unix(1613931864, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -136,7 +136,7 @@ func guiDarwinOsascriptsNotifyJsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gui/darwin/osascripts/notify.js.tmpl", size: 156, mode: os.FileMode(420), modTime: time.Unix(1613765490, 0)}
+	info := bindataFileInfo{name: "gui/darwin/osascripts/notify.js.tmpl", size: 156, mode: os.FileMode(436), modTime: time.Unix(1613931864, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -156,7 +156,7 @@ func guiDarwinOsascriptsOptionsJsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gui/darwin/osascripts/options.js.tmpl", size: 392, mode: os.FileMode(420), modTime: time.Unix(1613765490, 0)}
+	info := bindataFileInfo{name: "gui/darwin/osascripts/options.js.tmpl", size: 392, mode: os.FileMode(436), modTime: time.Unix(1613931864, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -176,7 +176,7 @@ func guiDarwinOsascriptsEntryJsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "gui/darwin/osascripts/entry.js.tmpl", size: 335, mode: os.FileMode(420), modTime: time.Unix(1613765490, 0)}
+	info := bindataFileInfo{name: "gui/darwin/osascripts/entry.js.tmpl", size: 335, mode: os.FileMode(436), modTime: time.Unix(1613931864, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

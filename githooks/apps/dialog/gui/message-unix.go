@@ -10,17 +10,16 @@ import (
 	gunix "gabyx/githooks/apps/dialog/gui/unix"
 	res "gabyx/githooks/apps/dialog/result"
 	set "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 )
 
-func ShowMessage(ctx context.Context, s *set.Message) (res.Message, error) {
+func ShowMessage(ctx context.Context, msg *set.Message) (r res.Message, err error) {
 
-	s.SetDefaultIcons()
+	msg.SetDefaultIcons()
 
 	var args []string
 
-	switch s.Style {
+	switch msg.Style {
 	case set.QuestionStyle:
 		args = append(args, "--question")
 	case set.InfoStyle:
@@ -31,19 +30,19 @@ func ShowMessage(ctx context.Context, s *set.Message) (res.Message, error) {
 		args = append(args, "--error")
 	}
 
-	if strs.IsNotEmpty(s.Title) {
-		args = append(args, "--title", s.Title)
+	if strs.IsNotEmpty(msg.Title) {
+		args = append(args, "--title", msg.Title)
 	}
 
-	if s.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
+	if msg.Width > 0 {
+		args = append(args, "--width", fmt.Sprintf("%d", msg.Width))
 	}
 
-	if s.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", s.Height))
+	if msg.Height > 0 {
+		args = append(args, "--height", fmt.Sprintf("%d", msg.Height))
 	}
 
-	switch s.WindowIcon {
+	switch msg.WindowIcon {
 	case set.ErrorIcon:
 		args = append(args, "--window-icon=error")
 	case set.WarningIcon:
@@ -54,40 +53,43 @@ func ShowMessage(ctx context.Context, s *set.Message) (res.Message, error) {
 		args = append(args, "--window-icon=question")
 	}
 
-	if strs.IsNotEmpty(s.Text) {
-		args = append(args, "--text", s.Text, "--no-markup")
+	if strs.IsNotEmpty(msg.Text) {
+		args = append(args, "--text", msg.Text, "--no-markup")
 	}
 
-	if strs.IsNotEmpty(s.OkLabel) {
-		args = append(args, "--ok-label", s.OkLabel)
+	if strs.IsNotEmpty(msg.OkLabel) {
+		args = append(args, "--ok-label", msg.OkLabel)
 	}
 
-	if strs.IsNotEmpty(s.CancelLabel) {
-		args = append(args, "--cancel-label", s.CancelLabel)
+	if strs.IsNotEmpty(msg.CancelLabel) {
+		args = append(args, "--cancel-label", msg.CancelLabel)
 	}
 
-	if s.ExtraButtons != nil {
-		for i := range s.ExtraButtons {
-			if strs.IsEmpty(s.ExtraButtons[i]) {
-				return res.Message{}, cm.ErrorF("Empty label for extra button is not allowed")
-			}
-			args = append(args, "--extra-button", s.ExtraButtons[i])
+	if msg.ExtraButtons != nil {
+		var extraButtons []string
+		extraButtons, err = addInvisiblePrefix(msg.ExtraButtons)
+		if err != nil {
+			return
+		}
+
+		for i := range extraButtons {
+			args = append(args, "--extra-button", extraButtons[i])
 		}
 	}
 
-	if s.NoWrap {
+	if msg.NoWrap {
 		args = append(args, "--no-wrap")
 	}
 
-	if s.Ellipsize {
+	if msg.Ellipsize {
 		args = append(args, "--ellipsize")
 	}
 
-	if s.DefaultCancel {
+	if msg.DefaultCancel {
 		args = append(args, "--default-cancel")
 	}
 
-	switch s.Icon {
+	switch msg.Icon {
 	case set.ErrorIcon:
 		args = append(args, "--icon-name=dialog-error")
 	case set.WarningIcon:
@@ -108,13 +110,7 @@ func ShowMessage(ctx context.Context, s *set.Message) (res.Message, error) {
 
 			// Handle extra buttons.
 			if len(out) > 0 {
-				button := string(out[:len(out)-1])
-				for i := range s.ExtraButtons {
-					if button == s.ExtraButtons[i] {
-						return res.Message{
-							General: res.ExtraButtonResult(uint(i))}, nil
-					}
-				}
+				return res.Message{General: getResultButtons(string(out), len(msg.ExtraButtons)+1)}, nil
 			}
 
 			return res.Message{General: res.CancelResult()}, nil
