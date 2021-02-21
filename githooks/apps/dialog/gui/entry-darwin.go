@@ -12,15 +12,23 @@ import (
 	sets "gabyx/githooks/apps/dialog/settings"
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
-
-	"github.com/ulule/deepcopier"
 )
 
-func translateEntry(entry *sets.Entry) (d gmac.MsgData, err error) {
+// NewMessageFromEntry create a new message
+// setting based on a entry setting.
+func NewMessageFromEntry(e *sets.Entry) sets.Message {
+	return sets.Message{
+		General:       e.General,
+		GeneralText:   e.GeneralText,
+		DefaultButton: e.DefaultButton,
+		Icon:          e.Icon,
+		Style:         sets.InfoStyle,
+	}
+}
 
-	m := sets.Message{}
-	err = deepcopier.Copy(entry).To(&m)
-	cm.AssertNoErrorPanic(err, "Struct copy failed")
+func translateEntry(entry *sets.Entry) (d gmac.EntryData, err error) {
+
+	m := NewMessageFromEntry(entry)
 
 	if strs.IsEmpty(m.CancelLabel) {
 		m.CancelLabel = "Cancel"
@@ -36,13 +44,14 @@ func translateEntry(entry *sets.Entry) (d gmac.MsgData, err error) {
 	}
 
 	m.Style = sets.QuestionStyle
+	m.Icon = sets.InfoIcon
 
-	d, err = translateMessage(&m)
+	md, err := translateMessage(&m)
 	if err != nil {
 		return
 	}
 
-	// Entry fields
+	d = gmac.NewFromEntry(&md)
 	d.Opts.HiddenAnswer = entry.HideEntryText
 	d.Opts.DefaultAnswer = entry.EntryText
 

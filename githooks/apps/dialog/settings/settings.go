@@ -42,10 +42,10 @@ type MessageStyle uint
 
 // The message styles.
 const (
-	QuestionStyle MessageStyle = iota
-	InfoStyle
+	InfoStyle MessageStyle = iota
 	WarningStyle
 	ErrorStyle
+	QuestionStyle
 )
 
 // Message are options for the message dialog.

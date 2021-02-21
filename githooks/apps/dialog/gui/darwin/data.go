@@ -7,10 +7,6 @@ type MsgOptions struct {
 	Buttons       []string `json:"buttons,omitempty"`
 	CancelButton  int      `json:"cancelButton,omitempty"`
 	DefaultButton int      `json:"defaultButton,omitempty"`
-
-	// For entry only...
-	DefaultAnswer string `json:"defaultAnswer"`
-	HiddenAnswer  bool   `json:"hiddenAnswer,omitempty"`
 }
 
 type MsgData struct {
@@ -19,6 +15,31 @@ type MsgData struct {
 	WithIcon  string
 
 	Opts MsgOptions `json:"opts"`
+}
+
+type EntryOpts struct {
+	MsgOptions
+
+	DefaultAnswer string `json:"defaultAnswer"`
+	HiddenAnswer  bool   `json:"hiddenAnswer,omitempty"`
+}
+
+type EntryData struct {
+	Operation string
+	Text      string
+	WithIcon  string
+
+	Opts EntryOpts `json:"opts"`
+}
+
+// Create new entry data from message data.
+func NewFromEntry(m *MsgData) EntryData {
+	return EntryData{
+		Operation: m.Operation,
+		Text:      m.Text,
+		WithIcon:  m.WithIcon,
+		Opts:      EntryOpts{MsgOptions: m.Opts},
+	}
 }
 
 type OptionsOpts struct {
