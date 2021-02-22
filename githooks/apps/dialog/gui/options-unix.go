@@ -17,7 +17,7 @@ import (
 )
 
 func getChoices(output string) (indices []uint) {
-	out := strings.Split(strings.TrimSpace(output), "\x00")
+	out := strings.Split(strings.TrimSpace(output), "\x1e")
 
 	indices = make([]uint, 0, len(out))
 
@@ -102,7 +102,7 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 	// List options
 	if s.MultipleSelection {
 		args = append(args, "--multiple")
-		args = append(args, "--separator", "\x00")
+		args = append(args, "--separator", "\x1e")
 	}
 
 	// Add choices with ids.

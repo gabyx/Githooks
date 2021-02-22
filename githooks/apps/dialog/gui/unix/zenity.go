@@ -37,6 +37,7 @@ func RunZenity(ctx context.Context, args []string, workingDir string) ([]byte, e
 	}
 
 	out, err := cmd.Output()
+
 	if ctx != nil && ctx.Err() != nil {
 		err = ctx.Err()
 	}

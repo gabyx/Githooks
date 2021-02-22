@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path"
 	"strings"
 
 	gunix "gabyx/githooks/apps/dialog/gui/unix"
@@ -59,7 +60,7 @@ func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
 	if err == nil {
 		return res.File{
 				General: res.OkResult(),
-				Paths:   strings.Split(strings.TrimSpace(string(out)), "\x00")},
+				Paths:   strings.Split(strings.TrimSpace(string(out)), "\x1e")},
 			nil
 	}
 
@@ -99,8 +100,8 @@ func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, err
 		args = append(args, "--window-icon=question")
 	}
 
-	if strs.IsNotEmpty(s.Filename) {
-		args = append(args, "--filename", s.Filename)
+	if strs.IsNotEmpty(s.Filename) || strs.IsNotEmpty(s.Root) {
+		args = append(args, "--filename", path.Join(s.Root, s.Filename))
 	}
 
 	if s.OnlyDirectories {
@@ -113,7 +114,7 @@ func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, err
 
 	args = append(args, initFilters(s.FileFilters)...)
 
-	out, err := gunix.RunZenity(ctx, args, s.Root)
+	out, err := gunix.RunZenity(ctx, args, "")
 	if err == nil {
 
 		// Any linebreak at the end will be trimmed away.

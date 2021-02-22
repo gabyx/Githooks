@@ -32,7 +32,7 @@ func addFlagsGeneralText(cmd *cobra.Command, s *set.GeneralText) {
 }
 
 func addFlagsGeneralFile(cmd *cobra.Command, s *set.GeneralFile) {
-	cmd.Flags().StringVar(&s.Root, "root", "", "Default root path of the file dialog.")
+	cmd.Flags().StringVar(&s.Root, "root", ".", "Default root path of the file dialog.")
 
 	cmd.Flags().StringVar(&s.Filename, "filename", "", "Default filename in the dialog.")
 
