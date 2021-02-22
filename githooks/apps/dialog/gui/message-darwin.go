@@ -70,7 +70,7 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 
 	} else {
 		if strs.IsEmpty(msg.OkLabel) {
-			msg.OkLabel = string(idPrefix) + "Ok"
+			msg.OkLabel = string(idPrefix) + "OK"
 		}
 
 		d.Opts.Buttons = append(extraButtons, msg.OkLabel) // nolint: gocritic

@@ -24,6 +24,7 @@ type EntryOpts struct {
 	HiddenAnswer  bool   `json:"hiddenAnswer,omitempty"`
 }
 
+// Note: Adding member -> Check `NewFromEntry`.
 type EntryData struct {
 	Operation string
 	Text      string

@@ -18,7 +18,7 @@ func handleResult(ctx *dcm.CmdContext, res *res.Entry, err error) error {
 		_, err := os.Stdout.WriteString(res.Text + dcm.LineBreak)
 
 		return err
-	}, nil)
+	}, nil, nil)
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {

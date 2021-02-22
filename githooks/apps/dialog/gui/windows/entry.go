@@ -13,67 +13,59 @@ import (
 	. "github.com/lxn/walk/declarative"
 )
 
-type MessageApp struct {
+type EntryApp struct {
 	*walk.Dialog
 
-	icon *walk.Icon
+	icon     *walk.Icon
+	lineEdit *walk.LineEdit
 
 	acceptPB *walk.PushButton
 	cancelPB *walk.PushButton
 }
 
-func defineMessageButtons(app *MessageApp, msg *sets.Message, r *res.Message) []Widget {
+func defineEntryButtons(app *EntryApp, entry *sets.Entry, r *res.Entry) []Widget {
 	ok := "OK"
-	if msg.Style == sets.QuestionStyle {
-		ok = "Yes"
+	if strs.IsNotEmpty(entry.OkLabel) {
+		ok = entry.OkLabel
 	}
-	if strs.IsNotEmpty(msg.OkLabel) {
-		ok = msg.OkLabel
+
+	cancel := "Cancel"
+	if strs.IsNotEmpty(entry.CancelLabel) {
+		cancel = entry.CancelLabel
 	}
 
 	okCallback := func() {
-		*r = res.Message{
-			General: res.OkResult()}
+		*r = res.Entry{
+			General: res.OkResult(),
+			Text:    app.lineEdit.Text()}
 		app.Accept()
 	}
 
-	cancel := ""
-	var cancelCallback func()
-	if msg.Style == sets.QuestionStyle {
-		cancel = "No"
-
-		if strs.IsNotEmpty(msg.CancelLabel) {
-			cancel = msg.CancelLabel
-		}
-
-		cancelCallback = func() {
-			*r = res.Message{General: res.CancelResult()}
-			app.Cancel()
-		}
+	cancelCallback := func() {
+		*r = res.Entry{General: res.CancelResult()}
+		app.Cancel()
 	}
 
 	extraButtonCallback := func(index uint) func() {
 		return func() {
-			*r = res.Message{General: res.ExtraButtonResult(index)}
+			*r = res.Entry{General: res.ExtraButtonResult(index)}
 			app.Accept()
 		}
 	}
 
 	return defineOkCancelButtons(
-		ok, cancel, msg.ExtraButtons,
+		ok, cancel, entry.ExtraButtons,
 		&app.acceptPB, &app.cancelPB,
 		okCallback, cancelCallback, extraButtonCallback)
 }
 
 // nolint: gomnd
-func defineMessageText(app *MessageApp, msg *sets.Message, addTextIcon bool) (w []Widget) {
+func defineEntryText(app *EntryApp, opts *sets.Entry, addTextIcon bool) (w []Widget) {
 
-	app.icon = getIcon(msg.WindowIcon)
+	app.icon = getIcon(opts.WindowIcon)
 
-	icon := getIcon(msg.Icon)
-	if icon != nil && addTextIcon {
-
-		bitmap, err := walk.NewBitmapFromIconForDPI(icon, walk.Size{Width: 48, Height: 48}, 96)
+	if app.icon != nil && addTextIcon {
+		bitmap, err := walk.NewBitmapFromIconForDPI(app.icon, walk.Size{Width: 48, Height: 48}, 96)
 		if err == nil {
 			w = append(w, ImageView{
 				Background: TransparentBrush{},
@@ -86,49 +78,50 @@ func defineMessageText(app *MessageApp, msg *sets.Message, addTextIcon bool) (w 
 	}
 
 	minSize := Size{Width: 10, Height: 0}
-	if msg.NoWrap {
+	if opts.NoWrap {
 		minSize.Width = 0
 	}
 
 	w = append(w, TextLabel{
 		RightToLeftReading: true,
 		MinSize:            minSize,
-		Text:               msg.Text})
+		Text:               opts.Text})
 
 	return
 }
 
-// Shows an Message dialog.
+func defineEntryEdit(app *EntryApp, opts *sets.Entry) Widget {
+	return LineEdit{AssignTo: &app.lineEdit, PasswordMode: opts.HideEntryText}
+}
+
+// Shows an entry dialog.
 // nolint: gomnd
-func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err error) {
+func ShowEntry(ctx context.Context, entry *sets.Entry) (r res.Entry, err error) {
 
-	app := &MessageApp{}
-
-	msg.SetDefaultIcons()
+	app := &EntryApp{}
 
 	minSize := Size{Width: 380, Height: 120}
 	size := walk.Size{Width: 400, Height: 150}
 
-	if msg.Width != 0 {
-		size.Width = int(msg.Width)
+	if entry.Width != 0 {
+		size.Width = int(entry.Width)
 	}
 
-	if msg.Height != 0 {
-		size.Height = int(msg.Height)
+	if entry.Height != 0 {
+		size.Height = int(entry.Height)
 	}
 
 	defaultButton := &app.acceptPB
 	cancelButton := &app.cancelPB
-	if msg.DefaultCancel {
+	if entry.DefaultCancel {
 		defaultButton, cancelButton = cancelButton, defaultButton
 	}
 
 	// nolint: gomnd
 	m := Dialog{
 		AssignTo:      &app.Dialog,
-		Title:         msg.Title,
+		Title:         entry.Title,
 		MinSize:       minSize,
-		Size:          Size{Width: size.Width, Height: size.Height},
 		DefaultButton: defaultButton,
 		CancelButton:  cancelButton,
 
@@ -142,12 +135,13 @@ func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err err
 
 		Children: []Widget{
 			Composite{
-				Layout:   HBox{Spacing: 15, MarginsZero: true},
-				Children: defineMessageText(app, msg, true),
+				Layout:   HBox{Spacing: 10, MarginsZero: true},
+				Children: defineEntryText(app, entry, false),
 			},
+			defineEntryEdit(app, entry),
 			Composite{
 				Layout:   HBox{SpacingZero: true, MarginsZero: true},
-				Children: defineMessageButtons(app, msg, &r),
+				Children: defineEntryButtons(app, entry, &r),
 			},
 		},
 	}
@@ -160,13 +154,9 @@ func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err err
 		// The dialog was closed -> Make it canceled if
 		// not yet set (ok or cancel pressed).
 		if r.IsUnset() {
-			r = res.Message{General: res.CancelResult()}
+			r = res.Entry{General: res.CancelResult()}
 		}
 	})
-
-	if app.icon != nil {
-		_ = app.SetIcon(app.icon)
-	}
 
 	centerAndSetSize(app.Dialog, size)
 
@@ -177,7 +167,7 @@ func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err err
 	ret := app.Run()
 
 	if ret == walk.DlgCmdCancel || ret == walk.DlgCmdClose {
-		r = res.Message{General: res.CancelResult()}
+		r = res.Entry{General: res.CancelResult()}
 
 		return
 	}

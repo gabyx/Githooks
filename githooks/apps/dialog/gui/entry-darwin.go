@@ -34,7 +34,7 @@ func translateEntry(entry *sets.Entry) (d gmac.EntryData, err error) {
 		m.CancelLabel = "Cancel"
 	}
 	if strs.IsEmpty(m.OkLabel) {
-		m.OkLabel = "Ok"
+		m.OkLabel = "OK"
 	}
 
 	if entry.ExtraButtons != nil {

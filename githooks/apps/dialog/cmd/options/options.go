@@ -24,12 +24,14 @@ func handleResult(ctx *dcm.CmdContext, res *res.Options, err error, sep string) 
 		last = dcm.LineBreak
 	}
 
+	printRes := func() error {
+		return cm.CombineErrors(
+			dcm.OutputIndexArray(res.Selection, sep),
+			dcm.OutputString(last))
+	}
+
 	return dcm.HandleGeneralResult(ctx, &res.General, err,
-		func() error {
-			return cm.CombineErrors(
-				dcm.OutputIndexArray(res.Selection, sep),
-				dcm.OutputString(last))
-		}, nil)
+		printRes, nil, printRes)
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
@@ -44,6 +46,9 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 		Long: `Shows a list selection dialog similar to 'zenity'.
 
 Extra buttons are only supported on Unix and Windows.
+If not using '--multiple' you can also use the
+button style options with '--style 1' which uses buttons instead
+of a listbox.
 
 # Exit Codes:
 
@@ -51,7 +56,7 @@ Extra buttons are only supported on Unix and Windows.
 		separated by '--separator'.
 - '1' : 'Cancel' was pressed or the dialog was closed.
 - '2' : The user pressed an extra button.
-		The output contains the index of that button.
+		The output contains the index of that button on the first line.
 - '5' : The dialog was closed due to timeout.`,
 		Run: func(cmd *cobra.Command, args []string) {
 

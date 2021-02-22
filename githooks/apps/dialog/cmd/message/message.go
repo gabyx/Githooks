@@ -13,7 +13,7 @@ import (
 )
 
 func handleResult(ctx *dcm.CmdContext, res *res.Message, err error) error {
-	return dcm.HandleGeneralResult(ctx, &res.General, err, nil, nil)
+	return dcm.HandleGeneralResult(ctx, &res.General, err, nil, nil, nil)
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {

@@ -18,7 +18,7 @@ func handleResult(ctx *dcm.CmdContext, res *res.File, err error, sep string) err
 	return dcm.HandleGeneralResult(ctx, &res.General, err, func() error {
 		return cm.CombineErrors(
 			dcm.OutputArray(res.Paths, sep))
-	}, nil)
+	}, nil, nil)
 }
 
 func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {

@@ -9,7 +9,6 @@ import (
 	strs "gabyx/githooks/strings"
 
 	"github.com/lxn/walk"
-	"github.com/lxn/win"
 
 	. "github.com/lxn/walk/declarative"
 )
@@ -21,31 +20,28 @@ type ListModel struct {
 
 type OptionsApp struct {
 	*walk.Dialog
+
+	icon     *walk.Icon
 	listBox  *walk.ListBox
 	list     *ListModel
 	multiple bool
 
 	acceptPB *walk.PushButton
 	cancelPB *walk.PushButton
-
-	selection []uint
 }
 
 func defineList(app *OptionsApp, opts *sets.Options) Widget {
 	app.multiple = opts.MultipleSelection
 
 	return ListBox{
-		AssignTo:                 &app.listBox,
-		Model:                    app.list,
-		OnSelectedIndexesChanged: app.listCurrentIndicesChanged,
-		MultiSelection:           app.multiple,
+		AssignTo:       &app.listBox,
+		Model:          app.list,
+		MultiSelection: app.multiple,
 	}
-
 }
 
-func defineButtons(app *OptionsApp, opts *sets.Options, r *res.Options) []Widget {
-
-	ok := "Ok"
+func defineListButtons(app *OptionsApp, opts *sets.Options, r *res.Options) []Widget {
+	ok := "OK"
 	if strs.IsNotEmpty(opts.OkLabel) {
 		ok = opts.OkLabel
 	}
@@ -55,44 +51,74 @@ func defineButtons(app *OptionsApp, opts *sets.Options, r *res.Options) []Widget
 		cancel = opts.CancelLabel
 	}
 
-	return []Widget{
-		PushButton{
-			AssignTo: &app.acceptPB,
-			Text:     ok,
-			OnClicked: func() {
-				*r = res.Options{
-					General:   res.OkResult(),
-					Selection: app.selection}
-
-				app.Accept()
-			}},
-		PushButton{
-			AssignTo: &app.cancelPB,
-			Text:     cancel,
-			OnClicked: func() {
-				*r = res.Options{General: res.CancelResult()}
-
-				app.Cancel()
-			}},
+	okCallback := func() {
+		*r = res.Options{
+			General:   res.OkResult(),
+			Selection: app.getCurrentSelectedIndices()}
+		app.Accept()
 	}
+
+	cancelCallback := func() {
+		*r = res.Options{General: res.CancelResult()}
+		app.Cancel()
+	}
+
+	extraButtonCallback := func(index uint) func() {
+		return func() {
+			*r = res.Options{
+				General: res.ExtraButtonResult(index)}
+			app.Accept()
+		}
+	}
+
+	return defineOkCancelButtons(
+		ok, cancel, opts.ExtraButtons,
+		&app.acceptPB, &app.cancelPB,
+		okCallback, cancelCallback, extraButtonCallback)
 }
 
-func centerOnScreen(app *walk.Dialog) {
-	wScreen := int(win.GetSystemMetrics(win.SM_CXSCREEN))
-	hScreen := int(win.GetSystemMetrics(win.SM_CYSCREEN))
+// nolint: gomnd
+func defineListText(app *OptionsApp, opts *sets.Options, addTextIcon bool) (w []Widget) {
 
-	rect := app.Bounds()
-	rect.X = wScreen/2 - rect.Width/2  // nolint: gomnd
-	rect.Y = hScreen/2 - rect.Height/2 // nolint: gomnd
-	_ = app.SetBounds(rect)
+	switch opts.WindowIcon {
+	case sets.InfoIcon:
+		app.icon = walk.IconInformation()
+	case sets.WarningIcon:
+		app.icon = walk.IconWarning()
+	case sets.ErrorIcon:
+		app.icon = walk.IconError()
+	case sets.QuestionIcon:
+		app.icon = walk.IconQuestion()
+	}
+
+	if app.icon != nil && addTextIcon {
+		bitmap, err := walk.NewBitmapFromIconForDPI(app.icon, walk.Size{Width: 48, Height: 48}, 96)
+		if err == nil {
+			w = append(w, ImageView{
+				Background: TransparentBrush{},
+				Image:      bitmap,
+				Mode:       ImageViewModeCenter,
+				MinSize:    Size{Width: 48, Height: 48},
+				MaxSize:    Size{Width: 48, Height: 48},
+			})
+		}
+	}
+
+	w = append(w, TextLabel{
+		RightToLeftReading: true,
+		MinSize:            Size{Width: 10, Height: 0},
+		Text:               opts.Text})
+
+	return
 }
 
+// Shows an options dialog.
 func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err error) {
 
 	app := &OptionsApp{list: &ListModel{options: opts.Options}}
 
-	size := Size{Width: 240, Height: 400}    // nolint: gomnd
-	minSize := Size{Width: 240, Height: 320} // nolint: gomnd
+	minSize := Size{Width: 240, Height: 240}                        // nolint: gomnd
+	size := walk.Size{Width: minSize.Width, Height: minSize.Height} // nolint: gomnd
 
 	if opts.Width != 0 {
 		size.Width = int(opts.Width)
@@ -113,27 +139,26 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 		AssignTo:      &app.Dialog,
 		Title:         opts.Title,
 		MinSize:       minSize,
-		Size:          size,
 		DefaultButton: defaultButton,
 		CancelButton:  cancelButton,
 
 		Layout: VBox{
-			Spacing: 4,
+			Spacing: 8,
 			Margins: Margins{
-				Left:   8,
-				Top:    8,
-				Bottom: 8,
-				Right:  8}},
+				Left:   12,
+				Top:    12,
+				Bottom: 12,
+				Right:  12}},
 
 		Children: []Widget{
-			TextLabel{
-				RightToLeftReading: true,
-				MinSize:            Size{Width: 10, Height: 0},
-				Text:               opts.Text},
+			Composite{
+				Layout:   HBox{Spacing: 10, MarginsZero: true},
+				Children: defineListText(app, opts, false),
+			},
 			defineList(app, opts),
 			Composite{
 				Layout:   HBox{SpacingZero: true, MarginsZero: true},
-				Children: defineButtons(app, opts, &r),
+				Children: defineListButtons(app, opts, &r),
 			},
 		},
 	}
@@ -150,33 +175,40 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 		}
 	})
 
-	app.Form().Activating().Once(func() {
-		centerOnScreen(app.Dialog)
-		_ = app.BringToTop()
-	})
+	centerAndSetSize(app.Dialog, size)
+
+	if ctx != nil {
+		watchTimeout(ctx, app.Dialog)
+	}
 
 	ret := app.Run()
 
-	if ret == walk.DlgCmdCancel {
+	if ret == walk.DlgCmdCancel || ret == walk.DlgCmdClose {
 		r = res.Options{General: res.CancelResult()}
 
 		return
 	}
 
+	if ctx != nil && ctx.Err() != nil {
+		err = ctx.Err()
+	}
+
 	return
 }
 
-func (app *OptionsApp) listCurrentIndicesChanged() {
+func (app *OptionsApp) getCurrentSelectedIndices() (indices []uint) {
 
 	if app.multiple {
 		s := app.listBox.SelectedIndexes()
-		app.selection = make([]uint, 0, len(s))
+		indices = make([]uint, 0, len(s))
 		for _, idx := range s {
-			app.selection = append(app.selection, uint(idx))
+			indices = append(indices, uint(idx))
 		}
 	} else {
-		app.selection = []uint{uint(app.listBox.CurrentIndex())}
+		indices = []uint{uint(app.listBox.CurrentIndex())}
 	}
+
+	return
 }
 
 func (m *ListModel) ItemCount() int {

@@ -141,6 +141,7 @@ type FileSave struct {
 }
 
 // FileSelection are options for the file dialog.
+// Note: Adding member -> Check Conversion from `FileSave` -> `FileSelection`.
 type FileSelection struct {
 	General
 	GeneralFile

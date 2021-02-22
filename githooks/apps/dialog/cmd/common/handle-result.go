@@ -40,7 +40,8 @@ func HandleGeneralResult(ctx *CmdContext,
 	g *res.General,
 	err error,
 	okCallback func() error,
-	cancelCallback func() error) error {
+	cancelCallback func() error,
+	extraCallback func() error) error {
 
 	// Handle expected errors first.
 	if os.IsTimeout(err) {
@@ -73,6 +74,11 @@ func HandleGeneralResult(ctx *CmdContext,
 	} else if clicked, idx := g.IsExtraButton(); clicked {
 		os.Stdout.WriteString(strs.Fmt("%d", idx))
 		os.Stdout.WriteString(LineBreak)
+		if extraCallback != nil {
+			if e := extraCallback(); e != nil {
+				return e // callback error...
+			}
+		}
 		ctx.ExitCode = 2
 	}
 
