@@ -12,6 +12,7 @@ import (
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/hooks"
 	"os"
+	"os/signal"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -52,6 +53,21 @@ func makeDialogCtl(ctx *dcm.CmdContext) (rootCmd *cobra.Command) {
 }
 
 func mainRun() (exitCode int) {
+
+	// Without handling the exit code
+	// would match with SIGINT.
+	// At least on Windows, which does not seem to add it to 128.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	defer func() {
+		signal.Stop(c)
+	}()
+
+	go func() {
+		<-c
+		os.Exit(1) // Return canceled always...
+	}()
+
 	cwd, err := os.Getwd()
 	cm.AssertNoErrorPanic(err, "Could not get current working dir.")
 	cwd = filepath.ToSlash(cwd)
