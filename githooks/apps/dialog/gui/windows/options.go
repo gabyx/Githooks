@@ -6,6 +6,7 @@ import (
 	"context"
 	res "gabyx/githooks/apps/dialog/result"
 	sets "gabyx/githooks/apps/dialog/settings"
+	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 
 	"github.com/lxn/walk"
@@ -112,8 +113,75 @@ func defineListText(app *OptionsApp, opts *sets.Options, addTextIcon bool) (w []
 	return
 }
 
+func showOptionsWithButtons(ctx context.Context, opts *sets.Options) (r res.Options, err error) {
+
+	// Wrap it through `ShowMessage`.
+	msg := sets.Message{
+		General:       opts.General,
+		GeneralText:   opts.GeneralText,
+		GeneralButton: opts.GeneralButton,
+		Style:         sets.InfoStyle,
+		Icon:          opts.WindowIcon}
+
+	// Default configuration
+	extraButtons := append([]string{}, opts.Options[1:]...)
+	msg.OkLabel = opts.Options[0]
+	okOptionIdx := uint(0)
+	extraOptionIdx := []uint{1, 2, 3}
+
+	dO := len(opts.DefaultOptions)
+	// Swap default configuration with the default option.
+	if dO != 0 && opts.DefaultOptions[dO-1] < uint(len(opts.Options)) {
+		idx := opts.DefaultOptions[dO-1]
+		for i, eIdx := range extraOptionIdx {
+			if eIdx == idx {
+				// Swap indices...
+				extraOptionIdx[i], okOptionIdx = okOptionIdx, extraOptionIdx[i]
+				msg.OkLabel, extraButtons[i] = extraButtons[i], msg.OkLabel
+			}
+		}
+	}
+
+	msg.ExtraButtons = append(extraButtons, msg.ExtraButtons...)
+	mRes, err := ShowMessage(ctx, &msg)
+
+	if err == nil {
+		if mRes.IsOk() {
+			return res.Options{
+				General:   res.OkResult(),
+				Selection: []uint{okOptionIdx}}, nil
+
+		} else if ok, idx := mRes.IsExtraButton(); ok {
+
+			nSkip := uint(len(opts.Options) - 1)
+			if idx < nSkip {
+				return res.Options{
+					General:   res.OkResult(),
+					Selection: []uint{extraOptionIdx[idx]}}, nil
+			}
+
+			return res.Options{General: res.ExtraButtonResult(idx - nSkip)}, nil
+
+		} else if mRes.IsCanceled() {
+			return res.Options{General: res.CancelResult()}, nil
+		}
+	}
+
+	return
+}
+
 // Shows an options dialog.
 func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err error) {
+
+	if len(opts.Options) == 0 {
+		err = cm.ErrorF("You need at list on option specified.")
+
+		return
+	}
+
+	if opts.Style == sets.OptionsStyleButtons && !opts.MultipleSelection {
+		return showOptionsWithButtons(ctx, opts)
+	}
 
 	app := &OptionsApp{list: &ListModel{options: opts.Options}}
 
@@ -167,6 +235,9 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 		return
 	}
 
+	// Select default items
+	setDefaultSelection(app, opts)
+
 	app.Disposing().Once(func() {
 		// The dialog was closed -> Make it canceled if
 		// not yet set (ok or cancel pressed).
@@ -194,6 +265,24 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 	}
 
 	return
+}
+
+func setDefaultSelection(app *OptionsApp, opts *sets.Options) {
+	dO := len(opts.DefaultOptions)
+
+	indices := make([]int, 0, dO)
+	for i := range opts.DefaultOptions {
+		if i >= len(opts.Options) {
+			continue
+		}
+		indices = append(indices, int(opts.DefaultOptions[i]))
+	}
+
+	if opts.MultipleSelection {
+		app.listBox.SetSelectedIndexes(indices)
+	} else if len(indices) > 0 {
+		_ = app.listBox.SetCurrentIndex(indices[len(indices)-1])
+	}
 }
 
 func (app *OptionsApp) getCurrentSelectedIndices() (indices []uint) {

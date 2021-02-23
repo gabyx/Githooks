@@ -21,8 +21,8 @@ type General struct {
 	WindowIcon DialogIcon
 }
 
-// DefaultButton are default settings for the standard buttons on certain dialogs.
-type DefaultButton struct {
+// GeneralButton are default settings for the standard buttons on certain dialogs.
+type GeneralButton struct {
 	OkLabel       string
 	CancelLabel   string
 	DefaultCancel bool
@@ -52,7 +52,7 @@ const (
 type Message struct {
 	General
 	GeneralText
-	DefaultButton
+	GeneralButton
 
 	Style MessageStyle
 	Icon  DialogIcon
@@ -75,7 +75,7 @@ const (
 type Options struct {
 	General
 	GeneralText
-	DefaultButton
+	GeneralButton
 
 	Options        []string
 	DefaultOptions []uint
@@ -88,7 +88,7 @@ type Options struct {
 type Entry struct {
 	General
 	GeneralText
-	DefaultButton
+	GeneralButton
 
 	EntryText     string
 	HideEntryText bool

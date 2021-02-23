@@ -16,7 +16,7 @@ func addFlagsGeneral(cmd *cobra.Command, s *set.General) {
 Only Unix supported: One of ['info', 'warning', 'error', 'question']`)
 }
 
-func addFlagsDefaultButton(cmd *cobra.Command, s *set.DefaultButton) {
+func addFlagsGeneralButton(cmd *cobra.Command, s *set.GeneralButton) {
 	cmd.Flags().StringVar(&s.OkLabel, "ok-label", "", "Ok button label.")
 	cmd.Flags().StringVar(&s.CancelLabel, "cancel-label", "", "Cancel button label.")
 	cmd.Flags().BoolVar(&s.DefaultCancel, "default-cancel", false, "Set 'Cancel' as the default button.")
@@ -47,7 +47,7 @@ func addFlagsGeneralFile(cmd *cobra.Command, s *set.GeneralFile) {
 func AddFlagsMessage(cmd *cobra.Command, s *set.Message) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
-	addFlagsDefaultButton(cmd, &s.DefaultButton)
+	addFlagsGeneralButton(cmd, &s.GeneralButton)
 
 	a1 := msgStyleArgs{style: &s.Style}
 	cmd.Flags().Var(&a1, "style", "Message style.")
@@ -60,20 +60,23 @@ One of ['info', 'warning', 'error', 'question']`)
 func AddFlagsOptions(cmd *cobra.Command, s *set.Options) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
-	addFlagsDefaultButton(cmd, &s.DefaultButton)
+	addFlagsGeneralButton(cmd, &s.GeneralButton)
 
 	cmd.Flags().StringArrayVar(&s.Options, "option", nil, "List of options to choose from.")
 	a := indexArgs{indices: &s.DefaultOptions}
 	cmd.Flags().Var(&a, "default-option", "Default selected option indices (only macOS/Windows).")
 
-	cmd.Flags().UintVar((*uint)(&s.Style), "style", 0, "Dialog style: '0' for list, '1' for buttons.")
+	cmd.Flags().UintVar((*uint)(&s.Style), "style", 0,
+		`Dialog style: '0' for list, '1' for buttons (only if not '--multiple').
+For button style: Default is always either '--default-option' or
+the first '--option'.`)
 	cmd.Flags().BoolVar(&s.MultipleSelection, "multiple", false, "Allow multiple selections.")
 }
 
 func AddFlagsEntry(cmd *cobra.Command, s *set.Entry) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
-	addFlagsDefaultButton(cmd, &s.DefaultButton)
+	addFlagsGeneralButton(cmd, &s.GeneralButton)
 
 	a2 := iconArgs{icon: &s.Icon}
 	cmd.Flags().Var(&a2, "icon", `Message icon (only macOS).
