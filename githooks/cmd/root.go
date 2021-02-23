@@ -70,7 +70,7 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 
 	fmt := ctx.Log.GetInfoFormatter(false)
-	title := fmt("Githooks CLI [version: %s]", build.BuildVersion)
+	title := fmt("Githooks CLI [version: '%s']", build.BuildVersion)
 	firstPrefix := " ▶ "
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())
 

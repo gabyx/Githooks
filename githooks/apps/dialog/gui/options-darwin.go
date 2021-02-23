@@ -80,6 +80,12 @@ func getChoices(output string, maxOptions int) (indices []uint) {
 }
 
 func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
+	if len(opts.Options) == 0 {
+		err = cm.ErrorF("You need at list one option specified.")
+
+		return
+	}
+
 	data, err := translateOptions(s)
 	if err != nil {
 		return res.Options{}, err

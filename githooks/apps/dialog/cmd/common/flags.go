@@ -13,7 +13,7 @@ func addFlagsGeneral(cmd *cobra.Command, s *set.General) {
 
 	a := iconArgs{icon: &s.WindowIcon}
 	cmd.Flags().Var(&a, "window-icon", `Window icon.
-Only Unix supported: One of ['info', 'warning', 'error', 'question']`)
+One of ['info', 'warning', 'error', 'question'] (only Windows/Unix)`)
 }
 
 func addFlagsGeneralButton(cmd *cobra.Command, s *set.GeneralButton) {

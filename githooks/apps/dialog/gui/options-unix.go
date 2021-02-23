@@ -33,6 +33,12 @@ func getChoices(output string) (indices []uint) {
 
 func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 
+	if len(opts.Options) == 0 {
+		err = cm.ErrorF("You need at list one option specified.")
+
+		return
+	}
+
 	if s.Style == set.OptionsStyleButtons && !s.MultipleSelection {
 		return showOptionsWithButtons(ctx, s)
 	}

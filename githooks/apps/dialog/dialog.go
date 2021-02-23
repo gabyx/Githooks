@@ -30,7 +30,7 @@ func addSubCommands(cmd *cobra.Command, ctx *dcm.CmdContext) {
 func makeDialogCtl(ctx *dcm.CmdContext) (rootCmd *cobra.Command) {
 
 	fmt := ctx.Log.GetInfoFormatter(false)
-	title := fmt("Githooks Dialog CLI [version: %s]", build.BuildVersion)
+	title := fmt("Githooks Dialog CLI [version: '%s']", build.BuildVersion)
 	firstPrefix := " ▶ "
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())
 

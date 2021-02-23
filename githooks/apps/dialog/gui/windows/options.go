@@ -6,7 +6,6 @@ import (
 	"context"
 	res "gabyx/githooks/apps/dialog/result"
 	sets "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 
 	"github.com/lxn/walk"
@@ -115,16 +114,6 @@ func defineListText(app *OptionsApp, opts *sets.Options, addTextIcon bool) (w []
 
 // Shows an options dialog.
 func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err error) {
-
-	if len(opts.Options) == 0 {
-		err = cm.ErrorF("You need at list on option specified.")
-
-		return
-	}
-
-	if opts.Style == sets.OptionsStyleButtons && !opts.MultipleSelection {
-		return showOptionsWithButtons(ctx, opts)
-	}
 
 	app := &OptionsApp{list: &ListModel{options: opts.Options}}
 
