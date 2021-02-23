@@ -34,8 +34,8 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 # Exit Codes:
 
 - '0' : User pressed 'Ok'. The output contains the selected paths
-		separated by '--separator'. All paths use forward slashes
-		on any platform.
+        separated by '--separator'. All paths use forward slashes
+        on any platform.
 - '1' : User pressed 'Cancel' or closed the dialog.
 - '5' : The dialog was closed due to timeout.`,
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -73,8 +73,8 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 # Exit Codes:
 
 - '0' : User pressed 'Ok'. The output contains the selected paths
-		separated by '--separator'. All paths use forward slashes
-		on any platform.
+        separated by '--separator'. All paths use forward slashes
+        on any platform.
 - '1' : User pressed 'Cancel' or closed the dialog.
 - '5' : The dialog was closed due to timeout.`,
 		PreRun: func(cmd *cobra.Command, args []string) {

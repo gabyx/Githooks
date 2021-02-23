@@ -53,10 +53,10 @@ of a listbox.
 # Exit Codes:
 
 - '0' : 'Ok' was pressed. The output contains the indices of the selected items
-		separated by '--separator'.
+        separated by '--separator'.
 - '1' : 'Cancel' was pressed or the dialog was closed.
 - '2' : The user pressed an extra button.
-		The output contains the index of that button on the first line.
+        The output contains the index of that button on the first line.
 - '5' : The dialog was closed due to timeout.`,
 		Run: func(cmd *cobra.Command, args []string) {
 
