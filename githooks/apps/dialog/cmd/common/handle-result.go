@@ -72,8 +72,7 @@ func HandleGeneralResult(ctx *CmdContext,
 			}
 		}
 	} else if clicked, idx := g.IsExtraButton(); clicked {
-		os.Stdout.WriteString(strs.Fmt("%d", idx))
-		os.Stdout.WriteString(LineBreak)
+		os.Stdout.WriteString(strs.Fmt("%d%s", idx, LineBreak))
 		if extraCallback != nil {
 			if e := extraCallback(); e != nil {
 				return e // callback error...

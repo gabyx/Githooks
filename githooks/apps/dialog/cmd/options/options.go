@@ -31,7 +31,7 @@ func handleResult(ctx *dcm.CmdContext, res *res.Options, err error, sep string) 
 	}
 
 	return dcm.HandleGeneralResult(ctx, &res.General, err,
-		printRes, nil, printRes)
+		printRes, nil, nil)
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
@@ -74,7 +74,10 @@ of a listbox.
 		}}
 
 	cmd.Flags().UintVar(&timeout, "timeout", 0, "Timeout for the dialog")
-	cmd.Flags().StringVar(&separator, "separator", ",", "Selection indices separator to use for output, default is ','")
+	cmd.Flags().StringVar(&separator,
+		"separator",
+		"", // empty intentionally
+		"Selection indices separator to use for output, default is ','")
 
 	dcm.AddFlagsOptions(cmd, &settings)
 	ccm.SetCommandDefaults(ctx.Log, cmd)

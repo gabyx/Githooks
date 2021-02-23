@@ -38,6 +38,9 @@ func translateOptions(opts *sets.Options) (d gmac.OptionsData, err error) {
 	d.Opts.EmptySelectionAllowed = true
 
 	for _, idx := range opts.DefaultOptions {
+		if idx >= len(d.Items) {
+			continue
+		}
 		d.Opts.DefaultItems = append(d.Opts.DefaultItems, d.Items[idx])
 	}
 

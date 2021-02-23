@@ -30,9 +30,8 @@ func ShowMessage(ctx context.Context, msg *set.Message) (r res.Message, err erro
 		args = append(args, "--error")
 	}
 
-	if strs.IsNotEmpty(msg.Title) {
-		args = append(args, "--title", msg.Title)
-	}
+	// Zenity prints default title and text if not set.
+	args = append(args, "--title", msg.Title)
 
 	if msg.Width > 0 {
 		args = append(args, "--width", fmt.Sprintf("%d", msg.Width))
@@ -53,15 +52,14 @@ func ShowMessage(ctx context.Context, msg *set.Message) (r res.Message, err erro
 		args = append(args, "--window-icon=question")
 	}
 
-	if strs.IsNotEmpty(msg.Text) {
-		args = append(args, "--text", msg.Text, "--no-markup")
-	}
+	// Zenity prints default title and text if not set.
+	args = append(args, "--text", msg.Text, "--no-markup")
 
 	if strs.IsNotEmpty(msg.OkLabel) {
 		args = append(args, "--ok-label", msg.OkLabel)
 	}
 
-	if strs.IsNotEmpty(msg.CancelLabel) {
+	if msg.Style == set.QuestionStyle && strs.IsNotEmpty(msg.CancelLabel) {
 		args = append(args, "--cancel-label", msg.CancelLabel)
 	}
 

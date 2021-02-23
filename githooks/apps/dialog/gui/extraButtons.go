@@ -1,4 +1,4 @@
-// +build darwin unix
+// +build !windows
 
 package gui
 

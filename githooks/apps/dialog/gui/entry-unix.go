@@ -18,9 +18,8 @@ func ShowEntry(ctx context.Context, entry *set.Entry) (r res.Entry, err error) {
 
 	args := []string{"--entry"}
 
-	if strs.IsNotEmpty(entry.Title) {
-		args = append(args, "--title", entry.Title)
-	}
+	// Zenity prints default title and text if not set.
+	args = append(args, "--title", entry.Title)
 
 	if entry.Width > 0 {
 		args = append(args, "--width", fmt.Sprintf("%d", entry.Width))
@@ -41,9 +40,8 @@ func ShowEntry(ctx context.Context, entry *set.Entry) (r res.Entry, err error) {
 		args = append(args, "--window-icon=question")
 	}
 
-	if strs.IsNotEmpty(entry.Text) {
-		args = append(args, "--text", entry.Text, "--no-markup")
-	}
+	// Zenity prints default title and text if not set.
+	args = append(args, "--text", entry.Text, "--no-markup")
 
 	if strs.IsNotEmpty(entry.OkLabel) {
 		args = append(args, "--ok-label", entry.OkLabel)

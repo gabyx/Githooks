@@ -82,7 +82,7 @@ func ExampleShowOptions() {
 	t.OkLabel = "Okey"
 	t.CancelLabel = "Cancel it"
 	t.Text = "Choose some options from below"
-	t.Options = []string{"Options 1", "Option 2", "Option 3"}
+	t.Options = []string{"Option 1", "Option 2", "Option 3"}
 	t.MultipleSelection = true
 	t.Width = 300
 	t.Height = 500
@@ -98,7 +98,7 @@ func ExampleShowOptionsButtons() {
 	t.OkLabel = "Okey"
 	t.CancelLabel = "Cancel it"
 	t.Text = "Choose some options from below"
-	t.Options = []string{"Options 1", "Option 2", "Option 3"}
+	t.Options = []string{"Option 1", "Option 2", "Option 3"}
 	t.MultipleSelection = false
 	t.Width = 300
 	t.Height = 500

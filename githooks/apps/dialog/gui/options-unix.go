@@ -33,6 +33,10 @@ func getChoices(output string) (indices []uint) {
 
 func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 
+	if s.Style == set.OptionsStyleButtons && !s.MultipleSelection {
+		return showOptionsWithButtons(ctx, s)
+	}
+
 	args := []string{
 		"--list",
 		"--hide-header",
@@ -41,13 +45,9 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		"--hide-column=1",
 		"--print-column=1"}
 
-	if strs.IsNotEmpty(s.Title) {
-		args = append(args, "--title", s.Title)
-	}
-
-	if strs.IsNotEmpty(s.Text) {
-		args = append(args, "--text", s.Text, "--no-markup")
-	}
+	// Zenity prints default title and text if not set.
+	args = append(args, "--title", s.Title)
+	args = append(args, "--text", s.Text, "--no-markup")
 
 	if s.Width > 0 {
 		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
