@@ -92,6 +92,23 @@ func ExampleShowOptions() {
 	// Output:
 }
 
+func ExampleShowOptionsButtons() {
+	t := settings.Options{}
+	t.Title = "Choices"
+	t.OkLabel = "Okey"
+	t.CancelLabel = "Cancel it"
+	t.Text = "Choose some options from below"
+	t.Options = []string{"Options 1", "Option 2", "Option 3"}
+	t.MultipleSelection = false
+	t.Width = 300
+	t.Height = 500
+	t.Style = settings.OptionsStyleButtons
+	t.WindowIcon = settings.QuestionIcon
+
+	_, _ = gui.ShowOptions(nil, &t) // nolint: staticcheck
+	// Output:
+}
+
 func ExampleShowFileSave() {
 	t := &settings.FileSave{}
 	t.Title = "Choices"
