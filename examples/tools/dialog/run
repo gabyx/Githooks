@@ -4,6 +4,8 @@
 import sys
 import platform
 import subprocess
+import argparse
+from tkinter.simpledialog import askstring
 from tkinter import Tk
 from tkinter import dialog
 
@@ -16,7 +18,7 @@ def ask(title, text, strings=('Yes', 'No'), bitmap='warning', default=0):
         text (str): Text to be show to the user
         strings (tuple, optional): Button strings to be shown. Defaults to ('Yes', 'No').
         bitmap (str, optional): Bitmap to use for the icon. Defaults to 'warning'.
-        default (int, optional): Index of the default button. Defaults to 0.  
+        default (int, optional): Index of the default button. Defaults to 0.
     Returns:
         [type]: [description]
     """
@@ -30,22 +32,23 @@ def ask(title, text, strings=('Yes', 'No'), bitmap='warning', default=0):
 
 
 if __name__ == '__main__':
-    title = sys.argv[1]
-    text = sys.argv[2]
-    options = sys.argv[3].strip().split("/")
 
-    longOptions = []
-    if len(sys.argv) >= 5:
-        longOptions = [l.strip() for l in sys.argv[4:]]
+    parser = argparse.ArgumentParser(description='Custom user dialog.')
+    subparsers = parser.add_subparsers(dest="cmd", required=True)
 
-    # Fill up the long options if not given
-    if len(longOptions) < len(options):
-        longOptions += options[len(longOptions):]
+    parseOptions = subparsers.add_parser('options', help='Custom options dialog')
+    parseOptions.add_argument('--title', help="The title of the dialog.", default="")
+    parseOptions.add_argument('--text', help="The text of the dialog.", default="")
+    parseOptions.add_argument('--default-option', help="The default option.", type=int, default=0)
+    parseOptions.add_argument('--option', action="append", help="The default option.", required=True)
 
-    default = 0
-    for idx, o in enumerate(options):
-        if o.isupper():
-            default = idx
+    parseEntry = subparsers.add_parser('entry', help='Custom entry dialog')
+    parseEntry.add_argument('--title', help="The title of the dialog.", default="")
+    parseEntry.add_argument('--text', help="The text of the dialog.", default="")
+    parseEntry.add_argument('--default-entry', help="The default option.", default="")
+
+    args = parser.parse_args()
+
 
     root = Tk()
     root.lift()
@@ -61,6 +64,16 @@ if __name__ == '__main__':
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT)
 
-    numButton = ask(title, text, longOptions, default=default)
+    print(args)
+    if args.cmd == "options":
+        ans = ask(title=args.title, text=args.text, strings=args.option, default=args.default_option)
+    elif args.cmd == "entry":
+        ans = askstring(args.title, args.text)
+    else:
+        raise "Wrong command."
 
-    print(options[numButton])
+    if ans is None:
+        sys.exit(1)  # Canceled
+
+    print(ans)
+
