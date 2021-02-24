@@ -1,10 +1,11 @@
 package prompt
 
 import (
+	"errors"
 	strs "gabyx/githooks/strings"
 )
 
-func ShowPromptDialog(
+func showPromptDialog(
 	title string,
 	text string,
 	defaultAnswer string) (string, error) {
@@ -12,16 +13,16 @@ func ShowPromptDialog(
 	return "", nil
 }
 
-func ShowOptionsDialog(
+func showOptionsDialog(
 	title string,
 	question string,
-	defaultAnswerIdx int,
+	defaultOptionIdx int,
 	options []string,
 	longOptions []string) (string, error) {
 	return "", nil
 }
 
-func showPromptLoopGUI(
+func showPromptLoop(
 	p *Context,
 	defaultAnswer string,
 	runPrompt func() (string, error),
@@ -38,8 +39,12 @@ func showPromptLoopGUI(
 		ans, err = runPrompt()
 		nPrompts++
 
-		if err != nil {
-			break
+		if errors.Is(err, CancledError) {
+			p.log.WarnF("User canceled. Remaining tries %v.", maxPrompts-nPrompts)
+
+			continue
+		} else if err != nil {
+			break // Any other error is fatal.
 		}
 
 		if p.printAnswer {
@@ -75,41 +80,41 @@ func showPromptLoopGUI(
 	return defaultAnswer, err
 }
 
-func showPromptOptionsGUI(
+func showOptionsGUI(
 	p *Context,
 	title string,
 	question string,
-	defaultAnswerIdx int,
+	defaultOptionIdx int,
 	options []string,
 	longOptions []string,
 	validator AnswerValidator) (string, error) {
 
 	defaultAnswer := ""
-	if defaultAnswerIdx >= 0 {
-		defaultAnswer = options[defaultAnswerIdx]
+	if defaultOptionIdx >= 0 {
+		defaultAnswer = options[defaultOptionIdx]
 	}
 
-	return showPromptLoopGUI(
+	return showPromptLoop(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return ShowOptionsDialog(title, question, defaultAnswerIdx, options, longOptions)
+			return showOptionsDialog(title, question, defaultOptionIdx, options, longOptions)
 		},
 		validator)
 }
 
-func showPromptGUI(
+func showEntryGUI(
 	p *Context,
 	title string,
 	text string,
 	defaultAnswer string,
 	validator AnswerValidator) (string, error) {
 
-	return showPromptLoopGUI(
+	return showPromptLoop(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return ShowPromptDialog(title, text, defaultAnswer)
+			return showPromptDialog(title, text, defaultAnswer)
 		},
 		validator)
 }

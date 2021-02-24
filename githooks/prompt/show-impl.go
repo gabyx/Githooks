@@ -3,9 +3,7 @@ package prompt
 import (
 	"errors"
 	cm "gabyx/githooks/common"
-	pcm "gabyx/githooks/prompt/common"
 	strs "gabyx/githooks/strings"
-	"os"
 	"strings"
 )
 
@@ -17,58 +15,52 @@ func formatTitleQuestion(p *Context) string {
 	return p.log.GetPromptFormatter(false)("Githooks - Git Hook Manager")
 }
 
-// showPromptOptions shows a prompt to the user with `text`
+// showOptions shows a prompt to the user with `text`
 // with the options `shortOptions` and optional long options `longOptions`.
-func showPromptOptions(
+func showOptions(
 	p *Context,
 	text string,
 	hintText string,
 	shortOptions string,
-	longOptions ...string) (answer string, err error) {
+	longOptions ...string) (string, error) {
 
+	var err error
 	options := strings.Split(shortOptions, "/")
 	validator := CreateValidatorAnswerOptions(options)
 
-	defaultAnswer, defaultAnswerIdx := getDefaultAnswer(options)
+	defaultAnswer, defaultOptionIdx := getDefaultAnswer(options)
 
-	if p.tool != nil {
-		args := append([]string{text, hintText, shortOptions}, longOptions...)
-		ans, e := cm.GetOutputFromExecutableTrimmed(p.execCtx, p.tool, cm.UseOnlyStdin(os.Stdin), args...)
-		ans = strings.ToLower(ans)
+	if p.tool.IsSetup() {
+		ans, e := showOptionsTool(
+			p,
+			formatTitleQuestion(p),
+			text,
+			defaultOptionIdx,
+			longOptions,
+			validator)
 
 		if e == nil {
-			// Validate the answer if possible.
-			if validator == nil {
-				return ans, nil
-
-			}
-
-			e = validator(ans)
-			if e == nil {
-				return ans, nil
-			}
-
-			return defaultAnswer,
-				cm.CombineErrors(e, cm.ErrorF("Answer validation error."))
+			return ans, nil
 		}
 
-		err = cm.CombineErrors(e, cm.ErrorF("Could not execute dialog script '%q'", p.tool))
+		err = cm.CombineErrors(e,
+			cm.ErrorF("Dialog tool '%q' failed", p.tool.tool.GetCommand()))
 		// else: Runnning fallback ...
 	}
 
 	if p.useGUI {
 
 		// Use the GUI dialog.
-		answer, e := showPromptOptionsGUI(
+		ans, e := showOptionsGUI(
 			p,
 			formatTitleQuestion(p),
 			text,
-			defaultAnswerIdx,
+			defaultOptionIdx,
 			options, longOptions,
 			validator)
 
 		if e == nil {
-			return answer, nil
+			return ans, nil
 		}
 
 		err = cm.CombineErrors(err, e)
@@ -79,7 +71,7 @@ func showPromptOptions(
 		emptyCausesDefault := strs.IsNotEmpty(defaultAnswer)
 		question := p.promptFmt("%s %s [%s]: ", text, hintText, shortOptions)
 
-		answer, isPromptDisplayed, e :=
+		ans, isPromptDisplayed, e :=
 			showPromptOptionsTerminal(
 				p,
 				question,
@@ -89,7 +81,7 @@ func showPromptOptions(
 				validator)
 
 		if e == nil {
-			return answer, nil
+			return ans, nil
 		}
 		err = cm.CombineErrors(err, e)
 
@@ -102,7 +94,7 @@ func showPromptOptions(
 	return defaultAnswer, err
 }
 
-func showPromptLoopTerminal(
+func showEntryLoopTerminal(
 	p *Context,
 	text string,
 	defaultAnswer string,
@@ -167,7 +159,7 @@ func showPromptLoopTerminal(
 			return ans, true, nil
 		}
 
-		warning := p.errorFmt("Answer validation error: %s", err.Error())
+		warning := p.errorFmt("Answer validation error: %s", valErr.Error())
 		writeOut(warning + "\n")
 
 		if nPrompts < maxPrompts {
@@ -197,7 +189,7 @@ func showPromptOptionsTerminal(
 	emptyCausesDefault bool,
 	validator AnswerValidator) (string, bool, error) {
 
-	return showPromptLoopTerminal(
+	return showEntryLoopTerminal(
 		p,
 		question,
 		defaultAnswer,
@@ -205,20 +197,31 @@ func showPromptOptionsTerminal(
 		validator)
 }
 
-// showPrompt shows a prompt to the user with `text`.
-func showPrompt(
+// showEntry shows a prompt to the user with `text`.
+func showEntry(
 	p *Context,
 	text string,
 	defaultAnswer string,
-	validator func(string) error) (answer string, err error) {
+	validator func(string) error) (string, error) {
 
-	cm.PanicIf(p.tool != nil, "Not yet implemented.")
+	var err error
+	if p.tool.IsSetup() {
+		ans, e := showEntryTool(p, formatTitle(p), text, defaultAnswer, validator)
+		if e == nil {
+			return ans, nil
+		}
+
+		err = cm.CombineErrors(e, cm.ErrorF("Dialog tool '%q' failed", p.tool.tool.GetCommand()))
+		// else: Runnning fallback ...
+	}
 
 	if p.useGUI {
-		answer, err = showPromptGUI(p, formatTitle(p), text, defaultAnswer, validator)
-		if err == nil {
-			return
+		ans, e := showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator)
+		if e == nil {
+			return ans, nil
 		}
+
+		err = cm.CombineErrors(err, e)
 
 	} else {
 		if strs.IsNotEmpty(defaultAnswer) {
@@ -227,13 +230,14 @@ func showPrompt(
 			text = p.promptFmt("%s : ", text)
 		}
 
-		isPromptDisplayed := false
-		answer, isPromptDisplayed, err =
-			showPromptTerminal(p, text, defaultAnswer, validator)
+		ans, isPromptDisplayed, e :=
+			showEntryTerminal(p, text, defaultAnswer, validator)
 
-		if err == nil {
-			return
+		if e == nil {
+			return ans, nil
 		}
+
+		err = cm.CombineErrors(err, e)
 
 		if !isPromptDisplayed {
 			// Show the prompt in the log output
@@ -244,21 +248,19 @@ func showPrompt(
 	return defaultAnswer, err
 }
 
-func showPromptTerminal(
+func showEntryTerminal(
 	p *Context,
 	text string,
 	defaultAnswer string,
 	validator AnswerValidator) (string, bool, error) {
-	return showPromptLoopTerminal(p, text, defaultAnswer, true, validator)
+	return showEntryLoopTerminal(p, text, defaultAnswer, true, validator)
 }
 
-func showPromptMulti(
+func showEntryMulti(
 	p *Context,
 	text string,
 	exitAnswer string,
 	validator AnswerValidator) (answers []string, err error) {
-
-	cm.PanicIf(p.tool != nil, "Not yet implemented.")
 
 	// Wrap the validator into another one which
 	// reacts on `exitAnswer`.
@@ -276,13 +278,13 @@ func showPromptMulti(
 	var ans string
 
 	for {
-		ans, err = showPrompt(p, text, "", val)
+		ans, err = showEntry(p, text, "", val)
 
 		if err != nil {
 
-			if _, ok := err.(pcm.ValidationError); ok {
+			if _, ok := err.(ValidationError); ok {
 				continue
-			} else if errors.Is(err, pcm.CancledError) {
+			} else if errors.Is(err, CancledError) {
 				err = nil
 
 				break

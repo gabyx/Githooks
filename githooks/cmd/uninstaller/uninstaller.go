@@ -86,7 +86,7 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	if !args.NonInteractive {
-		promptCtx, err = prompt.CreateContext(log, &cm.ExecContext{}, nil, false, args.UseStdin)
+		promptCtx, err = prompt.CreateContext(log, prompt.ToolContext{}, false, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 

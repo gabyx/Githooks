@@ -31,7 +31,7 @@ func getChoices(output string) (indices []uint) {
 	return
 }
 
-func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
+func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
 
 	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at list one option specified.")
@@ -39,8 +39,8 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		return
 	}
 
-	if s.Style == set.OptionsStyleButtons && !s.MultipleSelection {
-		return showOptionsWithButtons(ctx, s)
+	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
+		return showOptionsWithButtons(ctx, opts)
 	}
 
 	args := []string{
@@ -52,18 +52,18 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		"--print-column=1"}
 
 	// Zenity prints default title and text if not set.
-	args = append(args, "--title", s.Title)
-	args = append(args, "--text", s.Text, "--no-markup")
+	args = append(args, "--title", opts.Title)
+	args = append(args, "--text", opts.Text, "--no-markup")
 
-	if s.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
+	if opts.Width > 0 {
+		args = append(args, "--width", fmt.Sprintf("%d", opts.Width))
 	}
 
-	if s.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", s.Height))
+	if opts.Height > 0 {
+		args = append(args, "--height", fmt.Sprintf("%d", opts.Height))
 	}
 
-	switch s.WindowIcon {
+	switch opts.WindowIcon {
 	case set.ErrorIcon:
 		args = append(args, "--window-icon=error")
 	case set.WarningIcon:
@@ -74,46 +74,46 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		args = append(args, "--window-icon=question")
 	}
 
-	if strs.IsNotEmpty(s.OkLabel) {
-		args = append(args, "--ok-label", s.OkLabel)
+	if strs.IsNotEmpty(opts.OkLabel) {
+		args = append(args, "--ok-label", opts.OkLabel)
 	}
 
-	if strs.IsNotEmpty(s.CancelLabel) {
-		args = append(args, "--cancel-label", s.CancelLabel)
+	if strs.IsNotEmpty(opts.CancelLabel) {
+		args = append(args, "--cancel-label", opts.CancelLabel)
 	}
 
-	if s.ExtraButtons != nil {
-		for i := range s.ExtraButtons {
+	if opts.ExtraButtons != nil {
+		for i := range opts.ExtraButtons {
 
-			if strs.IsEmpty(s.ExtraButtons[i]) {
+			if strs.IsEmpty(opts.ExtraButtons[i]) {
 				return res.Options{}, cm.ErrorF("Empty label for extra button is not allowed")
 			}
 
-			args = append(args, "--extra-button", s.ExtraButtons[i])
+			args = append(args, "--extra-button", opts.ExtraButtons[i])
 		}
 	}
 
-	if s.NoWrap {
+	if opts.NoWrap {
 		args = append(args, "--no-wrap")
 	}
 
-	if s.Ellipsize {
+	if opts.Ellipsize {
 		args = append(args, "--ellipsize")
 	}
 
-	if s.DefaultCancel {
+	if opts.DefaultCancel {
 		args = append(args, "--default-cancel")
 	}
 
 	// List options
-	if s.MultipleSelection {
+	if opts.MultipleSelection {
 		args = append(args, "--multiple")
 		args = append(args, "--separator", "\x1e")
 	}
 
 	// Add choices with ids.
-	for i := range s.Options {
-		args = append(args, fmt.Sprintf("%d", i), s.Options[i])
+	for i := range opts.Options {
+		args = append(args, fmt.Sprintf("%d", i), opts.Options[i])
 	}
 
 	out, err := gunix.RunZenity(ctx, args, "")
@@ -129,8 +129,8 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 			// Handle extra buttons.
 			if len(out) > 0 {
 				button := string(out[:len(out)-1])
-				for i := range s.ExtraButtons {
-					if button == s.ExtraButtons[i] {
+				for i := range opts.ExtraButtons {
+					if button == opts.ExtraButtons[i] {
 						return res.Options{
 							General: res.ExtraButtonResult(uint(i))}, nil
 					}

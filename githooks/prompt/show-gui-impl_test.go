@@ -15,22 +15,22 @@ func TestCoverage(t *testing.T) {
 	cm.AssertNoErrorPanic(err)
 
 	os.Stdin = nil
-	promptCtx, _ := CreateContext(log, &cm.ExecContext{}, nil, true, false)
+	promptCtx, _ := CreateContext(log, nil, true, false)
 
-	ans, err := promptCtx.ShowPrompt("Enter a string sssssssssss:", "This is the default string", ValidatorAnswerNotEmpty)
+	ans, err := promptCtx.ShowEntry("Enter a string sssssssssss:", "This is the default string", ValidatorAnswerNotEmpty)
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
-	ans, err = promptCtx.ShowPromptOptions("Choose string      ss       ssssssssssssss s s s asd asdfl kjj sdlfök jsaölkdf jölaskdjf lökasjd flökjsa döfl  s:", "(Yes/no)", "Y/n", "Yes", "No")
+	ans, err = promptCtx.ShowOptions("Choose string      ss       ssssssssssssss s s s asd asdfl kjj sdlfök jsaölkdf jölaskdjf lökasjd flökjsa döfl  s:", "(Yes/no)", "Y/n", "Yes", "No")
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
-	ans, err = promptCtx.ShowPromptOptions(
+	ans, err = promptCtx.ShowOptions(
 		"This string sssssssssss s s as sd asd asd asd\nasd asd asd s              asd asd asd asd asd asd?", "(Yes/no/skip/skip all)", "Y/n/s/a", "Yes", "No", "Skip", "Skip All")
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
-	a, e := promptCtx.ShowPromptMulti("Enter strings ('exit' cancels):", "exit", ValidatorAnswerNotEmpty)
+	a, e := promptCtx.ShowEntryMulti("Enter strings ('exit' cancels):", "exit", ValidatorAnswerNotEmpty)
 	log.InfoF("Answer: '%+q'", a)
 	log.AssertNoErrorF(e, "Error occurred.")
 }

@@ -2,7 +2,6 @@ package prompt
 
 import (
 	cm "gabyx/githooks/common"
-	pcm "gabyx/githooks/prompt/common"
 	strs "gabyx/githooks/strings"
 
 	"strings"
@@ -31,7 +30,7 @@ func CreateValidatorAnswerOptions(options []string) AnswerValidator {
 			})
 
 		if !correct {
-			return pcm.NewValidationError("Answer '%s' not in '%q'.", answer, options)
+			return NewValidationError("Answer '%s' not in '%q'.", answer, options)
 		}
 
 		return nil
@@ -41,7 +40,7 @@ func CreateValidatorAnswerOptions(options []string) AnswerValidator {
 // ValidatorAnswerNotEmpty checks that answers are non-empty.
 var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
 	if strs.IsEmpty(strings.TrimSpace(s)) {
-		return pcm.NewValidationError("Answer must not be empty.")
+		return NewValidationError("Answer must not be empty.")
 	}
 
 	return nil
@@ -53,7 +52,7 @@ func CreateValidatorIsDirectory(tildeRepl string) AnswerValidator {
 	return func(s string) error {
 		s = cm.ReplaceTildeWith(s, tildeRepl)
 		if !cm.IsDirectory(s) {
-			return pcm.NewValidationError("Answer must be an existing directory.")
+			return NewValidationError("Answer must be an existing directory.")
 		}
 
 		return nil

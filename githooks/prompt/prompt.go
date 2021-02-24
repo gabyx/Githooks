@@ -13,18 +13,18 @@ type AnswerValidator func(string) error
 
 // IContext defines the interface to show a prompt to the user.
 type IContext interface {
-	ShowPromptOptions(
+	ShowOptions(
 		text string,
 		hintText string,
 		shortOptions string,
 		longOptions ...string) (string, error)
 
-	ShowPrompt(
+	ShowEntry(
 		text string,
 		defaultAnswer string,
 		validator AnswerValidator) (string, error)
 
-	ShowPromptMulti(
+	ShowEntryMulti(
 		text string,
 		exitAnswer string,
 		validator AnswerValidator) ([]string, error)
@@ -54,10 +54,8 @@ type Context struct {
 	maxTries        uint
 	panicIfMaxTries bool
 
-	// Prompt over the tool script
-	// if existing.
-	execCtx cm.IExecContext
-	tool    cm.IExecutable
+	// Optional tool context.
+	tool ToolContext
 }
 
 // Close closes the prompt context.
@@ -71,8 +69,7 @@ func (p *Context) Close() {
 // The GUI dialog gets only used if no terminal is attached on the output.
 func CreateContext(
 	log cm.ILogContext,
-	execCtx cm.IExecContext,
-	tool cm.IExecutable,
+	tool ToolContext,
 	useGUIFallback,
 	useStdIn bool) (IContext, error) {
 
@@ -118,11 +115,26 @@ func CreateContext(
 		maxTries:        maxTries,
 		panicIfMaxTries: true,
 		printAnswer:     printAnswer,
-
-		execCtx: execCtx,
-		tool:    tool}
+		tool:            tool}
 
 	runtime.SetFinalizer(&p, func(p *Context) { p.Close() })
 
 	return &p, err
+}
+
+// Context for the dialog tool script/executable, if one is installed.
+// If `execCtx` and `tool` is nil, the context is not setup and will not be used.
+type ToolContext struct {
+	execCtx cm.IExecContext
+	tool    cm.IExecutable
+}
+
+// IsExecutable tells if the prompt context for the dialog tool is executable.
+func (p *ToolContext) IsSetup() bool {
+	return p.execCtx != nil && p.tool != nil
+}
+
+// Creates a prompt context for the dialog tool script/executable.
+func CreateToolContext(execCtx cm.IExecContext, tool cm.IExecutable) (ToolContext, error) {
+	return ToolContext{execCtx: execCtx, tool: tool}, nil
 }

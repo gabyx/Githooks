@@ -56,7 +56,7 @@ func setupReadme(
 						"brief overview of Githooks?", mainWorktree)
 			}
 
-			answer, err := uiSettings.PromptCtx.ShowPromptOptions(
+			answer, err := uiSettings.PromptCtx.ShowOptions(
 				msg, "(Yes, no, all, skip all)",
 				"Y/n/a/s",
 				"Yes", "No", "All", "Skip All")

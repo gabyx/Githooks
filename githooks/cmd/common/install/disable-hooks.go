@@ -28,7 +28,7 @@ func GetHookDisableCallback(
 			userAnswer = uiSettings.DeleteDetectedLFSHooks
 		} else if !nonInteractive {
 			var err error
-			userAnswer, err = uiSettings.PromptCtx.ShowPromptOptions(
+			userAnswer, err = uiSettings.PromptCtx.ShowOptions(
 				"There is an LFS command statement in hook:\n"+
 					strs.Fmt("'%s'\n", file)+
 					"Githooks will call LFS hooks internally and LFS\n"+
