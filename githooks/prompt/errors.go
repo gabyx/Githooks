@@ -14,4 +14,4 @@ func NewValidationError(format string, args ...interface{}) ValidationError {
 	return ValidationError{cm.ErrorF(format, args...)}
 }
 
-var CancledError = errors.New("Cancled")
+var ErrorCanceled = errors.New("Cancled")

@@ -13,8 +13,9 @@ import (
 func mainRun() (exitCode int) {
 
 	// Without handling the exit code
-	// would match with SIGINT.
-	// At least on Windows, which does not seem to add it to 128.
+	// would match with SIGINT on Windows, which does not have signals
+	// and would call exit(SIGINT), so handle it explicitly.
+	// Also on Unix, if SIGINT is received -> return 1 := cancel too.
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	defer func() {
@@ -23,8 +24,9 @@ func mainRun() (exitCode int) {
 
 	go func() {
 		<-c
-		os.Exit(1) // Return canceled always...
+		os.Exit(1) // Return 1 := canceled always...
 	}()
+	// ===============================================================
 
 	cwd, err := os.Getwd()
 	cm.AssertNoErrorPanic(err, "Could not get current working dir.")

@@ -36,6 +36,7 @@ func showOptions(
 			formatTitleQuestion(p),
 			text,
 			defaultOptionIdx,
+			options,
 			longOptions,
 			validator)
 
@@ -202,7 +203,8 @@ func showEntry(
 	p *Context,
 	text string,
 	defaultAnswer string,
-	validator func(string) error) (string, error) {
+	validator func(string) error,
+	cancelResultsInRetry bool) (string, error) {
 
 	var err error
 	if p.tool.IsSetup() {
@@ -216,7 +218,7 @@ func showEntry(
 	}
 
 	if p.useGUI {
-		ans, e := showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator)
+		ans, e := showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator, cancelResultsInRetry)
 		if e == nil {
 			return ans, nil
 		}
@@ -278,13 +280,13 @@ func showEntryMulti(
 	var ans string
 
 	for {
-		ans, err = showEntry(p, text, "", val)
+		ans, err = showEntry(p, text, "", val, false)
 
 		if err != nil {
 
 			if _, ok := err.(ValidationError); ok {
 				continue
-			} else if errors.Is(err, CancledError) {
+			} else if errors.Is(err, ErrorCanceled) {
 				err = nil
 
 				break

@@ -90,8 +90,8 @@ type Entry struct {
 	GeneralText
 	GeneralButton
 
-	EntryText     string
-	HideEntryText bool
+	DefaultEntry     string
+	HideDefaultEntry bool
 
 	Icon DialogIcon // Only on macOS supported.
 }

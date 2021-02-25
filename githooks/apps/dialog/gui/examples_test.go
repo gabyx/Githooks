@@ -66,7 +66,7 @@ func ExampleShowEntry() {
 	t.CancelLabel = "Cancel it"
 	t.DefaultCancel = true
 	t.Text = "Enter the time:"
-	t.EntryText = "10:30"
+	t.DefaultEntry = "10:30"
 	t.Width = 300
 	t.Height = 500
 	t.Icon = settings.InfoIcon

@@ -75,11 +75,11 @@ func ShowEntry(ctx context.Context, entry *set.Entry) (r res.Entry, err error) {
 		args = append(args, "--default-cancel")
 	}
 
-	if strs.IsNotEmpty(entry.EntryText) {
-		args = append(args, "--entry-text", entry.EntryText)
+	if strs.IsNotEmpty(entry.DefaultEntry) {
+		args = append(args, "--entry-text", entry.DefaultEntry)
 	}
 
-	if entry.HideEntryText {
+	if entry.HideDefaultEntry {
 		args = append(args, "--hide-text")
 	}
 

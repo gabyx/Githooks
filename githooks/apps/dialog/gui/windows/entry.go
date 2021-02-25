@@ -60,7 +60,7 @@ func defineEntryButtons(app *EntryApp, entry *sets.Entry, r *res.Entry) []Widget
 }
 
 // nolint: gomnd
-func defineEntryText(app *EntryApp, opts *sets.Entry, addTextIcon bool) (w []Widget) {
+func defineDefaultEntry(app *EntryApp, opts *sets.Entry, addTextIcon bool) (w []Widget) {
 
 	app.icon = getIcon(opts.WindowIcon)
 
@@ -91,7 +91,7 @@ func defineEntryText(app *EntryApp, opts *sets.Entry, addTextIcon bool) (w []Wid
 }
 
 func defineEntryEdit(app *EntryApp, opts *sets.Entry) Widget {
-	return LineEdit{AssignTo: &app.lineEdit, PasswordMode: opts.HideEntryText}
+	return LineEdit{AssignTo: &app.lineEdit, PasswordMode: opts.HideDefaultEntry}
 }
 
 // Shows an entry dialog.
@@ -136,7 +136,7 @@ func ShowEntry(ctx context.Context, entry *sets.Entry) (r res.Entry, err error) 
 		Children: []Widget{
 			Composite{
 				Layout:   HBox{Spacing: 10, MarginsZero: true},
-				Children: defineEntryText(app, entry, false),
+				Children: defineDefaultEntry(app, entry, false),
 			},
 			defineEntryEdit(app, entry),
 			Composite{

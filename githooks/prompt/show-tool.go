@@ -13,13 +13,14 @@ func runDialogToolOptions(
 	title string,
 	text string,
 	defaultOptionIdx int,
-	options []string) (ans string, err error) {
+	options []string,
+	longOptions []string) (ans string, err error) {
 
 	cm.PanicIfF(!tool.IsSetup(), "Tool context is not setup.")
-	cm.PanicIfF(defaultOptionIdx >= len(options), "Wrong index.")
+	cm.PanicIfF(defaultOptionIdx >= len(longOptions), "Wrong index.")
 
 	var opts []string
-	for _, o := range options {
+	for _, o := range longOptions {
 		opts = append(opts, "--option", o)
 	}
 
@@ -34,21 +35,23 @@ func runDialogToolOptions(
 
 	if e, ok := err.(*exec.ExitError); ok {
 		if e.ExitCode() == 1 {
-			err = CancledError
-
-			return
+			err = ErrorCanceled
 		}
+	}
+
+	if err != nil {
+		return options[defaultOptionIdx], err
 	}
 
 	ans = strings.ToLower(ans)
 
 	// Get the chosen option idx.
 	idx, e := strconv.ParseInt(ans, 10, 32)
-	if e != nil || int(idx) >= len(options) {
+	if e != nil || int(idx) >= len(longOptions) {
 		err = cm.ErrorF("Dialog tool returned wrong index '%v' (< '%v')",
-			ans, len(options))
+			ans, len(longOptions))
 
-		return
+		return options[defaultOptionIdx], err
 	}
 
 	return options[idx], nil
@@ -70,13 +73,17 @@ func runDialogToolEntry(
 
 	ans, err = cm.GetOutputFromExecutableTrimmed(tool.execCtx, tool.tool, nil, args...)
 
+	if err == nil {
+		return
+	}
+
 	if e, ok := err.(*exec.ExitError); ok {
 		if e.ExitCode() == 1 {
-			err = CancledError
+			err = ErrorCanceled
 		}
 	}
 
-	return
+	return defaultAnswer, err
 }
 
 func showOptionsTool(
@@ -85,6 +92,7 @@ func showOptionsTool(
 	text string,
 	defaultOptionIdx int,
 	options []string,
+	longOptions []string,
 	validator AnswerValidator) (string, error) {
 
 	defaultAnswer := ""
@@ -96,9 +104,10 @@ func showOptionsTool(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return runDialogToolOptions(p.tool, title, text, defaultOptionIdx, options)
+			return runDialogToolOptions(p.tool, title, text, defaultOptionIdx, options, longOptions)
 		},
-		validator)
+		validator,
+		true)
 }
 
 func showEntryTool(
@@ -114,5 +123,6 @@ func showEntryTool(
 		func() (string, error) {
 			return runDialogToolEntry(p.tool, title, text, defaultAnswer)
 		},
-		validator)
+		validator,
+		true)
 }

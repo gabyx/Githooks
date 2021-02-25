@@ -1,50 +1,52 @@
 package result
 
+type resultState = int
+
+const (
+	undefinedState resultState = iota
+	oKState
+	canceledState
+	extraButtonState
+)
+
 type General struct {
-	// The user pressed ok.
-	ok bool
-
-	// The user canceled or closed.
-	canceledOrClosed bool
-
-	// The user clicked another button.
-	extraButton    bool
+	state          resultState
 	extraButtonIdx uint
 }
 
 // OkResult creates a accpted res.
 func OkResult() General {
-	return General{ok: true}
+	return General{state: oKState}
 }
 
 // CancelResult creates a canceled res.
 func CancelResult() General {
-	return General{canceledOrClosed: true}
+	return General{state: canceledState}
 }
 
 // ExtraButtonResult creates a res.
 func ExtraButtonResult(i uint) General {
-	return General{extraButton: true, extraButtonIdx: i}
+	return General{state: extraButtonState, extraButtonIdx: i}
 }
 
 // IsUnset tells if result is unset.
 func (g *General) IsUnset() bool {
-	return !g.ok && !g.canceledOrClosed && !g.extraButton
+	return g.state == undefinedState
 }
 
 // IsOk tells if the user clicked ok.
 func (g *General) IsOk() bool {
-	return g.ok && !g.canceledOrClosed
+	return g.state == oKState
 }
 
 // IsCanceled tells if the user canceled or closed the dialog.
 func (g *General) IsCanceled() bool {
-	return !g.ok && g.canceledOrClosed
+	return g.state == canceledState
 }
 
 // IsExtraButton tells if the user pressed an extra button.
 func (g *General) IsExtraButton() (bool, uint) {
-	return g.extraButton, g.extraButtonIdx
+	return g.state == extraButtonState, g.extraButtonIdx
 }
 
 // Message is the result type for message dialogs.

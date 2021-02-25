@@ -82,8 +82,8 @@ func AddFlagsEntry(cmd *cobra.Command, s *set.Entry) {
 	cmd.Flags().Var(&a2, "icon", `Message icon (only macOS).
 One of ['info', 'warning', 'error', 'question']`)
 
-	cmd.Flags().StringVar(&s.EntryText, "default-entry", "", "The default text in the entry field.")
-	cmd.Flags().BoolVar(&s.HideEntryText, "hide-entry", false, "Hide the text in the entry field.")
+	cmd.Flags().StringVar(&s.DefaultEntry, "default-entry", "", "The default text in the entry field.")
+	cmd.Flags().BoolVar(&s.HideDefaultEntry, "hide-entry", false, "Hide the text in the entry field.")
 }
 
 func AddFlagsNotification(cmd *cobra.Command, s *set.Notification) {

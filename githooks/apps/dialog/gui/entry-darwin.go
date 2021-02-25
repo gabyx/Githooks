@@ -52,8 +52,8 @@ func translateEntry(entry *sets.Entry) (d gmac.EntryData, err error) {
 	}
 
 	d = gmac.NewFromEntry(&md)
-	d.Opts.HiddenAnswer = entry.HideEntryText
-	d.Opts.DefaultAnswer = entry.EntryText
+	d.Opts.HiddenAnswer = entry.HideDefaultEntry
+	d.Opts.DefaultAnswer = entry.DefaultEntry
 
 	return
 }

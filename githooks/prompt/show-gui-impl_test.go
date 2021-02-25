@@ -1,9 +1,10 @@
 // +build gui
 
-package prompt
+package prompt_test
 
 import (
 	cm "gabyx/githooks/common"
+	"gabyx/githooks/prompt"
 	"os"
 
 	"testing"
@@ -15,22 +16,25 @@ func TestCoverage(t *testing.T) {
 	cm.AssertNoErrorPanic(err)
 
 	os.Stdin = nil
-	promptCtx, _ := CreateContext(log, nil, true, false)
+	promptCtx, _ := prompt.CreateContext(log, prompt.ToolContext{}, true, false)
 
-	ans, err := promptCtx.ShowEntry("Enter a string sssssssssss:", "This is the default string", ValidatorAnswerNotEmpty)
+	ans, err := promptCtx.ShowEntry("Enter a default string:",
+		"This is the default string", prompt.ValidatorAnswerNotEmpty)
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
-	ans, err = promptCtx.ShowOptions("Choose string      ss       ssssssssssssss s s s asd asdfl kjj sdlfök jsaölkdf jölaskdjf lökasjd flökjsa döfl  s:", "(Yes/no)", "Y/n", "Yes", "No")
+	ans, err = promptCtx.ShowOptions("Do you wanna do it?", "(Yes/no)", "Y/n", "Yes", "No")
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
 	ans, err = promptCtx.ShowOptions(
-		"This string sssssssssss s s as sd asd asd asd\nasd asd asd s              asd asd asd asd asd asd?", "(Yes/no/skip/skip all)", "Y/n/s/a", "Yes", "No", "Skip", "Skip All")
+		"Do you really wanna do it because its gonna get really messy and output will be convoluted?",
+		"(Yes/no/skip/skip all)", "Y/n/s/a", "Yes", "No", "Skip", "Skip All")
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
-	a, e := promptCtx.ShowEntryMulti("Enter strings ('exit' cancels):", "exit", ValidatorAnswerNotEmpty)
+	a, e := promptCtx.ShowEntryMulti("Enter strings ('exit' cancels):", "exit",
+		prompt.ValidatorAnswerNotEmpty)
 	log.InfoF("Answer: '%+q'", a)
 	log.AssertNoErrorF(e, "Error occurred.")
 }
