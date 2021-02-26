@@ -12,7 +12,7 @@ cd githooks
 Run tests:
 
 ```shell
-sh tests/exec-tests-go.sh {001..120}
+sh tests/exec-tests.sh {001..120}
 ```
 
 ## Debugging in Dev Container

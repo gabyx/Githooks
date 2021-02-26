@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs-go -f - .
+cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/windows/servercore:1809
 
 # $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261324
@@ -62,10 +62,10 @@ EOF
 
 docker run --rm \
     -a stdout \
-    -a stderr "githooks:windows-lfs-go" \
-    "C:/Program Files/Git/bin/sh.exe" ./exec-steps-go.sh --skip-docker-check "$@"
+    -a stderr "githooks:windows-lfs" \
+    "C:/Program Files/Git/bin/sh.exe" ./exec-steps.sh --skip-docker-check "$@"
 
 RESULT=$?
 
-docker rmi "githooks:windows-lfs-go"
+docker rmi "githooks:windows-lfs"
 exit $RESULT

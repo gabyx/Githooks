@@ -2,10 +2,10 @@
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
-cat <<EOF | docker build --force-rm -t githooks:alpine-nolfs-go-base -
+cat <<EOF | docker build --force-rm -t githooks:alpine-nolfs-base -
 FROM golang:1.15.8-alpine
 RUN apk add git --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
 EOF
 
-exec sh "$TEST_DIR"/exec-tests-go.sh 'alpine-nolfs-go' "$@"
+exec sh "$TEST_DIR"/exec-tests.sh 'alpine-nolfs' "$@"

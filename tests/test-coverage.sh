@@ -102,7 +102,7 @@ RUN sed -i -E 's@cli" shared location(.*)\)@cli" shared location\1 | grep "^/")@
 # Replace all runnner and  cli/'git hooks' invocations.
 # Foward over 'coverage/forwarder'.
 RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/cli"@g' \\
-    "\$GH_TESTS/exec-steps-go.sh" \\
+    "\$GH_TESTS/exec-steps.sh" \\
     "\$GH_TESTS"/step-*
 RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
     "\$GH_TESTS"/step-*
@@ -129,7 +129,7 @@ docker run --rm \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks/tests \
     "githooks:$IMAGE_TYPE-base" \
-    sh ./exec-testsuite-go.sh ||
+    sh ./exec-testsuite.sh ||
     exit $?
 
 # Run the integration tests
@@ -137,7 +137,7 @@ docker run --rm \
     -a stdout -a stderr \
     -v "$TEST_DIR/cover":/cover \
     "githooks:$IMAGE_TYPE" \
-    ./exec-steps-go.sh "$@" || exit $?
+    ./exec-steps.sh "$@" || exit $?
 
 # Upload the produced coverage
 # inside the current repo

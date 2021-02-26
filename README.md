@@ -731,6 +731,35 @@ The dialog tool has the following dependencies:
 - `Unix` : A dialog tool such as `zenity` (preferred), `qarma` or `matedialog`.
 - `Windows`: Common Controls 6 which is provided by the system directly.
 
+## Tests and Debugging
+
+Running the integration tests with Docker:
+
+```shell
+cd githooks
+sh tests/test-alpine.sh # and other 'test-XXXX.sh' files...
+```
+
+Run certain tests only:
+
+```shell
+sh tests/test-alpine.sh --seq {001..120}
+sh tests/test-alpine.sh --seq 065
+```
+
+## Debugging in the Dev Container
+
+There is a docker development container for debugging purposes in `.devcontainer`. VS Code can be launched in this remote docker container with the extension `ms-vscode-remote.remote-containers`.
+Use ``Remote-Containers: Open Workspace in Container...` and `Remote-Containers: Rebuild Container`.
+
+Once in the development container: You can launch the VS Code tasks:
+
+- `[Dev Container] go-delve-installer`
+- etc...
+
+which will start the `delve` debugger headless as a server in a terminal. You can then attach to the debug server with the debug configuration `Debug Go [remote delve]`. Set breakpoints in the source code to trigger them.
+
+
 ## Acknowledgements
 
 - [Original Githooks implementation in `sh`](http://github.com/rycus86/githooks) by Viktor Adam.

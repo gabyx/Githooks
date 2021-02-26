@@ -78,7 +78,7 @@ EOF
 docker run --rm \
     -a stdout -a stderr \
     "githooks:$IMAGE_TYPE" \
-    ./exec-steps-go.sh "$@"
+    ./exec-steps.sh "$@"
 
 RESULT=$?
 
