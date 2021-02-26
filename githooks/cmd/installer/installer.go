@@ -852,11 +852,15 @@ func installBinaries(
 	log.AssertNoErrorPanicF(err,
 		"Could not set Git config 'alias.hooks' to '%s'.", cli.Cmd)
 
-	// Set runner executable alias.
 	runner := hooks.GetRunnerExecutable(installDir)
 	err = hooks.SetRunnerExecutableAlias(runner)
 	log.AssertNoErrorPanic(err,
 		"Could not set runner executable alias '%s'.", runner)
+
+	dialog := hooks.GetRunnerExecutable(installDir)
+	err = hooks.SetDialogExecutableConfig(dialog)
+	log.AssertNoErrorPanic(err,
+		"Could not set dialog executable to '%s'.", dialog)
 }
 
 func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, promptCtx prompt.IContext) {

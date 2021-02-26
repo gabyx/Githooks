@@ -117,7 +117,8 @@ func downloadBinaries(
 
 	all := []string{
 		path.Join(tempDir, "cli"+ext),
-		path.Join(tempDir, "runner"+ext)}
+		path.Join(tempDir, "runner"+ext),
+		path.Join(tempDir, "dialog"+ext)}
 
 	return updates.Binaries{All: all, Cli: all[0], Others: all[1:]}
 }

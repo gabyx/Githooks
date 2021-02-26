@@ -38,7 +38,8 @@ func downloadBinaries(
 
 	all := []string{
 		path.Join(tempDir, "cli"+ext),
-		path.Join(tempDir, "runner"+ext)}
+		path.Join(tempDir, "runner"+ext),
+		path.Join(tempDir, "dialog"+ext)}
 
 	for _, exe := range all {
 		src := path.Join(bin, path.Base(exe))
