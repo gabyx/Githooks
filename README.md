@@ -705,7 +705,7 @@ The following platforms are tested:
 ## Dialog Tool
 
 Githooks provides it's own **platform-independent dialog tool `dialog`** which is located in `<installDir>/bin`.
-It enables the use of GUI dialogs such as:
+It enables the use of **native** GUI dialogs such as:
 
 - options dialog
 - entry dialog

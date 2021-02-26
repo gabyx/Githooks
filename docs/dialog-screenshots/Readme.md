@@ -24,4 +24,6 @@
 
 ![Save file dialog.](linux/file-save.png)
 
+![Noifications dialog.](linux/notification.png)
+
 And more configuration options. See the documentation.
