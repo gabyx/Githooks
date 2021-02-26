@@ -21,6 +21,12 @@ func addSubCommands(cmd *cobra.Command, ctx *dcm.CmdContext) {
 	cmd.AddCommand(entry.NewCmd(ctx))
 	cmd.AddCommand(notify.NewCmd(ctx))
 	cmd.AddCommand(file.NewCmd(ctx)...)
+
+	cmd.PersistentFlags().BoolVar(&ctx.ReportAsJSON, "json", false,
+		`Report the result as a JSON object on stdout.
+Exit code:
+	- '0' for success, and
+	- '> 0' if creating the dialog failed.`)
 }
 
 // MakeDialogCtl returns the root command of the Githooks dialog executable.

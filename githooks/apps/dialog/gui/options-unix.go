@@ -119,8 +119,8 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 	out, err := gunix.RunZenity(ctx, args, "")
 	if err == nil {
 		return res.Options{
-			General:   res.OkResult(),
-			Selection: getChoices(string(out))}, nil
+			General: res.OkResult(),
+			Options: getChoices(string(out))}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {

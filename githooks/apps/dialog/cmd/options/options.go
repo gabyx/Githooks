@@ -14,7 +14,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func handleResult(ctx *dcm.CmdContext, res *res.Options, err error, sep string) error {
+func handleResult(ctx *dcm.CmdContext, r *res.Options, err error, sep string) error {
+
+	if ctx.ReportAsJSON {
+		return dcm.HandleJSONResult(ctx, res.NewJSONResult(r), &r.General, err)
+	}
 
 	last := ""
 	if strs.IsEmpty(sep) {
@@ -26,12 +30,12 @@ func handleResult(ctx *dcm.CmdContext, res *res.Options, err error, sep string) 
 
 	printRes := func() error {
 		return cm.CombineErrors(
-			dcm.OutputIndexArray(res.Selection, sep),
+			dcm.OutputIndexArray(r.Options, sep),
 			dcm.OutputString(last))
 	}
 
-	return dcm.HandleGeneralResult(ctx, &res.General, err,
-		printRes, nil, nil)
+	return dcm.HandleGeneralResult(ctx, &r.General, err,
+		printRes, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {

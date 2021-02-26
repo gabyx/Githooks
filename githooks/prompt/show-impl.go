@@ -204,42 +204,47 @@ func showEntry(
 	text string,
 	defaultAnswer string,
 	validator func(string) error,
-	cancelResultsInRetry bool) (string, error) {
+	canCancel bool) (ans string, err error) {
 
-	var err error
 	if p.tool.IsSetup() {
-		ans, e := showEntryTool(p, formatTitle(p), text, defaultAnswer, validator)
-		if e == nil {
-			return ans, nil
+		ans, err = showEntryTool(p, formatTitle(p), text, defaultAnswer, validator, canCancel)
+		if err == nil {
+			return
 		}
 
-		err = cm.CombineErrors(e, cm.ErrorF("Dialog tool '%q' failed", p.tool.tool.GetCommand()))
+		if canCancel && errors.Is(err, ErrorCanceled) {
+			return defaultAnswer, err
+		}
+
+		p.log.AssertNoErrorF(err, "Dialog tool '%q' failed", p.tool.tool.GetCommand())
 		// else: Runnning fallback ...
 	}
 
 	if p.useGUI {
-		ans, e := showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator, cancelResultsInRetry)
-		if e == nil {
-			return ans, nil
+		ans, err = showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator, canCancel)
+		if err == nil {
+			return
 		}
 
-		err = cm.CombineErrors(err, e)
+		if canCancel && errors.Is(err, ErrorCanceled) {
+			return defaultAnswer, err
+		}
 
 	} else {
+
 		if strs.IsNotEmpty(defaultAnswer) {
 			text = p.promptFmt("%s [%s]: ", text, defaultAnswer)
 		} else {
 			text = p.promptFmt("%s : ", text)
 		}
 
-		ans, isPromptDisplayed, e :=
+		var isPromptDisplayed bool
+		ans, isPromptDisplayed, err =
 			showEntryTerminal(p, text, defaultAnswer, validator)
 
-		if e == nil {
-			return ans, nil
+		if err == nil {
+			return
 		}
-
-		err = cm.CombineErrors(err, e)
 
 		if !isPromptDisplayed {
 			// Show the prompt in the log output
@@ -265,22 +270,33 @@ func showEntryMulti(
 	validator AnswerValidator) (answers []string, err error) {
 
 	// Wrap the validator into another one which
-	// reacts on `exitAnswer`.
+	// reacts on `exitAnswer` for non-GUI prompts.
+	var val AnswerValidator = validator
 	exitReceived := false
-	var val AnswerValidator = func(s string) error {
-		if s == exitAnswer {
-			exitReceived = true
 
-			return nil
+	if !p.useGUI {
+
+		if strs.IsEmpty(exitAnswer) {
+			text += " [empty cancels]"
+		} else {
+			text += strs.Fmt(" ['%s' cancels]", exitAnswer)
 		}
 
-		return validator(s)
+		val = func(s string) error {
+			if s == exitAnswer {
+				exitReceived = true
+
+				return nil
+			}
+
+			return validator(s)
+		}
 	}
 
 	var ans string
 
 	for {
-		ans, err = showEntry(p, text, "", val, false)
+		ans, err = showEntry(p, text, "", val, true)
 
 		if err != nil {
 

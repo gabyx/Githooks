@@ -1,70 +1,70 @@
 package result
 
-type resultState = int
+type actionState = int
 
 const (
-	undefinedState resultState = iota
-	oKState
-	canceledState
-	extraButtonState
+	undefinedAction actionState = iota
+	oKAction
+	canceledAction
+	extraButtonAction
 )
 
 type General struct {
-	state          resultState
-	extraButtonIdx uint
+	Action         actionState
+	ExtraButtonIdx uint `yaml:"extraButtonIdx"`
 }
 
 // OkResult creates a accpted res.
 func OkResult() General {
-	return General{state: oKState}
+	return General{Action: oKAction}
 }
 
 // CancelResult creates a canceled res.
 func CancelResult() General {
-	return General{state: canceledState}
+	return General{Action: canceledAction}
 }
 
 // ExtraButtonResult creates a res.
 func ExtraButtonResult(i uint) General {
-	return General{state: extraButtonState, extraButtonIdx: i}
+	return General{Action: extraButtonAction, ExtraButtonIdx: i}
 }
 
 // IsUnset tells if result is unset.
 func (g *General) IsUnset() bool {
-	return g.state == undefinedState
+	return g.Action == undefinedAction
 }
 
 // IsOk tells if the user clicked ok.
 func (g *General) IsOk() bool {
-	return g.state == oKState
+	return g.Action == oKAction
 }
 
 // IsCanceled tells if the user canceled or closed the dialog.
 func (g *General) IsCanceled() bool {
-	return g.state == canceledState
+	return g.Action == canceledAction
 }
 
 // IsExtraButton tells if the user pressed an extra button.
 func (g *General) IsExtraButton() (bool, uint) {
-	return g.state == extraButtonState, g.extraButtonIdx
+	return g.Action == extraButtonAction, g.ExtraButtonIdx
 }
 
 // Message is the result type for message dialogs.
 type Message struct {
-	General
+	General `yaml:",inline"`
 }
 
 // Options is the result type for options dialogs.
 type Options struct {
-	General
+	General `yaml:",inline"`
 
-	// The chosen selection indices. Only valid in `IsOk()`.
-	Selection []uint
+	// The chosen options indices. Only valid in `IsOk()`.
+	Options []uint
 }
 
 // Entry is the result type for options dialogs.
 type Entry struct {
-	General
+	General `yaml:",inline"`
 
 	// The entered text.
 	Text string
@@ -72,7 +72,7 @@ type Entry struct {
 
 // File is the result type for file dialogs.
 type File struct {
-	General
+	General `yaml:",inline"`
 
 	// The selected paths.
 	Paths []string

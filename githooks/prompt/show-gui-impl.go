@@ -60,7 +60,7 @@ func showOptionsDialog(
 	case err != nil || res.IsCanceled():
 		return options[defaultOptionIdx], err
 	case res.IsOk():
-		return options[res.Selection[0]], err
+		return options[res.Options[0]], err
 	}
 
 	cm.Panic("Wrong dialog result state")
@@ -73,7 +73,7 @@ func showPromptLoop(
 	defaultAnswer string,
 	runPrompt func() (string, error),
 	validator AnswerValidator,
-	cancelResultsInRetry bool) (string, error) {
+	canCancel bool) (string, error) {
 
 	var err error
 	var ans string
@@ -87,14 +87,17 @@ func showPromptLoop(
 		nPrompts++
 
 		if errors.Is(err, ErrorCanceled) {
-			if cancelResultsInRetry {
+			if !canCancel {
 				p.log.WarnF("User canceled. Remaining tries %v.", maxPrompts-nPrompts)
 
 				continue
 			} else {
-				break
+				return defaultAnswer, err
 			}
+
 		} else if err != nil {
+			p.log.WarnF("Prompt failed: %s", err.Error())
+
 			break // Any other error is fatal.
 		}
 
@@ -152,7 +155,7 @@ func showOptionsGUI(
 			return showOptionsDialog(title, question, defaultOptionIdx, options, longOptions)
 		},
 		validator,
-		true)
+		false)
 }
 
 func showEntryGUI(
@@ -161,7 +164,7 @@ func showEntryGUI(
 	text string,
 	defaultAnswer string,
 	validator AnswerValidator,
-	cancelResultsInRetry bool) (string, error) {
+	canCancel bool) (string, error) {
 
 	return showPromptLoop(
 		p,
@@ -170,5 +173,5 @@ func showEntryGUI(
 			return showPromptDialog(title, text, defaultAnswer)
 		},
 		validator,
-		cancelResultsInRetry)
+		canCancel)
 }

@@ -46,7 +46,7 @@ func (p *Context) ShowEntry(
 	text string,
 	defaultAnswer string,
 	validator AnswerValidator) (answer string, err error) {
-	return showEntry(p, text, defaultAnswer, validator)
+	return showEntry(p, text, defaultAnswer, validator, false)
 }
 
 // ShowEntryMulti shows multiple prompts to enter multiple answers and

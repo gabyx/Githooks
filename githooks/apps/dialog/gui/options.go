@@ -42,16 +42,16 @@ func showOptionsWithButtons(ctx context.Context, opts *sets.Options) (r res.Opti
 	if err == nil {
 		if mRes.IsOk() {
 			return res.Options{
-				General:   res.OkResult(),
-				Selection: []uint{okOptionIdx}}, nil
+				General: res.OkResult(),
+				Options: []uint{okOptionIdx}}, nil
 
 		} else if ok, idx := mRes.IsExtraButton(); ok {
 
 			nSkip := uint(len(opts.Options) - 1)
 			if idx < nSkip {
 				return res.Options{
-					General:   res.OkResult(),
-					Selection: []uint{extraOptionIdx[idx]}}, nil
+					General: res.OkResult(),
+					Options: []uint{extraOptionIdx[idx]}}, nil
 			}
 
 			return res.Options{General: res.ExtraButtonResult(idx - nSkip)}, nil

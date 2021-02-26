@@ -12,8 +12,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func handleResult(ctx *dcm.CmdContext, res *res.Message, err error) error {
-	return dcm.HandleGeneralResult(ctx, &res.General, err, nil, nil, nil)
+func handleResult(ctx *dcm.CmdContext, r *res.Message, err error) error {
+	if ctx.ReportAsJSON {
+		return dcm.HandleJSONResult(ctx, res.NewJSONResult(r), &r.General, err)
+	}
+
+	return dcm.HandleGeneralResult(
+		ctx, &r.General, err,
+		nil, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {

@@ -1,4 +1,4 @@
-// +build gui
+// +build dontbuild
 
 package prompt_test
 
@@ -16,7 +16,7 @@ func TestCoverage(t *testing.T) {
 	cm.AssertNoErrorPanic(err)
 
 	os.Stdin = nil
-	promptCtx, _ := prompt.CreateContext(log, prompt.ToolContext{}, true, false)
+	promptCtx, _ := prompt.CreateContext(log, prompt.ToolContext{}, false, false)
 
 	ans, err := promptCtx.ShowEntry("Enter a default string:",
 		"This is the default string", prompt.ValidatorAnswerNotEmpty)
@@ -33,7 +33,7 @@ func TestCoverage(t *testing.T) {
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 
-	a, e := promptCtx.ShowEntryMulti("Enter strings ('exit' cancels):", "exit",
+	a, e := promptCtx.ShowEntryMulti("Enter strings", "exit",
 		prompt.ValidatorAnswerNotEmpty)
 	log.InfoF("Answer: '%+q'", a)
 	log.AssertNoErrorF(e, "Error occurred.")

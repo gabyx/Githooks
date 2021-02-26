@@ -2,9 +2,12 @@ package common
 
 import (
 	res "gabyx/githooks/apps/dialog/result"
+	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 	"os"
 	"strings"
+
+	"github.com/goccy/go-yaml"
 )
 
 func indicesToList(l []uint) (s []string) {
@@ -36,6 +39,16 @@ func OutputIndexArray(l []uint, sep string) error {
 	return OutputArray(indicesToList(l), sep)
 }
 
+// DefaultExtraButtonCallback is the default extra button callback.
+func DefaultExtraButtonCallback(g *res.General) func() error {
+	return func() error {
+		os.Stdout.WriteString(strs.Fmt("%d%s", g.ExtraButtonIdx, LineBreak))
+
+		return nil
+	}
+}
+
+// HandleGeneralResult handles output of general result on stdout.
 func HandleGeneralResult(ctx *CmdContext,
 	g *res.General,
 	err error,
@@ -71,14 +84,57 @@ func HandleGeneralResult(ctx *CmdContext,
 				return e // callback error...
 			}
 		}
-	} else if clicked, idx := g.IsExtraButton(); clicked {
-		os.Stdout.WriteString(strs.Fmt("%d%s", idx, LineBreak))
+	} else if clicked, _ := g.IsExtraButton(); clicked {
+		ctx.ExitCode = 2
 		if extraCallback != nil {
 			if e := extraCallback(); e != nil {
 				return e // callback error...
 			}
 		}
-		ctx.ExitCode = 2
+	}
+
+	return nil
+}
+
+// HandleGeneralJSONResult handles the output of the general result.
+func HandleGeneralJSONResult(ctx *CmdContext, err error) error {
+
+	// Handle expected errors first.
+	if os.IsTimeout(err) {
+		return nil
+	} else if err != nil {
+		// All other errors are not handled.
+		return err
+	}
+
+	return nil
+}
+
+// HandleJSONResult handles the output of the result in form of JSON.
+func HandleJSONResult(ctx *CmdContext, r res.JSONResult, g *res.General, err error) error {
+
+	// Handle expected errors first.
+	if os.IsTimeout(err) {
+		r.Timeout = true
+		err = nil
+	}
+
+	bytes, e := yaml.Marshal(&r)
+	if e != nil {
+		return cm.CombineErrors(e, cm.ErrorF("Could not YAML marshal result."))
+	}
+
+	bytes, e = yaml.YAMLToJSON(bytes)
+
+	if e != nil {
+		return cm.CombineErrors(e, cm.ErrorF("Could not convert to JSON."))
+	}
+
+	os.Stdout.Write(bytes)
+
+	if err != nil {
+		// All other errors are not handled.
+		return err
 	}
 
 	return nil

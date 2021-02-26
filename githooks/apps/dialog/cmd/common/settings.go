@@ -9,6 +9,9 @@ type CmdContext struct {
 	// Exit code of the dialog app.
 	ExitCode ExitCode
 
+	// Report as JSON
+	ReportAsJSON bool
+
 	// Log context.
 	Log cm.ILogContext
 }

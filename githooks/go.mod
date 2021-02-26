@@ -7,11 +7,12 @@ require (
 	github.com/agext/regexp v1.3.0
 	github.com/bmatcuk/doublestar/v3 v3.0.0
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
-	github.com/goccy/go-yaml v1.8.2
+	github.com/goccy/go-yaml v1.8.8
 	github.com/google/go-github/v33 v33.0.0
 	github.com/google/uuid v1.1.2
 	github.com/gookit/color v1.3.1
 	github.com/gopherjs/gopherjs v0.0.0-20210202160940-bed99a852dfe // indirect
+	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
 	github.com/loov/hrtime v1.0.2

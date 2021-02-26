@@ -107,7 +107,7 @@ func showOptionsTool(
 			return runDialogToolOptions(p.tool, title, text, defaultOptionIdx, options, longOptions)
 		},
 		validator,
-		true)
+		false)
 }
 
 func showEntryTool(
@@ -115,7 +115,8 @@ func showEntryTool(
 	title string,
 	text string,
 	defaultAnswer string,
-	validator AnswerValidator) (string, error) {
+	validator AnswerValidator,
+	canCancel bool) (string, error) {
 
 	return showPromptLoop(
 		p,
@@ -124,5 +125,5 @@ func showEntryTool(
 			return runDialogToolEntry(p.tool, title, text, defaultAnswer)
 		},
 		validator,
-		true)
+		canCancel)
 }
