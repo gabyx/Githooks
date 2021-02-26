@@ -10,6 +10,7 @@ import (
 )
 
 func handleResult(ctx *dcm.CmdContext, err error) error {
+
 	if err == nil {
 		ctx.ExitCode = 0
 	}
