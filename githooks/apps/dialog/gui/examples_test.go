@@ -21,10 +21,17 @@ func ExampleShowMessage() {
 	t.Style = settings.ErrorStyle
 
 	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+
+	t.Icon = settings.WarningIcon
+	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+
+	t.Icon = settings.InfoIcon
+	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+
 	// Output:
 }
 
-func ExampleShowWarning() {
+func ExampleShowMessageExtra() {
 	t := settings.Message{}
 	t.Title = "SpamMails Alert"
 	t.OkLabel = "Okey"
@@ -65,6 +72,7 @@ func ExampleShowEntry() {
 	t.OkLabel = "Accept it"
 	t.CancelLabel = "Cancel it"
 	t.DefaultCancel = true
+	t.ExtraButtons = []string{"Midnight"}
 	t.Text = "Enter the time:"
 	t.DefaultEntry = "10:30"
 	t.Width = 300
@@ -78,11 +86,11 @@ func ExampleShowEntry() {
 
 func ExampleShowOptions() {
 	t := settings.Options{}
-	t.Title = "Choices"
+	t.Title = "What pizza do you want to order?"
 	t.OkLabel = "Okey"
 	t.CancelLabel = "Cancel it"
-	t.Text = "Choose some options from below"
-	t.Options = []string{"Option 1", "Option 2", "Option 3"}
+	t.Text = "Choose a pizza from below:"
+	t.Options = []string{"Margherita", "Curry & Banana", "Hawai-Style"}
 	t.MultipleSelection = true
 	t.Width = 300
 	t.Height = 500
@@ -94,11 +102,11 @@ func ExampleShowOptions() {
 
 func ExampleShowOptionsButtons() {
 	t := settings.Options{}
-	t.Title = "Choices"
+	t.Title = "What pizza do you want to order?"
 	t.OkLabel = "Okey"
 	t.CancelLabel = "Cancel it"
-	t.Text = "Choose some options from below"
-	t.Options = []string{"Option 1", "Option 2", "Option 3"}
+	t.Text = "Choose a pizza from below:"
+	t.Options = []string{"Margherita", "Curry & Banana", "Hawai-Style"}
 	t.MultipleSelection = false
 	t.Width = 300
 	t.Height = 500
@@ -111,13 +119,13 @@ func ExampleShowOptionsButtons() {
 
 func ExampleShowFileSave() {
 	t := &settings.FileSave{}
-	t.Title = "Choices"
+	t.Title = "Save the pizza to your desktop:"
 	t.Width = 300
 	t.Height = 500
 	t.ConfirmOverwrite = true
 	t.ConfirmCreate = true
 	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
-	t.Filename = "MySuperFile/Name.dat"
+	t.Filename = "MySuperFile/Pizza.dat"
 	t.Root = "../.."
 	t.OnlyDirectories = true
 	t.WindowIcon = settings.QuestionIcon
@@ -129,7 +137,7 @@ func ExampleShowFileSave() {
 
 func ExampleShowFileSelection() {
 	t := settings.FileSelection{}
-	t.Title = "Choices"
+	t.Title = "Select your pizzas:"
 	t.Width = 300
 	t.Height = 500
 	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
@@ -146,7 +154,7 @@ func ExampleShowFileSelection() {
 
 func ExampleShowDirectorySelection() {
 	t := settings.FileSelection{}
-	t.Title = "Choices"
+	t.Title = "Choose your pizza folders:"
 	t.Width = 300
 	t.Height = 500
 	t.Root = "../.."
@@ -162,8 +170,8 @@ func ExampleShowDirectorySelection() {
 
 func ExampleShowNotification() {
 	t := settings.Notification{}
-	t.Title = "Wupsi: Lots of spam mail detected."
-	t.Text = "Remove your spam mails as soon as possible.\nWuaaaaaaaa...."
+	t.Title = "Hura: Your pizza has arrived."
+	t.Text = "Remove the card box and enjoy your stupid Hawai-Style Pizza.\nWuaaaaaaaa...."
 	t.Width = 300
 	t.Height = 500
 	t.WindowIcon = settings.WarningIcon
