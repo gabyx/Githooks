@@ -713,7 +713,7 @@ It enables the use of GUI dialogs such as:
 - message dialogs
 - system notifications
 
-inside of hooks and scripts.
+inside of hooks and scripts. **[See the screenshots.](docs/dialog-screenshots/Readme.md)**
 
 *Why another tool?:* At the moment of writting there exists no proper platform-independent GUI dialog tool which
 is **bomb-proof in it's output and exit code behavior**.
