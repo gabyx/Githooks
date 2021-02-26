@@ -53,8 +53,8 @@ func defineListButtons(app *OptionsApp, opts *sets.Options, r *res.Options) []Wi
 
 	okCallback := func() {
 		*r = res.Options{
-			General:   res.OkResult(),
-			Selection: app.getCurrentSelectedIndices()}
+			General: res.OkResult(),
+			Options: app.getCurrentSelectedIndices()}
 		app.Accept()
 	}
 
