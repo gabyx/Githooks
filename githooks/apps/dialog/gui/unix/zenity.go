@@ -1,4 +1,4 @@
-// +build linux
+// +build !windwos,!darwin
 
 package gui
 
