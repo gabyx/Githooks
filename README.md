@@ -71,6 +71,7 @@ Also it searches for hooks in configured shared hook repositories.
 - [Migration](#migration)
     - [Supported Platforms](#supported-platforms)
 - [Dialog Tool](#dialog-tool)
+    - [Build From Source](#build-from-source)
     - [Dependencies](#dependencies)
 - [Tests and Debugging](#tests-and-debugging)
 - [Debugging in the Dev Container](#debugging-in-the-dev-container)
@@ -771,6 +772,16 @@ You can use this dialog tool independent of Githooks.
 
 **Test it out!** 🎉: Please refer to the [documentation of the tool](docs/dialog/dialog.md).
 
+### Build From Source
+
+```shell
+cd githooks
+go mod download
+go mod vendor
+cd githooks/apps/dialog
+go build ./...
+./dialog --help
+```
 ### Dependencies
 
 The dialog tool has the following dependencies:
