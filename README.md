@@ -30,7 +30,55 @@ Also it searches for hooks in configured shared hook repositories.
 - Ignoring non-shared and shared hooks with patterns.
 - Automatic Githooks updates:
   Fully configurable for your own company by url/branch and deploy settings.
-- Bonus: [Platform-independent dialog tool](#dialog-tool) for user prompts inside your own hooks.
+- **Bonus:** [Platform-independent dialog tool](#dialog-tool) for user prompts inside your own hooks.
+
+<!-- TOC ignore:true -->
+## Table of Contents
+<!-- TOC -->
+
+- [Layout and Options](#layout-and-options)
+- [Execution](#execution)
+    - [Hook Run Configuration](#hook-run-configuration)
+    - [Parallel Execution](#parallel-execution)
+- [Supported Hooks](#supported-hooks)
+- [Git Large File Storage Git LFS Support](#git-large-file-storage-git-lfs-support)
+- [Shared hook repositories](#shared-hook-repositories)
+    - [Global Configuration](#global-configuration)
+    - [Local Configuration](#local-configuration)
+    - [Repository Configuration](#repository-configuration)
+    - [Supported URLS](#supported-urls)
+- [Layout of Shared Hook Repositories](#layout-of-shared-hook-repositories)
+    - [Shared Repository Namespace](#shared-repository-namespace)
+- [Ignoring Hooks and Files](#ignoring-hooks-and-files)
+- [Trusting Hooks](#trusting-hooks)
+- [Disabling Githooks](#disabling-githooks)
+    - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
+- [Installation](#installation)
+    - [Normal Installation](#normal-installation)
+    - [Non-Interactive Installation](#non-interactive-installation)
+    - [Install Mode: Centralized Hooks](#install-mode-centralized-hooks)
+    - [Install from different URL and Branch](#install-from-different-url-and-branch)
+    - [No Installation](#no-installation)
+    - [Install on the Server](#install-on-the-server)
+    - [Setup for Bare Repositories](#setup-for-bare-repositories)
+    - [Templates or Global Hooks](#templates-or-global-hooks)
+        - [Template Folder init.templateDir](#template-folder-inittemplatedir)
+        - [Global Hooks Location core.hooksPath](#global-hooks-location-corehookspath)
+    - [Updates](#updates)
+    - [Custom User Prompt](#custom-user-prompt)
+- [Uninstalling](#uninstalling)
+- [YAML Specifications](#yaml-specifications)
+- [Migration](#migration)
+    - [Supported Platforms](#supported-platforms)
+- [Dialog Tool](#dialog-tool)
+    - [Dependencies](#dependencies)
+- [Tests and Debugging](#tests-and-debugging)
+- [Debugging in the Dev Container](#debugging-in-the-dev-container)
+- [Acknowledgements](#acknowledgements)
+- [Authors](#authors)
+- [License](#license)
+
+<!-- /TOC -->
 
 ## Layout and Options
 
