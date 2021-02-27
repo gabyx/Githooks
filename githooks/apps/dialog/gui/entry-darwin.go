@@ -20,9 +20,9 @@ func NewMessageFromEntry(e *sets.Entry) sets.Message {
 	return sets.Message{
 		General:       e.General,
 		GeneralText:   e.GeneralText,
-		DefaultButton: e.DefaultButton,
-		Icon:          e.Icon,
+		GeneralButton: e.GeneralButton,
 		Style:         sets.InfoStyle,
+		Icon:          e.Icon,
 	}
 }
 

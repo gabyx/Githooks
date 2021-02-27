@@ -38,7 +38,7 @@ func translateOptions(opts *sets.Options) (d gmac.OptionsData, err error) {
 	d.Opts.EmptySelectionAllowed = true
 
 	for _, idx := range opts.DefaultOptions {
-		if idx >= len(d.Items) {
+		if idx >= uint(len(d.Items)) {
 			continue
 		}
 		d.Opts.DefaultItems = append(d.Opts.DefaultItems, d.Items[idx])
@@ -79,8 +79,8 @@ func getChoices(output string, maxOptions int) (indices []uint) {
 	return
 }
 
-func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
-	if len(opts.Options) == 0 {
+func ShowOptions(ctx context.Context, s *set.Options) (r res.Options, err error) {
+	if len(s.Options) == 0 {
 		err = cm.ErrorF("You need at list one option specified.")
 
 		return
@@ -88,15 +88,15 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 
 	data, err := translateOptions(s)
 	if err != nil {
-		return res.Options{}, err
+		return
 	}
 
 	out, err := gmac.RunOSAScript(ctx, "options", data, "")
 
 	if err == nil {
 		return res.Options{
-			General:   res.OkResult(),
-			Selection: getChoices(string(out), len(s.Options))}, nil
+			General: res.OkResult(),
+			Options: getChoices(string(out), len(s.Options))}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
@@ -105,5 +105,5 @@ func ShowOptions(ctx context.Context, s *set.Options) (res.Options, error) {
 		}
 	}
 
-	return res.Options{}, err
+	return
 }

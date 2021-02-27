@@ -42,6 +42,12 @@ builds:
     env: *ENV
     goos: *GOOS
     goarch: *GOARCH
+  - id: dialog
+    binary: dialog
+    main: ./apps/dialog
+    env: *ENV
+    goos: *GOOS
+    goarch: *GOARCH
 archives:
   - id: githooks
     builds:
