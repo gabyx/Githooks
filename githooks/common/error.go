@@ -5,6 +5,8 @@ import (
 	"fmt"
 	strs "gabyx/githooks/strings"
 	"strings"
+
+	"github.com/hashicorp/go-multierror"
 )
 
 // GithooksFailure is a normal hook failure.
@@ -26,26 +28,37 @@ func ErrorF(format string, args ...interface{}) error {
 	return fmt.Errorf(format, args...)
 }
 
-// CombineErrors combines multiple errors into one.
-func CombineErrors(errs ...error) error {
-	var s string
-	anyNotNil := false
+func formatErrors(errors []error) string {
+	var b strings.Builder
 
-	for _, e := range errs {
-		if e != nil {
-			anyNotNil = true
-			if strs.IsNotEmpty(s) {
-				s += ",\n"
-			}
-			s += e.Error()
+	l := len(errors)
+	for i := range errors {
+		b.WriteString(strs.Fmt("✗  %s", strings.ReplaceAll(errors[i].Error(), "\n", "\n  ")))
+		if i+1 < l {
+			b.WriteRune('\n')
 		}
 	}
 
-	if anyNotNil {
-		return errors.New(s)
+	return b.String()
+}
+
+// FormatError formats an error.
+func FormatError(err error) string {
+	if e, ok := err.(*multierror.Error); ok {
+		e.ErrorFormat = formatErrors
+
+		return e.Error()
 	}
 
-	return nil
+	return err.Error()
+}
+
+// CombineErrors combines multiple errors into one.
+func CombineErrors(err error, errs ...error) error {
+	e := multierror.Append(err, errs...)
+	e.ErrorFormat = formatErrors
+
+	return e.ErrorOrNil()
 }
 
 // Panic panics with an `error`.
@@ -90,13 +103,13 @@ func PanicIfF(condition bool, format string, args ...interface{}) {
 func AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
 		PanicIf(true,
-			append(lines, " -> error: ["+err.Error()+"]")...)
+			append(lines, " -> error: [\n"+FormatError(err)+"\n]")...)
 	}
 }
 
 // AssertNoErrorPanicF Assert no error, otherwise panic.
 func AssertNoErrorPanicF(err error, format string, args ...interface{}) {
 	if err != nil {
-		PanicIfF(true, format+" -> error: ["+err.Error()+"]", args...)
+		PanicIfF(true, format+" -> error:[\n"+FormatError(err)+"\n]", args...)
 	}
 }

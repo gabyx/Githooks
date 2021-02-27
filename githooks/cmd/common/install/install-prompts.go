@@ -64,7 +64,7 @@ func PromptExistingRepos(
 			questionPrompt = []string{"(yes, No)", "y/N"}
 		}
 
-		answer, err := promptCtx.ShowPromptOptions(
+		answer, err := promptCtx.ShowOptions(
 			existingPrompt[idx],
 			questionPrompt[0],
 			questionPrompt[1],
@@ -75,7 +75,7 @@ func PromptExistingRepos(
 			return
 		}
 
-		searchDir, err = promptCtx.ShowPrompt(
+		searchDir, err = promptCtx.ShowEntry(
 			"Where do you want to start the search?",
 			searchDir,
 			prompt.CreateValidatorIsDirectory(homeDir))
@@ -141,7 +141,7 @@ func PromptRegisteredRepos(
 
 	if !nonInteractive && len(dirs) != 0 {
 
-		answer, err := promptCtx.ShowPromptOptions(
+		answer, err := promptCtx.ShowOptions(
 			"The following remaining registered repositories\n"+
 				"contain Githooks installation:\n"+
 				strings.Join(

@@ -30,6 +30,7 @@ Also it searches for hooks in configured shared hook repositories.
 - Ignoring non-shared and shared hooks with patterns.
 - Automatic Githooks updates:
   Fully configurable for your own company by url/branch and deploy settings.
+- Bonus: [Platform-independent dialog tool](#dialog-tool) for user prompts inside your own hooks.
 
 ## Layout and Options
 
@@ -456,6 +457,7 @@ $ cli installer --template-dir "/home/public/.githooks-templates"
 By default the script will install the hooks into the `~/.githooks/templates/` directory.
 
 ### Install Mode: Centralized Hooks
+
 Lastly, you have the option to install the templates to, and use them from a centralized location.
 You can read more about the difference between this option and default one [below](#templates-or-central-hooks). For this, run the command below.
 
@@ -471,6 +473,7 @@ $ cli installer --use-core-hookspath --template-dir /home/public/.githooks
 ```
 
 ### Install from different URL and Branch
+
 If you want to install from another Git repository (e.g. from your own or your companies fork),
 you can specify the repository clone url as well as the branch name (default: `main`) when installing with:
 
@@ -619,15 +622,18 @@ You can also check for updates at any time by executing
 
 ### Custom User Prompt
 
+Githooks comes already with a [**platform-independend dialog tool**](#dialog-tool) which it uses also internally and you probably don't need this:
+
 If you want to use a GUI dialog when Githooks asks for user input, you can use an executable or script file to display it.
-The example in the `examples/tools/dialog` folder contains a Python script `run` which uses the Python provided `tkinter` to show a dialog.
+
+The example in the `examples/tools/dialog` folder contains a Python script `run` which uses the Python (> version 3.9) provided `tkinter` to show a dialog.
 
 ```shell
 # install the example dialog tool from this repository
 $ git hooks tools register dialog "./examples/tools/dialog"
 ```
 
-This will copy the tool to the Githooks install folderTO execute when displaying user prompts.
+This will copy the tool to the Githooks install folder to execute when displaying user prompts.
 The tool's interface is as follows.
 
 ```shell
@@ -695,6 +701,64 @@ The following platforms are tested:
 - Linux
 - macOs
 - Windows
+
+## Dialog Tool
+
+Githooks provides it's own **platform-independent dialog tool `dialog`** which is located in `<installDir>/bin`.
+It enables the use of **native** GUI dialogs such as:
+
+- options dialog
+- entry dialog
+- file save and file selection dialogs
+- message dialogs
+- system notifications
+
+inside of hooks and scripts. **[See the screenshots.](docs/dialog-screenshots/Readme.md)**
+
+*Why another tool?:* At the moment of writting there exists no proper platform-independent GUI dialog tool which
+is **bomb-proof in it's output and exit code behavior**.
+This tool should really enable proper and safe usage inside hooks and other scripts.
+You can even report the output in `json` format (use option `--json`).
+You can use this dialog tool independent of Githooks.
+
+**Test it out!** 🎉: Please refer to the [documentation of the tool](docs/dialog/dialog.md).
+
+### Dependencies
+
+The dialog tool has the following dependencies:
+
+- `macOS` : `osascript` which is provided by the system directly.
+- `Unix` : A dialog tool such as `zenity` (preferred), `qarma` or `matedialog`.
+- `Windows`: Common Controls 6 which is provided by the system directly.
+
+## Tests and Debugging
+
+Running the integration tests with Docker:
+
+```shell
+cd githooks
+sh tests/test-alpine.sh # and other 'test-XXXX.sh' files...
+```
+
+Run certain tests only:
+
+```shell
+sh tests/test-alpine.sh --seq {001..120}
+sh tests/test-alpine.sh --seq 065
+```
+
+## Debugging in the Dev Container
+
+There is a docker development container for debugging purposes in `.devcontainer`. VS Code can be launched in this remote docker container with the extension `ms-vscode-remote.remote-containers`.
+Use ``Remote-Containers: Open Workspace in Container...` and `Remote-Containers: Rebuild Container`.
+
+Once in the development container: You can launch the VS Code tasks:
+
+- `[Dev Container] go-delve-installer`
+- etc...
+
+which will start the `delve` debugger headless as a server in a terminal. You can then attach to the debug server with the debug configuration `Debug Go [remote delve]`. Set breakpoints in the source code to trigger them.
+
 
 ## Acknowledgements
 

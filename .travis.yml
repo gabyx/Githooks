@@ -21,19 +21,19 @@ jobs:
         - TEST_INSTANCE=test-coverage
         - COVERALLS_TOKEN=$COVERALLS_TOKEN
     - os: linux
-      env: TEST_INSTANCE=test-testsuite-go
+      env: TEST_INSTANCE=test-testsuite
     - os: windows
-      env: TEST_INSTANCE=test-windows-go
+      env: TEST_INSTANCE=test-windows
     - os: linux
-      env: TEST_INSTANCE=test-alpine-go
+      env: TEST_INSTANCE=test-alpine
     - os: linux
-      env: TEST_INSTANCE=test-alpine-go-user
+      env: TEST_INSTANCE=test-alpine-user
     - os: linux
-      env: TEST_INSTANCE=test-alpine-nolfs-go
+      env: TEST_INSTANCE=test-alpine-nolfs
     - os: linux
-      env: TEST_INSTANCE=test-corehookspath-go
+      env: TEST_INSTANCE=test-corehookspath
     - os: linux
-      env: TEST_INSTANCE=test-whitespace-go
+      env: TEST_INSTANCE=test-whitespace
     - os: linux
       env: TEST_INSTANCE=test-rules
 

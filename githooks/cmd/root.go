@@ -34,7 +34,7 @@ func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 	cwd, err := os.Getwd()
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
-	promptCtx, err = prompt.CreateContext(log, &cm.ExecContext{}, nil, false, false)
+	promptCtx, err = prompt.CreateContext(log, prompt.ToolContext{}, false, false)
 	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 
 	installDir := inst.LoadInstallDir(log)
@@ -70,7 +70,7 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 
 	fmt := ctx.Log.GetInfoFormatter(false)
-	title := fmt("Githooks CLI [version: %s]", build.BuildVersion)
+	title := fmt("Githooks CLI [version: '%s']", build.BuildVersion)
 	firstPrefix := " ▶ "
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())
 

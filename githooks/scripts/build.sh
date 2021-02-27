@@ -69,5 +69,7 @@ else
     # shellcheck disable=SC2086
     go test ./apps/cli $DEBUG_FLAGS $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/cli"
     # shellcheck disable=SC2086
+    go test ./apps/dialog $DEBUG_FLAGS $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/dialog"
+    # shellcheck disable=SC2086
     go test ./apps/runner $DEBUG_FLAGS $BUILD_FLAGS -covermode=count -coverpkg ./... -c -o "$GOBIN/runner"
 fi

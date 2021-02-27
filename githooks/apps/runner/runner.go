@@ -139,11 +139,14 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	dialogTool, err := hooks.GetToolScript(installDir, "dialog")
 	log.AssertNoErrorF(err, "Could not get status of 'dialog' tool.")
+	toolCtx, err := prompt.CreateToolContext(&execx, dialogTool)
+	log.AssertNoErrorF(err, "Could not create dialog tool context.")
+
 	if dialogTool != nil {
 		log.DebugF("Use dialog tool '%s'", dialogTool.GetCommand())
 	}
 
-	promptCtx, err := prompt.CreateContext(log, &execx, dialogTool, true, false)
+	promptCtx, err := prompt.CreateContext(log, toolCtx, true, false)
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
 	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)
@@ -236,7 +239,7 @@ func showTrustRepoPrompt(gitx *git.Context, promptCtx prompt.IContext) (isTruste
 		"Do you want to allow running every current and future hooks?"
 
 	var answer string
-	answer, err := promptCtx.ShowPromptOptions(question, "(yes, No)", "y/N", "Yes", "No")
+	answer, err := promptCtx.ShowOptions(question, "(yes, No)", "y/N", "Yes", "No")
 	log.AssertNoErrorF(err, "Could not show prompt.")
 
 	if err == nil && answer == "y" || answer == "Y" {
@@ -782,7 +785,7 @@ func showTrustPrompt(
 
 		question := mess + "\nDo you accept the changes?"
 
-		answer, err := uiSettings.PromptCtx.ShowPromptOptions(question,
+		answer, err := uiSettings.PromptCtx.ShowOptions(question,
 			"(Yes, all, no, disable)",
 			"Y/a/n/d",
 			"Yes", "All", "No", "Disable")

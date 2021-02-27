@@ -3,11 +3,9 @@ package prompt
 import (
 	"bufio"
 	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"io"
 	"os"
 	"runtime"
-	"strings"
 )
 
 // AnswerValidator is the callback type for the answer validator.
@@ -15,25 +13,26 @@ type AnswerValidator func(string) error
 
 // IContext defines the interface to show a prompt to the user.
 type IContext interface {
-	ShowPromptOptions(
+	ShowOptions(
 		text string,
 		hintText string,
 		shortOptions string,
 		longOptions ...string) (string, error)
 
-	ShowPrompt(
+	ShowEntry(
 		text string,
 		defaultAnswer string,
 		validator AnswerValidator) (string, error)
 
-	ShowPromptMulti(
+	ShowEntryMulti(
 		text string,
+		exitAnswer string,
 		validator AnswerValidator) ([]string, error)
 
 	Close()
 }
 
-// Formatter is the format function to format a prompt.
+// Formatter is the format function to format a prompt or error.
 type Formatter func(format string, args ...interface{}) string
 
 // Context defines the prompt context based on a `ILogContext`
@@ -41,21 +40,22 @@ type Formatter func(format string, args ...interface{}) string
 type Context struct {
 	log cm.ILogContext
 
-	promptFmt Formatter
-	errorFmt  Formatter
+	useGUI bool
 
-	termOut io.Writer
-
+	// Terminal data
+	promptFmt     Formatter
+	errorFmt      Formatter
+	termOut       io.Writer
 	termIn        *os.File
 	termInScanner *bufio.Scanner
 
+	// Promp settings
 	printAnswer     bool
 	maxTries        uint
 	panicIfMaxTries bool
 
-	// Prompt over the tool script if existing.
-	execCtx cm.IExecContext
-	tool    cm.IExecutable
+	// Optional tool context.
+	tool ToolContext
 }
 
 // Close closes the prompt context.
@@ -65,20 +65,15 @@ func (p *Context) Close() {
 	}
 }
 
-// CreateContext creates a `PrompContext`.
+// CreateContext creates a prompt context `IContext`.
+// The GUI dialog gets only used if no terminal is attached on the output.
 func CreateContext(
 	log cm.ILogContext,
-	execCtx cm.IExecContext,
-	tool cm.IExecutable,
-	assertOutputIsTerminal bool,
+	tool ToolContext,
+	useGUIFallback,
 	useStdIn bool) (IContext, error) {
 
 	var err error
-
-	var output io.Writer // If this output is nil, we fallback to taking default answer.
-	if !assertOutputIsTerminal || log.IsInfoATerminal() {
-		output = log.GetInfoWriter()
-	}
 
 	var input *os.File
 	printAnswer := false
@@ -90,12 +85,26 @@ func CreateContext(
 		maxTries = uint(1) //nolint: gomnd
 	} else {
 		input, err = cm.GetCtty()
-		// if err != nil => input == nil and we fallback
-		// to taking default answers.
+		// if err != nil => we don't have a terminal attached.
+	}
+
+	var output io.Writer
+	if useStdIn || (!AssertOutputIsTerminal || log.IsInfoATerminal()) {
+		// We use the output of the log:
+		// - If we are using stdin it does not matter if the output is really a terminal.
+		// - Otherwise its crucial that it is a terminal, since the prompt can not
+		//   be shown and the user has not notion what to input, in that case
+		//   output == nil, which results in the default answer.
+		// For tests: AssertOutputIsTerminal == false, which always sets the output.
+		output = log.GetInfoWriter()
 	}
 
 	p := Context{
 		log: log,
+
+		// In case we have no terminal input, and no output to show the prompt
+		// fallback to using the GUI if enabled.
+		useGUI: EnableGUI && useGUIFallback && (input == nil || output == nil),
 
 		errorFmt:      log.GetErrorFormatter(true),
 		promptFmt:     log.GetPromptFormatter(true),
@@ -106,63 +115,26 @@ func CreateContext(
 		maxTries:        maxTries,
 		panicIfMaxTries: true,
 		printAnswer:     printAnswer,
-
-		execCtx: execCtx,
-		tool:    tool}
+		tool:            tool}
 
 	runtime.SetFinalizer(&p, func(p *Context) { p.Close() })
 
 	return &p, err
 }
 
-func getDefaultAnswer(options []string) string {
-	for _, r := range options {
-		if strings.ToLower(r) != r { // is it an upper case letter?
-			return strings.ToLower(r)
-		}
-	}
-
-	return ""
+// Context for the dialog tool script/executable, if one is installed.
+// If `execCtx` and `tool` is nil, the context is not setup and will not be used.
+type ToolContext struct {
+	execCtx cm.IExecContext
+	tool    cm.IExecutable
 }
 
-// CreateValidatorAnswerOptions creates a validator which validates against
-// a list of options.
-func CreateValidatorAnswerOptions(options []string) AnswerValidator {
-
-	return func(answer string) error {
-
-		correct := strs.Any(
-			options,
-			func(o string) bool {
-				return strings.EqualFold(answer, o)
-			})
-
-		if !correct {
-			return cm.ErrorF("Answer '%s' not in '%q'.", answer, options)
-		}
-
-		return nil
-	}
+// IsExecutable tells if the prompt context for the dialog tool is executable.
+func (p *ToolContext) IsSetup() bool {
+	return p.execCtx != nil && p.tool != nil
 }
 
-// ValidatorAnswerNotEmpty checks that answers are non-empty.
-var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
-	if strs.IsEmpty(strings.TrimSpace(s)) {
-		return cm.Error("Answer must not be empty.")
-	}
-
-	return nil
-}
-
-// CreateValidatorIsDirectory creates a answer validator
-// which checks existing paths.
-func CreateValidatorIsDirectory(tildeRepl string) AnswerValidator {
-	return func(s string) error {
-		s = cm.ReplaceTildeWith(s, tildeRepl)
-		if !cm.IsDirectory(s) {
-			return cm.Error("Answer must be an existing directory.")
-		}
-
-		return nil
-	}
+// Creates a prompt context for the dialog tool script/executable.
+func CreateToolContext(execCtx cm.IExecContext, tool cm.IExecutable) (ToolContext, error) {
+	return ToolContext{execCtx: execCtx, tool: tool}, nil
 }

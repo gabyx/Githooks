@@ -1,0 +1,17 @@
+ObjC.import("stdlib")
+
+var app = Application.currentApplication()
+app.includeStandardAdditions = true
+app.activate()
+
+var opts = {{json .Opts}}
+opts.withIcon = Path({{json .WithIcon}})
+
+try{
+	var res = app[{{json .Operation}}]({{json .Text}}, opts)
+	res.textReturned
+} catch (e) {
+	if(String(e).includes("cancelled")){
+		$.exit(1)
+	}
+}

@@ -89,7 +89,7 @@ func (c *LogContext) PanicIfF(condition bool, format string, args ...interface{}
 // AssertNoError Assert no error, and otherwise log it.
 func (c *LogContext) AssertNoError(err error, lines ...string) bool {
 	if err != nil {
-		c.Warn(append(lines, strs.SplitLines("-> error: ["+err.Error()+"]")...)...)
+		c.Warn(append(lines, strs.SplitLines("-> error: [\n"+FormatError(err)+"\n]")...)...)
 		return false // nolint:nlreturn
 	}
 
@@ -99,7 +99,7 @@ func (c *LogContext) AssertNoError(err error, lines ...string) bool {
 // AssertNoErrorF Assert no error, and otherwise log it.
 func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{}) bool {
 	if err != nil {
-		c.WarnF(format+"\n-> error: ["+err.Error()+"]", args...)
+		c.WarnF(format+"\n-> error: [\n"+FormatError(err)+"\n]", args...)
 		return false // nolint:nlreturn
 	}
 
@@ -109,14 +109,14 @@ func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{
 // AssertNoErrorPanic asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
-		c.Panic(append(lines, strs.SplitLines("-> error: ["+err.Error()+"]")...)...)
+		c.Panic(append(lines, strs.SplitLines("-> error: [\n"+FormatError(err)+"\n]")...)...)
 	}
 }
 
 // AssertNoErrorPanicF asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...interface{}) {
 	if err != nil {
-		c.PanicF(format+"\n-> error: ["+err.Error()+"]", args...)
+		c.PanicF(format+"\n-> error: [\n"+FormatError(err)+"\n]", args...)
 	}
 }
 
@@ -124,13 +124,13 @@ func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...inter
 func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args ...interface{}) {
 	if isFatal {
 		if err != nil {
-			c.PanicF(format+"\n-> error: ["+err.Error()+"]", args...)
+			c.PanicF(format+"\n-> error: [\n"+FormatError(err)+"\n]", args...)
 		} else {
 			c.PanicF(format, args...)
 		}
 	} else {
 		if err != nil {
-			c.ErrorF(format+"\n-> error: ["+err.Error()+"]", args...)
+			c.ErrorF(format+"\n-> error: [\n"+FormatError(err)+"\n]", args...)
 		} else {
 			c.ErrorF(format, args...)
 		}

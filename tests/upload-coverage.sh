@@ -12,6 +12,9 @@ if [ -n "$GH_COVERAGE_DIR" ]; then
         exit 1
     }
     echo "Coverage created."
+
+    # Remove dialog tool because we cannot yet really measure the coverage accurately
+    sed -i -E '/^gabyx\/githooks\/apps\/dialog.*/d' "$GH_COVERAGE_DIR/all.cov"
 fi
 
 # shellcheck disable=SC2015

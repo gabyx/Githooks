@@ -10,10 +10,16 @@ repoDir="$DIR/../.."
 
 cd "$repoDir" || exit 1
 
+if command -v "gstat" ; then
+    STAT="gstat"
+else 
+    STAT="stat"
+fi
+
 for FILE in $STAGED_FILES; do
     if echo "$FILE" | grep -qE '^.*/cmd/.*\.go$'; then
 
-        docDate=$(stat -c %X "$repoDir/docs/cli/git_hooks.md")
+        docDate=$($STAT -c %X "$repoDir/docs/cli/git_hooks.md")
 
         if [ "$((docDate + 2 * 5))" -lt "$(date +%s)" ]; then
             if [ "$autoRegenerate" = "true" ]; then

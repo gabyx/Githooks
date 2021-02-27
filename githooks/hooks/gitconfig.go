@@ -4,7 +4,9 @@ package hooks
 const (
 	GitCKInstallDir = "githooks.installDir"
 	GitCKRunner     = "githooks.runner"
-	GitCKDisable    = "githooks.disable"
+	GitCKDialog     = "githooks.dialog"
+
+	GitCKDisable = "githooks.disable"
 
 	GitCKMaintainOnlyServerHooks = "githooks.maintainOnlyServerHooks"
 
@@ -50,6 +52,8 @@ func GetGlobalGitConfigKeys() []string {
 	return []string{
 		GitCKInstallDir,
 		GitCKRunner,
+		GitCKDialog,
+
 		GitCKDisable,
 
 		GitCKMaintainOnlyServerHooks,

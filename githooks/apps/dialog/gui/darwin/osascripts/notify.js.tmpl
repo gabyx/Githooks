@@ -1,0 +1,5 @@
+var app = Application.currentApplication()
+app.includeStandardAdditions = true
+
+var opts = {{json .Opts}}
+void app.displayNotification({{json .Text}}, opts)

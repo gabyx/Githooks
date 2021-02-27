@@ -178,6 +178,25 @@ func SetRunnerExecutableAlias(path string) error {
 	return git.Ctx().SetConfig(GitCKRunner, path, git.GlobalScope)
 }
 
+// GetDialogExecutable gets the installed Githooks dialog executable.
+func GetDialogExecutable(installDir string) (p string) {
+	p = path.Join(GetBinaryDir(installDir), "dialog")
+	if runtime.GOOS == cm.WindowsOsName {
+		p += cm.WindowsExecutableSuffix
+	}
+
+	return
+}
+
+// SetDialogExecutableConfig sets the global Githooks dialog executable.
+func SetDialogExecutableConfig(path string) error {
+	if !cm.IsFile(path) {
+		return cm.ErrorF("Dialog executable '%s' does not exist.", path)
+	}
+
+	return git.Ctx().SetConfig(GitCKDialog, path, git.GlobalScope)
+}
+
 // SetCLIExecutableAlias sets the global Githooks runner executable.
 func SetCLIExecutableAlias(path string) error {
 	if !cm.IsFile(path) {

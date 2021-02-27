@@ -532,7 +532,7 @@ func DefaultAcceptUpdateCallback(
 				versionText + "\n" +
 				"Would you like to install it now?"
 
-			answer, err := promptCtx.ShowPromptOptions(question,
+			answer, err := promptCtx.ShowOptions(question,
 				"(Yes, no)",
 				"Y/n",
 				"Yes", "No")

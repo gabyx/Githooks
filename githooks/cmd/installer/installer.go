@@ -197,7 +197,9 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, install.UI
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	if !args.NonInteractive {
-		promptCtx, err = prompt.CreateContext(log, &cm.ExecContext{}, nil, false, args.UseStdin)
+		// Use GUI fallback if we are running an auto-update triggered from the runner.
+		useGUIFallback := args.InternalAutoUpdate
+		promptCtx, err = prompt.CreateContext(log, prompt.ToolContext{}, useGUIFallback, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
@@ -494,7 +496,7 @@ func findGitHookTemplates(
 	}
 
 	// 5. Try to search for it on disk
-	answer, err := promptCtx.ShowPromptOptions(
+	answer, err := promptCtx.ShowOptions(
 		"Could not find the Git hook template directory.\n"+
 			"Do you want to search for it?",
 		"(yes, No)",
@@ -515,7 +517,7 @@ func findGitHookTemplates(
 			// If we dont use core.hooksPath, we ask
 			// if the user wants to continue setting this as
 			// 'init.templateDir'.
-			answer, err := promptCtx.ShowPromptOptions(
+			answer, err := promptCtx.ShowOptions(
 				"Do you want to set this up as the Git template\n"+
 					"directory (e.g setting 'init.templateDir')\n"+
 					"for future use?",
@@ -533,7 +535,7 @@ func findGitHookTemplates(
 	}
 
 	// 6. Set up as new
-	answer, err = promptCtx.ShowPromptOptions(
+	answer, err = promptCtx.ShowOptions(
 		"Do you want to set up a new Git templates folder?",
 		"(yes, No)",
 		"y/N",
@@ -571,7 +573,7 @@ func searchPreCommitFile(log cm.ILogContext, startDirs []string, promptCtx promp
 
 			templateDir := path.Dir(path.Dir(filepath.ToSlash(match)))
 
-			answer, err := promptCtx.ShowPromptOptions(
+			answer, err := promptCtx.ShowOptions(
 				strs.Fmt("--> Is it '%s'", templateDir),
 				"(yes, No)",
 				"y/N",
@@ -597,7 +599,7 @@ func searchTemplateDirOnDisk(log cm.ILogContext, promptCtx prompt.IContext) stri
 
 	if strs.IsEmpty(templateDir) {
 
-		answer, err := promptCtx.ShowPromptOptions(
+		answer, err := promptCtx.ShowOptions(
 			"Git hook template directory not found\n"+
 				"Do you want to keep searching?",
 			"(yes, No)",
@@ -622,7 +624,7 @@ func setupNewTemplateDir(log cm.ILogContext, installDir string, promptCtx prompt
 
 	if promptCtx != nil {
 		var err error
-		templateDir, err = promptCtx.ShowPrompt(
+		templateDir, err = promptCtx.ShowEntry(
 			"Enter the target folder",
 			templateDir,
 			nil)
@@ -850,11 +852,15 @@ func installBinaries(
 	log.AssertNoErrorPanicF(err,
 		"Could not set Git config 'alias.hooks' to '%s'.", cli.Cmd)
 
-	// Set runner executable alias.
 	runner := hooks.GetRunnerExecutable(installDir)
 	err = hooks.SetRunnerExecutableAlias(runner)
 	log.AssertNoErrorPanic(err,
 		"Could not set runner executable alias '%s'.", runner)
+
+	dialog := hooks.GetRunnerExecutable(installDir)
+	err = hooks.SetDialogExecutableConfig(dialog)
+	log.AssertNoErrorPanic(err,
+		"Could not set dialog executable to '%s'.", dialog)
 }
 
 func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, promptCtx prompt.IContext) {
@@ -880,7 +886,7 @@ func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, 
 	if nonInteractive {
 		activate = true
 	} else {
-		answer, err := promptCtx.ShowPromptOptions(
+		answer, err := promptCtx.ShowOptions(
 			promptMsg,
 			"(Yes, no)",
 			"Y/n", "Yes", "No")
@@ -999,7 +1005,7 @@ func setupSharedRepositories(
 			"Would you like to set up shared hook repos now?"
 	}
 
-	answer, err := uiSettings.PromptCtx.ShowPromptOptions(
+	answer, err := uiSettings.PromptCtx.ShowOptions(
 		question,
 		"(yes, No)", "y/N", "Yes", "No")
 	log.AssertNoError(err, "Could not show prompt")
@@ -1011,8 +1017,9 @@ func setupSharedRepositories(
 	log.Info("Let's input shared hook repository urls",
 		"one-by-one and leave the input empty to stop.")
 
-	entries, err := uiSettings.PromptCtx.ShowPromptMulti(
+	entries, err := uiSettings.PromptCtx.ShowEntryMulti(
 		"Enter the clone URL of a shared repository",
+		"", // exit answer
 		prompt.ValidatorAnswerNotEmpty)
 
 	if err != nil {
