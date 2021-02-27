@@ -53,6 +53,7 @@ archives:
     builds:
       - runner
       - cli
+      - dialog
     name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}.{{ .Arch }}"
     format: tar.gz
     files:
