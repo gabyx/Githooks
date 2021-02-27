@@ -52,6 +52,8 @@ func GetGlobalGitConfigKeys() []string {
 	return []string{
 		GitCKInstallDir,
 		GitCKRunner,
+		GitCKDialog,
+
 		GitCKDisable,
 
 		GitCKMaintainOnlyServerHooks,
