@@ -17,5 +17,6 @@ type CmdContext struct {
 	Log      cm.ILogContext // The log context.
 	LogStats cm.ILogStats   // The statistics of the log context.
 
-	PromptCtx prompt.IContext // The prompt context.
+	PromptCtx  prompt.IContext    // The general prompt context (will be different for install/uninstall).
+	DlgToolCtx prompt.ToolContext // The dialog tool context (if existing).
 }

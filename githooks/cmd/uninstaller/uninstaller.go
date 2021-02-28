@@ -77,7 +77,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	setupMockFlags(cmd, vi)
 }
 
-func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings) {
+func setMainVariables(log cm.ILogContext, args *Arguments, dlgToolCtx prompt.ToolContext) (Settings, UISettings) {
 
 	var promptCtx prompt.IContext
 	var err error
@@ -86,7 +86,7 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	if !args.NonInteractive {
-		promptCtx, err = prompt.CreateContext(log, prompt.ToolContext{}, false, args.UseStdin)
+		promptCtx, err = prompt.CreateContext(log, dlgToolCtx, false, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
@@ -373,7 +373,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setMainVariables(log, &args)
+	settings, uiSettings := setMainVariables(log, &args, ctx.DlgToolCtx)
 
 	if !args.InternalPostDispatch {
 		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {

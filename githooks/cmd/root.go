@@ -25,6 +25,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func getDialogToolContext(log cm.ILogContext, installDir string, execx cm.IExecContext) (toolCtx prompt.ToolContext) {
+	dialogTool, err := hooks.GetToolScript(installDir, "dialog")
+	log.AssertNoErrorF(err, "Could not get status of 'dialog' tool.")
+
+	toolCtx, err = prompt.CreateToolContext(execx, dialogTool)
+	log.AssertNoErrorF(err, "Could not create dialog tool context.")
+
+	if dialogTool != nil {
+		log.DebugF("Use dialog tool '%s'", dialogTool.GetCommand())
+	}
+
+	return
+}
+
 // NewSettings creates common settings to use for all commands.
 func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 
@@ -34,10 +48,11 @@ func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 	cwd, err := os.Getwd()
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
-	promptCtx, err = prompt.CreateContext(log, prompt.ToolContext{}, false, false)
-	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
-
 	installDir := inst.LoadInstallDir(log)
+
+	dlgTool := getDialogToolContext(log, installDir, &cm.ExecContext{})
+	promptCtx, err = prompt.CreateContext(log, dlgTool, false, false)
+	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 
 	return ccm.CmdContext{
 		Cwd:        cwd,
@@ -45,6 +60,7 @@ func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 		InstallDir: installDir,
 		CloneDir:   hooks.GetReleaseCloneDir(installDir),
 		PromptCtx:  promptCtx,
+		DlgToolCtx: dlgTool,
 		Log:        log,
 		LogStats:   logStats}
 }

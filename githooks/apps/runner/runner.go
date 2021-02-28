@@ -112,6 +112,20 @@ func createLog() {
 	cm.AssertOrPanic(err == nil, "Could not create log")
 }
 
+func getDialogToolContext(installDir string, execx cm.IExecContext) (toolCtx prompt.ToolContext) {
+	dialogTool, err := hooks.GetToolScript(installDir, "dialog")
+	log.AssertNoErrorF(err, "Could not get status of 'dialog' tool.")
+
+	toolCtx, err = prompt.CreateToolContext(execx, dialogTool)
+	log.AssertNoErrorF(err, "Could not create dialog tool context.")
+
+	if dialogTool != nil {
+		log.DebugF("Use dialog tool '%s'", dialogTool.GetCommand())
+	}
+
+	return
+}
+
 func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	cm.PanicIf(
@@ -137,16 +151,8 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	installDir := getInstallDir()
 
-	dialogTool, err := hooks.GetToolScript(installDir, "dialog")
-	log.AssertNoErrorF(err, "Could not get status of 'dialog' tool.")
-	toolCtx, err := prompt.CreateToolContext(&execx, dialogTool)
-	log.AssertNoErrorF(err, "Could not create dialog tool context.")
-
-	if dialogTool != nil {
-		log.DebugF("Use dialog tool '%s'", dialogTool.GetCommand())
-	}
-
-	promptCtx, err := prompt.CreateContext(log, toolCtx, true, false)
+	dlgTool := getDialogToolContext(installDir, &execx)
+	promptCtx, err := prompt.CreateContext(log, dlgTool, true, false)
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
 	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)

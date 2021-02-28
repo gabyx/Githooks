@@ -188,7 +188,10 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 
 }
 
-func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, install.UISettings) {
+func setMainVariables(
+	log cm.ILogContext,
+	args *Arguments,
+	dlgToolCtx prompt.ToolContext) (Settings, install.UISettings) {
 
 	var promptCtx prompt.IContext
 	var err error
@@ -199,7 +202,7 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, install.UI
 	if !args.NonInteractive {
 		// Use GUI fallback if we are running an auto-update triggered from the runner.
 		useGUIFallback := args.InternalAutoUpdate
-		promptCtx, err = prompt.CreateContext(log, prompt.ToolContext{}, useGUIFallback, args.UseStdin)
+		promptCtx, err = prompt.CreateContext(log, dlgToolCtx, useGUIFallback, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
@@ -1221,7 +1224,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setMainVariables(log, &args)
+	settings, uiSettings := setMainVariables(log, &args, ctx.DlgToolCtx)
 
 	if !args.DryRun {
 		setInstallDir(log, settings.InstallDir)
