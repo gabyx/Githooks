@@ -3,7 +3,7 @@ package download
 import (
 	"bytes"
 	cm "gabyx/githooks/common"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 )
@@ -25,7 +25,7 @@ func verifyChecksums(checksums Checksums, publicPGP string) ([]byte, error) {
 	defer checksumFileSignature.Body.Close()
 
 	// Read the checksumFile into memory
-	checksumBytes, err := ioutil.ReadAll(checksumFile.Body)
+	checksumBytes, err := io.ReadAll(checksumFile.Body)
 	if err != nil {
 		return nil, err
 	}

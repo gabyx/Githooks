@@ -9,7 +9,6 @@ import (
 	"gabyx/githooks/hooks"
 	"gabyx/githooks/prompt"
 	strs "gabyx/githooks/strings"
-	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -136,7 +135,7 @@ func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Argume
 
 	log.Info("Dispatching to uninstaller ...")
 
-	file, err := ioutil.TempFile("", "*uninstall-config.json")
+	file, err := os.CreateTemp("", "*uninstall-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
 	defer os.Remove(file.Name())
 

@@ -9,7 +9,6 @@ import (
 	"gabyx/githooks/prompt"
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
-	"io/ioutil"
 
 	"os"
 	"path"
@@ -864,7 +863,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Dump execution sequence.
 	if cm.IsDebug {
-		file, err := ioutil.TempFile("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
+		file, err := os.CreateTemp("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
 		log.AssertNoErrorPanic(err, "Failed to create execution log.")
 		defer file.Close()
 		err = hs.StoreJSON(file)

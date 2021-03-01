@@ -14,7 +14,6 @@ import (
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
 	"gabyx/githooks/updates/download"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -394,7 +393,7 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 
 		log.Info("Getting Githooks binaries...")
 
-		tempDir, err := ioutil.TempDir(os.TempDir(), "*-githooks-update")
+		tempDir, err := os.MkdirTemp(os.TempDir(), "*-githooks-update")
 		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
 		defer os.RemoveAll(tempDir)
 
@@ -449,7 +448,7 @@ func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments)
 
 	log.Info("Dispatching to new installer ...")
 
-	file, err := ioutil.TempFile("", "*install-config.json")
+	file, err := os.CreateTemp("", "*install-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
 	defer os.Remove(file.Name())
 
