@@ -860,7 +860,7 @@ func installBinaries(
 	log.AssertNoErrorPanic(err,
 		"Could not set runner executable alias '%s'.", runner)
 
-	dialog := hooks.GetRunnerExecutable(installDir)
+	dialog := hooks.GetDialogExecutable(installDir)
 	err = hooks.SetDialogExecutableConfig(dialog)
 	log.AssertNoErrorPanic(err,
 		"Could not set dialog executable to '%s'.", dialog)
