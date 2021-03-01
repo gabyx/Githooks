@@ -8,9 +8,9 @@
 
 ![Message with info icon.](linux/message-3.png)
 
-![Message with warning icon.](linux/message-4.png)
+![Message with extra button.](linux/message-4.png)
 
-![Message with extra buttons.](linux/message-5.png)
+![Question with extra button.](linux/message-5.png)
 
 ![Entry field.](linux/entry.png)
 
@@ -25,5 +25,29 @@
 ![Save file dialog.](linux/file-save.png)
 
 ![Noifications dialog.](linux/notification.png)
+
+## macOS
+
+![Message with error icon.](macOs/message-1.png)
+
+![Message with warning icon.](macOs/message-2.png)
+
+![Message with info icon.](macOs/message-3.png)
+
+![Message with extra button.](macOs/message-4.png)
+
+![Question with extra button.](macOs/message-5.png)
+
+![Entry field.](macOs/entry.png)
+
+![Options dialog.](macOs/options-1.png)
+
+![File selection dialog.](macOs/file-selection.png)
+
+![Directory selection dialog.](macOs/directory-selection.png)
+
+![Save file dialog.](macOs/file-save.png)
+
+![Noifications dialog.](macOs/notification.png)
 
 And more configuration options. See the documentation.

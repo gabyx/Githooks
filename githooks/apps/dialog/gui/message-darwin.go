@@ -62,16 +62,20 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 			msg.CancelLabel = "No"
 		}
 		if strs.IsEmpty(msg.OkLabel) {
-			msg.OkLabel = string(idPrefix) + "Yes"
+			msg.OkLabel = "Yes"
 		}
+
+		msg.OkLabel = string(idPrefix) + msg.OkLabel
 
 		d.Opts.Buttons = append(extraButtons, msg.CancelLabel, msg.OkLabel) // nolint: gocritic
 		d.Opts.CancelButton = len(extraButtons) + 1
 
 	} else {
 		if strs.IsEmpty(msg.OkLabel) {
-			msg.OkLabel = string(idPrefix) + "OK"
+			msg.OkLabel = "OK"
 		}
+
+		msg.OkLabel = string(idPrefix) + msg.OkLabel
 
 		d.Opts.Buttons = append(extraButtons, msg.OkLabel) // nolint: gocritic
 		d.Opts.DefaultButton = len(extraButtons) + 1

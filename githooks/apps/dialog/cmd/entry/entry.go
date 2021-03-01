@@ -37,7 +37,7 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 		Short: "Shows a entry dialog.",
 		Long: `Shows a entry dialog similar to 'zenity'.
 Currently extra buttons are not supported on all platforms.
-Unix supports multiple extra buttons, MacOS and Windows dont.
+Unix/Windows supports multiple extra buttons, MacOS does not.
 
 # Exit Codes:
 

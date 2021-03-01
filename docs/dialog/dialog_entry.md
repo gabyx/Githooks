@@ -6,7 +6,7 @@ Shows a entry dialog.
 
 Shows a entry dialog similar to `zenity`.
 Currently extra buttons are not supported on all platforms.
-Unix supports multiple extra buttons, MacOS and Windows dont.
+Unix/Windows supports multiple extra buttons, MacOS does not.
 
 # Exit Codes:
 

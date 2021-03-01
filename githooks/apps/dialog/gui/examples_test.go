@@ -6,6 +6,7 @@ import (
 	"gabyx/githooks/apps/dialog/gui"
 	"gabyx/githooks/apps/dialog/settings"
 	"os"
+	"runtime"
 )
 
 func ExampleShowMessage() {
@@ -72,7 +73,9 @@ func ExampleShowEntry() {
 	t.OkLabel = "Accept it"
 	t.CancelLabel = "Cancel it"
 	t.DefaultCancel = true
-	t.ExtraButtons = []string{"Midnight"}
+	if runtime.GOOS != "darwin" {
+		t.ExtraButtons = []string{"Midnight"}
+	}
 	t.Text = "Enter the time:"
 	t.DefaultEntry = "10:30"
 	t.Width = 300
