@@ -130,7 +130,7 @@ func ExampleShowFileSave() {
 	t.FileFilters = []settings.FileFilter{{Name: "Dev", Patterns: []string{"*.go", "*.sh"}}}
 	t.Filename = "MySuperFile/Pizza.dat"
 	t.Root = "../.."
-	t.OnlyDirectories = true
+	t.OnlyDirectories = false
 	t.WindowIcon = settings.QuestionIcon
 
 	f, e := gui.ShowFileSave(nil, t) // nolint: staticcheck
