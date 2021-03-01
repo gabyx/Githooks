@@ -15,7 +15,7 @@ import (
 )
 
 var relPathGoSrc = "githooks"
-var goVersionMin = "1.15.0"
+var goVersionMin = "1.16"
 var versionRe = regexp.MustCompile(`\d+\.\d+\.\d+`)
 
 func findGoExec() (cm.CmdContext, error) {
