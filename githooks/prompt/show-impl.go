@@ -41,7 +41,7 @@ func showOptions(
 			validator)
 
 		if e == nil {
-			return ans, nil
+			return strings.ToLower(ans), nil
 		}
 
 		err = cm.CombineErrors(e,
@@ -61,7 +61,7 @@ func showOptions(
 			validator)
 
 		if e == nil {
-			return ans, nil
+			return strings.ToLower(ans), nil
 		}
 
 		err = cm.CombineErrors(err, e)
@@ -77,12 +77,11 @@ func showOptions(
 				p,
 				question,
 				defaultAnswer,
-				options,
 				emptyCausesDefault,
 				validator)
 
 		if e == nil {
-			return ans, nil
+			return ans, nil // is already in lower case
 		}
 		err = cm.CombineErrors(err, e)
 
@@ -186,7 +185,6 @@ func showPromptOptionsTerminal(
 	p *Context,
 	question string,
 	defaultAnswer string,
-	options []string,
 	emptyCausesDefault bool,
 	validator AnswerValidator) (string, bool, error) {
 

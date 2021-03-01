@@ -18,22 +18,16 @@ func getDefaultAnswer(options []string) (string, int) {
 }
 
 // CreateValidatorAnswerOptions creates a validator which validates against
-// a list of options.
+// a list of options (case-insensitive).
 func CreateValidatorAnswerOptions(options []string) AnswerValidator {
-
 	return func(answer string) error {
-
-		correct := strs.Any(
-			options,
-			func(o string) bool {
-				return strings.EqualFold(answer, o)
-			})
-
-		if !correct {
-			return NewValidationError("Answer '%s' not in '%q'.", answer, options)
+		for i := range options {
+			if strings.EqualFold(answer, options[i]) {
+				return nil
+			}
 		}
 
-		return nil
+		return NewValidationError("Answer '%s' not in '%q'.", answer, options)
 	}
 }
 
