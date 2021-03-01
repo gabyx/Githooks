@@ -19,7 +19,7 @@ func GetTrustAllSetting(gitx *git.Context) (trustall bool, isSet bool) {
 	conf := gitx.GetConfig(GitCKTrustAll, git.LocalScope)
 
 	isSet = strs.IsNotEmpty(conf)
-	trustall = conf == "true"
+	trustall = conf == git.GitCVTrue
 
 	return
 }

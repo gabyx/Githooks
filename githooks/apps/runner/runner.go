@@ -160,7 +160,7 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
 	}
 
-	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCKFailOnNonExistingSharedHooks, git.Traverse) == "true"
+	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCKFailOnNonExistingSharedHooks, git.Traverse) == git.GitCVTrue
 
 	s := HookSettings{
 		Args:               os.Args[2:],

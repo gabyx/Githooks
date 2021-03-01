@@ -30,7 +30,7 @@ func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 
 	if onlyPrint {
 		conf := ctx.GitX.GetConfig(hooks.GitCKDisable, scope)
-		if conf == "true" {
+		if conf == git.GitCVTrue {
 			ctx.Log.InfoF("Githooks is disabled %s.", fmt)
 		} else {
 			ctx.Log.InfoF("Githooks is not disabled %s.", fmt)

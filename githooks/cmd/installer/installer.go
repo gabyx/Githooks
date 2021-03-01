@@ -348,9 +348,9 @@ func getDeploySettings(
 	return deploySettings
 }
 
-func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
+func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, args *Arguments) bool {
 
-	skipPrerelease := !(git.Ctx().GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == "true")
+	skipPrerelease := !(gitx.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue)
 
 	var status updates.ReleaseStatus
 	var err error
@@ -398,9 +398,12 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
 		defer os.RemoveAll(tempDir)
 
-		if args.BuildFromSource {
+		buildFromSrc := args.BuildFromSource ||
+			gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
 
-			log.Info("Building from clone...")
+		if buildFromSrc {
+
+			log.Info("Building from source...")
 			binaries = buildFromSource(
 				log,
 				args.BuildTags,
@@ -477,7 +480,7 @@ func findGitHookTemplates(
 	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 	haveInstall := strs.IsNotEmpty(installUsesCoreHooksPath)
 
-	hookTemplateDir, err := install.FindHookTemplateDir(useCoreHooksPath || installUsesCoreHooksPath == "true")
+	hookTemplateDir, err := install.FindHookTemplateDir(useCoreHooksPath || installUsesCoreHooksPath == git.GitCVTrue)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 	if err == nil && strs.IsNotEmpty(hookTemplateDir) {
 		return hookTemplateDir, ""
@@ -1231,7 +1234,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	}
 
 	if !args.InternalPostDispatch {
-		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {
+		if isDispatched := prepareDispatch(log, ctx.GitX, &settings, &args); isDispatched {
 			return
 		}
 	}
