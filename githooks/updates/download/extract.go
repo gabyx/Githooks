@@ -15,11 +15,22 @@ func Extract(file string, extension string, dir string) error {
 	}
 	defer f.Close()
 
-	if extension == ".tar.gz" {
-		err = cm.ExtractTarGz(f, dir)
-	} else {
-		// @todo  Implement dezip.
-		cm.Panic("Not implemented")
+	switch extension {
+	case ".tar.gz":
+
+		_, err = cm.ExtractTarGz(f, dir)
+
+	case ".zip":
+
+		var fi os.FileInfo
+		fi, err = f.Stat()
+		if err != nil {
+			return cm.CombineErrors(err, cm.ErrorF("Could not get stats for file '%s'.", file))
+		}
+		_, err = cm.ExtractZip(f, fi.Size(), dir)
+
+	default:
+		cm.PanicF("Extraction not implemented for extension %s'", extension)
 	}
 
 	if err != nil {

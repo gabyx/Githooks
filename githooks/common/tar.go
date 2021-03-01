@@ -11,7 +11,7 @@ import (
 
 // ExtractTarGz extracts `.tar.gz` streams to `baseDir` which must not exist.
 // Overwrites everything.
-func ExtractTarGz(gzipStream io.Reader, baseDir string) (err error) {
+func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err error) {
 	uncompressedStream, err := gzip.NewReader(gzipStream)
 	if err != nil {
 		return
@@ -53,8 +53,10 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (err error) {
 			}
 			defer file.Close()
 
-			if _, err := io.Copy(file, tarReader); err != nil {
-				return CombineErrors(ErrorF("Copy of data to '%s' failed", outPath), err)
+			if _, err = io.Copy(file, tarReader); err != nil {
+				err = CombineErrors(ErrorF("Copy of data to '%s' failed", outPath), err)
+
+				return
 			}
 
 			if runtime.GOOS == WindowsOsName {
@@ -66,12 +68,16 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (err error) {
 				return
 			}
 
+			paths = append(paths, outPath)
+
 		default:
-			return ErrorF("Tar extracting: unknown type: '%v' in '%v'",
+			err = ErrorF("Tar extracting: unknown type: '%v' in '%v'",
 				header.Typeflag,
 				header.Name)
+
+			return
 		}
 	}
 
-	return nil
+	return paths, nil
 }
