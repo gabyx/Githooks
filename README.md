@@ -1,5 +1,5 @@
 <img src="docs/githooks-logo.svg" style="margin-left: 20pt" align="right">
-<h1>Githooks <span style="font-size:12pt">on Steroids</span></h1>
+<h1>Githooks <font size="3">on Steroids</font></h1>
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
@@ -33,8 +33,8 @@ Also it searches for hooks in configured shared hook repositories.
   Fully configurable for your own company by url/branch and deploy settings.
 - **Bonus:** [Platform-independent dialog tool](#dialog-tool) for user prompts inside your own hooks.
 
-<!-- TOC ignore:true -->
-## Table of Contents
+<details>
+<summary><b>Table of Content (click to expand)</b></summary>
 <!-- TOC -->
 
 - [Layout and Options](#layout-and-options)
@@ -81,6 +81,7 @@ Also it searches for hooks in configured shared hook repositories.
 - [License](#license)
 
 <!-- /TOC -->
+</details>
 
 ## Layout and Options
 
