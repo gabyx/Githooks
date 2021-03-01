@@ -1,5 +1,3 @@
-//go:generate go run -mod=vendor ../../tools/embed-files.go
-
 package installer
 
 import (

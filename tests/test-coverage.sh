@@ -59,7 +59,7 @@ RUN echo "Make test gitrepo to clone from ..." && \\
 
 # Replace run-wrapper with coverage run-wrapper
 RUN cd \$GH_TEST_REPO && \\
-    cp githooks/run-wrapper-coverage.sh githooks/run-wrapper.sh
+    cp githooks/build/embedded/run-wrapper-coverage.sh githooks/build/embedded/run-wrapper.sh
 
 # Build binaries for v9.9.0.
 #################################

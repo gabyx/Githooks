@@ -15,7 +15,7 @@ func GetReadmeFile(repoDir string) string {
 
 // GetRunWrapperContent gets the bytes of the readme file template.
 func getReadmeFileContent() ([]byte, error) {
-	return build.Asset(path.Join(HooksDirName, "README.md"))
+	return build.Asset("embedded/README.md")
 }
 
 // WriteReadmeFile writes the readme content to `file`.
