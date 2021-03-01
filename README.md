@@ -8,6 +8,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 ![Git Version](https://img.shields.io/badge/Git-%E2%89%A5v.2.28.0-blue)
+![Git Version](https://img.shields.io/badge/Go-1.16-blue)
 
 **STILL BETA: Any changes without notice!**
 
@@ -122,7 +123,7 @@ in parallel over the thread pool. See [Parallel Execution](#parallel-execution) 
 
 You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list`
 (a globally configured Git alias `alias.hooks`) to list all hooks and their current state that apply to
-the current repository.
+the current repository. For this repository this [looks like the following.](docs/githooks-list.png)
 
 ## Execution
 
