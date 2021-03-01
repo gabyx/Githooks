@@ -39,7 +39,7 @@ EOF
 # Compile and test it.
 # shellcheck disable=SC2211
 cd "$GH_TEST_TMP/test106-lfs" &&
-    go build -o git-lfs.exe ./... &&
+    go build -o git-lfs.exe git-lfs.go &&
     ./git-lfs.exe testing &&
     [ -f "$GH_TEST_TMP/test106/lfs.out" ] &&
     rm -f "$GH_TEST_TMP/test106/lfs.out" || exit 3

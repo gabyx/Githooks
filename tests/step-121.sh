@@ -16,6 +16,7 @@ mkdir -p "$GH_TEST_TMP/test121" &&
 git init || exit 3
 
 # Make our own runner.
+
 cat <<"EOF" >"custom-runner.go" || exit 3
 package main
 
@@ -32,7 +33,7 @@ func main() {
 }
 EOF
 
-go build -o custom-runner.exe ./... || exit 4
+go build -o custom-runner.exe custom-runner.go || exit 4
 
 git config --global 'githooks.monkey' "git-monkey-global"
 [ -n "$ROOT_ACCESS" ] &&
