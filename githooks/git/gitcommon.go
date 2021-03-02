@@ -399,6 +399,14 @@ func FetchOrClone(
 	return
 }
 
+// IsRefReachable reports if `ref` (can be branch/tag/commit) is contained starting
+// from `startRef`.
+func IsRefReachable(gitx *Context, startRef string, ref string) (bool, error) {
+	i, err := gitx.GetExitCode("merge-base", "--is-ancestor", ref, startRef)
+
+	return i == 0, err
+}
+
 // GetTags gets the tags  at `commitSHA`.
 func GetTags(gitx *Context, commitSHA string) ([]string, error) {
 	if strs.IsEmpty(commitSHA) {

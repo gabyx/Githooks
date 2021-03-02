@@ -20,14 +20,14 @@ type ReleaseStatus struct {
 
 	IsNewClone bool
 
-	LocalCommitSHA  string
-	LocalTag        string
-	RemoteCommitSHA string
+	LocalCommitSHA  string // Current local commit and corresponding to the current installed version.
+	LocalTag        string // Current local tag  and corresponding to the current installed version.
+	RemoteCommitSHA string // Remote head on the remote branch.
 
-	UpdateCommitSHA   string
 	IsUpdateAvailable bool
-	UpdateVersion     *version.Version
+	UpdateCommitSHA   string // The determined update SHA (always <= RemoteCommitSHA).
 	UpdateTag         string
+	UpdateVersion     *version.Version
 
 	Branch       string
 	RemoteBranch string
@@ -241,34 +241,27 @@ func FetchUpdates(
 	}
 
 	if isNewClone {
-		// On a new clone we reset local and remote branch to
-		// the latest release tag decending from HEAD.
+		// On a new clone we reset local branch
+		// to the matching current release tag descending from HEAD.
+		// Remote stays and might trigger a direct update).
 
-		// Reset HEAD to the latest tag.
-		tag, e := gitx.Get("describe", "--tags", "--abbrev=0", git.HEAD)
-
-		if e != nil {
+		// Check if current tag is reachable from HEAD.
+		reachable, e := git.IsRefReachable(gitx, "HEAD", build.BuildTag)
+		if e != nil || !reachable {
 			err = cm.CombineErrors(
-				cm.ErrorF("No version tag could be found on branch '%s'",
-					branch), e)
+				cm.ErrorF("Current version tag '%v' could not be found on branch '%s'",
+					build.BuildTag, branch), e)
 
 			return
 		}
 
-		e = gitx.Check("reset", "--hard", tag)
+		e = gitx.Check("reset", "--hard", build.BuildTag)
 		if e != nil {
 			err = cm.CombineErrors(
 				cm.ErrorF("Could not reset branch '%s' to tag '%s'",
-					branch, tag), e)
+					branch, build.BuildTag), e)
 
 			return
-		}
-
-		// Get the commit it points to and reset the remote to it too.
-		resetRemoteTo, e = gitx.Get("rev-list", "-n", "1", tag)
-		if e != nil {
-			err = e
-			return // nolint:nlreturn
 		}
 	}
 
