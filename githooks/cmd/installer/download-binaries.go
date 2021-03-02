@@ -15,6 +15,9 @@ import (
 	"strings"
 )
 
+// IsRunningCoverage tells if we are running coverage.
+const IsRunningCoverage = false
+
 // detectDeploySettings tries to detect the deploy settings.
 // Currently that works for Github automatically.
 // For Gitea you need to specify the deploy api `deployAPI`.

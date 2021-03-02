@@ -399,7 +399,6 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 			gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
 
 		if buildFromSrc {
-
 			log.Info("Building from source...")
 			binaries = buildFromSource(
 				log,
@@ -408,8 +407,11 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 				status.RemoteURL,
 				status.Branch,
 				status.RemoteCommitSHA)
+		}
 
-		} else {
+		// We need to run deploy code too when running coverage because
+		// it builds a non-instrumented binary.
+		if !buildFromSrc || IsRunningCoverage {
 			tag := status.UpdateTag
 			if strs.IsEmpty(tag) {
 				tag = status.LocalTag

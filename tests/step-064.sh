@@ -4,8 +4,8 @@
 
 "$GH_TEST_BIN/cli" installer || exit 1
 
-mkdir -p "$GH_TEST_TMP/test063" &&
-    cd "$GH_TEST_TMP/test063" &&
+mkdir -p "$GH_TEST_TMP/test064" &&
+    cd "$GH_TEST_TMP/test064" &&
     git init ||
     exit 1
 

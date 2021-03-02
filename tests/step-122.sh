@@ -11,17 +11,17 @@ if [ ! -f "$DIALOG" ]; then
     exit 2
 fi
 
-if ! "$DIALOG" --version >/dev/null 2>&1; then
+if ! "$GITHOOKS_INSTALL_BIN_DIR/dialog" --version >/dev/null 2>&1; then
     echo "! Dialog tool not working properly."
     exit 3
 fi
 
-if ! "$DIALOG" --version 2>&1 | grep -q "dialog version"; then
+if ! "$GITHOOKS_INSTALL_BIN_DIR/dialog" --version 2>&1 | grep -q "dialog version"; then
     echo "! Dialog tool not working properly"
     exit 4
 fi
 
-if ! "$DIALOG" options --help 2>&1 | grep -q "dialog"; then
+if ! "$GITHOOKS_INSTALL_BIN_DIR/dialog" options --help 2>&1 | grep -q "dialog"; then
     echo "! Dialog tool not working properly"
     exit 5
 fi

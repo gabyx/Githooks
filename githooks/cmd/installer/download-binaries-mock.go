@@ -12,6 +12,9 @@ import (
 	"runtime"
 )
 
+// IsRunningCoverage returns if we are running coverage.
+var IsRunningCoverage = strs.IsNotEmpty(os.Getenv("GH_COVERAGE_DIR"))
+
 // detectDeploySettings tries to detect the deploy settings.
 // Currently that works for Github automatically.
 // For Gitea you need to specify the deploy api `deployAPI`.
