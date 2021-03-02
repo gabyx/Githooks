@@ -476,7 +476,7 @@ The installer will:
 
 ### Normal Installation
 
-To install Githooks on your system, simply execute the executable `installer`.
+To install Githooks on your system, simply execute `cli installer`.
 It will guide you through the installation process.
 Check the `cli installer --help` for available options. Some of them are described below:
 
