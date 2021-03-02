@@ -21,7 +21,7 @@ import (
 // Others will fail and need a special deploy settings config file.
 func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySettings, error) {
 
-	publicPGP, err := build.Asset(path.Join("githooks", ".deploy-pgp"))
+	publicPGP, err := build.Asset("embedded/.deploy-pgp")
 	cm.AssertNoErrorPanic(err, "Could not get embedded deploy PGP.")
 
 	isLocal := git.IsCloneURLALocalPath(cloneURL) ||

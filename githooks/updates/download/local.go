@@ -4,7 +4,6 @@ import (
 	"bytes"
 	cm "gabyx/githooks/common"
 	"html/template"
-	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -69,7 +68,7 @@ func (s *LocalDeploySettings) Download(versionTag string, dir string) error {
 
 	// Read the checksumFile into memory
 	checksumFile := path.Join(targetDir, githooksChecksumFile)
-	checksumBytes, err := ioutil.ReadFile(checksumFile)
+	checksumBytes, err := os.ReadFile(checksumFile)
 	if err != nil {
 		return err
 	}

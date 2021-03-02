@@ -4,7 +4,6 @@ import (
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/git"
 	strs "gabyx/githooks/strings"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -86,7 +85,7 @@ func GetBugReportingInfo(repoPath string) (info string, err error) {
 		exists, err = cm.IsPathExisting(file)
 
 		if exists {
-			data, err := ioutil.ReadFile(file)
+			data, err := os.ReadFile(file)
 			if err == nil {
 				info = string(data)
 			}
@@ -234,7 +233,7 @@ func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
 
 	disabled := gitx.GetConfig(GitCKDisable, git.Traverse)
 
-	return disabled == "true" || // nolint: goconst
+	return disabled == git.GitCVTrue || // nolint: goconst
 		disabled == "y" || // Legacy
 		disabled == "Y" // Legacy
 }

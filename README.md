@@ -1,5 +1,5 @@
 <img src="docs/githooks-logo.svg" style="margin-left: 20pt" align="right">
-<h1>Githooks <span style="font-size:12pt">on Steroids</span></h1>
+<h1>Githooks <font size="3">on Steroids</font></h1>
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
@@ -8,6 +8,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 ![Git Version](https://img.shields.io/badge/Git-%E2%89%A5v.2.28.0-blue)
+![Git Version](https://img.shields.io/badge/Go-1.16-blue)
 
 **STILL BETA: Any changes without notice!**
 
@@ -32,8 +33,8 @@ Also it searches for hooks in configured shared hook repositories.
   Fully configurable for your own company by url/branch and deploy settings.
 - **Bonus:** [Platform-independent dialog tool](#dialog-tool) for user prompts inside your own hooks.
 
-<!-- TOC ignore:true -->
-## Table of Contents
+<details>
+<summary><b>Table of Content (click to expand)</b></summary>
 <!-- TOC -->
 
 - [Layout and Options](#layout-and-options)
@@ -80,6 +81,7 @@ Also it searches for hooks in configured shared hook repositories.
 - [License](#license)
 
 <!-- /TOC -->
+</details>
 
 ## Layout and Options
 
@@ -122,7 +124,7 @@ in parallel over the thread pool. See [Parallel Execution](#parallel-execution) 
 
 You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list`
 (a globally configured Git alias `alias.hooks`) to list all hooks and their current state that apply to
-the current repository.
+the current repository. For this repository this [looks like the following.](docs/githooks-list.png)
 
 ## Execution
 

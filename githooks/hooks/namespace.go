@@ -2,7 +2,7 @@ package hooks
 
 import (
 	cm "gabyx/githooks/common"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 )
@@ -24,7 +24,7 @@ func GetHooksNamespace(hookDir string) (s string, err error) {
 	f := getNamespaceFile(hookDir)
 	if cm.IsFile(f) {
 		var data []byte
-		data, err = ioutil.ReadFile(f)
+		data, err = os.ReadFile(f)
 		s = strings.TrimSpace(string(data))
 	}
 

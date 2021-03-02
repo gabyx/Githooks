@@ -1,7 +1,7 @@
 package common
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/goccy/go-yaml"
@@ -15,7 +15,7 @@ func LoadYAML(file string, repr interface{}) error {
 	}
 	defer yamlFile.Close()
 
-	bytes, err := ioutil.ReadAll(yamlFile)
+	bytes, err := io.ReadAll(yamlFile)
 	if err != nil {
 		return CombineErrors(err, ErrorF("Could not read file '%s'.", file))
 	}

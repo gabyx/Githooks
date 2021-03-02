@@ -9,7 +9,6 @@ import (
 	"gabyx/githooks/prompt"
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
-	"io/ioutil"
 
 	"os"
 	"path"
@@ -160,7 +159,7 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
 	}
 
-	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCKFailOnNonExistingSharedHooks, git.Traverse) == "true"
+	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCKFailOnNonExistingSharedHooks, git.Traverse) == git.GitCVTrue
 
 	s := HookSettings{
 		Args:               os.Args[2:],
@@ -864,7 +863,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Dump execution sequence.
 	if cm.IsDebug {
-		file, err := ioutil.TempFile("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
+		file, err := os.CreateTemp("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
 		log.AssertNoErrorPanic(err, "Failed to create execution log.")
 		defer file.Close()
 		err = hs.StoreJSON(file)

@@ -1,13 +1,12 @@
 module gabyx/githooks
 
-go 1.15
+go 1.16
 
 require (
 	code.gitea.io/sdk/gitea v0.13.2
 	github.com/agext/regexp v1.3.0
 	github.com/bmatcuk/doublestar/v3 v3.0.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/goccy/go-yaml v1.8.8
 	github.com/google/go-github/v33 v33.0.0
 	github.com/google/uuid v1.2.0

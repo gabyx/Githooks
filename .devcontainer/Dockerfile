@@ -1,4 +1,4 @@
-FROM golang:1.15.8-alpine
+FROM golang:1.16-alpine
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=1000

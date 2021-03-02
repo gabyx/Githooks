@@ -1,10 +1,8 @@
-//go:generate go run -mod=vendor ../../tools/embed-files.go
-
 package gui
 
 import (
 	"context"
-	"gabyx/githooks/apps/dialog/build"
+	"embed"
 	cm "gabyx/githooks/common"
 	strs "gabyx/githooks/strings"
 	"os/exec"
@@ -13,10 +11,13 @@ import (
 	"text/template"
 )
 
+//go:embed osascripts
+var osascripts embed.FS
+
 func RunOSAScript(ctx context.Context, script string, data interface{}, workingDir string) ([]byte, error) {
 	var buf strings.Builder
 
-	tmpl, err := build.Asset(path.Join("gui/darwin/osascripts", script+".js.tmpl"))
+	tmpl, err := osascripts.ReadFile(path.Join("osascripts", script+".js.tmpl"))
 	cm.AssertNoErrorPanic(err, "Template not embedded.")
 	template, err := template.New("").Funcs(templateFuncs).Parse(string(tmpl))
 	cm.AssertNoErrorPanic(err, "Template '%s' invalid.", script)

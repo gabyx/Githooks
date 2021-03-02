@@ -580,6 +580,6 @@ func GetFailOnNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) (
 	case strs.IsEmpty(conf):
 		return
 	default:
-		return conf == "true", true
+		return conf == git.GitCVTrue, true
 	}
 }

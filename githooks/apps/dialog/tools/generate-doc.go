@@ -8,7 +8,6 @@ import (
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/git"
 	strs "gabyx/githooks/strings"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -22,7 +21,7 @@ type RegRepl struct {
 }
 
 func writeRegexRepl(file string, repls ...RegRepl) error {
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -33,7 +32,7 @@ func writeRegexRepl(file string, repls ...RegRepl) error {
 		data = r.Regex.ReplaceAllString(data, r.Repl)
 	}
 
-	return ioutil.WriteFile(file, []byte(data), cm.DefaultFileModeFile)
+	return os.WriteFile(file, []byte(data), cm.DefaultFileModeFile)
 
 }
 

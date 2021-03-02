@@ -21,7 +21,7 @@ const (
 // IsBareRepo returns `true` if `c.Cwd` is a bare repository.
 func (c *Context) IsBareRepo() bool {
 	out, _ := c.Get("rev-parse", "--is-bare-repository")
-	return out == "true" // nolint:nlreturn
+	return out == GitCVTrue // nolint:nlreturn
 }
 
 // IsGitRepo returns `true` if `path` is a git repository (bare or non-bare).
@@ -33,7 +33,7 @@ func (c *Context) IsGitRepo() bool {
 func (c *Context) IsGitDir() bool {
 	s, err := c.Get("rev-parse", "--is-inside-git-dir")
 
-	return err == nil && s == "true"
+	return err == nil && s == GitCVTrue
 }
 
 // GetAllWorktrees returns all worktrees based on the current context's working directory.

@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -55,7 +54,7 @@ func WriteJSON(writer io.Writer, repr interface{}) error {
 
 // ReadJSON reads the JSON representation of `repr` from `reader`.
 func ReadJSON(reader io.Reader, repr interface{}) error {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}

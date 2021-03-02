@@ -1,5 +1,3 @@
-//go:generate go run -mod=vendor ../../tools/embed-files.go
-
 package installer
 
 import (
@@ -14,7 +12,6 @@ import (
 	strs "gabyx/githooks/strings"
 	"gabyx/githooks/updates"
 	"gabyx/githooks/updates/download"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -348,9 +345,9 @@ func getDeploySettings(
 	return deploySettings
 }
 
-func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
+func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, args *Arguments) bool {
 
-	skipPrerelease := !(git.Ctx().GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == "true")
+	skipPrerelease := !(gitx.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue)
 
 	var status updates.ReleaseStatus
 	var err error
@@ -394,13 +391,16 @@ func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bo
 
 		log.Info("Getting Githooks binaries...")
 
-		tempDir, err := ioutil.TempDir(os.TempDir(), "*-githooks-update")
+		tempDir, err := os.MkdirTemp(os.TempDir(), "*-githooks-update")
 		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
 		defer os.RemoveAll(tempDir)
 
-		if args.BuildFromSource {
+		buildFromSrc := args.BuildFromSource ||
+			gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
 
-			log.Info("Building from clone...")
+		if buildFromSrc {
+
+			log.Info("Building from source...")
 			binaries = buildFromSource(
 				log,
 				args.BuildTags,
@@ -446,7 +446,7 @@ func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments)
 
 	log.Info("Dispatching to new installer ...")
 
-	file, err := ioutil.TempFile("", "*install-config.json")
+	file, err := os.CreateTemp("", "*install-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
 	defer os.Remove(file.Name())
 
@@ -477,7 +477,7 @@ func findGitHookTemplates(
 	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 	haveInstall := strs.IsNotEmpty(installUsesCoreHooksPath)
 
-	hookTemplateDir, err := install.FindHookTemplateDir(useCoreHooksPath || installUsesCoreHooksPath == "true")
+	hookTemplateDir, err := install.FindHookTemplateDir(useCoreHooksPath || installUsesCoreHooksPath == git.GitCVTrue)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 	if err == nil && strs.IsNotEmpty(hookTemplateDir) {
 		return hookTemplateDir, ""
@@ -1231,7 +1231,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	}
 
 	if !args.InternalPostDispatch {
-		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {
+		if isDispatched := prepareDispatch(log, ctx.GitX, &settings, &args); isDispatched {
 			return
 		}
 	}

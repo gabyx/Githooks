@@ -2,7 +2,7 @@
 
 if command -v "gsed" ; then
     SED="gsed"
-else 
+else
     SED="sed"
 fi
 
@@ -22,7 +22,7 @@ for HOOK_NAME in $HOOK_NAMES; do
     # shellcheck disable=SC2015
     $SED -e "s|GITHOOKS_RUNNER=.*|GITHOOKS_RUNNER=\"\$(cd \"\$(dirname \"\$0\")/../\" \&\& pwd)/githooks/bin/runner\"|" \
         -e "s|\(various Git triggers.*\)|\1\n#\n# This file is auto-generated, do not edit!|" \
-        <githooks/run-wrapper.sh >"hooks/$HOOK_NAME" &&
+        <githooks/build/embedded/run-wrapper.sh >"hooks/$HOOK_NAME" &&
         chmod u+x "hooks/$HOOK_NAME" &&
         git add hooks/* ||
         {

@@ -6,4 +6,7 @@ const (
 
 	// GitCKCoreHooksPath is the Git global hooks path config key.
 	GitCKCoreHooksPath = "core.hooksPath"
+
+	GitCVTrue  = "true"
+	GitCVFalse = "false"
 )

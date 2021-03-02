@@ -24,9 +24,9 @@ func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
 func GetAutomaticUpdateCheckSettings() (enabled bool, isSet bool) {
 	conf := git.Ctx().GetConfig(hooks.GitCKAutoUpdateEnabled, git.GlobalScope)
 	switch {
-	case conf == "true":
+	case conf == git.GitCVTrue:
 		return true, true
-	case conf == "false":
+	case conf == git.GitCVFalse:
 		return false, true
 	default:
 		return false, false

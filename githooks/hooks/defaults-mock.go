@@ -11,5 +11,5 @@ const (
 )
 
 func AllowLocalURLInRepoSharedHooks() bool {
-	return git.Ctx().GetConfig("githooks.testingTreatFileProtocolAsRemote", git.Traverse) == "true"
+	return git.Ctx().GetConfig("githooks.testingTreatFileProtocolAsRemote", git.Traverse) == git.GitCVTrue
 }
