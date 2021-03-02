@@ -23,7 +23,7 @@ builds:
     goarch: &GOARCH
       - amd64
       - arm64
-    ignore:
+    ignore: &IGNORE
       - goos: dragonfly
         goarch: arm64
       - goos: illumos
@@ -42,12 +42,14 @@ builds:
     env: *ENV
     goos: *GOOS
     goarch: *GOARCH
+    ignore: *IGNORE
   - id: dialog
     binary: dialog
     main: ./apps/dialog
     env: *ENV
     goos: *GOOS
     goarch: *GOARCH
+    ignore: *IGNORE
 archives:
   - id: githooks
     builds:
