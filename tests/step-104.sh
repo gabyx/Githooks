@@ -27,7 +27,7 @@ if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" tools register dialog ./tool; then
 fi
 
 # Trigger dialog, by triggering the trust prompt
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config trusted --deny; then
+if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --deny; then
     echo "! Failed to set trust setting"
     exit 5
 fi

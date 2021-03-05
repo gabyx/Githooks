@@ -12,6 +12,7 @@ func runDialogToolOptions(
 	tool ToolContext,
 	title string,
 	text string,
+	defaultAnswer string,
 	defaultOptionIdx int,
 	options []string,
 	longOptions []string) (ans string, err error) {
@@ -19,17 +20,21 @@ func runDialogToolOptions(
 	cm.PanicIfF(!tool.IsSetup(), "Tool context is not setup.")
 	cm.PanicIfF(defaultOptionIdx >= len(longOptions), "Wrong index.")
 
+	args := []string{
+		"options",
+		"--title", title,
+		"--text", text}
+
+	if defaultOptionIdx >= 0 {
+		args = append(args, "--default-option", strs.Fmt("%v", defaultOptionIdx))
+	}
+
 	var opts []string
 	for _, o := range longOptions {
 		opts = append(opts, "--option", o)
 	}
 
-	args := append([]string{
-		"options",
-		"--title", title,
-		"--text", text,
-		"--default-option", strs.Fmt("%v", defaultOptionIdx)},
-		opts...)
+	args = append(args, opts...)
 
 	ans, err = cm.GetOutputFromExecutableTrimmed(tool.execCtx, tool.tool, nil, args...)
 
@@ -40,7 +45,7 @@ func runDialogToolOptions(
 	}
 
 	if err != nil {
-		return options[defaultOptionIdx], err
+		return defaultAnswer, err
 	}
 
 	ans = strings.ToLower(ans)
@@ -51,7 +56,7 @@ func runDialogToolOptions(
 		err = cm.ErrorF("Dialog tool returned wrong index '%v' (< '%v')",
 			ans, len(longOptions))
 
-		return options[defaultOptionIdx], err
+		return defaultAnswer, err
 	}
 
 	return options[idx], nil
@@ -90,21 +95,17 @@ func showOptionsTool(
 	p *Context,
 	title string,
 	text string,
+	defaultAnswer string,
 	defaultOptionIdx int,
 	options []string,
 	longOptions []string,
 	validator AnswerValidator) (string, error) {
 
-	defaultAnswer := ""
-	if defaultOptionIdx >= 0 {
-		defaultAnswer = options[defaultOptionIdx]
-	}
-
 	return showPromptLoop(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return runDialogToolOptions(p.tool, title, text, defaultOptionIdx, options, longOptions)
+			return runDialogToolOptions(p.tool, title, text, defaultAnswer, defaultOptionIdx, options, longOptions)
 		},
 		validator,
 		false)

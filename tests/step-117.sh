@@ -96,7 +96,7 @@ if "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list --shared | grep -q "shared-clone"
     exit 1
 fi
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trusted --accept || exit 1
+"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
 
 # shellcheck disable=SC2012

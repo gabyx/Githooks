@@ -27,7 +27,7 @@ git hooks config
 * [git hooks config list](git_hooks_config_list.md)	 - Lists settings of the Githooks configuration.
 * [git hooks config search-dir](git_hooks_config_search-dir.md)	 - Changes the search directory used during installation.
 * [git hooks config shared](git_hooks_config_shared.md)	 - Updates the list of local or global shared hook repositories.
-* [git hooks config trusted](git_hooks_config_trusted.md)	 - Change trust settings in the current repository.
+* [git hooks config trust-all](git_hooks_config_trust-all.md)	 - Change trust settings in the current repository.
 * [git hooks config update](git_hooks_config_update.md)	 - Change Githooks update settings.
 * [git hooks config update-time](git_hooks_config_update-time.md)	 - Changes the Githooks update time.
 

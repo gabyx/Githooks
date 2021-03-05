@@ -78,7 +78,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 When called without arguments, it marks the local repository as trusted.
 
 The 'revoke' argument resets the already accepted trust setting,
-and the 'delete' argument also deletes the trusted marker.
+and the 'delete' argument also deletes the trust marker.
 
 The 'forget' option unsets the trust setting, asking for accepting
 it again next time, if the repository is marked as trusted.`,

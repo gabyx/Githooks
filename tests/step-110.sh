@@ -37,7 +37,7 @@ echo "Setup shared hook in server repo"
 cd "$GH_TEST_TMP/test110/server" || exit 1
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared add file://"$GH_TEST_TMP/test110/hooks" || exit 1
 echo "Setup shared hook in server repo: set trusted"
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trusted --accept || exit 1
+"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
 echo "Setup shared hook in server repo: update shared"
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
 

@@ -35,6 +35,7 @@ func showOptions(
 			p,
 			formatTitleQuestion(p),
 			text,
+			defaultAnswer,
 			defaultOptionIdx,
 			options,
 			longOptions,
@@ -56,6 +57,7 @@ func showOptions(
 			p,
 			formatTitleQuestion(p),
 			text,
+			defaultAnswer,
 			defaultOptionIdx,
 			options, longOptions,
 			validator)

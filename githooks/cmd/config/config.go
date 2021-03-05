@@ -332,7 +332,7 @@ func runUpdateTime(ctx *ccm.CmdContext, opts *SetOptions) {
 	}
 }
 
-func runTrust(ctx *ccm.CmdContext, opts *SetOptions) {
+func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
 	switch {
 	case opts.Set:
@@ -575,16 +575,16 @@ func configCloneBranchCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, cloneBranchCmd))
 }
 
-func configTrustCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
+func configTrustAllHooksCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
 	trustCmd := &cobra.Command{
-		Use:   "trusted [flags]",
+		Use:   "trust-all [flags]",
 		Short: "Change trust settings in the current repository.",
 		Long: `Change the trust setting in the current repository.
 
 This command needs to be run at the root of a repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runTrust(ctx, setOpts)
+			runTrustAllHooks(ctx, setOpts)
 		}}
 
 	optsPSUR := createOptionMap(true, true, true)
@@ -747,7 +747,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	configListCmd(ctx, configCmd, &gitOpts)
 	configDisableCmd(ctx, configCmd, &setOpts, &gitOpts)
-	configTrustCmd(ctx, configCmd, &setOpts)
+	configTrustAllHooksCmd(ctx, configCmd, &setOpts)
 
 	configSearchDirCmd(ctx, configCmd, &setOpts)
 	configUpdateCmd(ctx, configCmd, &setOpts)
