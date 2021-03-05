@@ -61,11 +61,12 @@ Also it searches for hooks in configured shared hook repositories.
     - [Install from different URL and Branch](#install-from-different-url-and-branch)
     - [No Installation](#no-installation)
     - [Install on the Server](#install-on-the-server)
-    - [Setup for Bare Repositories](#setup-for-bare-repositories)
+        - [Setup for Bare Repositories](#setup-for-bare-repositories)
     - [Templates or Global Hooks](#templates-or-global-hooks)
         - [Template Folder init.templateDir](#template-folder-inittemplatedir)
         - [Global Hooks Location core.hooksPath](#global-hooks-location-corehookspath)
     - [Updates](#updates)
+        - [Update Mechanics](#update-mechanics)
     - [Custom User Prompt](#custom-user-prompt)
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
@@ -577,9 +578,9 @@ The global template directory then **only** maintain contains the following run-
 - `pre-auto-gc`
 
 which get deployed with `git init` or `git clone` automatically.
-See also the [setup for bare repositories](#setup-bare).
+See also the [setup for bare repositories](#setup-for-bare-repositories).
 
-### Setup for Bare Repositories
+#### Setup for Bare Repositories
 
 Because bare repositories mostly live on a server, you should setup the following if
 you use a shared hooks repository (can live on the same server, see [shared URLs](#supported-urls))
@@ -650,8 +651,8 @@ You don't need to initialize `git lfs install`, because they presumably be alrea
 
 ### Updates
 
-You can update the scripts any time by running one of the install commands above. It will simply overwrite the run-wrappers
-with the new ones, and if you opt-in to install into existing local repositories, those will get overwritten too.
+You can update the Githooks any time by running one of the install commands above. It will simply overwrite the template run-wrappers
+with the new ones, and if you opt-in to install into existing or registered local repositories, those will get overwritten too.
 
 You can also enable automatic update checks during the installation, that is executed once a day after a successful commit.
 It checks for a new version and asks whether you want to install it. It then downloads the binaries and dispatches
@@ -666,6 +667,15 @@ $ git hooks update --enable # `Config: githooks.autoUpdateEnabled`
 # disable with:
 $ git hooks update --disable
 ```
+
+#### Update Mechanics
+
+The update machanism works by tracking the tags on the Git branch (chosen at install time) which is checked out in `<installDir>/release`.
+Normally, if there are new tags (versions) available, the newest tag (version) is installed. However, [prerelease version](https://semver.org) tags (e.g. `v1.0.0-rc1`)
+are generally skipped. You can disable this behavior by setting the global Git config value `githooks.autoUpdateUsePrerelease = true`.
+
+If the annotated version tag or the commit message it points to (`git tag -l --format=%(contents) <tag>`) contains a trailing header which matches the regex `Update-NoSkip:\s+true`, than this version **will not be skipped**.
+This feature enables to enforce an update to a specific version. In some cases this is useful (serialization changes etc.).
 
 You can also check for updates at any time by executing
 [`git hooks update`](docs/cli/git_hooks_update.md) or using
