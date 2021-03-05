@@ -20,8 +20,10 @@ type HookSettings struct {
 	HookName string // Name of the hook.
 	HookDir  string // Directory of the hook.
 
-	IsRepoTrusted                bool // If the repository is a trusted repository.
-	FailOnNonExistingSharedHooks bool // If Githooks should fail if there are shared hooks demanded which are not existing.
+	IsRepoTrusted              bool // If the repository is a trusted repository.
+	SkipNonExistingSharedHooks bool // If Githooks should skip non-existing shared hooks.
+	SkipUntrustedHooks         bool // If Githooks should skip active untrusted hooks.
+	NonInteractive             bool // If all non-fatal prompts should be default answered.
 }
 
 func (s HookSettings) toString() string {

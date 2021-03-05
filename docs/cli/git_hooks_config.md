@@ -23,10 +23,12 @@ git hooks config
 * [git hooks config clone-url](git_hooks_config_clone-url.md)	 - Changes the Githooks clone url used for any update.
 * [git hooks config delete-detected-lfs-hooks](git_hooks_config_delete-detected-lfs-hooks.md)	 - Change the behavior for detected LFS hooks during install.
 * [git hooks config disable](git_hooks_config_disable.md)	 - Disables Githooks in the current repository or globally.
-* [git hooks config fail-on-non-existing-shared-hooks](git_hooks_config_fail-on-non-existing-shared-hooks.md)	 - Updates the list of local or global shared hook repositories.
 * [git hooks config list](git_hooks_config_list.md)	 - Lists settings of the Githooks configuration.
+* [git hooks config non-interactive-runner](git_hooks_config_non-interactive-runner.md)	 - Enables/disables non-interactive execution of the runner.
 * [git hooks config search-dir](git_hooks_config_search-dir.md)	 - Changes the search directory used during installation.
 * [git hooks config shared](git_hooks_config_shared.md)	 - Updates the list of local or global shared hook repositories.
+* [git hooks config skip-non-existing-shared-hooks](git_hooks_config_skip-non-existing-shared-hooks.md)	 - Enable or disable skipping non-existing shared hooks.
+* [git hooks config skip-untrusted-hooks](git_hooks_config_skip-untrusted-hooks.md)	 - Enable/disable skipping active, untrusted hooks.
 * [git hooks config trust-all](git_hooks_config_trust-all.md)	 - Change trust settings in the current repository.
 * [git hooks config update](git_hooks_config_update.md)	 - Change Githooks update settings.
 * [git hooks config update-time](git_hooks_config_update-time.md)	 - Changes the Githooks update time.

@@ -24,7 +24,6 @@ const (
 	GitCKGoExecutable    = "githooks.goExecutable"
 
 	GitCKDeleteDetectedLFSHooksAnswer = "githooks.deleteDetectedLFSHooks"
-	GitCKFailOnNonExistingSharedHooks = "githooks.failOnNonExistingSharedHooks"
 
 	GitCKUseCoreHooksPath        = "githooks.useCoreHooksPath"
 	GitCKPathForUseCoreHooksPath = "githooks.pathForUseCoreHooksPath"
@@ -45,6 +44,11 @@ const (
 const (
 	GitCKShared               = "githooks.shared"
 	GitCKSharedUpdateTriggers = "githooks.sharedHooksUpdateTriggers"
+
+	GitCKSkipNonExistingSharedHooks = "githooks.skipNonExistingSharedHooks"
+	GitCKSkipUntrustedHooks         = "githooks.skipUntrustedHooks"
+
+	GitCKRunnerIsNonInteractive = "githooks.runnerIsNonInteractive"
 )
 
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
@@ -73,7 +77,6 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKBuildFromSource,
 
 		GitCKDeleteDetectedLFSHooksAnswer,
-		GitCKFailOnNonExistingSharedHooks,
 
 		GitCKUseCoreHooksPath,
 		GitCKPathForUseCoreHooksPath,
@@ -82,9 +85,14 @@ func GetGlobalGitConfigKeys() []string {
 
 		GitCKAliasHooks,
 
-		// User and global.
+		// Local & global.
 		GitCKShared,
-		GitCKSharedUpdateTriggers}
+		GitCKSharedUpdateTriggers,
+
+		GitCKSkipNonExistingSharedHooks,
+		GitCKSkipUntrustedHooks,
+
+		GitCKRunnerIsNonInteractive}
 }
 
 // GetLocalGitConfigKeys gets all local git config keys relevant for Githooks.
@@ -94,5 +102,10 @@ func GetLocalGitConfigKeys() []string {
 		GitCKTrustAll,
 
 		GitCKShared,
-		GitCKSharedUpdateTriggers}
+		GitCKSharedUpdateTriggers,
+
+		GitCKSkipNonExistingSharedHooks,
+		GitCKSkipUntrustedHooks,
+
+		GitCKRunnerIsNonInteractive}
 }

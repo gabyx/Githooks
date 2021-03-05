@@ -159,7 +159,9 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
 	}
 
-	failOnNonExistingHooks := gitx.GetConfig(hooks.GitCKFailOnNonExistingSharedHooks, git.Traverse) == git.GitCVTrue
+	nonInteractive := hooks.IsRunnerNonInteractive(gitx, git.Traverse)
+	skipNonExistingSharedHooks, _ := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
+	skipUntrustedHooks, _ := hooks.SkipUntrustedHooks(gitx, git.Traverse)
 
 	s := HookSettings{
 		Args:               os.Args[2:],
@@ -176,7 +178,9 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 		IsRepoTrusted: isTrusted,
 
-		FailOnNonExistingSharedHooks: failOnNonExistingHooks}
+		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
+		SkipUntrustedHooks:         skipUntrustedHooks,
+		NonInteractive:             nonInteractive}
 
 	log.DebugF(s.toString())
 
@@ -244,10 +248,10 @@ func showTrustRepoPrompt(gitx *git.Context, promptCtx prompt.IContext) (isTruste
 		"Do you want to allow running every current and future hooks?"
 
 	var answer string
-	answer, err := promptCtx.ShowOptions(question, "(yes, No)", "y/N", "Yes", "No")
-	log.AssertNoErrorF(err, "Could not show prompt.")
+	answer, err := promptCtx.ShowOptions(question, "(yes, no)", "y/n", "Yes", "No")
+	log.AssertNoErrorPanicF(err, "Could not get trust prompt answer.")
 
-	if err == nil && answer == "y" || answer == "Y" {
+	if answer == "y" || answer == "Y" {
 		err := hooks.SetTrustAllSetting(gitx, true, false)
 		log.AssertNoErrorF(err, "Could not store trust setting.")
 		isTrusted = true
@@ -292,6 +296,11 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		return
 	}
 
+	opts := []string{"--internal-auto-update"}
+	if settings.NonInteractive {
+		opts = append(opts, "--non-interactive")
+	}
+
 	updateAvailable, accepted, err := updates.RunUpdate(
 		settings.InstallDir,
 		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, false),
@@ -299,7 +308,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 			return updates.RunUpdateOverExecutable(settings.InstallDir,
 				&settings.ExecX,
 				cm.UseStreams(nil, log.GetInfoWriter(), log.GetErrorWriter()),
-				"--internal-auto-update")
+				opts...)
 		})
 
 	log.AssertNoErrorPanic(err, "Running update failed.")
@@ -409,10 +418,20 @@ func executeOldHook(settings *HookSettings,
 	}
 
 	hook := hooks[0]
+
 	if hook.Active && !hook.Trusted {
-		// Active hook, but not trusted:
-		// Show trust prompt to let user trust it or disable.
-		showTrustPrompt(uiSettings, checksums, &hook)
+		if !settings.NonInteractive {
+			// Active hook, but not trusted:
+			// Show trust prompt to let user trust it or disable it.
+			showTrustPrompt(uiSettings, checksums, &hook)
+		}
+
+		log.PanicIf(!settings.SkipUntrustedHooks && hook.Active && !hook.Trusted,
+			"Hook '%s' is active and needs to be trusted first.\n"+
+				"Either trust the hook or disable it, or skip active,\n"+
+				"untrusted hooks by running:\n"+
+				"  $ git hooks config skip-untrusted-hooks --enable",
+			hook.NamespacePath)
 	}
 
 	if !hook.Active || !hook.Trusted {
@@ -490,7 +509,7 @@ func getRepoSharedHooks(
 	shared, err := hooks.LoadRepoSharedHooks(settings.InstallDir, settings.RepositoryDir)
 
 	if err != nil {
-		log.ErrorOrPanicF(settings.FailOnNonExistingSharedHooks, err,
+		log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks, err,
 			"Repository shared hooks are demanded but failed "+
 				"to parse the file:\n'%s'",
 			hooks.GetRepoSharedFile(settings.RepositoryDir))
@@ -531,7 +550,7 @@ func getConfigSharedHooks(
 	}
 
 	if err != nil {
-		log.ErrorOrPanicF(settings.FailOnNonExistingSharedHooks,
+		log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks,
 			err,
 			"Shared hooks are demanded but failed "+
 				"to parse the %s config:\n'%s'",
@@ -597,11 +616,11 @@ func checkSharedHook(
 			mess += "It does not exist."
 		}
 
-		if !settings.FailOnNonExistingSharedHooks {
+		if settings.SkipNonExistingSharedHooks {
 			mess += "\nContinuing..."
 		}
 
-		log.ErrorOrPanicF(settings.FailOnNonExistingSharedHooks, err, mess, hook.OriginalURL)
+		log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks, err, mess, hook.OriginalURL)
 
 		return false
 	}
@@ -620,11 +639,11 @@ func checkSharedHook(
 				"  $ git hooks shared purge\n" +
 				"  $ git hooks shared update"
 
-			if !settings.FailOnNonExistingSharedHooks {
+			if settings.SkipNonExistingSharedHooks {
 				mess += "\nContinuing..."
 			}
 
-			log.ErrorOrPanicF(settings.FailOnNonExistingSharedHooks,
+			log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks,
 				nil, mess, hook.OriginalURL, url)
 
 			return false
@@ -706,9 +725,19 @@ func getHooksIn(
 		hook := &allHooks[i]
 
 		if hook.Active && !hook.Trusted {
-			// Active hook, but not trusted:
-			// Show trust prompt to let user trust it or disable.
-			showTrustPrompt(uiSettings, checksums, hook)
+
+			if !settings.NonInteractive {
+				// Active hook, but not trusted:
+				// Show trust prompt to let user trust it or disable it.
+				showTrustPrompt(uiSettings, checksums, hook)
+			}
+
+			log.PanicIf(!settings.SkipUntrustedHooks && hook.Active && !hook.Trusted,
+				"Hook '%s' is active and needs to be trusted first.\n"+
+					"Either trust the hook or disable it, or skip active,\n"+
+					"untrusted hooks by running:\n"+
+					"  $ git hooks config skip-untrusted-hooks --enable",
+				hook.NamespacePath)
 		}
 
 		if !hook.Active || !hook.Trusted {
@@ -791,10 +820,10 @@ func showTrustPrompt(
 		question := mess + "\nDo you accept the changes?"
 
 		answer, err := uiSettings.PromptCtx.ShowOptions(question,
-			"(Yes, all, no, disable)",
-			"Y/a/n/d",
+			"(yes, all, no, disable)",
+			"y/a/n/d",
 			"Yes", "All", "No", "Disable")
-		log.AssertNoError(err, "Could not show prompt.")
+		log.AssertNoErrorPanic(err, "Could not get trust prompt answer.")
 
 		switch answer {
 		case "a":

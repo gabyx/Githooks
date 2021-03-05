@@ -563,19 +563,19 @@ func (s *SharedRepo) IsCloneValid() bool {
 	return false
 }
 
-// SetFailOnNonExistingSharedHooks sets settings if the hook runner should fail on non existing hooks.
-func SetFailOnNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+// SetSkipNonExistingSharedHooks sets settings if the hook runner should fail on non existing hooks.
+func SetSkipNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
 	switch {
 	case reset:
-		return gitx.UnsetConfig(GitCKFailOnNonExistingSharedHooks, scope)
+		return gitx.UnsetConfig(GitCKSkipNonExistingSharedHooks, scope)
 	default:
-		return gitx.SetConfig(GitCKFailOnNonExistingSharedHooks, enable, scope)
+		return gitx.SetConfig(GitCKSkipNonExistingSharedHooks, enable, scope)
 	}
 }
 
-// GetFailOnNonExistingSharedHooks gets the settings if the hook runner should fail on non existing hooks.
-func GetFailOnNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) (enabled bool, isSet bool) {
-	conf := gitx.GetConfig(GitCKFailOnNonExistingSharedHooks, scope)
+// SkipNonExistingSharedHooks gets the settings if the hook runner should fail on non existing hooks.
+func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) (enabled bool, isSet bool) {
+	conf := gitx.GetConfig(GitCKSkipNonExistingSharedHooks, scope)
 	switch {
 	case strs.IsEmpty(conf):
 		return
