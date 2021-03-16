@@ -2,6 +2,10 @@
 # Test:
 #   Git worktrees: list hooks
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test099/.git/hooks" &&

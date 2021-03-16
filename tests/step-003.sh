@@ -2,11 +2,18 @@
 # Test:
 #   Run a simple install and verify multiple hooks trigger properly
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 # run the default install
 "$GH_TEST_BIN/cli" installer || exit 1
 
-mkdir -p "$GH_TEST_TMP/test3" && cd "$GH_TEST_TMP/test3" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test3" &&
+    cd "$GH_TEST_TMP/test3" &&
+    git init || exit 1
 
 # set up 2 pre-commit hooks, execute them and verify that they worked
 mkdir -p .githooks/pre-commit &&

@@ -2,13 +2,23 @@
 # Test:
 #   Run an install, skipping the intro README files
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
 fi
 
-mkdir -p "$GH_TEST_TMP/test045/001" && cd "$GH_TEST_TMP/test045/001" && git init || exit 1
-mkdir -p "$GH_TEST_TMP/test045/002" && cd "$GH_TEST_TMP/test045/002" && git init || exit 1
+mkdir -p "$GH_TEST_TMP/test045/001" &&
+    cd "$GH_TEST_TMP/test045/001" &&
+    git init || exit 1
+mkdir -p "$GH_TEST_TMP/test045/002" &&
+    cd "$GH_TEST_TMP/test045/002" &&
+    git init || exit 1
 
 cd "$GH_TEST_TMP/test045" || exit 1
 

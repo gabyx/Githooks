@@ -2,6 +2,12 @@
 # Test:
 #   Cli tool: manage global shared hook repositories
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
@@ -18,7 +24,9 @@ mkdir -p "$GH_TEST_TMP/shared/first-shared.git/.githooks/pre-commit" &&
     (cd "$GH_TEST_TMP/shared/third-shared.git" && git init && git add . && git commit -m 'Testing') ||
     exit 1
 
-mkdir -p "$GH_TEST_TMP/test082" && cd "$GH_TEST_TMP/test082" && git init || exit 1
+mkdir -p "$GH_TEST_TMP/test082" &&
+    cd "$GH_TEST_TMP/test082" &&
+    git init || exit 1
 
 testShared() {
 

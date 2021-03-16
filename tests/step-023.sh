@@ -2,6 +2,12 @@
 # Test:
 #   Run an install with multiple shared hooks set up, and verify those trigger properly
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 mkdir -p "$GH_TEST_TMP/shared/hooks-023-a.git/pre-commit" &&
     echo "echo 'From shared hook A' >> '$GH_TEST_TMP/test-023.out'" \
         >"$GH_TEST_TMP/shared/hooks-023-a.git/pre-commit/say-hello" &&
@@ -43,8 +49,9 @@ fi
 
 git config --global --get-all githooks.shared | grep -v 'some-previous-example' || exit 1
 
-mkdir -p "$GH_TEST_TMP/test023" && cd "$GH_TEST_TMP/test023" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test023" &&
+    cd "$GH_TEST_TMP/test023" &&
+    git init || exit 1
 
 # verify that the hooks are installed and are working
 git commit -m '' 2>/dev/null

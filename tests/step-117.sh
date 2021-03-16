@@ -2,6 +2,10 @@
 # Test:
 #   Test urls and local paths in shared hooks
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"
     exit 1

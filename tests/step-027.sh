@@ -2,8 +2,13 @@
 # Test:
 #   Direct runner execution: do not run disabled hooks
 
-mkdir -p "$GH_TEST_TMP/test27" && cd "$GH_TEST_TMP/test27" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+mkdir -p "$GH_TEST_TMP/test27" &&
+    cd "$GH_TEST_TMP/test27" &&
+    git init || exit 1
 
 mkdir -p .githooks &&
     mkdir -p .githooks/pre-commit &&

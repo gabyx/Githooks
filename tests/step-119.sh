@@ -2,6 +2,12 @@
 # Test:
 #   Direct runner execution: execute in parallel and check priority list and sequence.
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/shared-119.git/githooks/pre-commit" &&

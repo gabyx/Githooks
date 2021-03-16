@@ -2,6 +2,12 @@
 # Test:
 #   Fail on not available shared hooks.
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
 if ! "$GH_TEST_BIN/cli" installer; then
@@ -18,8 +24,10 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-103.git/pre-commit" &&
     exit 1
 
 # Install shared hook url into a repo.
-mkdir -p "$GH_TEST_TMP/test103" && cd "$GH_TEST_TMP/test103" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test103" &&
+    cd "$GH_TEST_TMP/test103" &&
+    git init || exit 1
+
 mkdir -p .githooks && echo "urls: - file://$GH_TEST_TMP/shared/hooks-103.git" >.githooks/.shared.yaml || exit 1
 git add .githooks/.shared.yaml
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared update

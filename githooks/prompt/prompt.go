@@ -53,9 +53,6 @@ type Context struct {
 	printAnswer     bool
 	maxTries        uint
 	panicIfMaxTries bool
-
-	// Optional tool context.
-	tool ToolContext
 }
 
 // Close closes the prompt context.
@@ -69,7 +66,6 @@ func (p *Context) Close() {
 // The GUI dialog gets only used if no terminal is attached on the output.
 func CreateContext(
 	log cm.ILogContext,
-	tool ToolContext,
 	useGUIFallback,
 	useStdIn bool) (IContext, error) {
 
@@ -114,8 +110,7 @@ func CreateContext(
 
 		maxTries:        maxTries,
 		panicIfMaxTries: true,
-		printAnswer:     printAnswer,
-		tool:            tool}
+		printAnswer:     printAnswer}
 
 	runtime.SetFinalizer(&p, func(p *Context) { p.Close() })
 

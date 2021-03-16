@@ -2,6 +2,10 @@
 # Test:
 #   Git LFS delegation
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 onExit() {
     if [ -n "$ORIGINAL_GIT_LFS" ]; then
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs-backup" "$ORIGINAL_GIT_LFS" || {

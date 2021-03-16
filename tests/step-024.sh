@@ -2,6 +2,12 @@
 # Test:
 #   Run an install that unsets shared repositories
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 # change it and expect it to reset it
 git config --global githooks.shared "$GH_TEST_TMP/shared/some-previous-example"
 

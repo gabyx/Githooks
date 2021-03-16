@@ -35,6 +35,8 @@ func SetTrustAllSetting(gitx *git.Context, enable bool, reset bool) error {
 }
 
 // IsRepoTrusted tells if the repository `repoPath` is trusted.
+// It is only trusted if the trust marker is present and
+// the `trustAll` settings is set to `trusted`.
 // On any error `false` is reported together with the error.
 func IsRepoTrusted(
 	gitx *git.Context,

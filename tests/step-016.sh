@@ -2,6 +2,12 @@
 # Test:
 #   Direct runner execution: update shared hooks
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
 mkdir -p "$GH_TEST_TMP/shared/hooks-016-a.git/pre-commit" &&
@@ -22,8 +28,9 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-016-b.git/.githooks/pre-commit" &&
     git commit -m 'Initial commit' ||
     exit 1
 
-mkdir -p "$GH_TEST_TMP/test16" && cd "$GH_TEST_TMP/test16" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test16" &&
+    cd "$GH_TEST_TMP/test16" &&
+    git init || exit 1
 
 mkdir -p .githooks &&
     git config --global githooks.shared "$GH_TEST_TMP/shared/hooks-016-a.git" &&

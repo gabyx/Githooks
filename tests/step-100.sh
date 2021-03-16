@@ -2,15 +2,22 @@
 # Test:
 #   Set up local repos, run the install and skip installing hooks into existing directories
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
 fi
 
-mkdir -p ~/test100/p001 && mkdir -p ~/test100/p002 || exit 1
-
-cd ~/test100/p001 && git init || exit 1
-cd ~/test100/p002 && git init || exit 1
+mkdir -p ~/test100/p001 ~/test100/p002 &&
+    cd ~/test100/p001 &&
+    git init &&
+    cd ~/test100/p002 &&
+    git init || exit 1
 
 if grep -r 'github.com/gabyx/githooks' ~/test100/; then
     echo "! Hooks were installed ahead of time"

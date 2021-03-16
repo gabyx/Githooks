@@ -2,7 +2,15 @@
 # Test:
 #   Run the cli tool for a hook that can't be found
 
-mkdir "$GH_TEST_TMP/test070" && cd "$GH_TEST_TMP/test070" && git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
+mkdir "$GH_TEST_TMP/test070" &&
+    cd "$GH_TEST_TMP/test070" &&
+    git init || exit 1
 
 if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"

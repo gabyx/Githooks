@@ -2,6 +2,12 @@
 # Test:
 #   Run a install successfully and install run wrappers into the current repo.
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 mkdir -p "$GH_TEST_TMP/start/dir" && cd "$GH_TEST_TMP/start/dir" || exit 1
 
 mkdir -p "$GH_TEST_TMP/empty" &&

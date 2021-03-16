@@ -111,20 +111,6 @@ func createLog() {
 	cm.AssertOrPanic(err == nil, "Could not create log")
 }
 
-func getDialogToolContext(installDir string, execx cm.IExecContext) (toolCtx prompt.ToolContext) {
-	dialogTool, err := hooks.GetToolScript(installDir, "dialog")
-	log.AssertNoErrorF(err, "Could not get status of 'dialog' tool.")
-
-	toolCtx, err = prompt.CreateToolContext(execx, dialogTool)
-	log.AssertNoErrorF(err, "Could not create dialog tool context.")
-
-	if dialogTool != nil {
-		log.DebugF("Use dialog tool '%s'", dialogTool.GetCommand())
-	}
-
-	return
-}
-
 func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	cm.PanicIf(
@@ -150,8 +136,7 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	installDir := getInstallDir()
 
-	dlgTool := getDialogToolContext(installDir, &execx)
-	promptCtx, err := prompt.CreateContext(log, dlgTool, true, false)
+	promptCtx, err := prompt.CreateContext(log, true, false)
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
 	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)
@@ -249,7 +234,10 @@ func showTrustRepoPrompt(gitx *git.Context, promptCtx prompt.IContext) (isTruste
 
 	var answer string
 	answer, err := promptCtx.ShowOptions(question, "(yes, no)", "y/n", "Yes", "No")
-	log.AssertNoErrorPanicF(err, "Could not get trust prompt answer.")
+	log.AssertNoErrorF(err, "Could not get trust prompt answer.")
+	if err != nil {
+		return
+	}
 
 	if answer == "y" || answer == "Y" {
 		err := hooks.SetTrustAllSetting(gitx, true, false)
@@ -939,8 +927,8 @@ func logHookResults(res ...hooks.HookResult) {
 			if len(r.Output) != 0 {
 				_, _ = log.GetErrorWriter().Write(r.Output)
 			}
-			log.AssertNoErrorPanicF(r.Error, "Hook '%s' %q' failed!",
-				r.Hook.GetCommand(), r.Hook.GetArgs())
+			log.AssertNoErrorPanicF(r.Error, "Hook '%s' failed!",
+				r.Hook.GetString())
 		}
 	}
 }

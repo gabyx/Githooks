@@ -2,6 +2,12 @@
 # Test:
 #   Cli tool: list shows files in trusted repos
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test060/.githooks/pre-commit" &&

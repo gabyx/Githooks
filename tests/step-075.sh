@@ -2,11 +2,16 @@
 # Test:
 #   Uninstall: start directory options for existing repos
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 mkdir -p "$GH_TEST_TMP/test074/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test074/.githooks/pre-commit/testing" &&
     cd "$GH_TEST_TMP/test074" &&
-    git init ||
-    exit 1
+    git init || exit 1
 
 echo "y
 y

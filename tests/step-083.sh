@@ -2,6 +2,12 @@
 # Test:
 #   Cli tool: manage local shared hook repositories
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
 if ! "$GH_TEST_BIN/cli" installer; then
@@ -20,7 +26,9 @@ mkdir -p "$GH_TEST_TMP/shared/first-shared.git/.githooks/pre-commit" &&
     (cd "$GH_TEST_TMP/shared/third-shared.git" && git init && git add . && git commit -m 'Testing') ||
     exit 1
 
-mkdir -p "$GH_TEST_TMP/test083" && cd "$GH_TEST_TMP/test083" && git init || exit 1
+mkdir -p "$GH_TEST_TMP/test083" &&
+    cd "$GH_TEST_TMP/test083" &&
+    git init || exit 1
 
 testShared() {
 

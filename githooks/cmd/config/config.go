@@ -334,6 +334,8 @@ func runUpdateTime(ctx *ccm.CmdContext, opts *SetOptions) {
 
 func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
+	ccm.AssertRepoRoot(ctx)
+
 	switch {
 	case opts.Set:
 		err := hooks.SetTrustAllSetting(ctx.GitX, true, false)

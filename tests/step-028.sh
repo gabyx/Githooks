@@ -2,8 +2,13 @@
 # Test:
 #   Direct runner execution: accept changes to hooks
 
-mkdir -p "$GH_TEST_TMP/test28" && cd "$GH_TEST_TMP/test28" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+mkdir -p "$GH_TEST_TMP/test28" &&
+    cd "$GH_TEST_TMP/test28" &&
+    git init || exit 1
 
 mkdir -p .githooks &&
     mkdir -p .githooks/pre-commit &&

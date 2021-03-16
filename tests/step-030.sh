@@ -2,8 +2,13 @@
 # Test:
 #   Direct runner execution: auto-update is not enabled
 
-mkdir -p "$GH_TEST_TMP/test30" && cd "$GH_TEST_TMP/test30" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+mkdir -p "$GH_TEST_TMP/test30" &&
+    cd "$GH_TEST_TMP/test30" &&
+    git init || exit 1
 
 git config --global githooks.autoUpdateEnabled false || exit 1
 

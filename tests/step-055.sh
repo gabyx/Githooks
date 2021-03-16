@@ -2,6 +2,12 @@
 # Test:
 #   Cli tool: list hooks for all types of hook sources
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 url1="ssh://git@github.com/test/repo1.git"

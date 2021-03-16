@@ -68,7 +68,6 @@ Also it searches for hooks in configured shared hook repositories.
     - [Updates](#updates)
         - [Update Mechanics](#update-mechanics)
     - [User Prompts](#user-prompts)
-    - [Custom User Prompt](#custom-user-prompt)
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
 - [Migration](#migration)
@@ -412,8 +411,7 @@ The trust prompt is always **fatal** meaning that failing to answer the prompt, 
 will result in a failing Git hook. To make the `runner` non-interactive, see [user prompts](#user-prompts).
 If a hook is still *active and untrusted* after the prompt, Githooks will fail by default.
 This is useful to be sure that all hooks get executed.
-However, you can skip active, untrusted hooks with [`git hooks config skip-untrusted-hooks --help`](docs/cli/git_hooks_config_skip-untrusted-hooks.md).
-
+However, you can disabled this behavior by skipping active, untrusted hooks with [`git hooks config skip-untrusted-hooks --enable`](docs/cli/git_hooks_config_skip-untrusted-hooks.md).
 
 The accepted checksums are maintained in the `.git/.githooks.checksum` directory, per local repository.
 You can however use a global checksum directory setup by specifing `githooks.checksumCacheDir`
@@ -707,44 +705,9 @@ The `runner` will show prompts, either in the terminal or as GUI dialog, in the 
 User prompts during `runner` execution are sometimes not desirable (server infastructure, docker container, etc...) and need to be disabled. Setting `git hooks config runner-non-interactive --enable --global` will:
 
 - Take default answers for all **non-fatal** prompts. No warnings are shown.
-- Take default answer for a **fatal prompt** if it is configured to do so.
+- Take default answer for a **fatal prompt** if it is configured:
   The only fatal prompt is the **trust prompt** which can be configured to pass by executing
   `git hooks config trust-all --accept`.
-
-
-### Custom User Prompt
-
-Githooks comes already with a [**platform-independend dialog tool**](#dialog-tool) which it uses also internally and you probably don't need this:
-
-If you want to use a GUI dialog when Githooks asks for user input, you can use an executable or script file to display it.
-
-The example in the `examples/tools/dialog` folder contains a Python script `run` which uses the Python (> version 3.9) provided `tkinter` to show a dialog.
-
-```shell
-# install the example dialog tool from this repository
-$ git hooks tools register dialog "./examples/tools/dialog"
-```
-
-This will copy the tool to the Githooks install folder to execute when displaying user prompts.
-The tool's interface is as follows.
-
-```shell
-$ run <title> <text> <options> <long-options>    # if `run` is executable
-$ sh run <title> <text> <options> <long-options> # otherwise, assuming `run` is a shell script
-```
-
-The arguments for the dialog tool are:
-
-- `<title>` the title for the GUI dialog
-- `<text>` the text for the GUI dialog
-- `<short-options>` the button return values, separated by slashes, e.g. `Y/n/d`. The default button is the first capital character found.
-- `<long-options>` the button texts in the GUI, e.g. `Yes/no/disable`
-
-The script needs to return one of the short-options on the standard output.
-If the exit code is not `0`, the normal prompt on the standard input is shown as a fallback mechanism.
-
-**Note:** Githooks will probably in the future provide a default cross-platform Dialog implementation, which will render this feature obsolete.
-(PRs welcome, see [https://github.com/gen2brain/dlgs](https://github.com/gen2brain/dlgs))
 
 ## Uninstalling
 

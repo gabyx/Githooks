@@ -2,8 +2,15 @@
 # Test:
 #   Direct runner execution: test pre-commit hooks
 
-mkdir -p "$GH_TEST_TMP/test11" && cd "$GH_TEST_TMP/test11" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
+mkdir -p "$GH_TEST_TMP/test11" &&
+    cd "$GH_TEST_TMP/test11" &&
+    git init || exit 1
 
 # set a non existing githooks.runner
 git config githooks.runner "nonexisting-binary"

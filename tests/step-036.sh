@@ -2,6 +2,12 @@
 # Test:
 #   Automatic update checks are already enabled
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 echo 'y
 ' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 

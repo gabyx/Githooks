@@ -2,6 +2,12 @@
 # Test:
 #   Disable, enable and accept a shared hook (no 'githooks' directory)
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
 if ! "$GH_TEST_BIN/cli" installer; then
@@ -20,8 +26,7 @@ mkdir -p "$GH_TEST_TMP/test115.shared/shared-repo.git/pre-commit" &&
 
 mkdir -p "$GH_TEST_TMP/test115.repo" &&
     cd "$GH_TEST_TMP/test115.repo" &&
-    git init ||
-    exit 3
+    git init || exit 3
 
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --shared file://"$GH_TEST_TMP/test115.shared/shared-repo.git" &&
     "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list | grep "shared-repo" | grep "pending" &&

@@ -2,6 +2,10 @@
 # Test:
 #   Direct runner execution: list of staged files (hook types)
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 MANAGED_HOOK_NAMES="
     applypatch-msg pre-applypatch post-applypatch
     pre-commit pre-merge-commit prepare-commit-msg commit-msg post-commit

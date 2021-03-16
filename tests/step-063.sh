@@ -2,12 +2,17 @@
 # Test:
 #   Cli tool: run an update
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test063" &&
     cd "$GH_TEST_TMP/test063" &&
-    git init ||
-    exit 1
+    git init || exit 1
 
 # Reset to trigger update
 if ! (cd ~/.githooks/release && git reset --hard HEAD~1 >/dev/null); then

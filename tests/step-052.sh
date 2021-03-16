@@ -2,6 +2,12 @@
 # Test:
 #   Cli tool: print help and usage
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 if ! "$GH_TEST_BIN/cli" --help | grep -q "See further information at"; then
