@@ -858,8 +858,9 @@ func configNonInteractiveRunner(
 		Long: `Enable or disables non-interactive execution of
 the Githooks runner executable.
 
-This will only default answer all non-fatal prompts. Fatal prompts (e.g. the trust prompts)
-still need to be configured to pass. See 'git hooks config trust-all --help'.`,
+Enabling non-interactivity will only default answer all non-fatal prompts.
+Fatal prompts (e.g. the trust prompts) still need to be configured to pass.
+See 'git hooks config trust-all --help'.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if gitOpts.Local {
 				ccm.AssertRepoRoot(ctx)

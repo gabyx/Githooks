@@ -47,8 +47,8 @@ fi
 ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --disable --print || exit 1
 ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --local --global --enable || exit 1
 
-# Fail on not existing hooks
-# Local on/ global off
+# Skip on not existing hooks
+# Local off/ global on
 if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --disable; then
     echo "! Disabling skip-non-existing-shared-hooks failed"
     exit 1
@@ -59,8 +59,8 @@ if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --loc
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --print | grep -q "enabled"; then
-    echo "! Expected skip-non-existing-shared-hooks to be enabled globally"
+if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --print | grep -q "disabled"; then
+    echo "! Expected skip-non-existing-shared-hooks to be disabled globally"
     exit 1
 fi
 
@@ -74,7 +74,7 @@ if git config --global --get githooks.skipNonExistingSharedHooks; then
     exit 1
 fi
 
-# Local on / global on
+# Local off / global off
 if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --disable; then
     echo "! Disabling skip-non-existing-shared-hooks globally failed"
     exit 1
@@ -86,7 +86,7 @@ if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --glo
 fi
 
 if [ ! "$(git config --local --get githooks.skipNonExistingSharedHooks)" = "false" ]; then
-    echo "! Expected githooks.skipNonExistingSharedHooks to be still enabled locally"
+    echo "! Expected githooks.skipNonExistingSharedHooks to be still disabled locally"
     exit 1
 fi
 
