@@ -139,14 +139,14 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 	promptCtx, err := prompt.CreateContext(log, true, false)
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
-	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)
-	if !isTrusted && hasTrustFile {
-		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
-	}
-
 	nonInteractive := hooks.IsRunnerNonInteractive(gitx, git.Traverse)
 	skipNonExistingSharedHooks, _ := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
 	skipUntrustedHooks, _ := hooks.SkipUntrustedHooks(gitx, git.Traverse)
+
+	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)
+	if !isTrusted && hasTrustFile && !nonInteractive {
+		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
+	}
 
 	s := HookSettings{
 		Args:               os.Args[2:],
@@ -239,7 +239,7 @@ func showTrustRepoPrompt(gitx *git.Context, promptCtx prompt.IContext) (isTruste
 		return
 	}
 
-	if answer == "y" || answer == "Y" {
+	if answer == "y" {
 		err := hooks.SetTrustAllSetting(gitx, true, false)
 		log.AssertNoErrorF(err, "Could not store trust setting.")
 		isTrusted = true
