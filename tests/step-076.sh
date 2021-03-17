@@ -2,8 +2,13 @@
 # Test:
 #   Direct runner execution: choose to ignore the update (non-single)
 
-mkdir -p "$GH_TEST_TMP/test076" && cd "$GH_TEST_TMP/test076" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+mkdir -p "$GH_TEST_TMP/test076" &&
+    cd "$GH_TEST_TMP/test076" &&
+    git init || exit 1
 
 # Reset to trigger update
 git config --global githooks.autoUpdateEnabled true || exit 1

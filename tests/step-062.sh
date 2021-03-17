@@ -2,12 +2,17 @@
 # Test:
 #   Cli tool: run update check
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test062" &&
     cd "$GH_TEST_TMP/test062" &&
-    git init ||
-    exit 1
+    git init || exit 1
 
 OUT=$("$GITHOOKS_INSTALL_BIN_DIR/cli" update --no)
 # shellcheck disable=SC2181

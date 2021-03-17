@@ -2,6 +2,12 @@
 # Test:
 #   Run an install, and let it search for the template dir
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
@@ -31,8 +37,9 @@ elif ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/git-templates/templates/ho
     exit 1
 fi
 
-mkdir -p "$GH_TEST_TMP/test6" && cd "$GH_TEST_TMP/test6" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test6" &&
+    cd "$GH_TEST_TMP/test6" &&
+    git init || exit 1
 
 # verify that the hooks are installed and are working
 if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/test6/.git/hooks/pre-commit"; then

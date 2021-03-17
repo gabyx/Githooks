@@ -2,6 +2,12 @@
 # Test:
 #   PR #135: Bugfix: Test that init.templateDir is not set when using core.hooksPath.
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if [ "$(id -u)" != "0" ] || ! echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "! Test needs root access and --use-core-hookspath."
     exit 249

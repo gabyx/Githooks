@@ -2,6 +2,10 @@
 # Test:
 #   Test urls and local paths in shared hooks
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
@@ -96,7 +100,7 @@ if "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list --shared | grep -q "shared-clone"
     exit 1
 fi
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trusted --accept || exit 1
+"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
 
 # shellcheck disable=SC2012

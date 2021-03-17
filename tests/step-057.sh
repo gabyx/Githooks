@@ -2,14 +2,19 @@
 # Test:
 #   Cli tool: enable a hook
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 "$GH_TEST_BIN/cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test057/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test057/.githooks/pre-commit/first" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test057/.githooks/pre-commit/second" &&
     cd "$GH_TEST_TMP/test057" &&
-    git init ||
-    exit 1
+    git init || exit 1
 
 if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" ignore add --pattern "**/*"; then
     echo "! Failed ignore hooks"

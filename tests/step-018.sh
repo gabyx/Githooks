@@ -2,6 +2,12 @@
 # Test:
 #   Direct runner execution: fail on shared hooks
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
 mkdir -p "$GH_TEST_TMP/shared/hooks-018.git/pre-commit" &&
@@ -12,8 +18,9 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-018.git/pre-commit" &&
     git commit -m 'Initial commit' ||
     exit 1
 
-mkdir -p "$GH_TEST_TMP/test18" && cd "$GH_TEST_TMP/test18" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test18" &&
+    cd "$GH_TEST_TMP/test18" &&
+    git init || exit 1
 
 mkdir -p .githooks &&
     echo "urls: - file://$GH_TEST_TMP/shared/hooks-018.git" >.githooks/.shared.yaml &&

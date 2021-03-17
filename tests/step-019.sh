@@ -2,6 +2,12 @@
 # Test:
 #   Run an install, and set based on a custom template directory
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
@@ -17,8 +23,9 @@ mkdir -p ~/.test-019/hooks &&
 
 "$GH_TEST_BIN/cli" installer || exit 1
 
-mkdir -p "$GH_TEST_TMP/test19" && cd "$GH_TEST_TMP/test19" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test19" &&
+    cd "$GH_TEST_TMP/test19" &&
+    git init || exit 1
 
 # verify that the hooks are installed and are working
 if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/test19/.git/hooks/pre-commit"; then

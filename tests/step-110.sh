@@ -2,6 +2,12 @@
 # Test:
 #   Trigger hooks on a bare repo with a push from a local repo.
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
 if ! "$GH_TEST_BIN/cli" installer; then
@@ -14,7 +20,8 @@ mkdir -p "$GH_TEST_TMP/test110/hooks" &&
     mkdir -p "$GH_TEST_TMP/test110/local" || exit 1
 
 # Hooks
-cd "$GH_TEST_TMP/test110/hooks" && git init || exit 1
+cd "$GH_TEST_TMP/test110/hooks" &&
+    git init || exit 1
 "$GITHOOKS_INSTALL_BIN_DIR/cli" config disable --set || exit 1
 
 # Server
@@ -37,7 +44,7 @@ echo "Setup shared hook in server repo"
 cd "$GH_TEST_TMP/test110/server" || exit 1
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared add file://"$GH_TEST_TMP/test110/hooks" || exit 1
 echo "Setup shared hook in server repo: set trusted"
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trusted --accept || exit 1
+"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
 echo "Setup shared hook in server repo: update shared"
 "$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
 

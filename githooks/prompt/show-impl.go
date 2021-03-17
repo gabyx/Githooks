@@ -30,32 +30,13 @@ func showOptions(
 
 	defaultAnswer, defaultOptionIdx := getDefaultAnswer(options)
 
-	if p.tool.IsSetup() {
-		ans, e := showOptionsTool(
-			p,
-			formatTitleQuestion(p),
-			text,
-			defaultOptionIdx,
-			options,
-			longOptions,
-			validator)
-
-		if e == nil {
-			return strings.ToLower(ans), nil
-		}
-
-		err = cm.CombineErrors(e,
-			cm.ErrorF("Dialog tool '%q' failed", p.tool.tool.GetCommand()))
-		// else: Runnning fallback ...
-	}
-
 	if p.useGUI {
-
 		// Use the GUI dialog.
 		ans, e := showOptionsGUI(
 			p,
 			formatTitleQuestion(p),
 			text,
+			defaultAnswer,
 			defaultOptionIdx,
 			options, longOptions,
 			validator)
@@ -203,20 +184,6 @@ func showEntry(
 	defaultAnswer string,
 	validator func(string) error,
 	canCancel bool) (ans string, err error) {
-
-	if p.tool.IsSetup() {
-		ans, err = showEntryTool(p, formatTitle(p), text, defaultAnswer, validator, canCancel)
-		if err == nil {
-			return
-		}
-
-		if canCancel && errors.Is(err, ErrorCanceled) {
-			return defaultAnswer, err
-		}
-
-		p.log.AssertNoErrorF(err, "Dialog tool '%q' failed", p.tool.tool.GetCommand())
-		// else: Runnning fallback ...
-	}
 
 	if p.useGUI {
 		ans, err = showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator, canCancel)

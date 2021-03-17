@@ -2,9 +2,13 @@
 # Test:
 #   Direct runner execution: list of staged files (special paths)
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 mkdir -p "$GH_TEST_TMP/test096/.githooks/pre-commit" &&
-    cd "$GH_TEST_TMP/test096" && git init ||
-    exit 1
+    cd "$GH_TEST_TMP/test096" &&
+    git init || exit 1
 
 mkdir -p sub/folder\ with\ space/x
 printf "Test" >>sub/test.txt

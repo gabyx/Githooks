@@ -237,3 +237,20 @@ func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
 		disabled == "y" || // Legacy
 		disabled == "Y" // Legacy
 }
+
+// IsRunnerNonInteractive tells if the runner should run in non-interactive mode
+// meaning all non-fatal prompts will be skipped with default answering
+// and fatal prompts still need to be configured to pass.
+func IsRunnerNonInteractive(gitx *git.Context, scope git.ConfigScope) bool {
+	return gitx.GetConfig(GitCKRunnerIsNonInteractive, scope) == "true"
+}
+
+// SetRunnerNonInteractive sets the runner to non-interactive mode.
+func SetRunnerNonInteractive(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+	switch {
+	case reset:
+		return gitx.UnsetConfig(GitCKRunnerIsNonInteractive, scope)
+	default:
+		return gitx.SetConfig(GitCKRunnerIsNonInteractive, enable, scope)
+	}
+}

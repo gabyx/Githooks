@@ -332,7 +332,9 @@ func runUpdateTime(ctx *ccm.CmdContext, opts *SetOptions) {
 	}
 }
 
-func runTrust(ctx *ccm.CmdContext, opts *SetOptions) {
+func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
+
+	ccm.AssertRepoRoot(ctx)
 
 	switch {
 	case opts.Set:
@@ -401,37 +403,131 @@ func RunUpdate(ctx *ccm.CmdContext, opts *SetOptions) {
 	}
 }
 
-func runNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+func runRunnerNonInteractive(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	scope := wrapToGitScope(ctx.Log, gitOpts)
 
-	localOrGlobal := "locally"
+	localOrGlobal := "locally" //nolint: goconst
 	if gitOpts.Global {
-		localOrGlobal = "globally"
+		localOrGlobal = "globally" //nolint: goconst
 	}
 
-	const text = "on non existing shared hooks"
+	const text = "non-interactive runner mode"
 	switch {
 	case opts.Set:
-		err := hooks.SetFailOnNonExistingSharedHooks(ctx.GitX, true, false, scope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not enable failing %s %s.", text, localOrGlobal)
-		ctx.Log.InfoF("Enabled failing %s %s.", text, localOrGlobal)
+		err := hooks.SetRunnerNonInteractive(ctx.GitX, true, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not enable %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Enabled %s %s.", text, localOrGlobal)
 
 	case opts.Unset:
-		err := hooks.SetFailOnNonExistingSharedHooks(ctx.GitX, false, false, scope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not disable failing %s %s.", text, localOrGlobal)
-		ctx.Log.InfoF("Disabled failing %s %s.", text, localOrGlobal)
+		err := hooks.SetRunnerNonInteractive(ctx.GitX, false, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not disable %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Disabled %s %s.", text, localOrGlobal)
 
 	case opts.Reset:
-		err := hooks.SetFailOnNonExistingSharedHooks(ctx.GitX, false, true, scope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not reset failing %s %s.", text, localOrGlobal)
-		ctx.Log.InfoF("Reset setting for failing %s %s.", text, localOrGlobal)
+		err := hooks.SetRunnerNonInteractive(ctx.GitX, false, true, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not reset %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Reset %s %s.", text, localOrGlobal)
 
 	case opts.Print:
-		enabled, _ := hooks.GetFailOnNonExistingSharedHooks(ctx.GitX, scope)
+		localOrGlobal = " " + localOrGlobal
+		if !gitOpts.Global && !gitOpts.Local {
+			scope = git.Traverse
+			localOrGlobal = ""
+		}
+
+		enabled := hooks.IsRunnerNonInteractive(ctx.GitX, scope)
 		if enabled {
-			ctx.Log.InfoF("Failing %s is enabled %s.", text, localOrGlobal)
+			ctx.Log.InfoF("Non-interactive runner mode is enabled%s.", text, localOrGlobal)
 		} else {
-			ctx.Log.InfoF("Failing %s is disabled %s.", text, localOrGlobal)
+			ctx.Log.InfoF("Non-interactive runner mode is disabled%s.", text, localOrGlobal)
+		}
+
+	default:
+		cm.Panic("Wrong arguments.")
+	}
+}
+
+func runSkipNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	scope := wrapToGitScope(ctx.Log, gitOpts)
+
+	localOrGlobal := "locally" //nolint: goconst
+	if gitOpts.Global {
+		localOrGlobal = "globally" //nolint: goconst
+	}
+
+	const text = "non-existing shared hooks"
+	switch {
+	case opts.Set:
+		err := hooks.SetSkipNonExistingSharedHooks(ctx.GitX, true, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not enable skipping %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Enabled skipping %s %s.", text, localOrGlobal)
+
+	case opts.Unset:
+		err := hooks.SetSkipNonExistingSharedHooks(ctx.GitX, false, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not disable skipping %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Disabled skipping %s %s.", text, localOrGlobal)
+
+	case opts.Reset:
+		err := hooks.SetSkipNonExistingSharedHooks(ctx.GitX, false, true, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not reset skipping %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Reset skipping %s %s.", text, localOrGlobal)
+
+	case opts.Print:
+		localOrGlobal = " " + localOrGlobal
+		if !gitOpts.Global && !gitOpts.Local {
+			scope = git.Traverse
+			localOrGlobal = ""
+		}
+
+		enabled, _ := hooks.SkipNonExistingSharedHooks(ctx.GitX, scope)
+		if enabled {
+			ctx.Log.InfoF("Skipping %s is enabled%s.", text, localOrGlobal)
+		} else {
+			ctx.Log.InfoF("Skipping %s is disabled%s.", text, localOrGlobal)
+		}
+
+	default:
+		cm.Panic("Wrong arguments.")
+	}
+}
+
+func runSkipUntrustedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	scope := wrapToGitScope(ctx.Log, gitOpts)
+
+	localOrGlobal := "locally" //nolint: goconst
+	if gitOpts.Global {
+		localOrGlobal = "globally" //nolint: goconst
+	}
+
+	const text = "active, untrusted hooks"
+	switch {
+	case opts.Set:
+		err := hooks.SetSkipUntrustedHooks(ctx.GitX, true, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not enable skipping %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Enabled skipping %s %s.", text, localOrGlobal)
+
+	case opts.Unset:
+		err := hooks.SetSkipUntrustedHooks(ctx.GitX, false, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not disable skipping %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Disabled skipping %s %s.", text, localOrGlobal)
+
+	case opts.Reset:
+		err := hooks.SetSkipUntrustedHooks(ctx.GitX, false, true, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not reset skipping %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Reset skipping %s %s.", text, localOrGlobal)
+
+	case opts.Print:
+		localOrGlobal = " " + localOrGlobal
+		if !gitOpts.Global && !gitOpts.Local {
+			scope = git.Traverse
+			localOrGlobal = ""
+		}
+
+		enabled, _ := hooks.SkipUntrustedHooks(ctx.GitX, scope)
+		if enabled {
+			ctx.Log.InfoF("Skipping %s is enabled%s.", text, localOrGlobal)
+		} else {
+			ctx.Log.InfoF("Skipping %s is disabled%s.", text, localOrGlobal)
 		}
 
 	default:
@@ -575,16 +671,16 @@ func configCloneBranchCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, cloneBranchCmd))
 }
 
-func configTrustCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
+func configTrustAllHooksCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
 	trustCmd := &cobra.Command{
-		Use:   "trusted [flags]",
+		Use:   "trust-all [flags]",
 		Short: "Change trust settings in the current repository.",
 		Long: `Change the trust setting in the current repository.
 
 This command needs to be run at the root of a repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runTrust(ctx, setOpts)
+			runTrustAllHooks(ctx, setOpts)
 		}}
 
 	optsPSUR := createOptionMap(true, true, true)
@@ -672,11 +768,15 @@ each containing a clone URL of a shared hook repository which gets added.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedCmd))
 }
 
-func configNonExistSharedRepo(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
+func configSkipNonExistingSharedHooks(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions) {
 
 	nonExistSharedCmd := &cobra.Command{
-		Use:   "fail-on-non-existing-shared-hooks [flags]",
-		Short: "Updates the list of local or global shared hook repositories.",
+		Use:   "skip-non-existing-shared-hooks [flags]",
+		Short: "Enable or disable skipping non-existing shared hooks.",
 		Long: `Enable or disable failing hooks with an error when any
 shared hooks are missing. This usually means 'git hooks shared update'
 has not been called yet.`,
@@ -689,23 +789,102 @@ has not been called yet.`,
 				ccm.AssertRepoRoot(ctx)
 			}
 
-			runNonExistingSharedHooks(ctx, setOpts, gitOpts)
+			runSkipNonExistingSharedHooks(ctx, setOpts, gitOpts)
 		}}
 
 	optsPSUR := createOptionMap(true, true, true)
 	wrapToEnableDisable(&optsPSUR)
-	optsPSUR.SetDesc = "Enable failing hooks with an error when any\n" +
-		"shared hooks configured is missing."
-	optsPSUR.UnsetDesc = "Disable failing hooks with an error when any\n" +
-		"shared hooks configured is missing."
-	optsPSUR.Reset = "" // disable reset.
+	optsPSUR.SetDesc = "Enable skipping non-existing shared hooks."
+	optsPSUR.UnsetDesc = "Disable skipping non-existing shared hooks."
+	optsPSUR.Reset = "Reset skipping non-existing shared hooks."
 
 	configSetOptions(nonExistSharedCmd, setOpts, &optsPSUR, ctx.Log, 0, 0)
 
-	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
-	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
+	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Local, "local", false,
+		"Use the local Git configuration (default, except for '--print').")
+	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Global,
+		"global", false, "Use the global Git configuration.")
 
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, nonExistSharedCmd))
+}
+
+func configFailUntrustedHooks(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions) {
+
+	nonExistSharedCmd := &cobra.Command{
+		Use:   "skip-untrusted-hooks [flags]",
+		Short: "Enable/disable skipping active, untrusted hooks.",
+		Long: `Enable or disable failing hooks with an error when any
+active, untrusted hooks are present.
+Mostly wanted if all hooks must be executed.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if !gitOpts.Local && !gitOpts.Global {
+				gitOpts.Local = true
+			}
+
+			if gitOpts.Local {
+				ccm.AssertRepoRoot(ctx)
+			}
+
+			runSkipUntrustedHooks(ctx, setOpts, gitOpts)
+		}}
+
+	optsPSUR := createOptionMap(true, true, true)
+	wrapToEnableDisable(&optsPSUR)
+	optsPSUR.SetDesc = "Enable skipping active, untrusted hooks."
+	optsPSUR.UnsetDesc = "Disable skipping active, untrusted hooks."
+	optsPSUR.Reset = "Reset skipping active, untrusted hooks."
+
+	configSetOptions(nonExistSharedCmd, setOpts, &optsPSUR, ctx.Log, 0, 0)
+
+	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Local, "local", false,
+		"Use the local Git configuration (default, except for '--print').")
+	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Global,
+		"global", false, "Use the global Git configuration.")
+
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, nonExistSharedCmd))
+}
+
+func configNonInteractiveRunner(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions) {
+
+	nonInteracticeRunner := &cobra.Command{
+		Use:   "non-interactive-runner [flags]",
+		Short: "Enables/disables non-interactive execution of the runner.",
+		Long: `Enable or disables non-interactive execution of
+the Githooks runner executable.
+
+Enabling non-interactivity will only default answer all non-fatal prompts.
+Fatal prompts (e.g. the trust prompts) still need to be configured to pass.
+See 'git hooks config trust-all --help'.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if gitOpts.Local {
+				ccm.AssertRepoRoot(ctx)
+			}
+
+			runRunnerNonInteractive(ctx, setOpts, gitOpts)
+		}}
+
+	optsPSUR := createOptionMap(true, true, true)
+	wrapToEnableDisable(&optsPSUR)
+	optsPSUR.SetDesc = "Enables non-interactive mode of the runner executable."
+	optsPSUR.UnsetDesc = "Disables non-interactive mode of the runner executable."
+	optsPSUR.Reset = "Reset non-interactive mode of the runner executable."
+
+	configSetOptions(nonInteracticeRunner, setOpts, &optsPSUR, ctx.Log, 0, 0)
+
+	nonInteracticeRunner.Flags().BoolVar(&gitOpts.Local, "local", false,
+		"Use the local Git configuration (default, except for '--print').")
+	nonInteracticeRunner.Flags().BoolVar(&gitOpts.Global, "global", false,
+		"Use the global Git configuration.")
+
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, nonInteracticeRunner))
 }
 
 func configDetectedLFSCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
@@ -747,7 +926,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	configListCmd(ctx, configCmd, &gitOpts)
 	configDisableCmd(ctx, configCmd, &setOpts, &gitOpts)
-	configTrustCmd(ctx, configCmd, &setOpts)
+	configTrustAllHooksCmd(ctx, configCmd, &setOpts)
 
 	configSearchDirCmd(ctx, configCmd, &setOpts)
 	configUpdateCmd(ctx, configCmd, &setOpts)
@@ -756,7 +935,11 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configCloneBranchCmd(ctx, configCmd, &setOpts)
 
 	configSharedCmd(ctx, configCmd, &setOpts, &gitOpts)
-	configNonExistSharedRepo(ctx, configCmd, &setOpts, &gitOpts)
+
+	configSkipNonExistingSharedHooks(ctx, configCmd, &setOpts, &gitOpts)
+	configFailUntrustedHooks(ctx, configCmd, &setOpts, &gitOpts)
+
+	configNonInteractiveRunner(ctx, configCmd, &setOpts, &gitOpts)
 
 	configDetectedLFSCmd(ctx, configCmd, &setOpts, &gitOpts)
 

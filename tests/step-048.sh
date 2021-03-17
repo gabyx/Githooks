@@ -2,10 +2,15 @@
 # Test:
 #   Direct runner execution: do not run any hooks in any repos
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 git config --global githooks.disable true || exit 1
 
-mkdir -p "$GH_TEST_TMP/test48" && cd "$GH_TEST_TMP/test48" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test48" &&
+    cd "$GH_TEST_TMP/test48" &&
+    git init || exit 1
 
 mkdir -p .githooks/pre-commit &&
     echo "echo 'Accepted hook' > '$GH_TEST_TMP/test48.out'" >.githooks/pre-commit/test &&

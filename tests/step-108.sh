@@ -2,6 +2,12 @@
 # Test:
 #   Custom install prefix test
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 TEST_PREFIX_DIR=""$GH_TEST_TMP/githooks""
 GITHOOKS_INSTALL_BIN_DIR="$TEST_PREFIX_DIR/.githooks/bin"
 
@@ -29,8 +35,7 @@ fi
 mkdir -p "$GH_TEST_TMP/test108/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test108/.githooks/pre-commit/testing" &&
     cd "$GH_TEST_TMP/test108" &&
-    git init ||
-    exit 5
+    git init || exit 5
 
 echo A >A.txt
 git add A.txt

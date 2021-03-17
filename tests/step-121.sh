@@ -2,6 +2,12 @@
 # Test:
 #   Direct runner execution: test a single pre-commit hook file with a runner script
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 [ "$(id -u)" -eq 0 ] && ROOT_ACCESS="true"
 
 cleanup() {
@@ -12,8 +18,8 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$GH_TEST_TMP/test121" &&
-    cd "$GH_TEST_TMP/test121" || exit 2
-git init || exit 3
+    cd "$GH_TEST_TMP/test121" &&
+    git init || exit 3
 
 # Make our own runner.
 

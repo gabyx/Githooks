@@ -2,6 +2,12 @@
 # Test:
 #   Git LFS integration
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if ! git-lfs --version; then
     echo "git-lfs is not available"
     exit 249

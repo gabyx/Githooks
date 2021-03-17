@@ -2,6 +2,12 @@
 # Test:
 #   Remember the start directory for searching existing repos
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
@@ -19,7 +25,8 @@ if [ "$(git config --global --get githooks.previousSearchDir)" != "$GH_TEST_TMP/
     exit 1
 fi
 
-cd "$GH_TEST_TMP/start/dir" && git init || exit 1
+cd "$GH_TEST_TMP/start/dir" &&
+    git init || exit 1
 
 "$GH_TEST_BIN/cli" installer || exit 1
 

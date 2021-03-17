@@ -41,6 +41,7 @@ func showPromptDialog(
 func showOptionsDialog(
 	title string,
 	question string,
+	defaultAnswer string,
 	defaultOptionIdx int,
 	options []string,
 	longOptions []string) (string, error) {
@@ -49,23 +50,26 @@ func showOptionsDialog(
 	opts.Title = title
 	opts.Text = question
 	opts.Options = longOptions
-	opts.DefaultOptions = []uint{uint(defaultOptionIdx)}
 	opts.Style = settings.OptionsStyleButtons
 	opts.WindowIcon = settings.QuestionIcon
 	opts.Width = 400
+
+	if defaultOptionIdx >= 0 {
+		opts.DefaultOptions = []uint{uint(defaultOptionIdx)}
+	}
 
 	res, err := gui.ShowOptions(nil, &opts) // nolint
 
 	switch {
 	case err != nil || res.IsCanceled():
-		return options[defaultOptionIdx], err
+		return defaultAnswer, err
 	case res.IsOk():
 		return options[res.Options[0]], err
 	}
 
 	cm.Panic("Wrong dialog result state")
 
-	return options[defaultOptionIdx], err
+	return defaultAnswer, err
 }
 
 func showPromptLoop(
@@ -138,21 +142,17 @@ func showOptionsGUI(
 	p *Context,
 	title string,
 	question string,
+	defaultAnswer string,
 	defaultOptionIdx int,
 	options []string,
 	longOptions []string,
 	validator AnswerValidator) (string, error) {
 
-	defaultAnswer := ""
-	if defaultOptionIdx >= 0 {
-		defaultAnswer = options[defaultOptionIdx]
-	}
-
 	return showPromptLoop(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return showOptionsDialog(title, question, defaultOptionIdx, options, longOptions)
+			return showOptionsDialog(title, question, defaultAnswer, defaultOptionIdx, options, longOptions)
 		},
 		validator,
 		false)

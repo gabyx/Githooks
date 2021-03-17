@@ -2,6 +2,12 @@
 # Test:
 #   Git LFS: fail when required but not found
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 # make sure we don't have LFS installed
 if git-lfs --version; then
     echo "git-lfs is available but we need it missing"

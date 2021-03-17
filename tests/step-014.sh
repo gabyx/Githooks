@@ -2,8 +2,15 @@
 # Test:
 #   Direct runner execution: disable running custom hooks
 
-mkdir -p "$GH_TEST_TMP/test14" && cd "$GH_TEST_TMP/test14" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
+mkdir -p "$GH_TEST_TMP/test14" &&
+    cd "$GH_TEST_TMP/test14" &&
+    git init || exit 1
 
 mkdir -p .githooks/pre-commit &&
     echo 'exit 1' >.githooks/pre-commit/test &&

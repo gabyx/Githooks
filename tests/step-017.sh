@@ -2,8 +2,15 @@
 # Test:
 #   Direct runner execution: execute a previously saved hook
 
-mkdir -p "$GH_TEST_TMP/test017" && cd "$GH_TEST_TMP/test017" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
+mkdir -p "$GH_TEST_TMP/test017" &&
+    cd "$GH_TEST_TMP/test017" &&
+    git init || exit 1
 
 mkdir -p .githooks/pre-commit &&
     echo "echo 'Direct execution' >> '$GH_TEST_TMP/test017.out'" >.githooks/pre-commit/test &&

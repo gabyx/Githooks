@@ -35,6 +35,8 @@ func SetTrustAllSetting(gitx *git.Context, enable bool, reset bool) error {
 }
 
 // IsRepoTrusted tells if the repository `repoPath` is trusted.
+// It is only trusted if the trust marker is present and
+// the `trustAll` settings is set to `trusted`.
 // On any error `false` is reported together with the error.
 func IsRepoTrusted(
 	gitx *git.Context,
@@ -48,6 +50,27 @@ func IsRepoTrusted(
 	}
 
 	return
+}
+
+// SetSkipUntrustedHooks sets the settings if the hook runner should fail on active non-trusted hooks.
+func SetSkipUntrustedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+	switch {
+	case reset:
+		return gitx.UnsetConfig(GitCKSkipUntrustedHooks, scope)
+	default:
+		return gitx.SetConfig(GitCKSkipUntrustedHooks, enable, scope)
+	}
+}
+
+// SkipUntrustedHooks gets the settings if the hook runner should fail on active non-trusted hooks.
+func SkipUntrustedHooks(gitx *git.Context, scope git.ConfigScope) (enabled bool, isSet bool) {
+	conf := gitx.GetConfig(GitCKSkipUntrustedHooks, scope)
+	switch {
+	case strs.IsEmpty(conf):
+		return
+	default:
+		return conf == git.GitCVTrue, true
+	}
 }
 
 const (

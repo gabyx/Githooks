@@ -67,7 +67,7 @@ Also it searches for hooks in configured shared hook repositories.
         - [Global Hooks Location core.hooksPath](#global-hooks-location-corehookspath)
     - [Updates](#updates)
         - [Update Mechanics](#update-mechanics)
-    - [Custom User Prompt](#custom-user-prompt)
+    - [User Prompts](#user-prompts)
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
 - [Migration](#migration)
@@ -342,8 +342,8 @@ on any local repositories. Any other local path will be used **directly and will
 Additionally, the update can also be triggered on other hook names by setting a comma-separated list of additional
 hook names in the Git configuration parameter `githooks.sharedHooksUpdateTriggers` on any configuration level.
 
-An additional global configuration parameter `githooks.failOnNonExistingSharedHooks` makes hooks fail with an error if any shared hook configured in `.shared.yaml` is missing, meaning `git hooks update` has not yet been called.
-See [`git hooks config fail-on-non-existing-shared-hooks --help`](docs/cli/git_hooks_config_fail-on-non-existing-shared-hooks.md)
+An additional global configuration parameter `githooks.skipNonExistingSharedHooks` makes Githooks skip any configured non-existing shared hooks. Otherwise, Githooks will fail and you need to update them by running `git hooks update`.
+See [`git hooks config skip-non-existing-shared-hooks --help`](docs/cli/skip-non-existing-shared-hooks.md)
 
 You can also manage and update shared hook repositories using the [`git hooks shared --help`](docs/cli/git_hooks_shared.md) tool.
 
@@ -405,25 +405,27 @@ Hooks in individual shared repositories can be disabled as well, with [`git hook
 ## Trusting Hooks
 
 To try and make things a little bit more secure, Githooks checks if any new hooks were added we haven't run before,
-or if any of the existing ones have changed. When they have, it will prompt for confirmation whether you accept
+or if any of the existing ones have changed. When they have, it will prompt for confirmation (trust prompt) whether you accept
 those changes or not, and you can also disable specific hooks to skip running them until you decide otherwise.
+The trust prompt is always **fatal** meaning that failing to answer the prompt, or any other prompt error,
+will result in a failing Git hook. To make the `runner` non-interactive, see [user prompts](#user-prompts).
+If a hook is still *active and untrusted* after the prompt, Githooks will fail by default.
+This is useful to be sure that all hooks get executed.
+However, you can disabled this behavior by skipping active, untrusted hooks with [`git hooks config skip-untrusted-hooks --enable`](docs/cli/git_hooks_config_skip-untrusted-hooks.md).
+
 The accepted checksums are maintained in the `.git/.githooks.checksum` directory, per local repository.
 You can however use a global checksum directory setup by specifing `githooks.checksumCacheDir`
 in any suitable Git config (can be different for each repository).
 
-If the repository contains a `.githooks/trust-all` file, it is marked as a trusted repository. On the first interaction with hooks, Githooks will ask for confirmation that the user trusts all existing and future hooks in the repository,
+If the repository contains a `.githooks/trust-all` file, it is marked as a trusted repository.
+Consult [`git hooks trust --help`](docs/cli/git_hooks_trust.md). On the first interaction with hooks,
+Githooks will ask for confirmation that the user trusts all existing and future hooks in the repository,
 and if she does, no more confirmation prompts will be shown.
-This can be reverted by running either the
-`git config --unset githooks.trustAll`, or the [`git hooks config trusted --help`](docs/cli/git_hooks_config_trusted.md) command.
-This is a per-repository setting.
-Consult [`git hooks trust --help`](docs/cli/git_hooks_trust.md) and [`git hooks config trusted --help`](docs/cli/git_hooks_config_trusted.md)
-for more information.
+This can be reverted by running [`git hooks config trust-all --reset`](docs/cli/git_hooks_config_trust-all.md) command
+(modifying the local Git config setting `githooks.trustAll`). This is a per-repository setting.
+Consult [`git hooks config trust-all --help`](docs/cli/git_hooks_config_trust-all.md) for more information.
 
-There is a caveat worth mentioning: if a terminal *(tty)* can't be allocated, then the default action is to accept the changes or new hooks.
-A terminal cannot be allocated for exmaple if you execute Git over a GUI such as VS Code or any other Git GUI.
-Let me know in an issue if you strongly disagree, and you think this is a big enough risk worth having slightly worse UX instead.
-
-You can also accept (trust) hooks by using [`git hooks trust hooks ---help`](docs/cli/git_hooks_trust_hooks.md).
+You can also trust individual hooks by using [`git hooks trust hooks --help`](docs/cli/git_hooks_trust_hooks.md).
 
 ## Disabling Githooks
 
@@ -582,27 +584,24 @@ See also the [setup for bare repositories](#setup-for-bare-repositories).
 
 #### Setup for Bare Repositories
 
-Because bare repositories mostly live on a server, you should setup the following if
-you use a shared hooks repository (can live on the same server, see [shared URLs](#supported-urls))
+If you want to use Githooks with bare repositories on a server, you should setup the following to ensure smooth operations (see [user prompts](#user-prompts)):
 
 ```shell
 cd bareRepo
 # Install Githooks into this bare repository
-# which will only install server hooks:
 git hooks install
-
-# Creates `.githooks/trust-all` marker for this bare repo
-# This is necessary to circumvent trust prompts for shared hooks.
-git hooks trust
 
 # Automatically accept changes to all existing and new
 # hooks in the current repository.
-git hooks config trusted --accept
+# This makes the fatal trust prompt pass.
+git hooks config trust-all-hooks --accept
 
-# Don't do global automatic updates, since the Githooks update
-# script should not be run in parallel on a server.
+# Don't do global automatic updates, since the Githooks updater
+# might get invoked in parallel on a server.
 git hooks config update --disable
 ```
+
+Enabling auto-updates on the server, is a todo and needs file locks.
 
 ### Templates or Global Hooks
 
@@ -681,39 +680,34 @@ You can also check for updates at any time by executing
 [`git hooks update`](docs/cli/git_hooks_update.md) or using
 [`git hooks config update [--enable|--disable]`](docs/cli/git_hooks_config_update.md) command to enable or disable the automatic update checks.
 
-### Custom User Prompt
+### User Prompts
 
-Githooks comes already with a [**platform-independend dialog tool**](#dialog-tool) which it uses also internally and you probably don't need this:
+Githooks shows user prompts during installation, updating (automatic or manual), uninstallation and when executing hooks (the `runner` executable).
 
-If you want to use a GUI dialog when Githooks asks for user input, you can use an executable or script file to display it.
+The `runner` might get executed over a Git GUI or any other environment where no terminal is available. In this case all user prompts are shown as
+GUI dialogs with the included [platform-independent dialog tool](#dialog-tool). The GUI dialog fallback is currently only enabled for the `runner`.
 
-The example in the `examples/tools/dialog` folder contains a Python script `run` which uses the Python (> version 3.9) provided `tkinter` to show a dialog.
+Githooks distinguishes between *fatal* and *non-fatal* prompts.
 
-```shell
-# install the example dialog tool from this repository
-$ git hooks tools register dialog "./examples/tools/dialog"
-```
+- A *fatal* prompt will result in a complete abort if
+  - The prompt could not be shown (terminal or GUI dialog).
+  - The answer returned by the user is incorrect (terminal only) or the
+    user canceled the GUI dialog.
 
-This will copy the tool to the Githooks install folder to execute when displaying user prompts.
-The tool's interface is as follows.
+- A *non-fatal* prompt always has a default answer which is taken in the above failing cases and the execution continues. Warning messages might be shown however.
 
-```shell
-$ run <title> <text> <options> <long-options>    # if `run` is executable
-$ sh run <title> <text> <options> <long-options> # otherwise, assuming `run` is a shell script
-```
+The `runner` will show prompts, either in the terminal or as GUI dialog, in the following cases:
 
-The arguments for the dialog tool are:
+1. **Trust prompt**: The user is required to trust/untrust a new/changed hook: **fatal**.
+2. **Update prompts**: The user is requested to accept a new update if automatic updates are enabled (`git hooks update --enable`): **non-fatal**.
+    - Various other prompts when the updater is launched: **non-fatal**.
 
-- `<title>` the title for the GUI dialog
-- `<text>` the text for the GUI dialog
-- `<short-options>` the button return values, separated by slashes, e.g. `Y/n/d`. The default button is the first capital character found.
-- `<long-options>` the button texts in the GUI, e.g. `Yes/no/disable`
+User prompts during `runner` execution are sometimes not desirable (server infastructure, docker container, etc...) and need to be disabled. Setting `git hooks config runner-non-interactive --enable --global` will:
 
-The script needs to return one of the short-options on the standard output.
-If the exit code is not `0`, the normal prompt on the standard input is shown as a fallback mechanism.
-
-**Note:** Githooks will probably in the future provide a default cross-platform Dialog implementation, which will render this feature obsolete.
-(PRs welcome, see [https://github.com/gen2brain/dlgs](https://github.com/gen2brain/dlgs))
+- Take default answers for all **non-fatal** prompts. No warnings are shown.
+- Take default answer for a **fatal prompt** if it is configured:
+  The only fatal prompt is the **trust prompt** which can be configured to pass by executing
+  `git hooks config trust-all --accept`.
 
 ## Uninstalling
 

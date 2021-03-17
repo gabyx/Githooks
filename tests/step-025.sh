@@ -2,8 +2,15 @@
 # Test:
 #   Direct runner execution: break if the previously moved hook is failing
 
-mkdir -p "$GH_TEST_TMP/test25" && cd "$GH_TEST_TMP/test25" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
+mkdir -p "$GH_TEST_TMP/test25" &&
+    cd "$GH_TEST_TMP/test25" &&
+    git init || exit 1
 
 mkdir -p .githooks &&
     mkdir -p .githooks/pre-commit &&

@@ -2,14 +2,19 @@
 # Test:
 #   Direct runner execution: execute auto-update
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
 fi
 
-mkdir -p "$GH_TEST_TMP/test29" && cd "$GH_TEST_TMP/test29" || exit 1
-git init || exit 1
+mkdir -p "$GH_TEST_TMP/test29" &&
+    cd "$GH_TEST_TMP/test29" &&
+    git init || exit 1
 
 git config --global githooks.autoUpdateEnabled true || exit 1
 

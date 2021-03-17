@@ -1,4 +1,4 @@
-## git hooks config trusted
+## git hooks config trust-all
 
 Change trust settings in the current repository.
 
@@ -9,7 +9,7 @@ Change the trust setting in the current repository.
 This command needs to be run at the root of a repository.
 
 ```
-git hooks config trusted [flags]
+git hooks config trust-all [flags]
 ```
 
 ### Options
@@ -22,7 +22,7 @@ git hooks config trusted [flags]
       --deny     Marks the repository as it has refused to
                  trust the changes, even if the trust marker is present.
       --reset    Clears the trust setting.
-  -h, --help     help for trusted
+  -h, --help     help for trust-all
 ```
 
 ### SEE ALSO

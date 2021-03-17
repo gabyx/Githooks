@@ -2,8 +2,13 @@
 # Test:
 #   Direct runner execution: update a hook in a trusted repository
 
-mkdir -p "$GH_TEST_TMP/test34" && cd "$GH_TEST_TMP/test34" || exit 1
-git init || exit 1
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+mkdir -p "$GH_TEST_TMP/test34" &&
+    cd "$GH_TEST_TMP/test34" &&
+    git init || exit 1
 
 mkdir -p .githooks/pre-commit &&
     touch .githooks/trust-all &&

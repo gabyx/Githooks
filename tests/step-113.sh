@@ -2,6 +2,12 @@
 # Test:
 #   Test template area is set up properly (regular)
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
+acceptAllTrustPrompts || exit 1
+
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
@@ -10,8 +16,7 @@ fi
 mkdir -p "$GH_TEST_TMP/test113/.githooks/pre-commit" &&
     echo "echo 'Testing 113' > '$GH_TEST_TMP/test113.out'" >"$GH_TEST_TMP/test113/.githooks/pre-commit/test-hook" &&
     cd "$GH_TEST_TMP/test113" &&
-    git init ||
-    exit 1
+    git init || exit 1
 
 if grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test113/.git"; then
     echo "! Hooks were installed ahead of time"

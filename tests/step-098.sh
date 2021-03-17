@@ -2,6 +2,10 @@
 # Test:
 #   Git worktrees: run hooks
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1090
+. "$TEST_DIR/general.sh"
+
 # shellcheck disable=SC2086
 mkdir -p "$GH_TEST_TMP/test098/.git/hooks" &&
     cd "$GH_TEST_TMP/test098" &&
