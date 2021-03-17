@@ -138,7 +138,7 @@ The standard output and standard error of any hook which Githooks runs is captur
  not get read by Git itself (e.g. `pre-push`).
 
 Hooks can also be specified by a run configuration in a corresponding YAML file,
-see [#hook-run-configuration](Hook Run Configuration).
+see [Hook Run Configuration](#hook-run-configuration).
 
 Hooks related to `commit` events (where it makes sense, not `post-commit`) will also have a `${STAGED_FILES}`
  environment variable setthat is the list of staged and changed files according to
@@ -433,13 +433,13 @@ To disable running any Githooks locally or globally, use the following:
 
 ```shell
 # Disable Githooks completely for this repository:
-$ git hooks disable # Use --reset do undo.
+$ git hooks disable # Use --reset to undo.
 # or
 $ git hooks config disable --set # Same thing... Config: `githooks.disable`
 
 
 # Disable Githooks globally:
-$ git hooks disable --global # Use --reset do undo.
+$ git hooks disable --global # Use --reset to undo.
 # or
 $ git hooks config disable --set --global # Same thing... Config: `githooks.disable`
 ```
