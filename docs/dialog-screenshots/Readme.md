@@ -28,27 +28,27 @@
 
 ## macOS
 
-![Message with error icon.](macOs/message-1.png)
+![Message with error icon.](macos/message-1.png)
 
-![Message with warning icon.](macOs/message-2.png)
+![Message with warning icon.](macos/message-2.png)
 
-![Message with info icon.](macOs/message-3.png)
+![Message with info icon.](macos/message-3.png)
 
-![Message with extra button.](macOs/message-4.png)
+![Message with extra button.](macos/message-4.png)
 
-![Question with extra button.](macOs/message-5.png)
+![Question with extra button.](macos/message-5.png)
 
-![Entry field.](macOs/entry.png)
+![Entry field.](macos/entry.png)
 
-![Options dialog.](macOs/options-1.png)
+![Options dialog.](macos/options-1.png)
 
-![File selection dialog.](macOs/file-selection.png)
+![File selection dialog.](macos/file-selection.png)
 
-![Directory selection dialog.](macOs/directory-selection.png)
+![Directory selection dialog.](macos/directory-selection.png)
 
-![Save file dialog.](macOs/file-save.png)
+![Save file dialog.](macos/file-save.png)
 
-![Noifications dialog.](macOs/notification.png)
+![Noifications dialog.](macos/notification.png)
 
 ## Windows
 
