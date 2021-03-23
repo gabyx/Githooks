@@ -42,8 +42,9 @@ const (
 
 // Git config keys for local/global config.
 const (
-	GitCKShared               = "githooks.shared"
-	GitCKSharedUpdateTriggers = "githooks.sharedHooksUpdateTriggers"
+	GitCKShared                        = "githooks.shared"
+	GitCKSharedUpdateTriggers          = "githooks.sharedHooksUpdateTriggers"
+	GitCKAutoUpdateSharedHooksDisabled = "githooks.autoUpdateSharedHooksDisabled"
 
 	GitCKSkipNonExistingSharedHooks = "githooks.skipNonExistingSharedHooks"
 	GitCKSkipUntrustedHooks         = "githooks.skipUntrustedHooks"
@@ -88,6 +89,7 @@ func GetGlobalGitConfigKeys() []string {
 		// Local & global.
 		GitCKShared,
 		GitCKSharedUpdateTriggers,
+		GitCKAutoUpdateSharedHooksDisabled,
 
 		GitCKSkipNonExistingSharedHooks,
 		GitCKSkipUntrustedHooks,
@@ -103,6 +105,7 @@ func GetLocalGitConfigKeys() []string {
 
 		GitCKShared,
 		GitCKSharedUpdateTriggers,
+		GitCKAutoUpdateSharedHooksDisabled,
 
 		GitCKSkipNonExistingSharedHooks,
 		GitCKSkipUntrustedHooks,

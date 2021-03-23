@@ -15,13 +15,13 @@ git hooks config skip-untrusted-hooks [flags]
 ### Options
 
 ```
-      --print                                     Print the setting.
-      --enable                                    Enable skipping active, untrusted hooks.
-      --disable                                   Disable skipping active, untrusted hooks.
-      --Reset skipping active, untrusted hooks.   Reset the setting.
-      --local                                     Use the local Git configuration (default, except for `--print`).
-      --global                                    Use the global Git configuration.
-  -h, --help                                      help for skip-untrusted-hooks
+      --print     Print the setting.
+      --enable    Enable skipping active, untrusted hooks.
+      --disable   Disable skipping active, untrusted hooks.
+      --reset     Reset skipping active, untrusted hooks.
+      --local     Use the local Git configuration (default, except for `--print`).
+      --global    Use the global Git configuration.
+  -h, --help      help for skip-untrusted-hooks
 ```
 
 ### SEE ALSO

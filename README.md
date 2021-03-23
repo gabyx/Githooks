@@ -8,9 +8,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 ![Git Version](https://img.shields.io/badge/Git-%E2%89%A5v.2.28.0-blue)
-![Git Version](https://img.shields.io/badge/Go-1.16-blue)
-
-**STILL BETA: Any changes without notice!**
+![Go Version](https://img.shields.io/badge/Go-1.16-blue)
 
 A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
@@ -53,7 +51,8 @@ Also it searches for hooks in configured shared hook repositories.
 - [Ignoring Hooks and Files](#ignoring-hooks-and-files)
 - [Trusting Hooks](#trusting-hooks)
 - [Disabling Githooks](#disabling-githooks)
-    - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
+- [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
+- [User Prompts](#user-prompts)
 - [Installation](#installation)
     - [Normal Installation](#normal-installation)
     - [Non-Interactive Installation](#non-interactive-installation)
@@ -67,7 +66,6 @@ Also it searches for hooks in configured shared hook repositories.
         - [Global Hooks Location core.hooksPath](#global-hooks-location-corehookspath)
     - [Updates](#updates)
         - [Update Mechanics](#update-mechanics)
-    - [User Prompts](#user-prompts)
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
 - [Migration](#migration)
@@ -76,7 +74,8 @@ Also it searches for hooks in configured shared hook repositories.
     - [Build From Source](#build-from-source)
     - [Dependencies](#dependencies)
 - [Tests and Debugging](#tests-and-debugging)
-- [Debugging in the Dev Container](#debugging-in-the-dev-container)
+    - [Debugging in the Dev Container](#debugging-in-the-dev-container)
+    - [Todos:](#todos)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
 - [License](#license)
@@ -118,13 +117,12 @@ All hooks to be executed live under the `.githooks` top-level folder, that shoul
 Inside, we can have directories with the name of the hook (like `commit-msg` and `pre-commit` above),
 or a file matching the hook name (like `post-checkout` in the example). The filenames in the directory
 do not matter, but the ones starting with a `.` (dotfiles) will be excluded by default.
-All others are executed in lexical order alphabetical order
-according to the Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk).
+All others are executed in lexical order according to the Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk).
 rules. Subfolders as e.g. `final` get treated as parallel batch and all hooks inside are by default executed
 in parallel over the thread pool. See [Parallel Execution](#parallel-execution) for details.
 
-You can use the [command line helper](docs/cli/git_hooks.md) tool as `git hooks list`
-(a globally configured Git alias `alias.hooks`) to list all hooks and their current state that apply to
+You can use the [command line helper](docs/cli/git_hooks.md)
+(a globally configured Git alias `alias.hooks`), that is `git hooks list`, to list all hooks and their current state that apply to
 the current repository. For this repository this [looks like the following.](docs/githooks-list.png)
 
 ## Execution
@@ -134,15 +132,15 @@ On Windows that mostly means dispatching to the `bash.exe` from [https://gitforw
 
 **All parameters and standard input** are forwarded from Git to the hooks.
 The standard output and standard error of any hook which Githooks runs is captured
-**together**<span id="a1">[<sup>1</sup>](#1)</span>. and printed to the standard error stream which might or might
- not get read by Git itself (e.g. `pre-push`).
+**together**<span id="a1">[<sup>1</sup>](#1)</span> and printed to the standard error stream which might or might
+not get read by Git itself (e.g. `pre-push`).
 
 Hooks can also be specified by a run configuration in a corresponding YAML file,
 see [Hook Run Configuration](#hook-run-configuration).
 
 Hooks related to `commit` events (where it makes sense, not `post-commit`) will also have a `${STAGED_FILES}`
- environment variable setthat is the list of staged and changed files according to
- `git diff --cached --diff-filter=ACMR --name-only`.  File paths are separated by a newline `\n`.
+environment variable setthat is the list of staged and changed files according to
+`git diff --cached --diff-filter=ACMR --name-only`.  File paths are separated by a newline `\n`.
 If you want to iterate in a shell script over them,
 and expect spaces in paths, you might want to set the `IFS` like this:
 
@@ -195,24 +193,28 @@ All environment and Git config variables in `args` and `cmd` are substituted wit
 
 Not existing environment variables or Git config variables are replaced with the empty string by default.
 If you use `${!...:VAR}` (e.g `${!git-s:VAR }`) it will trigger an error and fail the hook if the variable `VAR` is not found.
-Escaping a above syntax works with `\${...}`.
+Escaping the above syntax works with `\${...}`.
 
-**Sidenote**: You might wonder why this configuration is not collocated in one YAML file for all hooks.
+**Sidenote**: You might wonder why this configuration is not gathered in one single YAML file for all hooks.
 The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times
 needs time and since we want speed and only an opt-in solution this is avoided.
 
 ### Parallel Execution
 
-As in the [example](#layout-and-options), all discovered hooks in subfolders `<batchName>`, e.g. `<hooksDir>/<hookName>/<batchName>/*` where
-`<hooksDir>` is either `.githooks` for repository checked-in hooks or
-`githooks`, `.githooks` or `.` for shared repository hooks, are assigned the same batch name `<batchName>` and processed
-in parallel over a threadpool defaulting to as many threads as many cores on the system. Each batch is a synchronisation
+As in the [example](#layout-and-options), all discovered hooks in subfolders `<batchName>`, e.g. `<repoPath>/<hooksDir>/<hookName>/<batchName>/*` where `<hooksDir>` is either
+
+- `.githooks` for repository checked-in hooks or
+- `githooks`, `.githooks` or `.` for shared repository hooks,
+
+are assigned the same batch name `<batchName>` and processed
+in parallel. Each batch is a synchronisation
 point and starts after the one before has finished.
+The threadpool uses by default as many threads as cores on the system.
 The number of threads can be controlled by the Git configuration variable `githooks.numThreads` set anywhere, e.g. in
 the local or global Git configuration.
 
 If you place a file `.all-parallel` inside `<hooksDir>/<hookName>`, all discovered hooks inside `<hooksDir>/<hookName>`
-are assigned to the samme batch name `all` resulting in executing all hooks in one parallel batch.
+are assigned to the same batch name `all` resulting in executing all hooks in one parallel batch.
 
 You can inspect the computed batch name by running [`git hooks list --batch-name`](/docs/cli/git_hooks_list.md).
 
@@ -245,7 +247,7 @@ for information on what they do and what parameters they receive.
 - `sendemail-validate`
 - `post-index-change`
 
-The `fsmonitor-watchman` hook is currently not supported.
+The hook `fsmonitor-watchman` is currently not supported.
 If you have a use-case for it and want to use it with this tool, please open an issue.
 
 ## Git Large File Storage (Git LFS) Support
@@ -259,9 +261,9 @@ If the user has installed [Git Large File Storage](https://git-lfs.github.com/) 
 - `post-merge`
 - `pre-push`
 
-Since Githooks overwrites the hooks in `.git/hooks`, it will also run all *Git LFS* hooks internally
+Since Githooks overwrites the hooks in `<repoPath>/.git/hooks`, it will also run all *Git LFS* hooks internally
 if the `git-lfs` executable is found on the system path. You can enforce having `git-lfs` installed on
-the system by placing a `./githooks/.lfs-required` file inside the repository, then if `git-lfs` is missing,
+the system by placing a `<repoPath>/.githooks/.lfs-required` file inside the repository, then if `git-lfs` is missing,
 a warning is shown and the hook will exit with code `1`. For some `post-*` hooks this does not mean that the
 outcome of the git command can be influenced even tough the exit code is `1`, for example `post-commit` hooks
 can't fail commits. A clone of a repository containing this file might still work but would issue a warning
@@ -272,12 +274,12 @@ hook (e.g. `examples/lfs/pre-commit`) checked in which enforces a correct instal
 
 ## Shared hook repositories
 
-The hooks are primarily designed to execute programs or scripts in the `.githooks` folder of a single repository.
+The hooks are primarily designed to execute programs or scripts in the `<repoPath>/.githooks` folder of a single repository.
 However there are use-cases for common hooks, shared between many repositories with similar requirements and functionality.
 For example, you could make sure Python dependencies are updated on projects that have a `requirements.txt` file,
 or an `mvn verify` is executed on `pre-commit` for Maven projects, etc.
 
-For this reason, you can place a `.shared.yaml` file (see [specs](#yaml-specifications)) inside the `.githooks` repository, which can hold a list of repositories which hold common and shared hooks. Alternatively, you can have a shared repositories set by multiple `githooks.shared` local or global Git configuration variables, and the hooks in these repositories will execute for all local projects where Githooks is installed.
+For this reason, you can place a `.shared.yaml` file (see [specs](#yaml-specifications)) inside the `<repoPath>/.githooks` folder, which can hold a list of repositories which contain common and shared hooks. Alternatively, you can have shared repositories set by multiple `githooks.shared` local or global Git configuration variables, and the hooks in these repositories will execute for all local projects where Githooks is installed.
 See [git hooks shared](docs/cli/git_hooks_shared.md) for configuring all 3 types of shared hooks repositories.
 
 Below are example values for these setting.
@@ -325,7 +327,7 @@ Supported URL for shared hooks are:
   - `file:///local/path/to/bare-repo.git@mybranch`
 
   All URLs can include a tag specification syntax at the end like `...@<tag>`, where `<tag>` is a Git tag, branch or commit hash.
-  The `file://` protocol is treated the same as a local path to a bare repository, see *local paths* below.
+  The `file://` protocol is treated the same as a local path to a bare repository, *see next point*.
 
 - **Local paths** to bare and non-bare repositories such as:
 
@@ -336,16 +338,16 @@ Supported URL for shared hooks are:
   These entries are forbidden for **shared hooks** configured by `.githooks/.shared.yaml` per repository
   because it makes little sense and is a security risk.
 
-Shared hooks repositories specified by *URLs* and *local paths to bare repository* will be checked out into the `<instalPrefix>/.githooks/shared` folder
+Shared hooks repositories specified by *URLs* and *local paths to bare repository* will be checked out into the `<installPrefix>/.githooks/shared` folder
 (`~/.githooks/shared` by default), and are updated automatically after a `post-merge` event (typically a `git pull`)
 on any local repositories. Any other local path will be used **directly and will not be updated or modified**.
-Additionally, the update can also be triggered on other hook names by setting a comma-separated list of additional
+Additionally, the update of shared hook repositories can also be triggered on other hook names by setting a comma-separated list of additional
 hook names in the Git configuration parameter `githooks.sharedHooksUpdateTriggers` on any configuration level.
 
 An additional global configuration parameter `githooks.skipNonExistingSharedHooks` makes Githooks skip any configured non-existing shared hooks. Otherwise, Githooks will fail and you need to update them by running `git hooks update`.
 See [`git hooks config skip-non-existing-shared-hooks --help`](docs/cli/skip-non-existing-shared-hooks.md)
 
-You can also manage and update shared hook repositories using the [`git hooks shared --help`](docs/cli/git_hooks_shared.md) tool.
+You can also manage and update shared hook repositories using the [`git hooks shared update`](docs/cli/git_hooks_shared.md) command.
 
 ## Layout of Shared Hook Repositories
 
@@ -354,17 +356,18 @@ The layout of these shared repositories is the same as above, with the exception
 If you want the shared hook repository to use Githooks itself (e.g. for development purposes by using hooks from `<sharedRepo>/.githooks`) you can furthermore place the *shared* hooks inside a `<sharedRepo/githooks` subfolder.
 In that case the `<sharedRepo>/.githooks` folder is ignored when other users use this shared repository.
 
-So the priority to find hooks in a shared hook repository is as follows: consider hooks
+The priority to find hooks in a shared hook repository is as follows: consider hooks
 
-1. in `<hooksDir>` := `<sharedRepo>/githooks`, if it does not exist, consider hooks in
-2. in `<hooksDir>` := `<sharedRepo>/.githooks`, if it does not exist consider hooks
-3. in `<hooksDir>` := `<sharedRepo>` as the last fallback.
+1. in `<hooksDir> := <sharedRepo>/githooks`, if it does not exist, consider hooks
+2. in `<hooksDir> := <sharedRepo>/.githooks`, if it does not exist consider hooks
+3. in `<hooksDir> := <sharedRepo>` as the last fallback.
 
 Each of these directories can be of the same format as the normal `.githooks` folder in a single repository.
 
 ### Shared Repository Namespace
 
-A shared repository can optionally have a namespace associated with it. The name can be stored in a file `.namespace` in any possible hooks directory `<hooksDir>` of the shared repository, see [layout](#layout-of-shared-hook-repositories).
+A shared repository can optionally have a namespace associated with it. The name can be stored in a file `.namespace` in any possible hooks directory `<hooksDir>` of the shared repository, see [layout](#layout-of-shared-hook-repositories). The namespace
+comes into play when ignoring/disabling certain hooks. See [ignoring hooks](#ignoring-hooks-and-files).
 
 ## Ignoring Hooks and Files
 
@@ -373,18 +376,22 @@ The `.ignore.yaml` (see [specs](#yaml-specifications)) files allow excluding fil
 - from being treated as hook scripts or
 - hooks from beeing run.
 
-You can ignore executing all sorts of hooks per Git repository by specifying patterns
-or paths which match against a hook's (file's) *namespace path*.
+You can ignore executing all sorts of hooks per Git repository by specifying **patterns**
+or **paths** which match against a hook's (file's) *namespace path*.
 
-The *namespace path* consists of the name of the hook prefixed by a hook namespace , e.g. `<hookNamespace>/<relPath>` where
-`<relPath>` is the relative path to the current hook directory.
-A [namespace](#shared-repository-namespace) comes into play when the hook belongs to a shared hook repository.
+Each hook either in the current repository `<repoPath>/.githooks/...` or inside a shared hooks
+repository has a so called *namespace path*.
+A *namespace path* consists of the *name of the hook* prefixed by a *namespace* , e.g. `<namespacePath> := <namespace>/<relPath> = 'core-hooks/pre-commit/check-numbers` where
+`<relPath> = pre-commit/check-numbers` is the relative path to the hook.
+Each shared repository can provide its own [namespace](#shared-repository-namespace).
+A [namespace](#shared-repository-namespace) will be used only when the hook belongs to a shared hook repository and will have a default unique value if it is not defined.
 
-Each hook either in the current repository `.githooks/...` or inside a shared hooks
-repository has a so called *namespace path*. All ignore entries in `.ignore.yaml` (patterns or paths) will match against these
-*namespace paths*. Each shared repository can provide its own [namespace](#shared-repository-namespace).
+ All ignore entries in `.ignore.yaml` (patterns or paths) will match against these
+*namespace paths*.
 You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md)
 in the current repository.
+
+Disabling works like:
 
 ```shell
 # Disable certain hooks by a pattern in this repository:
@@ -392,15 +399,13 @@ in the current repository.
 $ git hooks ignore add --pattern "pre-commit/**" # Store: `.git/.githooks.ignore.yaml`:
 
 # Disable certain shared hooks (with namespace 'my-shared-super-hooks')
-# by a pattern in this repository:
+# by a glob pattern in this repository:
 $ git hooks ignore add --pattern "my-shared-super-hooks/pre-commit/**"
 ```
 
-In the above [example](#layout-and-options]), one of the `.ignore.yaml` files should contain a pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file. Patterns can contain double star syntax to match multiple directories, e.g. `**/*.txt` instead of `*.txt`.
+In the above [example](#layout-and-options]), one of the `.ignore.yaml` files should contain a glob pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file. Patterns can contain double star syntax to match multiple directories, e.g. `**/*.txt` instead of `*.txt`.
 
-The `.githooks/.ignore.yaml` file applies to each of the hook directories. If there is a `.ignore.yaml` file both in the hook type folder and in `.githooks`, the files whose filename matches any pattern from either of those two files will be excluded. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on pattern syntax.
-
-Hooks in individual shared repositories can be disabled as well, with [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore_add.md)` by specifing patterns or namespace paths.
+The main `<repoPath>/<hookDir>/.ignore.yaml` file applies to all hooks. Any additional `<repoPath>/<hookDir>/<hookName>/.ignore.yaml` file inside `<hookDir>` will be accumulated to the main file. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on the pattern syntax.
 
 ## Trusting Hooks
 
@@ -413,16 +418,16 @@ If a hook is still *active and untrusted* after the prompt, Githooks will fail b
 This is useful to be sure that all hooks get executed.
 However, you can disabled this behavior by skipping active, untrusted hooks with [`git hooks config skip-untrusted-hooks --enable`](docs/cli/git_hooks_config_skip-untrusted-hooks.md).
 
-The accepted checksums are maintained in the `.git/.githooks.checksum` directory, per local repository.
+The accepted checksums are maintained in the `<repoPath>/.git/.githooks.checksum` directory, per local repository.
 You can however use a global checksum directory setup by specifing `githooks.checksumCacheDir`
 in any suitable Git config (can be different for each repository).
 
-If the repository contains a `.githooks/trust-all` file, it is marked as a trusted repository.
+If the repository contains a `<repoPath>/.githooks/trust-all` file, it is marked as a trusted repository.
 Consult [`git hooks trust --help`](docs/cli/git_hooks_trust.md). On the first interaction with hooks,
 Githooks will ask for confirmation that the user trusts all existing and future hooks in the repository,
 and if she does, no more confirmation prompts will be shown.
-This can be reverted by running [`git hooks config trust-all --reset`](docs/cli/git_hooks_config_trust-all.md) command
-(modifying the local Git config setting `githooks.trustAll`). This is a per-repository setting.
+This can be reverted by running [`git hooks config trust-all --reset`](docs/cli/git_hooks_config_trust-all.md) command.
+This is a per-repository setting.
 Consult [`git hooks config trust-all --help`](docs/cli/git_hooks_config_trust-all.md) for more information.
 
 You can also trust individual hooks by using [`git hooks trust hooks --help`](docs/cli/git_hooks_trust_hooks.md).
@@ -438,19 +443,49 @@ $ git hooks disable # Use --reset to undo.
 $ git hooks config disable --set # Same thing... Config: `githooks.disable`
 
 
-# Disable Githooks globally:
+# Disable Githooks globally (for all repositories):
 $ git hooks disable --global # Use --reset to undo.
 # or
 $ git hooks config disable --set --global # Same thing... Config: `githooks.disable`
 ```
 
-Also, as mentioned above, all hook executions can be bypassed with a non-empty value in the `$GITHOOKS_DISABLE` environment variable.
+Also, as mentioned above, all hook executions can be bypassed with a non-empty value in the `GITHOOKS_DISABLE` environment variable.
 
-### Installing or Removing Run-Wrappers
+## Installing or Removing Run-Wrappers
 
 You can install and uninstall run-wrappers inside a repository with [`git hooks install`](docs/cli/git_hooks_install.md).
 or [`git hooks uninstall`](docs/cli/git_hooks_install.md).
 This installs and uninstalls wrappers from `${GIT_DIR}/hooks` as well as sets and unsets local Githooks-internal Git configuration variables.
+
+
+## User Prompts
+
+Githooks shows user prompts during installation, updating (automatic or manual), uninstallation and when executing hooks (the `runner` executable).
+
+The `runner` might get executed over a Git GUI or any other environment where no terminal is available. In this case all user prompts are shown as
+GUI dialogs with the included [platform-independent dialog tool](#dialog-tool). The GUI dialog fallback is currently only enabled for the `runner`.
+
+Githooks distinguishes between *fatal* and *non-fatal* prompts.
+
+- A *fatal* prompt will result in a complete abort if
+  - The prompt could not be shown (terminal or GUI dialog).
+  - The answer returned by the user is incorrect (terminal only) or the
+    user canceled the GUI dialog.
+
+- A *non-fatal* prompt always has a default answer which is taken in the above failing cases and the execution continues. Warning messages might be shown however.
+
+The `runner` will show prompts, either in the terminal or as GUI dialog, in the following cases:
+
+1. **Trust prompt**: The user is required to trust/untrust a new/changed hook: **fatal**.
+2. **Update prompts**: The user is requested to accept a new update if automatic updates are enabled (`git hooks update --enable`): **non-fatal**.
+    - Various other prompts when the updater is launched: **non-fatal**.
+
+User prompts during `runner` execution are sometimes not desirable (server infastructure, docker container, etc...) and need to be disabled. Setting `git hooks config runner-non-interactive --enable --global` will:
+
+- Take default answers for all **non-fatal** prompts. No warnings are shown.
+- Take default answer for a **fatal prompt** if it is configured:
+  The only fatal prompt is the **trust prompt** which can be configured to pass by executing
+  `git hooks config trust-all --accept`.
 
 ## Installation
 
@@ -512,8 +547,8 @@ By default the script will install the hooks into the `~/.githooks/templates/` d
 
 ### Install Mode: Centralized Hooks
 
-Lastly, you have the option to install the templates to, and use them from a centralized location.
-You can read more about the difference between this option and default one [below](#templates-or-central-hooks). For this, run the command below.
+Lastly, you have the option to install the templates to a centralized location (`core.hooksPath`).
+You can read more about the difference between this option and the default one [below](#templates-or-central-hooks). For this, run the command below.
 
 ```shell
 $ cli installer --use-core-hookspath
@@ -535,6 +570,9 @@ you can specify the repository clone url as well as the branch name (default: `m
 $ cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
 ```
 
+The installer always maintains a Githooks clone inside `<installDir>/release`  for its automatic update logic.
+The specified custom clone URL and branch will then be used for further updates in the above example (see [update machanics](#update-mechanics)).
+
 Because the installer **always** downloads the latest release (here from another URL/branch), it needs deploy settings
 to know where to get the binaries from. Either your fork has setup
 these settings in their Githooks release (you hopefully downloaded) already or you can specify them by using
@@ -543,14 +581,12 @@ The `<type>` can either be `gitea` ( or `github` which is not needed since it ca
 it will automatically download and **verify** the binaries over the implemented API.
 Credentials will be collected over [`git credential`](https://git-scm.com/docs/cli/git-credential) to access the API. [@todo].
 
-The clone URL and branch will then be used for further updates.
-
 ### No Installation
 
-You can use this hook manager also without a global installation. For that you can clone this repository anywhere (e.g. `<repository>`) and build
+You can use this hook manager also without a global installation. For that you can clone this repository anywhere (e.g. `<repoPath>`) and build
 the executables with Go by running `githooks/scripts/build.sh`.
 You can then use the hooks by setting `core.hooksPath` (in any suitable Git config)
-to the checked in run-wrappers in `<repository>/hooks` like so:
+to the checked in run-wrappers in `<repoPath>/hooks` like so:
 
 ```shell
 git clone https://github.com/gabyx/githooks.git githooks
@@ -568,7 +604,7 @@ This can be achieved by installing with the additional flag `--only-server-hooks
 $ cli installer --only-server-hooks
 ```
 
-The global template directory then **only** maintain contains the following run-wrappers for Githooks:
+The global template directory then **only** contains the following run-wrappers for Githooks:
 
 - `pre-push`
 - `pre-receive`
@@ -603,6 +639,9 @@ git hooks config update --disable
 
 Enabling auto-updates on the server, is a todo and needs file locks.
 
+Note: A user cannot change bare repository Githooks by pushing changes to a bare repository on the server. If you use shared hook repositories in you bare repository, you might consider disabling
+shared hooks updates by [`git hooks config disable-shared-hooks-update --set`](docs/cli/git_hooks_config_disable-shared-hooks-update).
+
 ### Templates or Global Hooks
 
 This installer command can work in one of 2 ways:
@@ -631,7 +670,7 @@ git clone --template= <url> <repoPath>
 git lfs install # Important if you use Git LFS!. It never hurts doing this.
 ```
 
-**Note**: It's recommended that you do `git lfs install` again. With the latest `git` version 2.30, and `git lfs` version 2.9.2,
+**Note**: It's recommended that you do `git lfs install` again. However, with the latest `git` version 2.30, and `git lfs` version 2.9.2,
 `--template=` will not result in **no** LFS hooks inside `${GIT_DIR}/hooks` if your repository **contains** LFS objects.
 
 #### Global Hooks Location (`core.hooksPath`)
@@ -650,11 +689,11 @@ You don't need to initialize `git lfs install`, because they presumably be alrea
 
 ### Updates
 
-You can update the Githooks any time by running one of the install commands above. It will simply overwrite the template run-wrappers
+You can update the Githooks any time by running one of the install commands above. It will update itself and simply overwrite the template run-wrappers
 with the new ones, and if you opt-in to install into existing or registered local repositories, those will get overwritten too.
 
-You can also enable automatic update checks during the installation, that is executed once a day after a successful commit.
-It checks for a new version and asks whether you want to install it. It then downloads the binaries and dispatches
+You can also enable automatic update checks during the installation, that is executed **once a day after a successful commit**.
+It checks for a new version and asks whether you want to install it. It then downloads the binaries (GPG signed + checksummed) and dispatches
 to the new installer to install the new version.
 
 Automatic updates can be enabled or disabled at any time by running the command below.
@@ -679,35 +718,6 @@ This feature enables to enforce an update to a specific version. In some cases t
 You can also check for updates at any time by executing
 [`git hooks update`](docs/cli/git_hooks_update.md) or using
 [`git hooks config update [--enable|--disable]`](docs/cli/git_hooks_config_update.md) command to enable or disable the automatic update checks.
-
-### User Prompts
-
-Githooks shows user prompts during installation, updating (automatic or manual), uninstallation and when executing hooks (the `runner` executable).
-
-The `runner` might get executed over a Git GUI or any other environment where no terminal is available. In this case all user prompts are shown as
-GUI dialogs with the included [platform-independent dialog tool](#dialog-tool). The GUI dialog fallback is currently only enabled for the `runner`.
-
-Githooks distinguishes between *fatal* and *non-fatal* prompts.
-
-- A *fatal* prompt will result in a complete abort if
-  - The prompt could not be shown (terminal or GUI dialog).
-  - The answer returned by the user is incorrect (terminal only) or the
-    user canceled the GUI dialog.
-
-- A *non-fatal* prompt always has a default answer which is taken in the above failing cases and the execution continues. Warning messages might be shown however.
-
-The `runner` will show prompts, either in the terminal or as GUI dialog, in the following cases:
-
-1. **Trust prompt**: The user is required to trust/untrust a new/changed hook: **fatal**.
-2. **Update prompts**: The user is requested to accept a new update if automatic updates are enabled (`git hooks update --enable`): **non-fatal**.
-    - Various other prompts when the updater is launched: **non-fatal**.
-
-User prompts during `runner` execution are sometimes not desirable (server infastructure, docker container, etc...) and need to be disabled. Setting `git hooks config runner-non-interactive --enable --global` will:
-
-- Take default answers for all **non-fatal** prompts. No warnings are shown.
-- Take default answer for a **fatal prompt** if it is configured:
-  The only fatal prompt is the **trust prompt** which can be configured to pass by executing
-  `git hooks config trust-all --accept`.
 
 ## Uninstalling
 
@@ -742,7 +752,7 @@ directly with a new install:
 
 2. Convert all entries in `.shared` files to an url in a YAML file `.shared.yaml` [here](docs/yaml-spec.md).
 
-3. It's heartly recommended to **first** uninstalling the old version, to get rid of any old settings.
+3. It's heartly recommended to **first** uninstall the old version, to get rid of any old settings.
 
 4. Install the new version.
 
@@ -814,10 +824,10 @@ sh tests/test-alpine.sh --seq {001..120}
 sh tests/test-alpine.sh --seq 065
 ```
 
-## Debugging in the Dev Container
+### Debugging in the Dev Container
 
 There is a docker development container for debugging purposes in `.devcontainer`. VS Code can be launched in this remote docker container with the extension `ms-vscode-remote.remote-containers`.
-Use ``Remote-Containers: Open Workspace in Container...` and `Remote-Containers: Rebuild Container`.
+Use `Remote-Containers: Open Workspace in Container...` and `Remote-Containers: Rebuild Container`.
 
 Once in the development container: You can launch the VS Code tasks:
 
@@ -827,14 +837,19 @@ Once in the development container: You can launch the VS Code tasks:
 which will start the `delve` debugger headless as a server in a terminal. You can then attach to the debug server with the debug configuration `Debug Go [remote delve]`. Set breakpoints in the source code to trigger them.
 
 
+### Todos:
+  - Test: `githooks.disableSharedHooksUpdate`.
+  - Finish deploy settings implementation for Gitea and sorts.
+
 ## Acknowledgements
 
 - [Original Githooks implementation in `sh`](http://github.com/rycus86/githooks) by Viktor Adam.
 
 ## Authors
 
-- Gabriel Nützi (`go` implementation)
+- Gabriel Nützi (`Go` implementation)
 - Viktor Adam (Initial `sh` implementation)
+- Matthijs Kooijman (suggestions & discussions)
 - and community.
 
 ## License

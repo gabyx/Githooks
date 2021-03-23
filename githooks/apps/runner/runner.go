@@ -471,12 +471,15 @@ func collectHooks(
 
 func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, sharedType hooks.SharedHookType) {
 
-	if settings.HookName != "post-merge" &&
-		!(settings.HookName == "post-checkout" &&
-			settings.Args[0] == git.NullRef) &&
-		!strs.Includes(settings.GitX.GetConfigAll(hooks.GitCKSharedUpdateTriggers, git.Traverse),
-			settings.HookName) {
+	disableUpdate, _ := hooks.IsSharedHooksUpdateDisabled(settings.GitX, git.Traverse)
+	updateTriggers := settings.GitX.GetConfigAll(hooks.GitCKSharedUpdateTriggers, git.Traverse)
 
+	triggered := settings.HookName == "post-merge" ||
+		(settings.HookName == "post-checkout" &&
+			settings.Args[0] == git.NullRef) ||
+		strs.Includes(updateTriggers, settings.HookName)
+
+	if disableUpdate || !triggered {
 		log.Debug("Shared hooks not updated.")
 
 		return
