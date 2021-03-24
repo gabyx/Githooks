@@ -18,13 +18,13 @@ git hooks config non-interactive-runner [flags]
 ### Options
 
 ```
-      --print                                                  Print the setting.
-      --enable                                                 Enables non-interactive mode of the runner executable.
-      --disable                                                Disables non-interactive mode of the runner executable.
-      --Reset non-interactive mode of the runner executable.   Reset the setting.
-      --local                                                  Use the local Git configuration (default, except for `--print`).
-      --global                                                 Use the global Git configuration.
-  -h, --help                                                   help for non-interactive-runner
+      --print     Print the setting.
+      --enable    Enables non-interactive mode of the runner executable.
+      --disable   Disables non-interactive mode of the runner executable.
+      --reset     Reset non-interactive mode of the runner executable.
+      --local     Use the local Git configuration (default, except for `--print`).
+      --global    Use the global Git configuration.
+  -h, --help      help for non-interactive-runner
 ```
 
 ### SEE ALSO

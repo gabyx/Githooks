@@ -583,3 +583,25 @@ func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) (enabl
 		return conf == git.GitCVTrue, true
 	}
 }
+
+// SetDisableSharedHooksUpdate sets settings if the hook runner should
+// disable automatic updates for shared hooks.
+func SetDisableSharedHooksUpdate(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+	switch {
+	case reset:
+		return gitx.UnsetConfig(GitCKAutoUpdateSharedHooksDisabled, scope)
+	default:
+		return gitx.SetConfig(GitCKAutoUpdateSharedHooksDisabled, enable, scope)
+	}
+}
+
+// IsSharedHooksUpdateDisable checks if automatic updates for shared hooks is disabled.
+func IsSharedHooksUpdateDisabled(gitx *git.Context, scope git.ConfigScope) (disabled bool, isSet bool) {
+	conf := gitx.GetConfig(GitCKAutoUpdateSharedHooksDisabled, scope)
+	switch {
+	case strs.IsEmpty(conf):
+		return
+	default:
+		return conf == git.GitCVTrue, true
+	}
+}

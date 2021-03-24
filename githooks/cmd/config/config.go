@@ -491,6 +491,51 @@ func runSkipNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpt
 	}
 }
 
+func runDisableSharedHooksUpdate(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	scope := wrapToGitScope(ctx.Log, gitOpts)
+
+	localOrGlobal := "locally" //nolint: goconst
+	if gitOpts.Global {
+		localOrGlobal = "globally" //nolint: goconst
+	}
+
+	const text = "automatic updates of shared hooks"
+	switch {
+	case opts.Set:
+		err := hooks.SetDisableSharedHooksUpdate(ctx.GitX, true, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not disable %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Disable %s %s.", text, localOrGlobal)
+
+	case opts.Unset:
+		err := hooks.SetDisableSharedHooksUpdate(ctx.GitX, false, false, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not enable %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Enabled %s %s.", text, localOrGlobal)
+
+	case opts.Reset:
+		err := hooks.SetDisableSharedHooksUpdate(ctx.GitX, false, true, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not reset (enable) %s %s.", text, localOrGlobal)
+		ctx.Log.InfoF("Reset (enabled) %s %s.", text, localOrGlobal)
+
+	case opts.Print:
+		localOrGlobal = " " + localOrGlobal
+		if !gitOpts.Global && !gitOpts.Local {
+			scope = git.Traverse
+			localOrGlobal = ""
+		}
+
+		msg := "Automatic updates of shared hooks are "
+		disabled, _ := hooks.IsSharedHooksUpdateDisabled(ctx.GitX, scope)
+		if disabled {
+			ctx.Log.InfoF(msg+"disabled%s.", text, localOrGlobal)
+		} else {
+			ctx.Log.InfoF(msg+"enabled%s.", text, localOrGlobal)
+		}
+
+	default:
+		cm.Panic("Wrong arguments.")
+	}
+}
+
 func runSkipUntrustedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	scope := wrapToGitScope(ctx.Log, gitOpts)
 
@@ -796,7 +841,45 @@ has not been called yet.`,
 	wrapToEnableDisable(&optsPSUR)
 	optsPSUR.SetDesc = "Enable skipping non-existing shared hooks."
 	optsPSUR.UnsetDesc = "Disable skipping non-existing shared hooks."
-	optsPSUR.Reset = "Reset skipping non-existing shared hooks."
+	optsPSUR.ResetDesc = "Reset skipping non-existing shared hooks."
+
+	configSetOptions(nonExistSharedCmd, setOpts, &optsPSUR, ctx.Log, 0, 0)
+
+	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Local, "local", false,
+		"Use the local Git configuration (default, except for '--print').")
+	nonExistSharedCmd.Flags().BoolVar(&gitOpts.Global,
+		"global", false, "Use the global Git configuration.")
+
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, nonExistSharedCmd))
+}
+
+func configDisableSharedHooksUpdate(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions) {
+
+	nonExistSharedCmd := &cobra.Command{
+		Use:   "disable-shared-hooks-update [flags]",
+		Short: "Disable/enable automatic updates of shared hooks.",
+		Long: `Disable/enable automatic updates of shared hook
+repositories.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if !gitOpts.Local && !gitOpts.Global {
+				gitOpts.Local = true
+			}
+
+			if gitOpts.Local {
+				ccm.AssertRepoRoot(ctx)
+			}
+
+			runDisableSharedHooksUpdate(ctx, setOpts, gitOpts)
+		}}
+
+	optsPSUR := createOptionMap(true, true, true)
+	optsPSUR.SetDesc = "Disable automatic updates of shared hooks."
+	optsPSUR.UnsetDesc = "Enabled automatic updates of shared hooks.."
+	optsPSUR.ResetDesc = "Reset (enable) automatic updates of shared hooks."
 
 	configSetOptions(nonExistSharedCmd, setOpts, &optsPSUR, ctx.Log, 0, 0)
 
@@ -836,7 +919,7 @@ Mostly wanted if all hooks must be executed.`,
 	wrapToEnableDisable(&optsPSUR)
 	optsPSUR.SetDesc = "Enable skipping active, untrusted hooks."
 	optsPSUR.UnsetDesc = "Disable skipping active, untrusted hooks."
-	optsPSUR.Reset = "Reset skipping active, untrusted hooks."
+	optsPSUR.ResetDesc = "Reset skipping active, untrusted hooks."
 
 	configSetOptions(nonExistSharedCmd, setOpts, &optsPSUR, ctx.Log, 0, 0)
 
@@ -875,7 +958,7 @@ See 'git hooks config trust-all --help'.`,
 	wrapToEnableDisable(&optsPSUR)
 	optsPSUR.SetDesc = "Enables non-interactive mode of the runner executable."
 	optsPSUR.UnsetDesc = "Disables non-interactive mode of the runner executable."
-	optsPSUR.Reset = "Reset non-interactive mode of the runner executable."
+	optsPSUR.ResetDesc = "Reset non-interactive mode of the runner executable."
 
 	configSetOptions(nonInteracticeRunner, setOpts, &optsPSUR, ctx.Log, 0, 0)
 
@@ -935,6 +1018,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configCloneBranchCmd(ctx, configCmd, &setOpts)
 
 	configSharedCmd(ctx, configCmd, &setOpts, &gitOpts)
+	configDisableSharedHooksUpdate(ctx, configCmd, &setOpts, &gitOpts)
 
 	configSkipNonExistingSharedHooks(ctx, configCmd, &setOpts, &gitOpts)
 	configFailUntrustedHooks(ctx, configCmd, &setOpts, &gitOpts)

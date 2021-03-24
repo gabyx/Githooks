@@ -15,13 +15,13 @@ git hooks config skip-non-existing-shared-hooks [flags]
 ### Options
 
 ```
-      --print                                       Print the setting.
-      --enable                                      Enable skipping non-existing shared hooks.
-      --disable                                     Disable skipping non-existing shared hooks.
-      --Reset skipping non-existing shared hooks.   Reset the setting.
-      --local                                       Use the local Git configuration (default, except for `--print`).
-      --global                                      Use the global Git configuration.
-  -h, --help                                        help for skip-non-existing-shared-hooks
+      --print     Print the setting.
+      --enable    Enable skipping non-existing shared hooks.
+      --disable   Disable skipping non-existing shared hooks.
+      --reset     Reset skipping non-existing shared hooks.
+      --local     Use the local Git configuration (default, except for `--print`).
+      --global    Use the global Git configuration.
+  -h, --help      help for skip-non-existing-shared-hooks
 ```
 
 ### SEE ALSO
