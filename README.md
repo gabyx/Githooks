@@ -852,6 +852,11 @@ which will start the `delve` debugger headless as a server in a terminal. You ca
 - Matthijs Kooijman (suggestions & discussions)
 - and community.
 
+## Support & Donation
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6S6BJL4GSMSG4)
+Will be distributed equally among all contributors.
+
 ## License
 
 MIT
