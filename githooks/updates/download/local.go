@@ -61,7 +61,7 @@ func (s *LocalDeploySettings) Download(versionTag string, dir string) error {
 	case strings.HasSuffix(targetFile, ".zip"):
 		targetExtension = ".zip"
 	default:
-		return cm.Error("Archive type of file '%s' not supporeted.", targetFile)
+		return cm.ErrorF("Archive type of file '%s' not supporeted.", targetFile)
 	}
 
 	targetDir := path.Dir(targetFile)

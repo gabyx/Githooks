@@ -38,6 +38,7 @@ Also it searches for hooks in configured shared hook repositories.
 - [Layout and Options](#layout-and-options)
 - [Execution](#execution)
     - [Hook Run Configuration](#hook-run-configuration)
+    - [Exported Environment Variables](#exported-environment-variables)
     - [Parallel Execution](#parallel-execution)
 - [Supported Hooks](#supported-hooks)
 - [Git Large File Storage Git LFS Support](#git-large-file-storage-git-lfs-support)
@@ -78,6 +79,7 @@ Also it searches for hooks in configured shared hook repositories.
     - [Todos:](#todos)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
+- [Support & Donation](#support--donation)
 - [License](#license)
 
 <!-- /TOC -->
@@ -198,6 +200,14 @@ Escaping the above syntax works with `\${...}`.
 **Sidenote**: You might wonder why this configuration is not gathered in one single YAML file for all hooks.
 The reason is that each hook invocation by Git is separate. Avoiding reading this total file several times
 needs time and since we want speed and only an opt-in solution this is avoided.
+
+### Exported Environment Variables
+
+Githooks defines the following environment variables:
+
+- `STAGED_FILES` : All staged files, applicable to hooks: `pre-commit`, `prepare-commit-msg` and `commit-msg`.
+- `GITHOOKS_OS` : The runtime operating system, applicable to all hooks. [See this list](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
+- `GITHOOKS_ARCH` : The runtime operating architecture, applicable to all hooks. [See this list](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
 
 ### Parallel Execution
 

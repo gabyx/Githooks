@@ -65,6 +65,12 @@ var LFSHookNames = [4]string{
 // StagedFilesHookNames are the hook names on which staged files are exported.
 var StagedFilesHookNames = [3]string{"pre-commit", "prepare-commit-msg", "commit-msg"}
 
+// EnvVariableOs is the environment variable which holds runtime operating system name.
+const EnvVariableOs = "GITHOOKS_OS"
+
+// EnvVariableArch is the environment variable which holds runtime architecture name.
+const EnvVariableArch = "GITHOOKS_ARCH"
+
 // EnvVariableStagedFiles is the environment variable which holds the staged files.
 const EnvVariableStagedFiles = "STAGED_FILES"
 

@@ -21,7 +21,7 @@ func (i *indexArgs) Set(s string) error {
 
 	value, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
-		return cm.Error("Could not parse index '%s'.", s)
+		return cm.ErrorF("Could not parse index '%s'.", s)
 	}
 
 	*i.indices = append(*i.indices, uint(value))

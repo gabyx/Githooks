@@ -86,7 +86,7 @@ func Build(repoPath string, buildTags []string) (string, error) {
 
 	goSrc := path.Join(repoPath, relPathGoSrc)
 	if !cm.IsDirectory(goSrc) {
-		return "", cm.Error("Source directors '%s' is not existing.", goSrc)
+		return "", cm.ErrorF("Source directors '%s' is not existing.", goSrc)
 	}
 
 	goPath := path.Join(repoPath, relPathGoSrc, ".go")
@@ -105,7 +105,7 @@ func Build(repoPath string, buildTags []string) (string, error) {
 	e1 := os.RemoveAll(goPath)
 	e2 := os.RemoveAll(goBinPath)
 	if e1 != nil || e2 != nil {
-		return goBinPath, cm.ErrorF("Could not remove temporary build files.")
+		return goBinPath, cm.Error("Could not remove temporary build files.")
 	}
 
 	// Set working dir.

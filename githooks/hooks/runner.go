@@ -63,11 +63,11 @@ func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err erro
 		return
 	}
 
-	subst := getEnvSubstitution(os.LookupEnv, git.Ctx().LookupConfig)
+	subst := getVarSubstitution(os.LookupEnv, git.Ctx().LookupConfig)
 
 	if exec.Cmd, err = subst(config.Cmd); err != nil {
 		err = cm.CombineErrors(err,
-			cm.Error("Error in hook run config '%s'.", hookPath))
+			cm.ErrorF("Error in hook run config '%s'.", hookPath))
 
 		return
 	}
@@ -77,7 +77,7 @@ func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err erro
 	for i := range config.Args {
 		if exec.Args[i], err = subst(exec.Args[i]); err != nil {
 			err = cm.CombineErrors(err,
-				cm.Error("Error in hook run config '%s'.", hookPath))
+				cm.ErrorF("Error in hook run config '%s'.", hookPath))
 
 			return
 		}
@@ -90,7 +90,7 @@ func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err erro
 
 var reEnvVariable = regexp.MustCompile(`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s):([a-zA-Z.][a-zA-Z0-9_.]+)\}`)
 
-func getEnvSubstitution(
+func getVarSubstitution(
 	getEnv func(string) (string, bool),
 	gitGet func(string, git.ConfigScope) (string, bool)) func(string) (string, error) {
 
