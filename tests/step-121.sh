@@ -99,6 +99,7 @@ if [ "$?" -ne 0 ] ||
     exit 6
 fi
 
+# Testing "!" operator.
 # Test if it fails!
 cat <<"EOF" >".githooks/pre-commit.yaml" || exit 5
 cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
@@ -114,4 +115,22 @@ OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
 if [ "$?" -eq 0 ] || ! echo "$OUT" | grep "Error in hook run config"; then
     echo "! Expected hook to fail."
     exit 7
+fi
+
+# Testing GITHOOKS_OS/GITHOOKS_ARCH
+# Test if it does not fail!
+cat <<"EOF" >".githooks/pre-commit.yaml" || exit 5
+cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
+args:
+    - "my-file.py"
+    - "${!env:GITHOOKS_OS}"
+    - "${!env:GITHOOKS_ARCH}"
+version: 1
+EOF
+
+OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+# shellcheck disable=SC2181,SC2016
+if [ "$?" -ne 0 ] || echo "$OUT" | grep "Error in hook run config"; then
+    echo "! Expected hook to succeed."
+    exit 8
 fi

@@ -79,6 +79,7 @@ func mainRun() (exitCode int) {
 		return
 	}
 
+	exportGeneralEnvVars()
 	exportStagedFiles(&settings)
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
@@ -249,6 +250,11 @@ func showTrustRepoPrompt(gitx *git.Context, promptCtx prompt.IContext) (isTruste
 	}
 
 	return
+}
+
+func exportGeneralEnvVars() {
+	os.Setenv(hooks.EnvVariableOs, runtime.GOOS)
+	os.Setenv(hooks.EnvVariableArch, runtime.GOARCH)
 }
 
 func exportStagedFiles(settings *HookSettings) {

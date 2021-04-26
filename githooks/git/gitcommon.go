@@ -236,7 +236,13 @@ func FindGitDirs(searchDir string) (all []string, err error) {
 
 // Clone an URL to a path `repoPath`.
 func Clone(repoPath string, url string, branch string, depth int) error {
-	args := []string{"clone", "-c", "core.hooksPath=", "--template=", "--single-branch"}
+	// Its important to not use any template directory here to not
+	// install accidentally Githooks run-wrappers.
+	// We set the `core.hooksPath` explicitly to its internal hooks directory to not interfer
+	// with global settings.
+	// Also this installs LFS hooks, which comes handy for certain shared hook repos
+	// with prebuilt binaries.
+	args := []string{"clone", "-c", "core.hooksPath=.git/hooks", "--template=", "--single-branch"}
 
 	if branch != "" {
 		args = append(args, "--branch", branch)
@@ -247,7 +253,19 @@ func Clone(repoPath string, url string, branch string, depth int) error {
 	}
 
 	args = append(args, []string{url, repoPath}...)
-	out, e := CtxSanitized().GetCombined(args...)
+
+	ctx := CtxSanitized()
+	// We must not execute this clone command inside a Git repo  (e.g. A)
+	// due to `core.hooksPath=.git/hooks` which get applied to `A` -> Bug ?:
+	// https://stackoverflow.com/questions/67273420/why-does-git-execute-hooks-from-an-other-repository
+	ctx.Cwd = path.Dir(repoPath)
+	if !cm.IsDirectory(ctx.Cwd) {
+		if e := os.MkdirAll(ctx.Cwd, cm.DefaultFileModeDirectory); e != nil {
+			return cm.ErrorF("Could not create working directory '%s'.", ctx.Cwd)
+		}
+	}
+
+	out, e := ctx.GetCombined(args...)
 
 	if e != nil {
 		return cm.ErrorF("Cloning of '%s' [branch: '%s']\ninto '%s' failed:\n%s", url, branch, repoPath, out)

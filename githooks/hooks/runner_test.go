@@ -23,7 +23,7 @@ func getGitConfig(key string, scope git.ConfigScope) (string, bool) {
 
 func TestEnvReplace(t *testing.T) {
 
-	subst := getEnvSubstitution(os.LookupEnv, getGitConfig)
+	subst := getVarSubstitution(os.LookupEnv, getGitConfig)
 
 	os.Setenv("var", "banana")
 	os.Setenv("tar", "monkey")
