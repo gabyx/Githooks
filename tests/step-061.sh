@@ -13,17 +13,17 @@ acceptAllTrustPrompts || exit 1
 mkdir -p "$GH_TEST_TMP/shared/first-shared.git/pre-commit" &&
     cd "$GH_TEST_TMP/shared/first-shared.git" &&
     echo 'echo "Hello"' >pre-commit/sample-one &&
-    git init --template=/dev/null && git add . && git commit -m 'Testing' || exit 1
+    git init --template= && git add . && git commit -m 'Testing' || exit 1
 
 mkdir -p "$GH_TEST_TMP/shared/second-shared.git/pre-commit" &&
     cd "$GH_TEST_TMP/shared/second-shared.git" &&
     echo 'echo "Hello"' >pre-commit/sample-two &&
-    git init --template=/dev/null && git add . && git commit -m 'Testing' || exit 1
+    git init --template= && git add . && git commit -m 'Testing' || exit 1
 
 mkdir -p "$GH_TEST_TMP/shared/third-shared.git/pre-commit" &&
     cd "$GH_TEST_TMP/shared/third-shared.git" &&
     echo 'echo "Hello"' >pre-commit/sample-three &&
-    git init --template=/dev/null && git add . && git commit -m 'Testing' || exit 1
+    git init --template= && git add . && git commit -m 'Testing' || exit 1
 
 mkdir -p "$GH_TEST_TMP/test061/.githooks" &&
     cd "$GH_TEST_TMP/test061" &&
