@@ -26,7 +26,6 @@ git hooks
 * [git hooks list](git_hooks_list.md)	 - Lists the active hooks in the current repository.
 * [git hooks readme](git_hooks_readme.md)	 - Manages the Githooks README in the current repository.
 * [git hooks shared](git_hooks_shared.md)	 - Manages the shared hook repositories.
-* [git hooks tools](git_hooks_tools.md)	 - Manages script folders for tools.
 * [git hooks trust](git_hooks_trust.md)	 - Manages settings related to trusted repositories.
 * [git hooks uninstall](git_hooks_uninstall.md)	 - Uninstalls Githooks run-wrappers into the current repository.
 * [git hooks uninstaller](git_hooks_uninstaller.md)	 - Githooks uninstaller application.

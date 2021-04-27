@@ -400,8 +400,9 @@ func executeOldHook(settings *HookSettings,
 	}
 
 	hooks, _, err := hooks.GetAllHooksIn(
+		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace,
-		isIgnored, isTrusted, true,
+		isIgnored, isTrusted, true, false,
 		settings.Args)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
@@ -449,7 +450,7 @@ func collectHooks(
 
 	// Local hooks in repository
 	h.LocalHooks = getHooksIn(
-		settings, uiSettings, settings.RepositoryHooksDir,
+		settings, uiSettings, settings.RepositoryDir, settings.RepositoryHooksDir,
 		true, hooks.NamespaceRepositoryHook, ignores, checksums)
 
 	// All shared hooks
@@ -653,6 +654,7 @@ func checkSharedHook(
 func getHooksIn(
 	settings *HookSettings,
 	uiSettings *UISettings,
+	rootDir string,
 	hooksDir string,
 	addInternalIgnores bool,
 	hookNamespace string,
@@ -694,8 +696,9 @@ func getHooksIn(
 	}
 
 	allHooks, maxBatches, err := hooks.GetAllHooksIn(
+		rootDir,
 		hooksDir, settings.HookName, hookNamespace,
-		isIgnored, isTrusted, true,
+		isIgnored, isTrusted, true, true,
 		settings.Args)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
@@ -768,18 +771,21 @@ func getHooksInShared(settings *HookSettings,
 	// 1. priority has non-dot folder 'githooks'
 	dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir)
 	if cm.IsDirectory(dir) {
-		return getHooksIn(settings, uiSettings, dir, true, hookNamespace, ignores, checksums)
+		return getHooksIn(settings, uiSettings,
+			shRepo.RepositoryDir, dir, true, hookNamespace, ignores, checksums)
 	}
 
 	// 2. priority is the normal '.githooks' folder.
 	// This is second, to allow internal development Githooks inside shared repos.
 	dir = hooks.GetGithooksDir(shRepo.RepositoryDir)
 	if cm.IsDirectory(dir) {
-		return getHooksIn(settings, uiSettings, dir, true, hookNamespace, ignores, checksums)
+		return getHooksIn(settings, uiSettings,
+			shRepo.RepositoryDir, dir, true, hookNamespace, ignores, checksums)
 	}
 
 	// 3. Fallback to the whole repository.
-	return getHooksIn(settings, uiSettings, shRepo.RepositoryDir, true, hookNamespace, ignores, checksums)
+	return getHooksIn(settings, uiSettings,
+		shRepo.RepositoryDir, shRepo.RepositoryDir, true, hookNamespace, ignores, checksums)
 }
 
 func logBatches(title string, hooks hooks.HookPrioList) {

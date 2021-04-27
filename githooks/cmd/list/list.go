@@ -29,6 +29,7 @@ func runList(ctx *ccm.CmdContext,
 		list, count := listHooksForName(
 			ctx.Log,
 			hookName,
+			repoDir,
 			gitDir,
 			repoHooksDir,
 			shared,
@@ -164,6 +165,7 @@ func printPendingShared(ctx *ccm.CmdContext, shared hooks.SharedRepos) {
 func listHooksForName(
 	log cm.ILogContext,
 	hookName string,
+	repoDir string,
 	gitDir string,
 	repoHooksDir string,
 	shared hooks.SharedRepos,
@@ -173,12 +175,12 @@ func listHooksForName(
 
 	// List replaced hooks (normally only one)
 	replacedHooks := GetAllHooksIn(
-		log, path.Join(gitDir, "hooks"), hookName,
+		log, repoDir, path.Join(gitDir, "hooks"), hookName,
 		hooks.NamespaceReplacedHook, state, false, true)
 
 	// List repository hooks
 	repoHooks := GetAllHooksIn(
-		log, repoHooksDir, hookName,
+		log, repoDir, repoHooksDir, hookName,
 		hooks.NamespaceRepositoryHook, state, false, false)
 
 	// List all shared hooks
@@ -264,13 +266,16 @@ func GetAllHooksInShared(
 		var allHooks []hooks.Hook
 
 		if dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(dir) {
-			allHooks = GetAllHooksIn(log, dir, hookName, hookNamespace, state, true, false)
+			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir,
+				dir, hookName, hookNamespace, state, true, false)
 
 		} else if dir := hooks.GetGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(dir) {
-			allHooks = GetAllHooksIn(log, dir, hookName, hookNamespace, state, true, false)
+			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir,
+				dir, hookName, hookNamespace, state, true, false)
 
 		} else {
-			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir, hookName, hookNamespace, state, true, false)
+			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir,
+				shRepo.RepositoryDir, hookName, hookNamespace, state, true, false)
 		}
 
 		if len(allHooks) != 0 {
@@ -289,6 +294,7 @@ func GetAllHooksInShared(
 // GetAllHooksIn gets all hooks in a hooks directory.
 func GetAllHooksIn(
 	log cm.ILogContext,
+	rootDir string,
 	hooksDir string,
 	hookName string,
 	hookNamespace string,
@@ -343,7 +349,11 @@ func GetAllHooksIn(
 		}
 	}
 
-	allHooks, _, err := hooks.GetAllHooksIn(hooksDir, hookName, hookNamespace, isIgnored, isTrusted, false, nil)
+	allHooks, _, err := hooks.GetAllHooksIn(
+		rootDir, hooksDir,
+		hookName, hookNamespace,
+		isIgnored, isTrusted, false,
+		!isReplacedHook, nil)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	return allHooks

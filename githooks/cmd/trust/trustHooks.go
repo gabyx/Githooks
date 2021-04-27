@@ -14,6 +14,7 @@ import (
 func getAllHooks(
 	log cm.ILogContext,
 	hookNames []string,
+	repoDir string,
 	gitDir string,
 	repoHooksDir string,
 	shared hooks.SharedRepos,
@@ -25,12 +26,12 @@ func getAllHooks(
 
 		// List replaced hooks (normally only one)
 		replacedHooks := list.GetAllHooksIn(
-			log, path.Join(gitDir, "hooks"), hookName,
+			log, repoDir, path.Join(gitDir, "hooks"), hookName,
 			hooks.NamespaceReplacedHook, state, false, true)
 		allHooks = append(allHooks, replacedHooks...)
 
 		// List repository hooks
-		repoHooks := list.GetAllHooksIn(log, repoHooksDir, hookName,
+		repoHooks := list.GetAllHooksIn(log, repoDir, repoHooksDir, hookName,
 			hooks.NamespaceRepositoryHook, state, false, false)
 		allHooks = append(allHooks, repoHooks...)
 
@@ -87,7 +88,7 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 
 	state, shared := list.PrepareListHookState(ctx, repoDir, repoHooksDir, gitDirWorktree, hookNames)
 
-	allHooks := getAllHooks(ctx.Log, hookNames, gitDir, repoHooksDir, shared, state)
+	allHooks := getAllHooks(ctx.Log, hookNames, repoDir, gitDir, repoHooksDir, shared, state)
 
 	countMatches := 0
 
