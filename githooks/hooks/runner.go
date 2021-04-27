@@ -94,7 +94,7 @@ func GetHookRunCmd(
 	}
 
 	// Resolve commands with path separators which are
-	// relative path -> relative to `rootDir`.
+	// relative paths relative to the `rootDir`.
 	// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
 	if strings.ContainsAny(exec.Cmd, "/\\") {
 		if runtime.GOOS == cm.WindowsOsName {
