@@ -28,8 +28,6 @@ builds:
         goarch: arm64
       - goos: illumos
         goarch: arm64
-      - goos: darwin
-        goarch: arm64
       - goos: plan9
         goarch: arm64
       - goos: solaris
