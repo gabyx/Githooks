@@ -14,11 +14,11 @@ if ! "$GH_TEST_BIN/cli" installer; then
 fi
 
 git config --global --unset githooks.autoUpdateEnabled &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" update --enable &&
+    "$GH_INSTALL_BIN_DIR/cli" update --enable &&
     [ "$(git config --get githooks.autoUpdateEnabled)" = "true" ] ||
     exit 1
 
 git config --global --unset githooks.autoUpdateEnabled &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" update --disable &&
+    "$GH_INSTALL_BIN_DIR/cli" update --disable &&
     [ "$(git config --get githooks.autoUpdateEnabled)" = "false" ] ||
     exit 1

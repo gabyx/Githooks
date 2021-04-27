@@ -94,7 +94,7 @@ fi
 
 # Test LFS invocation if git hooks are disabled
 rm lfs.out && rm hook.out &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config disable --set &&
+    "$GH_INSTALL_BIN_DIR/cli" config disable --set &&
     ACCEPT_CHANGES=Y git commit --allow-empty -m "Second commit" ||
     exit 12
 
@@ -104,7 +104,7 @@ if ! grep -q 'post-commit' lfs.out || [ -f hook.out ]; then
 fi
 
 # an extra invocation for coverage
-"$GITHOOKS_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-merge unused ||
+"$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-merge unused ||
     exit 12
 
 if ! grep -q 'post-merge' lfs.out; then

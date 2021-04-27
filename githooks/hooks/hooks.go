@@ -128,12 +128,14 @@ type TrustCallback = func(hookPath string) (trusted bool, sha1 string)
 // in hooks dir `hookDir`.
 // The reported `maxBatches` might include empty ones.
 func GetAllHooksIn(
+	rootDir string,
 	hooksDir string,
 	hookName string,
 	hookNamespace string,
 	isIgnored IngoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
+	parseRunnerConfig bool,
 	args []string) (allHooks []Hook, maxBatches int, err error) {
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
@@ -153,7 +155,7 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			runCmd, err = GetHookRunCmd(hookPath, args)
+			runCmd, err = GetHookRunCmd(hookPath, args, parseRunnerConfig, rootDir)
 			if err != nil {
 				return cm.CombineErrors(err,
 					cm.ErrorF("Could not detect runner for hook\n'%s'", hookPath))

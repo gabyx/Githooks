@@ -22,7 +22,7 @@ mkdir -p "$GH_TEST_TMP/test110/hooks" &&
 # Hooks
 cd "$GH_TEST_TMP/test110/hooks" &&
     git init || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config disable --set || exit 1
+"$GH_INSTALL_BIN_DIR/cli" config disable --set || exit 1
 
 # Server
 cd "$GH_TEST_TMP/test110/server" && git init --bare || exit 1
@@ -42,11 +42,11 @@ git commit -a -m "Hooks" || exit 1
 
 echo "Setup shared hook in server repo"
 cd "$GH_TEST_TMP/test110/server" || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared add file://"$GH_TEST_TMP/test110/hooks" || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared add file://"$GH_TEST_TMP/test110/hooks" || exit 1
 echo "Setup shared hook in server repo: set trusted"
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
+"$GH_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
 echo "Setup shared hook in server repo: update shared"
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared update || exit 1
 
 echo "Test hook from push"
 cd "$GH_TEST_TMP/test110/local" || exit 1
@@ -70,7 +70,7 @@ git commit -a -m "Make hook succeed"
 
 echo "Update hooks"
 cd "$GH_TEST_TMP/test110/server" || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared update || exit 1
 
 echo "Push hook to succeed"
 cd "$GH_TEST_TMP/test110/local" || exit 1

@@ -12,7 +12,6 @@ import (
 	"gabyx/githooks/cmd/list"
 	"gabyx/githooks/cmd/readme"
 	"gabyx/githooks/cmd/shared"
-	"gabyx/githooks/cmd/tools"
 	"gabyx/githooks/cmd/trust"
 	"gabyx/githooks/cmd/uninstaller"
 	"gabyx/githooks/cmd/update"
@@ -57,7 +56,6 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 	cmd.AddCommand(list.NewCmd(ctx))
 	cmd.AddCommand(readme.NewCmd(ctx))
 	cmd.AddCommand(shared.NewCmd(ctx))
-	cmd.AddCommand(tools.NewCmd(ctx))
 	cmd.AddCommand(trust.NewCmd(ctx))
 	cmd.AddCommand(update.NewCmd(ctx))
 

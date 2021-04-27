@@ -17,26 +17,26 @@ mkdir -p "$GH_TEST_TMP/test081" &&
     cd "$GH_TEST_TMP/test081" &&
     git init || exit 1
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" trust &&
+"$GH_INSTALL_BIN_DIR/cli" trust &&
     [ -f .githooks/trust-all ] &&
     [ "$(git config --local --get githooks.trustAll)" = "true" ] ||
     exit 1
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" trust revoke &&
+"$GH_INSTALL_BIN_DIR/cli" trust revoke &&
     [ -f .githooks/trust-all ] &&
     [ "$(git config --local --get githooks.trustAll)" = "false" ] ||
     exit 2
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" trust delete &&
+"$GH_INSTALL_BIN_DIR/cli" trust delete &&
     [ ! -f .githooks/trust-all ] &&
     [ "$(git config --local --get githooks.trustAll)" = "false" ] ||
     exit 3
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" trust forget &&
+"$GH_INSTALL_BIN_DIR/cli" trust forget &&
     [ -z "$(git config --local --get githooks.trustAll)" ] &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" trust forget ||
+    "$GH_INSTALL_BIN_DIR/cli" trust forget ||
     exit 4
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" trust invalid && exit 5
+"$GH_INSTALL_BIN_DIR/cli" trust invalid && exit 5
 
 exit 0

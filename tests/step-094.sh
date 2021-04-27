@@ -18,7 +18,7 @@ mkdir -p "$GH_TEST_TMP/test094/a" "$GH_TEST_TMP/test094/b" "$GH_TEST_TMP/test094
 
 git config --global githooks.previousSearchDir "$GH_TEST_TMP"
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" installer; then
+if ! "$GH_INSTALL_BIN_DIR/cli" installer; then
     echo "! Failed to run the global installation"
     exit 1
 fi
@@ -35,7 +35,7 @@ else
     fi
 fi
 
-if (cd "$GH_TEST_TMP/test094/c" && "$GITHOOKS_INSTALL_BIN_DIR/cli" install); then
+if (cd "$GH_TEST_TMP/test094/c" && "$GH_INSTALL_BIN_DIR/cli" install); then
     echo "! Install expected to fail outside a repository"
     exit 1
 fi
@@ -47,7 +47,7 @@ if ! (cd ~/.githooks/release && git status && git reset --hard HEAD^); then
 fi
 
 CURRENT="$(cd ~/.githooks/release && git rev-parse HEAD)"
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" installer; then
+if ! "$GH_INSTALL_BIN_DIR/cli" installer; then
     echo "! Expected global installation to succeed"
     exit 1
 fi

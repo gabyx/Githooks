@@ -170,7 +170,9 @@ any [supported hook name](#supported-hooks). An example might look like the foll
 
 ```yaml
 # The command to run.
-cmd: "command-of-${env:USER}.exe"
+# - if it contains path separators and is relative, it its evaluated relative to
+#   the worktree of the repository where this config resides.
+cmd: "dist/command-of-${env:USER}.exe"
 
 # The arguments given to `cmd`.
 args:

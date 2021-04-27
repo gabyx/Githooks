@@ -18,12 +18,12 @@ mkdir -p "$GH_TEST_TMP/test059/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test059" &&
     git init || exit 1
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list | grep "first" | grep -q "'ignored'"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "first" | grep -q "'ignored'"; then
     echo "! Unexpected cli list output (1)"
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list | grep "second" | grep -q "'ignored'"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "second" | grep -q "'ignored'"; then
     echo "! Unexpected cli list output (2)"
     exit 1
 fi

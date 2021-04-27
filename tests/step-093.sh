@@ -15,17 +15,17 @@ fi
 
 mkdir -p "$GH_TEST_TMP/test093" && cd "$GH_TEST_TMP/test093" || exit 2
 
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 3
+! "$GH_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 3
 
 git init || exit 4
 
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all || exit 5
+! "$GH_INSTALL_BIN_DIR/cli" config trust-all || exit 5
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept | grep -q 'trusts all hooks' || exit 6
+"$GH_INSTALL_BIN_DIR/cli" config trust-all --accept &&
+    "$GH_INSTALL_BIN_DIR/cli" config trust-all --accept | grep -q 'trusts all hooks' || exit 6
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --deny &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --print | grep -q 'does not trust hooks' || exit 7
+"$GH_INSTALL_BIN_DIR/cli" config trust-all --deny &&
+    "$GH_INSTALL_BIN_DIR/cli" config trust-all --print | grep -q 'does not trust hooks' || exit 7
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --reset &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --print | grep -q 'is not set' || exit 8
+"$GH_INSTALL_BIN_DIR/cli" config trust-all --reset &&
+    "$GH_INSTALL_BIN_DIR/cli" config trust-all --print | grep -q 'is not set' || exit 8

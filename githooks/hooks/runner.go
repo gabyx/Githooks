@@ -3,6 +3,9 @@ package hooks
 import (
 	cm "gabyx/githooks/common"
 	"gabyx/githooks/git"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"os"
 	"path"
@@ -41,7 +44,13 @@ func loadRunnerConfig(hookPath string) (data runnerConfigFile, err error) {
 }
 
 // GetHookRunCmd gets the executable for the hook `hookPath`.
-func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err error) {
+// Any command in a runner config YAML with path separators will
+// be made absolute to `rootDir`.
+func GetHookRunCmd(
+	hookPath string,
+	args []string,
+	parseRunnerConfig bool,
+	rootDir string) (exec cm.Executable, err error) {
 
 	if cm.IsExecutable(hookPath) {
 		exec.Cmd = hookPath
@@ -49,8 +58,8 @@ func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err erro
 		return
 	}
 
-	if path.Ext(hookPath) != ".yaml" {
-		// No run configuration YAML -> get the default runner.
+	if !parseRunnerConfig || path.Ext(hookPath) != ".yaml" {
+		// Dont parse run config or not existing -> get the default runner.
 		exec = GetDefaultRunner(hookPath, args)
 
 		return
@@ -83,6 +92,20 @@ func GetHookRunCmd(hookPath string, args []string) (exec cm.Executable, err erro
 		}
 
 	}
+
+	// Resolve commands with path separators which are
+	// relative paths relative to the `rootDir`.
+	// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
+	if strings.ContainsAny(exec.Cmd, "/\\") {
+		if runtime.GOOS == cm.WindowsOsName {
+			exec.Cmd = filepath.ToSlash(exec.Cmd)
+		}
+
+		if !filepath.IsAbs(exec.Cmd) {
+			exec.Cmd = path.Join(rootDir, exec.Cmd)
+		}
+	}
+
 	exec.Args = append(exec.Args, args...)
 
 	return

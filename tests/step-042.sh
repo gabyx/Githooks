@@ -54,7 +54,7 @@ fi
 git config --global --unset githooks.autoUpdateCheckTimestamp
 
 OUTPUT=$(
-    "$GITHOOKS_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
+    "$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
 )
 
 if ! echo "$OUTPUT" | grep -q "All done! Enjoy!"; then
