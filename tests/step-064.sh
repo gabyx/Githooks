@@ -24,7 +24,7 @@ fi
 git config --global githooks.buildFromSource "true"
 
 CURRENT="$(cd ~/.githooks/release && git rev-parse HEAD)"
-if ! OUT=$("$GITHOOKS_INSTALL_BIN_DIR/cli" update --yes); then
+if ! OUT=$("$GH_INSTALL_BIN_DIR/cli" update --yes); then
     echo "! Failed to run the update"
 fi
 

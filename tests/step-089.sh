@@ -13,13 +13,13 @@ if ! "$GH_TEST_BIN/cli" installer; then
     exit 1
 fi
 
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config update || exit 2
+! "$GH_INSTALL_BIN_DIR/cli" config update || exit 2
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config update --disable &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config update --print | grep -q 'disabled' || exit 3
+"$GH_INSTALL_BIN_DIR/cli" config update --disable &&
+    "$GH_INSTALL_BIN_DIR/cli" config update --print | grep -q 'disabled' || exit 3
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config update --enable &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config update --print | grep -q 'enabled' || exit 4
+"$GH_INSTALL_BIN_DIR/cli" config update --enable &&
+    "$GH_INSTALL_BIN_DIR/cli" config update --print | grep -q 'enabled' || exit 4
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config update --disable &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config update --print | grep -q 'disabled' || exit 5
+"$GH_INSTALL_BIN_DIR/cli" config update --disable &&
+    "$GH_INSTALL_BIN_DIR/cli" config update --print | grep -q 'disabled' || exit 5

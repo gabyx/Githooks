@@ -65,8 +65,8 @@ mkdir -p "$GH_TEST_TMP/test123" &&
     git init || exit 11
 
 # Add the shared repo
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --local "file://$GH_TEST_TMP/shared" || exit 12
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 13
+"$GH_INSTALL_BIN_DIR/cli" shared add --local "file://$GH_TEST_TMP/shared" || exit 12
+"$GH_INSTALL_BIN_DIR/cli" shared update || exit 13
 
 # Execute pre-commit by the runner
 OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)

@@ -15,17 +15,17 @@ if ! "$GH_TEST_BIN/cli" installer; then
     exit 1
 fi
 
-if "$GITHOOKS_INSTALL_BIN_DIR/cli" list; then
+if "$GH_INSTALL_BIN_DIR/cli" list; then
     echo "! Expected to fail"
     exit 1
 fi
 
-if "$GITHOOKS_INSTALL_BIN_DIR/cli" trust; then
+if "$GH_INSTALL_BIN_DIR/cli" trust; then
     echo "! Expected to fail"
     exit 1
 fi
 
-if "$GITHOOKS_INSTALL_BIN_DIR/cli" disable; then
+if "$GH_INSTALL_BIN_DIR/cli" disable; then
     echo "! Expected to fail"
     exit 1
 fi

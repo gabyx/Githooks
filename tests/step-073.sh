@@ -19,7 +19,7 @@ mkdir -p "$GH_TEST_TMP/test073/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test073" &&
     git init || exit 1
 
-if "$GITHOOKS_INSTALL_BIN_DIR/cli" list pre-commit | grep -i "'trusted'"; then
+if "$GH_INSTALL_BIN_DIR/cli" list pre-commit | grep -i "'trusted'"; then
     echo "! Unexpected list result"
     exit 1
 fi

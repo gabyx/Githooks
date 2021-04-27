@@ -101,16 +101,16 @@ RUN sed -i -E 's@cli" shared location(.*)\)@cli" shared location\1 | grep "^/")@
 
 # Replace all runnner/cli/dialog/'git hooks' invocations.
 # Foward over 'coverage/forwarder'.
-RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/cli"@g' \\
+RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
     "\$GH_TESTS"/step-*
-RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
+RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
     "\$GH_TESTS"/step-*
-RUN sed -i -E 's@"(.GITHOOKS_INSTALL_BIN_DIR|.GH_TEST_BIN)/dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/dialog"@g' \\
+RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/dialog"@g' \\
     "\$GH_TESTS"/step-*
 RUN sed -i -E 's@".DIALOG"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1"@g' \\
     "\$GH_TESTS"/step-*
-RUN sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GITHOOKS_INSTALL_BIN_DIR/cli"@g' \\
+RUN sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GH_INSTALL_BIN_DIR/cli"@g' \\
     "\$GH_TESTS"/step-*
 
 

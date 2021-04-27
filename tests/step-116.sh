@@ -101,8 +101,8 @@ if [ -f "$REGISTER_FILE" ]; then
     exit 1
 fi
 
-if [ -f "$GITHOOKS_INSTALL_BIN_DIR/runner" ] ||
-    [ -f "$GITHOOKS_INSTALL_BIN_DIR/cli" ]; then
+if [ -f "$GH_INSTALL_BIN_DIR/runner" ] ||
+    [ -f "$GH_INSTALL_BIN_DIR/cli" ]; then
     echo "! Expected that all binaries are deleted."
     exit 1
 fi

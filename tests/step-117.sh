@@ -47,14 +47,14 @@ git clone "$GH_TEST_TMP/shared/shared.git" --branch testbranch "$GH_TEST_TMP/sha
     exit 1
 
 cd "$GH_TEST_TMP/test117" || exit 1
-OUT=$("$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --shared "$GH_TEST_TMP/shared/shared-clone.git" 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/cli" shared add --shared "$GH_TEST_TMP/shared/shared-clone.git" 2>&1)
 # shellcheck disable=SC2181
 if [ $? -eq 0 ] || ! echo "$OUT" | grep -q "You cannot add a URL"; then
     echo "! Expected adding local path to local shared hooks to fail: $OUT" >&2
     exit 1
 fi
 
-OUT=$("$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --shared file://"$GH_TEST_TMP/shared/shared-clone.git" 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/cli" shared add --shared file://"$GH_TEST_TMP/shared/shared-clone.git" 2>&1)
 # shellcheck disable=SC2181
 if [ $? -eq 0 ] || ! echo "$OUT" | grep -q "You cannot add a URL"; then
     echo "! Expected adding local url to local shared hooks to fail: $OUT" >&2
@@ -64,7 +64,7 @@ fi
 echo "urls: - file:////$GH_TEST_TMP/shared/shared-cloned.git" >.githooks/.shared.yaml || exit 1
 
 # Invoke shared hooks update
-OUT=$("$GITHOOKS_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
 # shellcheck disable=SC2181
 if echo "$OUT" | grep -q "Shared hook: test1" ||
     ! echo "$OUT" | grep -q "Update will be skipped" ||
@@ -83,25 +83,25 @@ fi
 rm -f .githooks/.shared.yaml || exit 1
 
 # Test listing output
-if "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list --shared | grep -q "shared-clone" ||
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list --all | grep -q "shared-clone"; then
+if "$GH_INSTALL_BIN_DIR/cli" shared list --shared | grep -q "shared-clone" ||
+    "$GH_INSTALL_BIN_DIR/cli" shared list --all | grep -q "shared-clone"; then
     echo "! Expected to have an empty shared hooks list" >&2
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --global "$GH_TEST_TMP/shared/shared-clone.git"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" shared add --global "$GH_TEST_TMP/shared/shared-clone.git"; then
     echo "! Expected adding local path to global shared hook repository to succeed" >&2
     exit 1
 fi
 
-if "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list --shared | grep -q "shared-clone" >/dev/null 2>&1 ||
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" shared list | grep "shared-clone" | grep -qv "active"; then
+if "$GH_INSTALL_BIN_DIR/cli" shared list --shared | grep -q "shared-clone" >/dev/null 2>&1 ||
+    "$GH_INSTALL_BIN_DIR/cli" shared list | grep "shared-clone" | grep -qv "active"; then
     echo "! Expected global shared hook repo to be active" >&2
     exit 1
 fi
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
+"$GH_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared update || exit 1
 
 # shellcheck disable=SC2012
 RESULT=$(find ~/.githooks/shared/ -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l)
@@ -123,17 +123,17 @@ if [ "$CHECKSUM" != "$CHECKSUM_NOW" ]; then
     exit 1
 fi
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared remove --global "$GH_TEST_TMP/shared/shared-clone.git"
+"$GH_INSTALL_BIN_DIR/cli" shared remove --global "$GH_TEST_TMP/shared/shared-clone.git"
 if [ -n "$(git config --global --get-all githooks.shared)" ]; then
     echo "! Expected to not have any global shared hooks repository set" >&2
     exit 1
 fi
 
 # Add local non-bare repo url to the global shared hooks
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --local "$GH_TEST_TMP/shared/shared-clone.git" || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --global file://"$GH_TEST_TMP/shared/shared-server.git"@testbranch2 || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared update || exit 1
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared list --all
+"$GH_INSTALL_BIN_DIR/cli" shared add --local "$GH_TEST_TMP/shared/shared-clone.git" || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared add --global file://"$GH_TEST_TMP/shared/shared-server.git"@testbranch2 || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared update || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared list --all
 
 # shellcheck disable=SC2012
 RESULT=$(find ~/.githooks/shared/ -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l)
@@ -151,11 +151,11 @@ if ! echo "$OUT" | grep -q "Shared hook: test1" ||
 fi
 
 # Make normal shared hooks folder (no checkout)
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared purge || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared purge || exit 1
 git config --global --unset-all githooks.shared || exit 1
 rm -rf "$GH_TEST_TMP/shared/shared-clone.git/.git" || exit 1
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --local "$GH_TEST_TMP/shared/shared-clone.git" || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared add --local "$GH_TEST_TMP/shared/shared-clone.git" || exit 1
 OUT=$(git commit --allow-empty -m "Test shared hooks" 2>&1)
 # shellcheck disable=SC2181
 if ! echo "$OUT" | grep -q "Shared hook: test1"; then
@@ -169,7 +169,7 @@ if git config --global --get-all githooks.shared | grep "shared-clone.git"; then
 fi
 
 # Duplicate to global shared hooks
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared add --global "$GH_TEST_TMP/shared/shared-clone.git" || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared add --global "$GH_TEST_TMP/shared/shared-clone.git" || exit 1
 OUT=$(git commit --allow-empty -m "Test shared hooks" 2>&1)
 echo "$OUT" | grep -qo "Shared hook: test1" | wc -l
 

@@ -13,12 +13,12 @@ if ! "$GH_TEST_BIN/cli" installer; then
     exit 1
 fi
 
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config update-time || exit 2
+! "$GH_INSTALL_BIN_DIR/cli" config update-time || exit 2
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 3
+"$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 3
 
 git config --global githooks.autoUpdateCheckTimestamp 123 &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' && exit 4
+    "$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' && exit 4
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" config update-time --reset &&
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 5
+"$GH_INSTALL_BIN_DIR/cli" config update-time --reset &&
+    "$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 5

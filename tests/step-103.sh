@@ -30,7 +30,7 @@ mkdir -p "$GH_TEST_TMP/test103" &&
 
 mkdir -p .githooks && echo "urls: - file://$GH_TEST_TMP/shared/hooks-103.git" >.githooks/.shared.yaml || exit 1
 git add .githooks/.shared.yaml
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared update
+"$GH_INSTALL_BIN_DIR/cli" shared update
 
 # shellcheck disable=SC2012
 RESULT=$(find ~/.githooks/shared/ -type f 2>/dev/null | wc -l)
@@ -42,7 +42,7 @@ fi
 git commit -m "Test" || exit 1
 
 # Remove all shared hooks and make it fail
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared purge || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared purge || exit 1
 
 if [ -d ~/.githooks/shared ]; then
     echo "! Expected shared hooks to be purged."
@@ -50,24 +50,24 @@ if [ -d ~/.githooks/shared ]; then
 fi
 
 # Test some random nonsense.
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --enable --disable || exit 1
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --enable --print || exit 1
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --disable --print || exit 1
-! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --local --global --enable || exit 1
+! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --enable --disable || exit 1
+! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --enable --print || exit 1
+! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --disable --print || exit 1
+! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --local --global --enable || exit 1
 
 # Skip on not existing hooks
 # Local off/ global on
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --disable; then
+if ! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --disable; then
     echo "! Disabling skip-non-existing-shared-hooks failed"
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --local --print | grep -q "disabled"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --local --print | grep -q "disabled"; then
     echo "! Expected skip-non-existing-shared-hooks to be disabled locally"
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --print | grep -q "disabled"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --print | grep -q "disabled"; then
     echo "! Expected skip-non-existing-shared-hooks to be disabled globally"
     exit 1
 fi
@@ -83,12 +83,12 @@ if git config --global --get githooks.skipNonExistingSharedHooks; then
 fi
 
 # Local off / global off
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --disable; then
+if ! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --disable; then
     echo "! Disabling skip-non-existing-shared-hooks globally failed"
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --print | grep -q "disabled"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" config skip-non-existing-shared-hooks --global --print | grep -q "disabled"; then
     echo "! Expected skip-non-existing-shared-hooks to be disabled globally"
     exit 1
 fi
@@ -116,7 +116,7 @@ if [ "$RESULT" = "0" ]; then
 fi
 
 # Remove all shared hooks
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared purge || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared purge || exit 1
 
 echo "Commiting"
 # Make a commit
@@ -131,7 +131,7 @@ if [ $? -eq 0 ] || ! echo "$OUTPUT" | grep -q "Failed to execute shared hook"; t
     exit 1
 fi
 
-"$GITHOOKS_INSTALL_BIN_DIR/cli" shared pull || exit 1
+"$GH_INSTALL_BIN_DIR/cli" shared pull || exit 1
 
 # Change url and try to make it fail
 (cd ~/.githooks/shared/*shared-hooks-103* &&

@@ -36,9 +36,9 @@ if [ ! -f "$GH_TEST_TMP/test099.out" ]; then
     exit 1
 fi
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list | grep "example" | grep "'active'" | grep -q "'trusted'"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "example" | grep "'active'" | grep -q "'trusted'"; then
     echo "! Unexpected cli list output"
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" list
+    "$GH_INSTALL_BIN_DIR/cli" list
     exit 3
 fi
 
@@ -46,8 +46,8 @@ fi
 git worktree add -b example-a ../test099-A HEAD || exit 2
 cd ../test099-A || exit 2
 
-if ! "$GITHOOKS_INSTALL_BIN_DIR/cli" list | grep "example" | grep "'active'" | grep -q "'untrusted'"; then
+if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "example" | grep "'active'" | grep -q "'untrusted'"; then
     echo "! Unexpected cli list output"
-    "$GITHOOKS_INSTALL_BIN_DIR/cli" list
+    "$GH_INSTALL_BIN_DIR/cli" list
     exit 3
 fi

@@ -16,12 +16,12 @@ if ! "$GH_TEST_BIN/cli" installer; then
 fi
 
 for SUBCOMMAND in '' ' ' 'x' 'y'; do
-    if "$GITHOOKS_INSTALL_BIN_DIR/cli" "$SUBCOMMAND"; then
+    if "$GH_INSTALL_BIN_DIR/cli" "$SUBCOMMAND"; then
         echo "! Expected to fail: $SUBCOMMAND"
         exit 1
     fi
 
-    if "$GITHOOKS_INSTALL_BIN_DIR/cli" "$SUBCOMMAND"; then
+    if "$GH_INSTALL_BIN_DIR/cli" "$SUBCOMMAND"; then
         echo "! Expected the alias to fail: $SUBCOMMAND"
         exit 1
     fi
