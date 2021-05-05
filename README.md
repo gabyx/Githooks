@@ -797,7 +797,7 @@ is **bomb-proof in it's output and exit code behavior**.
 This tool should really enable proper and safe usage inside hooks and other scripts.
 You can even report the output in `json` format (use option `--json`).
 It was heavily inspired by [zenity](https://github.com/ncruces/zenity) and features some
-of the same properties (no `cgo`, cancelation through `context`)
+of the same properties (no `cgo`, cancelation through `context`).
 You can use this dialog tool independently of Githooks.
 
 **Test it out!** 🎉: Please refer to the [documentation of the tool](docs/dialog/dialog.md).

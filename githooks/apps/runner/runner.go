@@ -366,7 +366,7 @@ func executeLFSHooks(settings *HookSettings) {
 		log.PanicF("This repository requires Git LFS, but 'git-lfs' was\n"+
 			"not found on your PATH.\n"+
 			"Git LFS is required since one of the following is true:\n"+
-			"  - file '%s' existing: '%v' or\n"+
+			"  - file '%s' existing: '%v'\n"+
 			"  - file `%s` existing: '%v'",
 			lfsConfFile, lfsConfExists, lfsRequiredFile, lfsReqFileExists)
 	}
