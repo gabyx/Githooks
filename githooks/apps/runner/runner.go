@@ -347,8 +347,9 @@ func executeLFSHooks(settings *HookSettings) {
 	}
 
 	lfsIsAvailable := git.IsLFSAvailable()
-	lfsRequiredFile := hooks.GetLFSRequiredFile(settings.RepositoryDir)
-	lfsIsRequired := cm.IsFile(lfsRequiredFile)
+	lfsRequiredFile, lfsReqFileExists := hooks.GetLFSRequiredFile(settings.RepositoryDir)
+	lfsConfFile, lfsConfExists := git.GetLFSConfigFile(settings.RepositoryDir)
+	lfsIsRequired := lfsReqFileExists || lfsConfExists
 
 	if lfsIsAvailable {
 		log.Debug("Excuting LFS Hook")
@@ -361,14 +362,13 @@ func executeLFSHooks(settings *HookSettings) {
 
 		log.AssertNoErrorPanic(err, "Execution of LFS Hook failed.")
 
-	} else {
-		log.Debug("Git LFS not available")
-		log.PanicIf(lfsIsRequired,
-			"This repository requires Git LFS, but 'git-lfs' was",
-			"not found on your PATH. If you no longer want to use",
-			strs.Fmt("Git LFS, remove the\n'%s'\nfile.",
-				lfsRequiredFile),
-		)
+	} else if lfsIsRequired {
+		log.PanicF("This repository requires Git LFS, but 'git-lfs' was\n"+
+			"not found on your PATH.\n"+
+			"Git LFS is required since one of the following is true:\n"+
+			"  - file '%s' existing: '%v'\n"+
+			"  - file `%s` existing: '%v'",
+			lfsConfFile, lfsConfExists, lfsRequiredFile, lfsReqFileExists)
 	}
 }
 

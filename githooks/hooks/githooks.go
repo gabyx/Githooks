@@ -218,9 +218,12 @@ func GetReleaseCloneDir(installDir string) string {
 	return path.Join(installDir, "release")
 }
 
-// GetLFSRequiredFile gets the LFS-Required file inside the repository.
-func GetLFSRequiredFile(repoDir string) string {
-	return path.Join(GetGithooksDir(repoDir), ".lfs-required")
+// GetLFSRequiredFile gets the LFS-Required file inside the repository
+// and `true` if existing.
+func GetLFSRequiredFile(repoDir string) (string, bool) {
+	s := path.Join(GetGithooksDir(repoDir), ".lfs-required")
+
+	return s, cm.IsFile(s)
 }
 
 // IsGithooksDisabled checks if Githooks is disabled in

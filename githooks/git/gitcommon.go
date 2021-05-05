@@ -492,6 +492,14 @@ func GetCommitSHA(gitx *Context, ref string) (string, error) {
 	return gitx.Get("rev-parse", ref)
 }
 
+// GetLFSRequiredFile gets the LFS config file inside the repository and
+// `true` if existing.
+func GetLFSConfigFile(repoDir string) (string, bool) {
+	s := path.Join(repoDir, ".lfsconfig")
+
+	return s, cm.IsFile(s)
+}
+
 // IsLFSAvailable tells if git-lfs is available in the path.
 func IsLFSAvailable() bool {
 	_, err := exec.LookPath("git-lfs")
