@@ -81,7 +81,7 @@ func getChoices(output string, maxOptions int) (indices []uint) {
 
 func ShowOptions(ctx context.Context, s *set.Options) (r res.Options, err error) {
 	if len(s.Options) == 0 {
-		err = cm.ErrorF("You need at list one option specified.")
+		err = cm.ErrorF("You need at least one option specified.")
 
 		return
 	}
