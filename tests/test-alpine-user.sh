@@ -16,7 +16,7 @@ RUN [ -d "$GH_TEST_GIT_CORE/templates/hooks" ] && \
 RUN mkdir -p "$GH_TEST_REPO" "$GH_TEST_GIT_CORE/templates/hooks" && \
     chown -R test:test "$GH_TEST_REPO" "$GH_TEST_GIT_CORE"
 USER test
-RUN mkdir -p home/test/tmp
+RUN mkdir -p /home/test/tmp
 ENV GH_TEST_TMP=/home/test/tmp
 '
 
