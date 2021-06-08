@@ -1,5 +1,5 @@
 <img src="docs/githooks-logo.svg" style="margin-left: 20pt" align="right">
-<h1>Githooks <font size="3">on Steroids</font></h1>
+<h1>Githooks</h1>
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/githooks?branch=main)
