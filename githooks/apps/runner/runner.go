@@ -372,7 +372,8 @@ func executeLFSHooks(settings *HookSettings) {
 	}
 }
 
-func executeOldHook(settings *HookSettings,
+func executeOldHook(
+	settings *HookSettings,
 	uiSettings *UISettings,
 	ingores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) {
@@ -402,8 +403,7 @@ func executeOldHook(settings *HookSettings,
 	hooks, _, err := hooks.GetAllHooksIn(
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace,
-		isIgnored, isTrusted, true, false,
-		settings.Args)
+		isIgnored, isTrusted, true, false)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
 	if len(hooks) == 0 {
@@ -698,8 +698,7 @@ func getHooksIn(
 	allHooks, maxBatches, err := hooks.GetAllHooksIn(
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace,
-		isIgnored, isTrusted, true, true,
-		settings.Args)
+		isIgnored, isTrusted, true, true)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	if len(allHooks) == 0 {
@@ -742,7 +741,7 @@ func getHooksIn(
 
 		if !hook.Active || !hook.Trusted {
 			log.DebugF("Hook '%s' is skipped [active: '%v', trusted: '%v']",
-				hook.Cmd, hook.Active, hook.Trusted)
+				hook.Path, hook.Active, hook.Trusted)
 
 			continue
 		}
@@ -797,7 +796,7 @@ func logBatches(title string, hooks hooks.HookPrioList) {
 		for bIdx, batch := range hooks {
 			l += strs.Fmt(" Batch: %v\n", bIdx)
 			for i := range batch {
-				l += strs.Fmt("  - '%s' %+q\n", batch[i].Cmd, batch[i].Args)
+				l += strs.Fmt("  - '%s' %+q\n", batch[i].GetCommand(), batch[i].GetArgs())
 			}
 		}
 		log.DebugF("%s :\n%s", title, l)

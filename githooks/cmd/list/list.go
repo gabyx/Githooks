@@ -353,7 +353,7 @@ func GetAllHooksIn(
 		rootDir, hooksDir,
 		hookName, hookNamespace,
 		isIgnored, isTrusted, false,
-		!isReplacedHook, nil)
+		!isReplacedHook)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	return allHooks

@@ -54,7 +54,7 @@ mkdir -p "$GH_TEST_TMP/test023" &&
     git init || exit 1
 
 # verify that the hooks are installed and are working
-git commit -m '' 2>/dev/null
+git commit -m 'Test' 2>/dev/null
 
 if ! grep 'From shared hook A' "$GH_TEST_TMP/test-023.out"; then
     echo "! The shared hooks A don't seem to be working"

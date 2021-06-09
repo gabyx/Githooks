@@ -48,49 +48,42 @@ func loadRunnerConfig(hookPath string) (data runnerConfigFile, err error) {
 // be made absolute to `rootDir`.
 func GetHookRunCmd(
 	hookPath string,
-	args []string,
 	parseRunnerConfig bool,
-	rootDir string) (exec cm.Executable, err error) {
+	rootDir string) (cm.IExecutable, error) {
 
-	if cm.IsExecutable(hookPath) {
-		exec.Cmd = hookPath
+	exec := cm.Executable{Cmd: hookPath}
 
-		return
+	if cm.IsExecutable(exec.Cmd) {
+		return &exec, nil
 	}
 
 	if !parseRunnerConfig || path.Ext(hookPath) != ".yaml" {
 		// Dont parse run config or not existing -> get the default runner.
-		exec = GetDefaultRunner(hookPath, args)
-
-		return
+		return GetDefaultRunner(hookPath), nil
 	}
 
 	config, e := loadRunnerConfig(hookPath)
 	if e != nil {
-		err = cm.ErrorF("Could not read runner config '%s'", hookPath)
-
-		return
+		return nil, cm.ErrorF("Could not read runner config '%s'", hookPath)
 	}
 
 	subst := getVarSubstitution(os.LookupEnv, git.Ctx().LookupConfig)
 
+	// Substitute variables in command.
+	var err error
 	if exec.Cmd, err = subst(config.Cmd); err != nil {
-		err = cm.CombineErrors(err,
+		return nil, cm.CombineErrors(err,
 			cm.ErrorF("Error in hook run config '%s'.", hookPath))
-
-		return
 	}
 
 	exec.Args = config.Args
 
-	for i := range config.Args {
+	// Substitute variables in arguments.
+	for i := range exec.Args {
 		if exec.Args[i], err = subst(exec.Args[i]); err != nil {
-			err = cm.CombineErrors(err,
+			return nil, cm.CombineErrors(err,
 				cm.ErrorF("Error in hook run config '%s'.", hookPath))
-
-			return
 		}
-
 	}
 
 	// Resolve commands with path separators which are
@@ -106,9 +99,7 @@ func GetHookRunCmd(
 		}
 	}
 
-	exec.Args = append(exec.Args, args...)
-
-	return
+	return &exec, nil
 }
 
 var reEnvVariable = regexp.MustCompile(`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s):([a-zA-Z.][a-zA-Z0-9_.]+)\}`)

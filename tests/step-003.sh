@@ -21,6 +21,6 @@ mkdir -p .githooks/pre-commit &&
     echo "echo 'Hook-2' >> '$GH_TEST_TMP/multitest'" >.githooks/pre-commit/test2 ||
     exit 1
 
-git commit -m '' 2>/dev/null
+git commit -m 'Test' 2>/dev/null
 
 grep -q 'Hook-1' "$GH_TEST_TMP/multitest" && grep -q 'Hook-2' "$GH_TEST_TMP/multitest"

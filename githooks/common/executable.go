@@ -15,7 +15,7 @@ type Executable struct {
 	// The absolute path of the hook script/executable.
 	Cmd string
 
-	// First arguments to the hook script/executable.
+	// Arguments to the hook script/executable.
 	Args []string
 }
 

@@ -245,7 +245,7 @@ for information on what they do and what parameters they receive.
 - `commit-msg`
 - `post-commit`
 - `pre-rebase`
-- `post-checkout`
+- `post-checkout` (non-zero exit code is wrapped to 1)
 - `post-merge`
 - `pre-push`
 - `pre-receive`
