@@ -14,7 +14,7 @@ import (
 
 func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
 	if len(opts.Options) == 0 {
-		err = cm.ErrorF("You need at list one option specified.")
+		err = cm.ErrorF("You need at least one option specified.")
 
 		return
 	}
