@@ -15,7 +15,7 @@ import (
 // Hook contains the data to an executable hook.
 type Hook struct {
 	// The executable of the hook.
-	cm.Executable
+	cm.IExecutable
 
 	// The path to the file which configured this executable.
 	Path string
@@ -135,8 +135,7 @@ func GetAllHooksIn(
 	isIgnored IngoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
-	parseRunnerConfig bool,
-	args []string) (allHooks []Hook, maxBatches int, err error) {
+	parseRunnerConfig bool) (allHooks []Hook, maxBatches int, err error) {
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
 
@@ -150,12 +149,12 @@ func GetAllHooksIn(
 
 		trusted := false
 		sha := ""
-		var runCmd cm.Executable
+		var runCmd cm.IExecutable
 
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			runCmd, err = GetHookRunCmd(hookPath, args, parseRunnerConfig, rootDir)
+			runCmd, err = GetHookRunCmd(hookPath, parseRunnerConfig, rootDir)
 			if err != nil {
 				return cm.CombineErrors(err,
 					cm.ErrorF("Could not detect runner for hook\n'%s'", hookPath))
@@ -164,7 +163,7 @@ func GetAllHooksIn(
 
 		allHooks = append(allHooks,
 			Hook{
-				Executable:    runCmd,
+				IExecutable:   runCmd,
 				Path:          hookPath,
 				NamespacePath: namespacedPath,
 				Active:        !ignored,

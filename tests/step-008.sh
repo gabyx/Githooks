@@ -26,7 +26,7 @@ mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
     git init ||
     exit 1
 
-git commit -m ''
+git commit -m 'Test'
 
 if ! grep 'Previous' "$GH_TEST_TMP/test-008.out"; then
     echo '! Saved hook was not run'

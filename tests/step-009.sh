@@ -28,7 +28,7 @@ y
 $GH_TEST_TMP/test9
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
-git commit -m ''
+git commit -m 'Test'
 
 if ! grep 'Previous' "$GH_TEST_TMP/test-009.out"; then
     echo '! Saved hook was not run'
