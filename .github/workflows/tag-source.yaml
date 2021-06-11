@@ -1,0 +1,19 @@
+name: Tagging Go Package
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Tagging Source Code
+        run: |
+          git config user.name ${{ secrets.GH_USER }}
+          git config user.email "${{ secrets.GH_MAIL }}"
+          tag=${GITHUB_REF##*/}
+          git tag "githooks/$tag" || { echo "Failed to set tag on source code"; exit 1 }
+          git push --tags || { echo "Failed to push tag"; exit 1 }
