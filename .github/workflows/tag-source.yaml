@@ -12,8 +12,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Tagging Source Code
         run: |
-          git config user.name ${{ secrets.GH_USER }}
-          git config user.email "${{ secrets.GH_MAIL }}"
+          git config user.name "githooks-bot"
+          git config user.email "githooks-bot@users.noreply.github.com"
           tag=${GITHUB_REF##*/}
           git tag "githooks/$tag" || { echo "Failed to set tag on source code"; exit 1 }
           git push --tags || { echo "Failed to push tag"; exit 1 }
