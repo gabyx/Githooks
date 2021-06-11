@@ -2,11 +2,12 @@ package prompt
 
 import (
 	"errors"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 
-	"gabyx/githooks/apps/dialog/gui"
-	"gabyx/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
+
+	"github.com/gabyx/githooks/githooks/apps/dialog/gui"
+	"github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
 func showPromptDialog(

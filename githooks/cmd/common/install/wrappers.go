@@ -1,11 +1,12 @@
 package install
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
 	"os"
 	"path"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
 )
 
 // InstallIntoRepo installs run-wrappers into a repositories

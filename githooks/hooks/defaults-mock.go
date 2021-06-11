@@ -3,7 +3,7 @@
 package hooks
 
 import (
-	"gabyx/githooks/git"
+	"github.com/gabyx/githooks/githooks/git"
 )
 
 const (

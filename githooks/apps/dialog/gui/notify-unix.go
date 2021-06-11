@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	gunix "gabyx/githooks/apps/dialog/gui/unix"
-	set "gabyx/githooks/apps/dialog/settings"
-	strs "gabyx/githooks/strings"
+	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func ShowNotification(ctx context.Context, s *set.Notification) error {

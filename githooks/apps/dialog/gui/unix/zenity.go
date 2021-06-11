@@ -4,8 +4,9 @@ package gui
 
 import (
 	"context"
-	strs "gabyx/githooks/strings"
 	"os/exec"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func GetZenityExecutable() string {

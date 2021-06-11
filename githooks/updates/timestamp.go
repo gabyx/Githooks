@@ -2,12 +2,13 @@ package updates
 
 import (
 	"fmt"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
-	strs "gabyx/githooks/strings"
 	"strconv"
 	"time"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // RecordUpdateCheckTimestamp records the current update check time.

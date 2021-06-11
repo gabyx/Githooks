@@ -1,11 +1,12 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 
 	"os"
 	"path"

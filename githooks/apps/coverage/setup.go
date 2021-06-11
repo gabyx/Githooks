@@ -1,10 +1,11 @@
 package coverage
 
 import (
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // Data holds the counter of the current coverage data file of a run.

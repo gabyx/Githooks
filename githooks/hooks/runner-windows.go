@@ -3,8 +3,8 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 	"strings"
 )
 

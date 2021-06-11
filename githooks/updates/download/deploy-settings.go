@@ -1,8 +1,9 @@
 package download
 
 import (
-	cm "gabyx/githooks/common"
 	"path"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // DeploySettings are the settings a user of Githooks can adjust to

@@ -9,10 +9,10 @@ import (
 	"path"
 	"strings"
 
-	gunix "gabyx/githooks/apps/dialog/gui/unix"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	strs "gabyx/githooks/strings"
+	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {

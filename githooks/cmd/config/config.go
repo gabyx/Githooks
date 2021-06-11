@@ -1,15 +1,16 @@
 package config
 
 import (
-	ccm "gabyx/githooks/cmd/common"
-	"gabyx/githooks/cmd/disable"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
-	strs "gabyx/githooks/strings"
-	"gabyx/githooks/updates"
 	"strings"
 	"time"
+
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	"github.com/gabyx/githooks/githooks/cmd/disable"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/gabyx/githooks/githooks/updates"
 
 	"github.com/pkg/math"
 	"github.com/spf13/cobra"

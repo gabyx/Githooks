@@ -2,8 +2,9 @@ package gui
 
 import (
 	"context"
-	res "gabyx/githooks/apps/dialog/result"
-	sets "gabyx/githooks/apps/dialog/settings"
+
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
 // showOptionsWithButtons shows a option dialog with buttons instead of a list box.

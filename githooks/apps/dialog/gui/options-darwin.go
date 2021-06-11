@@ -7,12 +7,12 @@ import (
 	"os/exec"
 	"strings"
 
-	gmac "gabyx/githooks/apps/dialog/gui/darwin"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	sets "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
+	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func translateOptions(opts *sets.Options) (d gmac.OptionsData, err error) {

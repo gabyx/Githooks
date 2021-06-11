@@ -1,12 +1,13 @@
 package common
 
 import (
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/otiai10/copy"

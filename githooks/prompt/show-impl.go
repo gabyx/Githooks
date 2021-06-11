@@ -2,9 +2,10 @@ package prompt
 
 import (
 	"errors"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func formatTitle(p *Context) string {

@@ -1,9 +1,10 @@
 package hooks
 
 import (
-	"gabyx/githooks/git"
 	"os"
 	"testing"
+
+	"github.com/gabyx/githooks/githooks/git"
 
 	"github.com/stretchr/testify/assert"
 )

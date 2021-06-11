@@ -1,8 +1,8 @@
 package main
 
 import (
-	hooks "gabyx/githooks/hooks"
-	"gabyx/githooks/prompt"
+	hooks "github.com/gabyx/githooks/githooks/hooks"
+	"github.com/gabyx/githooks/githooks/prompt"
 )
 
 // UISettings defines user interface settings made by the user over prompts.

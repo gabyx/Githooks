@@ -3,8 +3,9 @@ package common
 import (
 	"errors"
 	"fmt"
-	strs "gabyx/githooks/strings"
 	"strings"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/hashicorp/go-multierror"
 )

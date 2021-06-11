@@ -3,9 +3,10 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
 	"path"
 	"runtime"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // GetCLIExecutable gets the global Githooks CLI executable.

@@ -1,7 +1,7 @@
 package install
 
 import (
-	"gabyx/githooks/prompt"
+	"github.com/gabyx/githooks/githooks/prompt"
 )
 
 // UISettings defines user interface settings made by the user over prompts.

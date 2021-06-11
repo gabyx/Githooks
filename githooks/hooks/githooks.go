@@ -1,13 +1,14 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // HooksDirName denotes the directory name used for repository specific hooks.

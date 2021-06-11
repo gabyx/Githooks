@@ -3,7 +3,7 @@
 package main
 
 import (
-	"gabyx/githooks/apps/coverage"
+	"github.com/gabyx/githooks/githooks/apps/coverage"
 
 	"testing"
 )

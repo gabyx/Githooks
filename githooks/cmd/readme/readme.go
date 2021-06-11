@@ -1,10 +1,11 @@
 package readme
 
 import (
-	ccm "gabyx/githooks/cmd/common"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/hooks"
 	"path/filepath"
+
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/hooks"
 
 	"github.com/spf13/cobra"
 )

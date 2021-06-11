@@ -1,11 +1,12 @@
 package common
 
 import (
-	res "gabyx/githooks/apps/dialog/result"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"os"
 	"strings"
+
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/goccy/go-yaml"
 )

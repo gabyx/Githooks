@@ -1,10 +1,11 @@
 package install
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
 	"path"
 	"sort"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 )
 
 // PreCommitSearchTask is a task to search for pre-commit files.

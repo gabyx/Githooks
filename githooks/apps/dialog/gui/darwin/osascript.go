@@ -3,12 +3,13 @@ package gui
 import (
 	"context"
 	"embed"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"os/exec"
 	"path"
 	"strings"
 	"text/template"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 //go:embed osascripts

@@ -1,8 +1,8 @@
 package common
 
 import (
-	"gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
+	"github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 type iconArgs struct {

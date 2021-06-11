@@ -3,9 +3,10 @@ package common
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	strs "gabyx/githooks/strings"
 	"io"
 	"os"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // GetSHA1HashFile gets the SHA1 hash of a file.

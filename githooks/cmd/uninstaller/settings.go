@@ -1,9 +1,9 @@
 package uninstaller
 
 import (
-	"gabyx/githooks/hooks"
-	"gabyx/githooks/prompt"
-	strs "gabyx/githooks/strings"
+	"github.com/gabyx/githooks/githooks/hooks"
+	"github.com/gabyx/githooks/githooks/prompt"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // UninstallSet is a typedef for tracking uninstalled repos.

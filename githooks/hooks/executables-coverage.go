@@ -3,9 +3,9 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/coverage"
-	strs "gabyx/githooks/strings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/coverage"
+	strs "github.com/gabyx/githooks/githooks/strings"
 	"path"
 	"runtime"
 )

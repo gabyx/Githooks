@@ -2,13 +2,13 @@
 package main
 
 import (
-	"gabyx/githooks/build"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
-	"gabyx/githooks/prompt"
-	strs "gabyx/githooks/strings"
-	"gabyx/githooks/updates"
+	"github.com/gabyx/githooks/githooks/build"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
+	"github.com/gabyx/githooks/githooks/prompt"
+	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/gabyx/githooks/githooks/updates"
 
 	"os"
 	"path"

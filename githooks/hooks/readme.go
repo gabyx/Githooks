@@ -1,10 +1,11 @@
 package hooks
 
 import (
-	"gabyx/githooks/build"
-	cm "gabyx/githooks/common"
 	"os"
 	"path"
+
+	"github.com/gabyx/githooks/githooks/build"
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // GetReadmeFile gets the Githooks readme

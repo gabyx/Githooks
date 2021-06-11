@@ -6,10 +6,10 @@ import (
 	"context"
 	"path/filepath"
 
-	gwin "gabyx/githooks/apps/dialog/gui/windows"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
+	gwin "github.com/gabyx/githooks/githooks/apps/dialog/gui/windows"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 const ()

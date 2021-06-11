@@ -2,12 +2,13 @@ package message
 
 import (
 	"context"
-	dcm "gabyx/githooks/apps/dialog/cmd/common"
-	"gabyx/githooks/apps/dialog/gui"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	ccm "gabyx/githooks/cmd/common"
 	"time"
+
+	dcm "github.com/gabyx/githooks/githooks/apps/dialog/cmd/common"
+	"github.com/gabyx/githooks/githooks/apps/dialog/gui"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
 
 	"github.com/spf13/cobra"
 )

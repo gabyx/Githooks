@@ -3,14 +3,15 @@
 package main
 
 import (
-	"gabyx/githooks/apps/dialog/cmd"
-	dcm "gabyx/githooks/apps/dialog/cmd/common"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"regexp"
+
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd"
+	dcm "github.com/gabyx/githooks/githooks/apps/dialog/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra/doc"
 )

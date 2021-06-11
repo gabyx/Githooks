@@ -1,14 +1,15 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	strs "gabyx/githooks/strings"
 	"net/url"
 	"os"
 	"path"
 	"regexp"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // SharedRepo holds the data for a shared hook.

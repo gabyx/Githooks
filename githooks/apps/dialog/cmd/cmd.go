@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"gabyx/githooks/apps/dialog/cmd/entry"
-	"gabyx/githooks/apps/dialog/cmd/file"
-	"gabyx/githooks/apps/dialog/cmd/message"
-	"gabyx/githooks/apps/dialog/cmd/notify"
-	"gabyx/githooks/apps/dialog/cmd/options"
-	"gabyx/githooks/build"
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd/entry"
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd/file"
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd/message"
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd/notify"
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd/options"
+	"github.com/gabyx/githooks/githooks/build"
 
-	dcm "gabyx/githooks/apps/dialog/cmd/common"
-	ccm "gabyx/githooks/cmd/common"
-	cm "gabyx/githooks/common"
+	dcm "github.com/gabyx/githooks/githooks/apps/dialog/cmd/common"
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 
 	"github.com/spf13/cobra"
 )

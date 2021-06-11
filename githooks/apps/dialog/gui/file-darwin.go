@@ -7,10 +7,10 @@ import (
 	"os/exec"
 	"strings"
 
-	gmac "gabyx/githooks/apps/dialog/gui/darwin"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	sets "gabyx/githooks/apps/dialog/settings"
+	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
 func translateFileSelection(f *sets.FileSelection) (d gmac.FileData, err error) {

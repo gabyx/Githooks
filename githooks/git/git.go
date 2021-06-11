@@ -1,11 +1,12 @@
 package git
 
 import (
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"os"
 	"sort"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // ConfigScope Defines the scope of a config file, such as local, global or system.

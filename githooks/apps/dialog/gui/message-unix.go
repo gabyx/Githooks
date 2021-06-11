@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os/exec"
 
-	gunix "gabyx/githooks/apps/dialog/gui/unix"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	strs "gabyx/githooks/strings"
+	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func ShowMessage(ctx context.Context, msg *set.Message) (r res.Message, err error) {
