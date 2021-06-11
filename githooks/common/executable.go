@@ -1,6 +1,6 @@
 package common
 
-import strs "gabyx/githooks/strings"
+import strs "github.com/gabyx/githooks/githooks/strings"
 
 // IExecutable defines the interface for a general executable.
 type IExecutable interface {

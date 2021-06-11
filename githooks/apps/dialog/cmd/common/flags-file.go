@@ -1,9 +1,10 @@
 package common
 
 import (
-	"gabyx/githooks/apps/dialog/settings"
-	strs "gabyx/githooks/strings"
 	"strings"
+
+	"github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 type fileFilterArgs struct {

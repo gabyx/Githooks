@@ -2,10 +2,11 @@ package prompt
 
 import (
 	"bufio"
-	cm "gabyx/githooks/common"
 	"io"
 	"os"
 	"runtime"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // AnswerValidator is the callback type for the answer validator.

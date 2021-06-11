@@ -1,4 +1,4 @@
-module gabyx/githooks
+module github.com/gabyx/githooks/githooks
 
 go 1.16
 

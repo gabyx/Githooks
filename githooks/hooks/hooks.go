@@ -1,13 +1,14 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	thx "github.com/pbenner/threadpool"
 )

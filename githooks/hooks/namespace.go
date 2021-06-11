@@ -1,10 +1,11 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
 	"os"
 	"path"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 const (

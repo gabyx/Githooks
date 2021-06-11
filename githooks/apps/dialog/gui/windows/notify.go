@@ -4,12 +4,13 @@ package gui
 
 import (
 	"context"
-	sets "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"runtime"
 	"syscall"
 	"unsafe"
+
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 var (

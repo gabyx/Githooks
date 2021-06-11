@@ -1,12 +1,13 @@
 package shared
 
 import (
-	ccm "gabyx/githooks/cmd/common"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
-	strs "gabyx/githooks/strings"
 	"strings"
+
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra"
 )

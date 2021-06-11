@@ -1,12 +1,13 @@
 package install
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func setupReadme(

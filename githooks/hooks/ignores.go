@@ -1,11 +1,12 @@
 package hooks
 
 import (
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"path"
 	"path/filepath"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // hookIgnoreFile is the format of the ignore patterns file.

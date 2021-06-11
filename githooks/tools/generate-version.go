@@ -4,12 +4,13 @@ package main
 
 import (
 	"bytes"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
 	"go/format"
 	"os"
 	"path"
 	"text/template"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 )
 
 var pkg = "build"
@@ -20,7 +21,7 @@ package {{ .Package }}
 
 import 	(
 	"github.com/hashicorp/go-version"
-	cm "gabyx/githooks/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 var BuildCommit = "{{ .Commit }}"

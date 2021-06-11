@@ -3,7 +3,7 @@
 package uninstaller
 
 import (
-	cm "gabyx/githooks/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

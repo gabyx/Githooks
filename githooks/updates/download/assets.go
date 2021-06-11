@@ -1,10 +1,11 @@
 package download
 
 import (
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"regexp"
 	"runtime"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // Asset holds data for Git web services such as Github or Gitea.

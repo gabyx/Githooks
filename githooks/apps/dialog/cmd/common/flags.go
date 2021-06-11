@@ -1,7 +1,7 @@
 package common
 
 import (
-	set "gabyx/githooks/apps/dialog/settings"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 
 	"github.com/spf13/cobra"
 )

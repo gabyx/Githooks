@@ -1,10 +1,11 @@
 package common
 
 import (
-	strs "gabyx/githooks/strings"
 	"os"
 	"os/exec"
 	"strings"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // CmdContext defines the command context to execute commands.

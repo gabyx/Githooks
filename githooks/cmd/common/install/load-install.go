@@ -1,11 +1,12 @@
 package install
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/hooks"
-	strs "gabyx/githooks/strings"
 	"path"
 	"path/filepath"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/mitchellh/go-homedir"
 )

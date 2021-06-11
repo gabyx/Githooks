@@ -2,11 +2,12 @@ package common
 
 import (
 	"fmt"
-	strs "gabyx/githooks/strings"
 	"io"
 	"os"
 	"runtime/debug"
 	"strings"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/gookit/color"
 	"golang.org/x/term"

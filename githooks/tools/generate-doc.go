@@ -3,13 +3,14 @@
 package main
 
 import (
-	"gabyx/githooks/cmd"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
 	"regexp"
+
+	"github.com/gabyx/githooks/githooks/cmd"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra/doc"
 )

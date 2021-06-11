@@ -2,7 +2,7 @@
 
 package hooks
 
-import cm "gabyx/githooks/common"
+import cm "github.com/gabyx/githooks/githooks/common"
 
 // GetDefaultRunner gets the default hook runner.
 func GetDefaultRunner(hookPath string) cm.IExecutable {

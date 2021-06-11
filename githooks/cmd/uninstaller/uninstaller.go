@@ -1,17 +1,18 @@
 package uninstaller
 
 import (
-	"gabyx/githooks/build"
-	ccm "gabyx/githooks/cmd/common"
-	"gabyx/githooks/cmd/common/install"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
-	"gabyx/githooks/prompt"
-	strs "gabyx/githooks/strings"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/gabyx/githooks/githooks/build"
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	"github.com/gabyx/githooks/githooks/cmd/common/install"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
+	"github.com/gabyx/githooks/githooks/prompt"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

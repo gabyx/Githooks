@@ -1,9 +1,10 @@
 package git
 
 import (
-	strs "gabyx/githooks/strings"
 	"regexp"
 	"strings"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 var reURLScheme *regexp.Regexp = regexp.MustCompile(`(?m)^[^:/?#]+://`)

@@ -10,10 +10,11 @@ package common
 // matching zero-or-more directory levels deep.
 
 import (
-	strs "gabyx/githooks/strings"
 	"os"
 	"path/filepath"
 	"strings"
+
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	glob "github.com/bmatcuk/doublestar/v3"
 )

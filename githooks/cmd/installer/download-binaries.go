@@ -3,16 +3,17 @@
 package installer
 
 import (
-	"gabyx/githooks/build"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	strs "gabyx/githooks/strings"
-	"gabyx/githooks/updates"
-	"gabyx/githooks/updates/download"
 	"net/url"
 	"path"
 	"runtime"
 	"strings"
+
+	"github.com/gabyx/githooks/githooks/build"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/gabyx/githooks/githooks/updates"
+	"github.com/gabyx/githooks/githooks/updates/download"
 )
 
 // IsRunningCoverage tells if we are running coverage.

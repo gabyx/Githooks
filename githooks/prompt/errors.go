@@ -2,7 +2,8 @@ package prompt
 
 import (
 	"errors"
-	cm "gabyx/githooks/common"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // ValidationError represents a validation error.

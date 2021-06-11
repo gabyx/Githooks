@@ -4,9 +4,10 @@ package gui
 
 import (
 	"context"
-	res "gabyx/githooks/apps/dialog/result"
-	sets "gabyx/githooks/apps/dialog/settings"
-	strs "gabyx/githooks/strings"
+
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/lxn/walk"
 

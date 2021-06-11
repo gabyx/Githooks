@@ -1,11 +1,12 @@
 package main
 
 import (
-	"gabyx/githooks/cmd"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/hooks"
 	"os"
 	"path/filepath"
+
+	"github.com/gabyx/githooks/githooks/cmd"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/hooks"
 )
 
 func mainRun() (exitCode int) {

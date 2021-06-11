@@ -1,8 +1,8 @@
 package installer
 
 import (
-	"gabyx/githooks/hooks"
-	strs "gabyx/githooks/strings"
+	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // InstallSet is a type wrapper for installed repo data.

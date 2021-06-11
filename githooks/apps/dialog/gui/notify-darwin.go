@@ -4,9 +4,9 @@ package gui
 
 import (
 	"context"
-	gmac "gabyx/githooks/apps/dialog/gui/darwin"
-	sets "gabyx/githooks/apps/dialog/settings"
-	strs "gabyx/githooks/strings"
+	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	strs "github.com/gabyx/githooks/githooks/strings"
 	"strings"
 )
 

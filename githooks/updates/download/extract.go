@@ -1,7 +1,7 @@
 package download
 
 import (
-	cm "gabyx/githooks/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 
 	"github.com/mholt/archiver/v3"
 )

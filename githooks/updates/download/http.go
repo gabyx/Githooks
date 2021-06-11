@@ -1,7 +1,7 @@
 package download
 
 import (
-	cm "gabyx/githooks/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // HTTPDeploySettings are deploy settings for HTTP downloading.

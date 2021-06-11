@@ -1,7 +1,7 @@
 package common
 
 import (
-	cm "gabyx/githooks/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 type CmdContext struct {

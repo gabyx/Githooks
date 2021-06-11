@@ -1,13 +1,14 @@
 package main
 
 import (
-	"gabyx/githooks/apps/dialog/cmd"
-	dcm "gabyx/githooks/apps/dialog/cmd/common"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/hooks"
 	"os"
 	"os/signal"
 	"path/filepath"
+
+	"github.com/gabyx/githooks/githooks/apps/dialog/cmd"
+	dcm "github.com/gabyx/githooks/githooks/apps/dialog/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/hooks"
 )
 
 func mainRun() (exitCode int) {

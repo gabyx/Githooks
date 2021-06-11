@@ -3,10 +3,11 @@ package gui_test
 
 import (
 	"fmt"
-	"gabyx/githooks/apps/dialog/gui"
-	"gabyx/githooks/apps/dialog/settings"
 	"os"
 	"runtime"
+
+	"github.com/gabyx/githooks/githooks/apps/dialog/gui"
+	"github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
 func ExampleShowMessage() {

@@ -6,11 +6,11 @@ import (
 	"context"
 	"os/exec"
 
-	gmac "gabyx/githooks/apps/dialog/gui/darwin"
-	res "gabyx/githooks/apps/dialog/result"
-	sets "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
+	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {

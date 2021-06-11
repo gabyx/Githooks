@@ -2,14 +2,15 @@ package options
 
 import (
 	"context"
-	dcm "gabyx/githooks/apps/dialog/cmd/common"
-	"gabyx/githooks/apps/dialog/gui"
-	res "gabyx/githooks/apps/dialog/result"
-	set "gabyx/githooks/apps/dialog/settings"
-	ccm "gabyx/githooks/cmd/common"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
 	"time"
+
+	dcm "github.com/gabyx/githooks/githooks/apps/dialog/cmd/common"
+	"github.com/gabyx/githooks/githooks/apps/dialog/gui"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra"
 )

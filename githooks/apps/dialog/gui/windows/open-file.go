@@ -10,10 +10,10 @@ import (
 	"unicode/utf16"
 	"unsafe"
 
-	res "gabyx/githooks/apps/dialog/result"
-	sets "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
-	strs "gabyx/githooks/strings"
+	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 var (

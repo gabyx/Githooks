@@ -1,8 +1,8 @@
 package updates
 
 import (
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
 )
 
 // SetAutomaticUpdateCheckSettings set the automatic update settings.

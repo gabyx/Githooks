@@ -1,10 +1,10 @@
 package install
 
 import (
-	ccm "gabyx/githooks/cmd/common"
-	inst "gabyx/githooks/cmd/common/install"
-	"gabyx/githooks/git"
-	"gabyx/githooks/hooks"
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	inst "github.com/gabyx/githooks/githooks/cmd/common/install"
+	"github.com/gabyx/githooks/githooks/git"
+	"github.com/gabyx/githooks/githooks/hooks"
 
 	"github.com/spf13/cobra"
 )

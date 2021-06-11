@@ -3,9 +3,10 @@
 package gui
 
 import (
-	cm "gabyx/githooks/common"
 	"syscall"
 	"unsafe"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 type comObject struct{}

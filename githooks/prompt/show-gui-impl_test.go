@@ -3,8 +3,8 @@
 package prompt_test
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/prompt"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/prompt"
 	"os"
 
 	"testing"

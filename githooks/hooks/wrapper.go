@@ -1,13 +1,14 @@
 package hooks
 
 import (
-	"gabyx/githooks/build"
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
 	"os"
 	"path"
 	"regexp"
 	"runtime"
+
+	"github.com/gabyx/githooks/githooks/build"
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 )
 
 var runWrapperDetectionRegex = regexp.MustCompile(`https://github\.com/(gabyx|rycus86)/githooks`)

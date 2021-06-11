@@ -1,8 +1,9 @@
 package common
 
 import (
-	cm "gabyx/githooks/common"
 	"strconv"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 type indexArgs struct {

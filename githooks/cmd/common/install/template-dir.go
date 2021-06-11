@@ -1,11 +1,12 @@
 package install
 
 import (
-	cm "gabyx/githooks/common"
-	"gabyx/githooks/git"
-	strs "gabyx/githooks/strings"
 	"os"
 	"path"
+
+	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // CheckTemplateDir checks the target directory and if valid

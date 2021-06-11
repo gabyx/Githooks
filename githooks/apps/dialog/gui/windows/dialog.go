@@ -3,11 +3,12 @@
 package gui
 
 import (
-	sets "gabyx/githooks/apps/dialog/settings"
-	cm "gabyx/githooks/common"
 	"os"
 	"syscall"
 	"unsafe"
+
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	cm "github.com/gabyx/githooks/githooks/common"
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"

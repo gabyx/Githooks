@@ -2,12 +2,13 @@ package download
 
 import (
 	"bytes"
-	cm "gabyx/githooks/common"
 	"html/template"
 	"os"
 	"path"
 	"runtime"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // LocalDeploySettings are deploy settings for accessing the deploy locally.

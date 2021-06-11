@@ -1,8 +1,9 @@
 package ccm
 
 import (
-	cm "gabyx/githooks/common"
 	"math"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 
 	"github.com/spf13/cobra"
 )

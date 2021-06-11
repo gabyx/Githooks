@@ -1,13 +1,13 @@
 package update
 
 import (
-	"gabyx/githooks/build"
-	ccm "gabyx/githooks/cmd/common"
-	"gabyx/githooks/cmd/config"
-	"gabyx/githooks/cmd/installer"
-	"gabyx/githooks/prompt"
-	strs "gabyx/githooks/strings"
-	"gabyx/githooks/updates"
+	"github.com/gabyx/githooks/githooks/build"
+	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	"github.com/gabyx/githooks/githooks/cmd/config"
+	"github.com/gabyx/githooks/githooks/cmd/installer"
+	"github.com/gabyx/githooks/githooks/prompt"
+	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/gabyx/githooks/githooks/updates"
 
 	"github.com/spf13/cobra"
 )

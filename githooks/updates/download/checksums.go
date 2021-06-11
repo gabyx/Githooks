@@ -2,10 +2,11 @@ package download
 
 import (
 	"bytes"
-	cm "gabyx/githooks/common"
 	"io"
 	"os"
 	"strings"
+
+	cm "github.com/gabyx/githooks/githooks/common"
 )
 
 // verifyChecksums verifies checksums with the signature and the public key, and returns
