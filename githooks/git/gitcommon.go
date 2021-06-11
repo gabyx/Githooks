@@ -453,7 +453,7 @@ func GetVersionAt(gitx *Context, commitSHA string) (*version.Version, string, er
 }
 
 // GetVersion gets the semantic version and its tag.
-func GetVersion(gitx *Context, commitSHA string) (v *version.Version, tag string, err error) {
+func GetVersion(gitx *Context, commitSHA string, matchPattern string) (v *version.Version, tag string, err error) {
 
 	if commitSHA == HEAD {
 		commitSHA, err = GetCommitSHA(gitx, HEAD)
@@ -462,7 +462,7 @@ func GetVersion(gitx *Context, commitSHA string) (v *version.Version, tag string
 		}
 	}
 
-	tag, err = gitx.Get("describe", "--tags", "--abbrev=0", commitSHA)
+	tag, err = gitx.Get("describe", "--tags", "--abbrev=0", "--match", matchPattern)
 	if err != nil {
 		return
 	}

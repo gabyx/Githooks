@@ -45,7 +45,7 @@ func main() {
 	commitSHA, err := git.GetCommitSHA(gitx, git.HEAD)
 	cm.AssertNoErrorPanicF(err, "GetCommitSHA failed.")
 
-	ver, tag, err := git.GetVersion(gitx, git.HEAD)
+	ver, tag, err := git.GetVersion(gitx, git.HEAD, "v*") // The tags to match always start with "v...."
 	cm.AssertNoErrorPanicF(err, "GetVersion failed.")
 
 	// Create or overwrite the go file from template
