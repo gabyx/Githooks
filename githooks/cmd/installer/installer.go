@@ -1078,11 +1078,14 @@ func setupSharedRepositories(
 
 func storeSettings(log cm.ILogContext, settings *Settings, uiSettings *install.UISettings) {
 	// Store cached UI values back.
-	err := git.Ctx().SetConfig(
-		hooks.GitCKDeleteDetectedLFSHooksAnswer, uiSettings.DeleteDetectedLFSHooks, git.GlobalScope)
-	log.AssertNoError(err, "Could not store config 'githooks.deleteDetectedLFSHooks'.")
 
-	err = settings.RegisteredGitDirs.Store(settings.InstallDir)
+	if strs.IsNotEmpty(uiSettings.DeleteDetectedLFSHooks) {
+		err := git.Ctx().SetConfig(
+			hooks.GitCKDeleteDetectedLFSHooksAnswer, uiSettings.DeleteDetectedLFSHooks, git.GlobalScope)
+		log.AssertNoError(err, "Could not store config 'githooks.deleteDetectedLFSHooks'.")
+	}
+
+	err := settings.RegisteredGitDirs.Store(settings.InstallDir)
 	log.AssertNoError(err,
 		"Could not store registered file in '%s'.",
 		settings.InstallDir)
