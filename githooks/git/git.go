@@ -138,6 +138,10 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 
 		keyValue := strings.SplitN(list[i], " ", 2)
 		cm.PanicIf(len(keyValue) == 0, "Wrong split.")
+		// Handle unset values
+		if len(keyValue) == 1 {
+			keyValue = append(keyValue, "")
+		}
 
 		res = append(res, keyValue)
 	}
