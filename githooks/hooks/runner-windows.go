@@ -5,7 +5,6 @@ package hooks
 import (
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
-	"strings"
 )
 
 // ShellWrappedExecutable contains the data to a script/executable file which
@@ -21,16 +20,14 @@ func (e *shellWrappedExecutable) GetCommand() string {
 
 // GetArgs gets all args.
 func (e *shellWrappedExecutable) GetArgs(args ...string) (a []string) {
-	var sb strings.Builder
-
-	sb.Write([]byte(e.Cmd))
+	cmd := e.Cmd
 
 	for i := range args {
-		_, e := strs.FmtW(&sb, " '%s'", strings.ReplaceAll(args[i], "'", "'\"'\"'"))
-		cm.DebugAssertNoError(e)
+		cmd += strs.Fmt(" \"$%d\"", i+1)
 	}
 
-	return []string{"-c", sb.String()}
+	// See https://pubs.opengroup.org/onlinepubs/009604499/utilities/sh.html
+	return append([]string{"-c", cmd, "_"}, args...)
 }
 
 // GetArgs gets all args.
