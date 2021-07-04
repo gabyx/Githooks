@@ -53,7 +53,7 @@ fi
 CURRENT_TIME=$(date +%s)
 MOCK_LAST_RUN=$((CURRENT_TIME - 100000))
 # shellcheck disable=SC2015
-cd ~/.githooks/release && git reset --hard HEAD~1 >/dev/null || {
+cd ~/.githooks/release && git reset --hard v9.9.0 >/dev/null || {
     echo "! Could not reset master to trigger update."
     exit 1
 }
