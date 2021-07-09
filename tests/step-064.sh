@@ -15,7 +15,7 @@ mkdir -p "$GH_TEST_TMP/test064" &&
     git init || exit 1
 
 # Reset to trigger update
-if ! (cd ~/.githooks/release && git reset --hard HEAD~1 >/dev/null); then
+if ! (cd ~/.githooks/release && git reset --hard v9.9.0 >/dev/null); then
     echo "! Could not reset master to trigger update."
     exit 1
 fi
@@ -37,5 +37,18 @@ AFTER="$(cd ~/.githooks/release && git rev-parse HEAD)"
 
 if [ "$CURRENT" = "$AFTER" ]; then
     echo "! Release clone was not updated, but it should have!"
+    exit 1
+fi
+
+if ! "$GH_INSTALL_BIN_DIR/cli" --version | grep -q "9.9.1"; then
+    echo "! Expected to update to 9.9.1"
+    "$GH_INSTALL_BIN_DIR/cli" --version
+    exit 1
+fi
+
+# Check that current commit has `Update-NoSkip: true` trailer
+if ! git -C ~/.githooks/release log -n 1 "$AFTER" --pretty="%(trailers:key=Update-NoSkip,valueonly)" |
+    grep -q "true"; then
+    echo "! Did not detect 'Update-NoSkip: true' trailer on current release commit."
     exit 1
 fi

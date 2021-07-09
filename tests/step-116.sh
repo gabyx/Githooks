@@ -130,7 +130,7 @@ CURRENT_TIME=$(date +%s)
 MOCK_LAST_RUN=$((CURRENT_TIME - 100000))
 
 # Reset to trigger update from repo 3
-if ! (cd ~/.githooks/release && git reset --hard HEAD~1 >/dev/null); then
+if ! (cd ~/.githooks/release && git reset --hard v9.9.0 >/dev/null); then
     echo "! Could not reset master to trigger update."
     exit 1
 fi

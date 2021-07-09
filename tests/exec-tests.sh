@@ -32,7 +32,7 @@ RUN git config --global user.email "githook@test.com" && \\
     git config --global core.autocrlf false
 
 RUN echo "Make test gitrepo to clone from ..." && \\
-    cd \$GH_TEST_REPO && git init  >/dev/null 2>&1  && \\
+    cd "\$GH_TEST_REPO" && git init  >/dev/null 2>&1  && \\
     git add . >/dev/null 2>&1  && \\
     git commit -a -m "Before build" >/dev/null 2>&1
 
@@ -44,7 +44,7 @@ RUN cd \$GH_TEST_REPO/githooks && \\
     ./scripts/build.sh --build-flags "-tags debug,mock" && \\
     ./bin/cli --version
 RUN echo "Commit build v9.9.0 to repo ..." && \\
-    cd \$GH_TEST_REPO && \\
+    cd "\$GH_TEST_REPO" && \\
     git add . >/dev/null 2>&1 && \\
     git commit -a --allow-empty -m "Version 9.9.0" >/dev/null 2>&1 && \\
     git tag -f "v9.9.0"
@@ -57,10 +57,17 @@ RUN cd \$GH_TEST_REPO/githooks && \\
     ./scripts/clean.sh && \\
     ./scripts/build.sh --build-flags "-tags debug,mock" && \\
     ./bin/cli --version
-RUN echo "Commit build v9.9.1 to repo ..." && \\
-    cd \$GH_TEST_REPO && \\
-    git commit -a --allow-empty -m "Version 9.9.1" >/dev/null 2>&1 && \\
+RUN echo "Commit build v9.9.1 to repo (no-skip)..." && \\
+    cd "\$GH_TEST_REPO" && \\
+    git commit -a --allow-empty -m "Version 9.9.1" -m "Update-NoSkip: true" >/dev/null 2>&1 && \\
     git tag -f "v9.9.1"
+
+# Commit for to v9.9.2 (not used for update).
+#################################
+RUN echo "Commit build v9.9.2 to repo ..." && \\
+    cd "\$GH_TEST_REPO" && \\
+    git commit -a --allow-empty -m "Version 9.9.2" >/dev/null 2>&1 && \\
+    git tag -f "v9.9.2"
 
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
         sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
