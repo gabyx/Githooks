@@ -82,11 +82,17 @@ RUN cd \$GH_TEST_REPO/githooks && \\
     ./scripts/clean.sh && \\
     ./scripts/build.sh --coverage --build-flags "-tags debug,mock,coverage" && \\
     ./bin/cli githooksCoverage --version
-RUN echo "Commit build v9.9.1 to repo ..." && \\
-    cd \$GH_TEST_REPO && \\
-    git commit -a --allow-empty -m "Version 9.9.1" >/dev/null 2>&1 && \\
+RUN echo "Commit build v9.9.1 to repo (no-skip)..." && \\
+    cd "\$GH_TEST_REPO" && \\
+    git commit -a --allow-empty -m "Version 9.9.1" -m "Update-NoSkip: true" >/dev/null 2>&1 && \\
     git tag -f "v9.9.1"
 
+# Commit for to v9.9.2 (not used for update).
+#################################
+RUN echo "Commit build v9.9.2 to repo ..." && \\
+    cd "\$GH_TEST_REPO" && \\
+    git commit -a --allow-empty -m "Version 9.9.2" >/dev/null 2>&1 && \\
+    git tag -f "v9.9.2"
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
         sed -i -E 's|(.*)/cli" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
     fi
