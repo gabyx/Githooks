@@ -37,46 +37,47 @@ Also it searches for hooks in configured shared hook repositories.
 
 - [Layout and Options](#layout-and-options)
 - [Execution](#execution)
-    - [Hook Run Configuration](#hook-run-configuration)
-    - [Exported Environment Variables](#exported-environment-variables)
-    - [Parallel Execution](#parallel-execution)
+  - [Hook Run Configuration](#hook-run-configuration)
+  - [Exported Environment Variables](#exported-environment-variables)
+  - [Parallel Execution](#parallel-execution)
 - [Supported Hooks](#supported-hooks)
-- [Git Large File Storage Git LFS Support](#git-large-file-storage-git-lfs-support)
+- [Git Large File Storage (Git LFS) Support](#git-large-file-storage-git-lfs-support)
 - [Shared hook repositories](#shared-hook-repositories)
-    - [Global Configuration](#global-configuration)
-    - [Local Configuration](#local-configuration)
-    - [Repository Configuration](#repository-configuration)
-    - [Supported URLS](#supported-urls)
+  - [Global Configuration](#global-configuration)
+  - [Local Configuration](#local-configuration)
+  - [Repository Configuration](#repository-configuration)
+  - [Supported URLS](#supported-urls)
 - [Layout of Shared Hook Repositories](#layout-of-shared-hook-repositories)
-    - [Shared Repository Namespace](#shared-repository-namespace)
+  - [Shared Repository Namespace](#shared-repository-namespace)
 - [Ignoring Hooks and Files](#ignoring-hooks-and-files)
 - [Trusting Hooks](#trusting-hooks)
 - [Disabling Githooks](#disabling-githooks)
 - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
 - [User Prompts](#user-prompts)
 - [Installation](#installation)
-    - [Normal Installation](#normal-installation)
-    - [Non-Interactive Installation](#non-interactive-installation)
-    - [Install Mode: Centralized Hooks](#install-mode-centralized-hooks)
-    - [Install from different URL and Branch](#install-from-different-url-and-branch)
-    - [No Installation](#no-installation)
-    - [Install on the Server](#install-on-the-server)
-        - [Setup for Bare Repositories](#setup-for-bare-repositories)
-    - [Templates or Global Hooks](#templates-or-global-hooks)
-        - [Template Folder init.templateDir](#template-folder-inittemplatedir)
-        - [Global Hooks Location core.hooksPath](#global-hooks-location-corehookspath)
-    - [Updates](#updates)
-        - [Update Mechanics](#update-mechanics)
+  - [Normal Installation](#normal-installation)
+  - [Non-Interactive Installation](#non-interactive-installation)
+  - [Install Mode: Centralized Hooks](#install-mode-centralized-hooks)
+  - [Install from different URL and Branch](#install-from-different-url-and-branch)
+  - [No Installation](#no-installation)
+  - [Install on the Server](#install-on-the-server)
+    - [Setup for Bare Repositories](#setup-for-bare-repositories)
+  - [Templates or Global Hooks](#templates-or-global-hooks)
+    - [Template Folder (`init.templateDir`)](#template-folder-inittemplatedir)
+    - [Global Hooks Location (`core.hooksPath`)](#global-hooks-location-corehookspath)
+  - [Updates](#updates)
+    - [Update Mechanics](#update-mechanics)
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
 - [Migration](#migration)
-    - [Supported Platforms](#supported-platforms)
+  - [Supported Platforms](#supported-platforms)
 - [Dialog Tool](#dialog-tool)
-    - [Build From Source](#build-from-source)
-    - [Dependencies](#dependencies)
+  - [Build From Source](#build-from-source)
+  - [Dependencies](#dependencies)
 - [Tests and Debugging](#tests-and-debugging)
-    - [Debugging in the Dev Container](#debugging-in-the-dev-container)
-    - [Todos:](#todos)
+  - [Debugging in the Dev Container](#debugging-in-the-dev-container)
+  - [Todos:](#todos)
+- [FAQ](#faq)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
 - [Support & Donation](#support--donation)
@@ -848,10 +849,15 @@ Once in the development container: You can launch the VS Code tasks:
 
 which will start the `delve` debugger headless as a server in a terminal. You can then attach to the debug server with the debug configuration `Debug Go [remote delve]`. Set breakpoints in the source code to trigger them.
 
-
 ### Todos:
   - Test: `githooks.disableSharedHooksUpdate`.
   - Finish deploy settings implementation for Gitea and sorts.
+
+## FAQ
+
+- **Shell on Windows shows weird characters:**
+  Githooks outputs UTF-8 characters (emojis etc.).
+  Make sure you have the UTF-8 codepage active by doing `chcp.com 65001` (either in `cmd.exe` or `git-bash.exe`, also from an integrated terminal in VS Code). You can make it permanent by putting this into the startup scripts of your shell, e.g. (`.bashrc`). Consider using Windows Terminal.
 
 ## Acknowledgements
 
