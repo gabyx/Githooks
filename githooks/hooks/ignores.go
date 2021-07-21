@@ -151,7 +151,7 @@ func checkPatternInversion(p string) (string, bool) {
 	if strings.HasPrefix(p, "!") {
 		return p[1:], true
 	} else if strings.HasPrefix(p, `\!`) {
-		return p[2:], false
+		return p[1:], false
 	}
 
 	return p, false
