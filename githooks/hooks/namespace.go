@@ -13,6 +13,11 @@ const (
 	NamespaceRepositoryHook = ""
 	// NamespaceReplacedHook is the namespace for replace hooks.
 	NamespaceReplacedHook = "hooks"
+
+	// NamespaceSeparator separates the namespace from the rest in the namespace path of a hook.
+	// Since it contains `/` its impossible to use in file names an
+	// thus is safe to check for in ignore patterns.
+	NamespaceSeparator = "://"
 )
 
 func getNamespaceFile(hooksDir string) string {
@@ -26,7 +31,7 @@ func GetHooksNamespace(hookDir string) (s string, err error) {
 	if cm.IsFile(f) {
 		var data []byte
 		data, err = os.ReadFile(f)
-		s = strings.TrimSpace(string(data))
+		s = strings.ReplaceAll(strings.TrimSpace(string(data)), " ", "-")
 	}
 
 	return

@@ -70,8 +70,9 @@ func PrepareListHookState(
 	// Load ignore patterns
 	ignores, err := hooks.GetIgnorePatterns(repoHooksDir, gitDirWorktree, hookNames)
 	ctx.Log.AssertNoErrorF(err, "Errors while loading ignore patterns.")
-	ctx.Log.DebugF("HooksDir ignore patterns: '%q'.", ignores.HooksDir)
+
 	ctx.Log.DebugF("User ignore patterns: '%+q'.", ignores.User)
+	ctx.Log.DebugF("Accumuldated repository ignore patterns: '%q'.", ignores.HooksDir)
 
 	// Load all shared hooks
 	shared := hooks.NewSharedRepos(8) //nolint: gomnd
@@ -106,7 +107,7 @@ type ListingState struct {
 	isRepoTrusted      bool
 	isGithooksDisabled bool
 
-	sharedIgnores ignoresPerHooksDir
+	sharedIgnores ignoresPerHooksDir // sharedIgnores contains all ignores for the shared hooks
 }
 
 func filterPendingSharedRepos(shared hooks.SharedRepos) (pending hooks.SharedRepos) {
@@ -314,10 +315,11 @@ func GetAllHooksIn(
 		return trusted, sha
 	}
 
-	// Cache repository ignores
+	// Cache shared repository ignores
 	hookDirIgnores := state.sharedIgnores[hooksDir]
 	if hookDirIgnores == nil && addInternalIgnores {
 		var e error
+
 		igns, e := hooks.GetHookPatternsHooksDir(hooksDir, []string{hookName})
 		log.AssertNoErrorF(e, "Could not get worktree ignores in '%s'.", hooksDir)
 		state.sharedIgnores[hooksDir] = &igns

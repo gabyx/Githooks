@@ -37,8 +37,8 @@ type HookPatterns struct {
 
 // RepoIgnorePatterns is the list of possible ignore patterns in a repository.
 type RepoIgnorePatterns struct {
-	HooksDir HookPatterns // Ignores set by `.ignore` file in the hooks directory of the repository.
-	User     HookPatterns // Ignores set by the `.ignore` file in the Git directory of the repository.
+	HooksDir HookPatterns // Ignores set by `.ignore.yaml` file in the hooks directory of the repository.
+	User     HookPatterns // Ignores set by the `.ignore.yaml` file in the Git directory of the repository.
 }
 
 // CombineIgnorePatterns combines two ignore patterns.
@@ -211,33 +211,53 @@ func (h *RepoIgnorePatterns) IsIgnored(namespacePath string) (bool, bool) {
 	return false, false
 }
 
-// GetHookIngoreFileHooksDir gets ignores files inside the hook directory.
+// GetHookIgnoreFileHooksDir gets ignores files inside the hook directory.
 // The `hookName` can be empty.
-func GetHookIngoreFileHooksDir(repoHooksDir string, hookName string) string {
-	return path.Join(repoHooksDir, hookName, ".ignore.yaml")
+func GetHookIgnoreFileHooksDir(hooksDir string, hookName string) string {
+	return path.Join(hooksDir, hookName, ".ignore.yaml")
 }
 
 // GetHookIgnoreFilesHooksDir gets ignores files inside the hook directory.
-func GetHookIgnoreFilesHooksDir(repoHooksDir string, hookNames []string) (files []string) {
+func GetHookIgnoreFilesHooksDir(hooksDir string, hookNames []string) (files []string) {
 	files = make([]string, 0, 1+len(hookNames))
 
-	files = append(files, GetHookIngoreFileHooksDir(repoHooksDir, ""))
 	for _, hookName := range hookNames {
-		files = append(files, GetHookIngoreFileHooksDir(repoHooksDir, hookName))
+		files = append(files, GetHookIgnoreFileHooksDir(hooksDir, hookName))
 	}
 
 	return
 }
 
 // GetHookPatternsHooksDir gets all ignored hooks in the hook directory.
-func GetHookPatternsHooksDir(repoHooksDir string, hookNames []string) (patterns HookPatterns, err error) {
-	files := GetHookIgnoreFilesHooksDir(repoHooksDir, hookNames)
+func GetHookPatternsHooksDir(hooksDir string, hookNames []string) (patterns HookPatterns, err error) {
+	files := GetHookIgnoreFilesHooksDir(hooksDir, hookNames)
 	patterns.Reserve(2 * len(files)) // nolint: gomnd
 
-	for _, file := range files {
+	mainFile := GetHookIgnoreFileHooksDir(hooksDir, "")
+	ps, e := LoadIgnorePatterns(mainFile)
+	err = cm.CombineErrors(err, e)
+	patterns.Add(&ps)
+
+	for _, hookName := range hookNames {
+		file := GetHookIgnoreFileHooksDir(hooksDir, hookName)
 		if cm.IsFile(file) {
 			ps, e := LoadIgnorePatterns(file)
 			err = cm.CombineErrors(err, e)
+
+			// For each pattern/namespace path which contains not a namespace,
+			// make it a relative pattern towards this `hookName` folder
+			for i := range ps.Patterns {
+				if !strings.Contains(ps.Patterns[i], NamespaceSeparator) {
+					ps.Patterns[i] = path.Join(hookName, ps.Patterns[i])
+				}
+			}
+
+			for i := range ps.NamespacePaths {
+				if !strings.Contains(ps.NamespacePaths[i], NamespaceSeparator) {
+					ps.NamespacePaths[i] = path.Join(hookName, ps.NamespacePaths[i])
+				}
+			}
+
 			patterns.Add(&ps)
 		}
 	}
@@ -326,13 +346,13 @@ func StoreIgnorePatterns(patterns HookPatterns, file string) (err error) {
 // GetIgnorePatterns loads all ignore patterns in the worktree's hooks dir and
 // also in the worktrees Git directory.
 func GetIgnorePatterns(
-	repoHooksDir string,
+	hooksDir string,
 	gitDirWorktree string,
 	hookNames []string) (patt RepoIgnorePatterns, err error) {
 
 	var e error
 
-	patt.HooksDir, e = GetHookPatternsHooksDir(repoHooksDir, hookNames)
+	patt.HooksDir, e = GetHookPatternsHooksDir(hooksDir, hookNames)
 	if e != nil {
 		err = cm.CombineErrors(cm.Error("Could not get worktree ignore patterns."), e)
 	}

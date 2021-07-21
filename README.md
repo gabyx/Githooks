@@ -394,15 +394,16 @@ or **paths** which match against a hook's (file's) *namespace path*.
 
 Each hook either in the current repository `<repoPath>/.githooks/...` or inside a shared hooks
 repository has a so called *namespace path*.
-A *namespace path* consists of the *name of the hook* prefixed by a *namespace* , e.g. `<namespacePath> := <namespace>/<relPath> = 'core-hooks/pre-commit/check-numbers` where
+A *namespace path* consists of the *name of the hook* prefixed by a *namespace* , e.g.
+`<namespacePath> := <namespace>://<relPath> = 'core-hooks://pre-commit/check-numbers` where
 `<relPath> = pre-commit/check-numbers` is the relative path to the hook.
 Each shared repository can provide its own [namespace](#shared-repository-namespace).
-A [namespace](#shared-repository-namespace) will be used only when the hook belongs to a shared hook repository and will have a default unique value if it is not defined.
+A [namespace](#shared-repository-namespace) will be used only when the hook belongs to a shared hook repository and will have a default unique value if it is not defined. You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md)
+in the current repository.
+**Note**: The namespace name `hooks` is reserved internally for replaced hooks!
 
  All ignore entries in `.ignore.yaml` (patterns or paths) will match against these
 *namespace paths*.
-You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md)
-in the current repository.
 
 Disabling works like:
 
@@ -410,15 +411,18 @@ Disabling works like:
 # Disable certain hooks by a pattern in this repository:
 # User ignore pattern stored in `.git/.githooks.ignore.yaml`:
 $ git hooks ignore add --pattern "pre-commit/**" # Store: `.git/.githooks.ignore.yaml`:
+# or stored inside the repository:
+$ git hooks ignore add --repository --pattern "pre-commit/**" # Store: `.githooks/.ignore.yaml`:
 
 # Disable certain shared hooks (with namespace 'my-shared-super-hooks')
 # by a glob pattern in this repository:
-$ git hooks ignore add --pattern "my-shared-super-hooks/pre-commit/**"
+$ git hooks ignore add --repository --pattern "my-shared-super-hooks://pre-commit/**"
 ```
 
 In the above [example](#layout-and-options]), one of the `.ignore.yaml` files should contain a glob pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file. Patterns can contain double star syntax to match multiple directories, e.g. `**/*.txt` instead of `*.txt`.
 
-The main `<repoPath>/<hookDir>/.ignore.yaml` file applies to all hooks. Any additional `<repoPath>/<hookDir>/<hookName>/.ignore.yaml` file inside `<hookDir>` will be accumulated to the main file. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on the pattern syntax.
+The main `<repoPath>/<hookDir>/.ignore.yaml` file applies to all hooks. Any additional `<repoPath>/<hookDir>/<hookName>/.ignore.yaml` file inside `<hookDir>` will be accumulated to the main file and patterns and namespace paths **are relative to this folder**.
+You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on the pattern syntax.
 
 ## Trusting Hooks
 

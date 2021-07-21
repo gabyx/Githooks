@@ -39,7 +39,7 @@ func loadIgnoreFile(
 			"Given hook name '%s' is not any of the hook names:\n%s", ignAct.HookName,
 			ccm.GetFormattedHookList(""))
 
-		file = hooks.GetHookIngoreFileHooksDir(hooks.GetGithooksDir(repoRoot), ignAct.HookName)
+		file = hooks.GetHookIgnoreFileHooksDir(hooks.GetGithooksDir(repoRoot), ignAct.HookName)
 	} else {
 		file = hooks.GetHookIgnoreFileGitDir(gitDir)
 	}
@@ -126,8 +126,11 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 	}
 
 	if ignShow.Repository {
+		root := hooks.GetGithooksDir(repoRoot)
+		print(hooks.GetHookIgnoreFileHooksDir(root, ""), "repo")
+
 		for _, file := range hooks.GetHookIgnoreFilesHooksDir(
-			hooks.GetGithooksDir(repoRoot),
+			root,
 			hooks.ManagedHookNames) {
 
 			print(file, "repo")

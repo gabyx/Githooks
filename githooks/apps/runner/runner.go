@@ -449,9 +449,10 @@ func collectHooks(
 	checksums *hooks.ChecksumStore) (h hooks.Hooks) {
 
 	// Local hooks in repository
+	// No parsing of local includes because already happened.
 	h.LocalHooks = getHooksIn(
 		settings, uiSettings, settings.RepositoryDir, settings.RepositoryHooksDir,
-		true, hooks.NamespaceRepositoryHook, ignores, checksums)
+		false, hooks.NamespaceRepositoryHook, ignores, checksums)
 
 	// All shared hooks
 	var allAddedShared = make([]string, 0)

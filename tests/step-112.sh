@@ -37,7 +37,7 @@ if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' | grep 'shared:repo' | 
     exit 5
 fi
 
-"$GH_INSTALL_BIN_DIR/cli" ignore add --pattern 'mygagahooks/**/test-shared' ||
+"$GH_INSTALL_BIN_DIR/cli" ignore add --pattern 'mygagahooks://**/test-shared' ||
     exit 6
 
 if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' |
