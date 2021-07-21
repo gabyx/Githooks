@@ -140,11 +140,12 @@ func GetAllHooksIn(
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
 
+		prefix += "/"
+
 		// Prefix should always be removed! (we only have '/' in paths!)
 		cm.DebugAssertF(strings.TrimPrefix(hookPath, prefix) != hookPath,
 			"Prefix could not be removed '%s', '%s'.", prefix, hookPath)
 
-		// Namespace the path to check ignores
 		namespacedPath := path.Join(hookNamespace, strings.TrimPrefix(hookPath, prefix))
 		ignored := isIgnored(namespacedPath)
 
@@ -226,9 +227,7 @@ func GetAllHooksIn(
 					}
 
 					if !info.IsDir() {
-						return appendHook(dirOrFile, p,
-							path.Join(hookNamespace, hookName),
-							batchName)
+						return appendHook(hooksDir, p, hookNamespace, batchName)
 					}
 
 					return nil
@@ -242,8 +241,7 @@ func GetAllHooksIn(
 				return filepath.SkipDir
 			}
 
-			return appendHook(dirOrFile, p,
-				path.Join(hookNamespace, hookName), batchName)
+			return appendHook(hooksDir, p, hookNamespace, batchName)
 		}
 
 		// Collect all hooks in e.g. `path/pre-commit/*`
