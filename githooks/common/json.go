@@ -1,9 +1,10 @@
 package common
 
 import (
-	"encoding/json"
 	"io"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 // LoadJSON loads and parses JSON file into a representation.
@@ -42,7 +43,7 @@ func StoreJSON(file string, repr interface{}) error {
 
 // WriteJSON writes the JSON representation of `repr` to `writer`.
 func WriteJSON(writer io.Writer, repr interface{}) error {
-	bytes, err := json.Marshal(repr)
+	bytes, err := jsoniter.Marshal(repr)
 	if err != nil {
 		return err
 	}
@@ -59,5 +60,5 @@ func ReadJSON(reader io.Reader, repr interface{}) error {
 		return err
 	}
 
-	return json.Unmarshal(bytes, repr)
+	return jsoniter.Unmarshal(bytes, repr)
 }

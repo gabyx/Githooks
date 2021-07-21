@@ -731,7 +731,7 @@ func getHooksIn(
 				showTrustPrompt(uiSettings, checksums, hook)
 			}
 
-			log.PanicIf(!settings.SkipUntrustedHooks && hook.Active && !hook.Trusted,
+			log.PanicIfF(!settings.SkipUntrustedHooks && hook.Active && !hook.Trusted,
 				"Hook '%s' is active and needs to be trusted first.\n"+
 					"Either trust the hook or disable it, or skip active,\n"+
 					"untrusted hooks by running:\n"+

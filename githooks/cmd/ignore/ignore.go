@@ -25,7 +25,7 @@ type ignoreShowOptions struct {
 	OnlyExisting bool
 }
 
-func ignoreLoadIgnoreFile(
+func loadIgnoreFile(
 	ctx *ccm.CmdContext,
 	ignAct *ignoreActionOptions,
 	repoRoot string,
@@ -59,7 +59,7 @@ func runIgnoreAddPattern(
 	remove bool, patterns *hooks.HookPatterns) {
 
 	repoRoot, _, gitDirWorktree := ccm.AssertRepoRoot(ctx)
-	file, ps := ignoreLoadIgnoreFile(ctx, ignAct, repoRoot, gitDirWorktree)
+	file, ps := loadIgnoreFile(ctx, ignAct, repoRoot, gitDirWorktree)
 
 	var text string
 
