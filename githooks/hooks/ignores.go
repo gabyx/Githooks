@@ -234,9 +234,11 @@ func GetHookPatternsHooksDir(hooksDir string, hookNames []string) (patterns Hook
 	patterns.Reserve(2 * len(files)) // nolint: gomnd
 
 	mainFile := GetHookIgnoreFileHooksDir(hooksDir, "")
-	ps, e := LoadIgnorePatterns(mainFile)
-	err = cm.CombineErrors(err, e)
-	patterns.Add(&ps)
+	if cm.IsFile(mainFile) {
+		ps, e := LoadIgnorePatterns(mainFile)
+		err = cm.CombineErrors(err, e)
+		patterns.Add(&ps)
+	}
 
 	for _, hookName := range hookNames {
 		file := GetHookIgnoreFileHooksDir(hooksDir, hookName)
@@ -248,13 +250,13 @@ func GetHookPatternsHooksDir(hooksDir string, hookNames []string) (patterns Hook
 			// make it a relative pattern towards this `hookName` folder
 			for i := range ps.Patterns {
 				if !strings.Contains(ps.Patterns[i], NamespaceSeparator) {
-					ps.Patterns[i] = path.Join(hookName, ps.Patterns[i])
+					ps.Patterns[i] = path.Clean(path.Join(hookName, ps.Patterns[i]))
 				}
 			}
 
 			for i := range ps.NamespacePaths {
 				if !strings.Contains(ps.NamespacePaths[i], NamespaceSeparator) {
-					ps.NamespacePaths[i] = path.Join(hookName, ps.NamespacePaths[i])
+					ps.NamespacePaths[i] = path.Clean(path.Join(hookName, ps.NamespacePaths[i]))
 				}
 			}
 

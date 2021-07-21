@@ -135,27 +135,27 @@ fi
 
 # Check all parallel batch names
 OUT=$("$GH_INSTALL_BIN_DIR/cli" list --batch-name) || exit 11
-if ! echo "$OUT" | grep "step1.1" | grep -q -E "ns-path: +'\w+/pre-commit/step-1/step1.1'" ||
+if ! echo "$OUT" | grep "step1.1" | grep -q -E "ns-path: +'\w+://pre-commit/step-1/step1.1'" ||
     ! echo "$OUT" | grep "step1.1" | grep -q -E "batch: +'step-1'" ||
-    ! echo "$OUT" | grep "step1.2" | grep -q -E "ns-path: +'\w+/pre-commit/step-1/step1.2'" ||
+    ! echo "$OUT" | grep "step1.2" | grep -q -E "ns-path: +'\w+://pre-commit/step-1/step1.2'" ||
     ! echo "$OUT" | grep "step1.2" | grep -q -E "batch: +'step-1'"; then
     echo "! Unexpected cli list output (11):"
     echo "$OUT"
     exit 1
 fi
 
-if ! echo "$OUT" | grep "step2.1" | grep -q -E "ns-path: +'\w+/pre-push/step-2/step2.1'" ||
+if ! echo "$OUT" | grep "step2.1" | grep -q -E "ns-path: +'\w+://pre-push/step-2/step2.1'" ||
     ! echo "$OUT" | grep "step2.1" | grep -q -E "batch: +'step-2'" ||
-    ! echo "$OUT" | grep "step2.2" | grep -q -E "ns-path: +'\w+/pre-push/step-2/step2.2'" ||
+    ! echo "$OUT" | grep "step2.2" | grep -q -E "ns-path: +'\w+://pre-push/step-2/step2.2'" ||
     ! echo "$OUT" | grep "step2.2" | grep -q -E "batch: +'step-2'"; then
     echo "! Unexpected cli list output (12):"
     echo "$OUT"
     exit 1
 fi
 
-if ! echo "$OUT" | grep "step3.1" | grep -q -E "ns-path: +'\w+/post-update/step-3/step3.1'" ||
+if ! echo "$OUT" | grep "step3.1" | grep -q -E "ns-path: +'\w+://post-update/step-3/step3.1'" ||
     ! echo "$OUT" | grep "step3.1" | grep -q -E "batch: +'step-3'" ||
-    ! echo "$OUT" | grep "step3.2" | grep -q -E "ns-path: +'\w+/post-update/step-3/step3.2'" ||
+    ! echo "$OUT" | grep "step3.2" | grep -q -E "ns-path: +'\w+://post-update/step-3/step3.2'" ||
     ! echo "$OUT" | grep "step3.2" | grep -q -E "batch: +'step-3'"; then
     echo "! Unexpected cli list output (13):"
     echo "$OUT"
