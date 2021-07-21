@@ -567,6 +567,7 @@ func DefaultAcceptUpdateCallback(
 			log.AssertNoErrorF(err, "Could not show prompt.")
 
 			if answer == "y" {
+				log.InfoF("Going to install version: '%s'.", status.UpdateVersion.String())
 
 				return true
 			}
@@ -575,6 +576,7 @@ func DefaultAcceptUpdateCallback(
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
 			if acceptIfNoPrompt {
+				log.InfoF("Going to install version: '%s'.", status.UpdateVersion.String())
 
 				return true
 			}

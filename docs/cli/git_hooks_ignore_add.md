@@ -23,7 +23,7 @@ namespace path `<namespacePath>` of a hook.
 #### Hook Namespace Path
 
 The namespaced path of a hook file consists of
-`<namespacePath>` ≔ `<namespace>/<relPath>`, where `<relPath>` is the
+`<namespacePath>` ≔ `ns:<namespace>/<relPath>`, where `<relPath>` is the
 relative path of the hook with respect to a base directory
 `<hooksDir>`.
 Note that a namespace path `<namespacePath>` always contains
@@ -36,19 +36,19 @@ For local repository hooks in `<repo>/.githooks`:
 
 - `<hooksDir>`  ≔ `<repo>/.githooks`
 - `<namespace>` ≔ The first white-space trimmed line in the
-                   file `<hooksDir>/.namespace` or empty.
+                   file `<hooksDir>/.namespace` or `ns:gh-self`.
 
 For shared repository hooks in `<sharedRepo>` with url `<url>`:
 
 - `<hooksDir>`  ≔ `<sharedRepo>`
 - `<namespace>` ≔ The first white-space trimmed line in the
-                    file `<hooksDir>/.namespace` or the first 10 digits
-					of the SHA1 hash of `<url>`.
+                   file `<hooksDir>/.namespace` or the first 10 digits
+                   of the SHA1 hash of `<url>`.
 
 For previous replace hooks in `<repo>/.git/hooks/<hookName>.replaced.githook`:
 
 - `<hooksDir>`  ≔ `<repo>/.git/hooks`
-- `<namespace>` ≔ `hooks`
+- `<namespace>` ≔ `ns:gh-replaced`
 
 #### Glob Pattern Syntax
 
@@ -56,6 +56,10 @@ The glob pattern syntax supports the `globstar` (double star) syntax
 in addition to the syntax in 'https://golang.org/pkg/path/filepath/#Match'.
 Also you can use negation with a prefix '!', where the '!' character is
 escaped by '\!'.
+Every pattern which does not start with the namespace suffix `ns:`
+is automatically treated as a relative pattern to the location of
+
+
 
 ```
 git hooks ignore add [flags]

@@ -22,7 +22,7 @@ func runList(ctx *ccm.CmdContext,
 	repoDir, gitDir, gitDirWorktree := ccm.AssertRepoRoot(ctx)
 
 	repoHooksDir := hooks.GetGithooksDir(repoDir)
-	state, shared := PrepareListHookState(ctx, repoDir, repoHooksDir, gitDirWorktree, hookNames)
+	state, shared, _ := PrepareListHookState(ctx, repoDir, repoHooksDir, gitDirWorktree, hookNames)
 
 	total := 0
 	for _, hookName := range hookNames {
@@ -60,21 +60,28 @@ func PrepareListHookState(
 	repoDir string,
 	repoHooksDir string,
 	gitDirWorktree string,
-	hookNames []string) (*ListingState, hooks.SharedRepos) {
+	hookNames []string) (state *ListingState, shared hooks.SharedRepos, hookNamespace string) {
 
 	// Load checksum store
 	checksums, err := hooks.GetChecksumStorage(ctx.GitX, gitDirWorktree)
 	ctx.Log.AssertNoErrorF(err, "Errors while loading checksum store.")
 	ctx.Log.DebugF("%s", checksums.Summary())
 
+	// Set this repository's hook namespace.
+	hookNamespace, err = hooks.GetHooksNamespace(repoHooksDir)
+	ctx.Log.AssertNoErrorF(err, "Errors while loading hook namespace.")
+	if strs.IsEmpty(hookNamespace) {
+		hookNamespace = hooks.NamespaceRepositoryHook
+	}
+
 	// Load ignore patterns
-	ignores, err := hooks.GetIgnorePatterns(repoHooksDir, gitDirWorktree, hookNames)
+	ignores, err := hooks.GetIgnorePatterns(repoHooksDir, gitDirWorktree, hookNames, hookNamespace)
 	ctx.Log.AssertNoErrorF(err, "Errors while loading ignore patterns.")
-	ctx.Log.DebugF("HooksDir ignore patterns: '%q'.", ignores.HooksDir)
 	ctx.Log.DebugF("User ignore patterns: '%+q'.", ignores.User)
+	ctx.Log.DebugF("Accumuldated repository ignore patterns: '%q'.", ignores.HooksDir)
 
 	// Load all shared hooks
-	shared := hooks.NewSharedRepos(8) //nolint: gomnd
+	shared = hooks.NewSharedRepos(8) //nolint: gomnd
 
 	shared[hooks.SharedHookTypeV.Repo], err = hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
 	ctx.Log.AssertNoErrorF(err, "Could not load repository shared hooks.")
@@ -88,13 +95,14 @@ func PrepareListHookState(
 	isTrusted, _ := hooks.IsRepoTrusted(ctx.GitX, repoDir)
 	isDisabled := hooks.IsGithooksDisabled(ctx.GitX, true)
 
-	return &ListingState{
-			Checksums:          &checksums,
-			Ignores:            &ignores,
-			isRepoTrusted:      isTrusted,
-			isGithooksDisabled: isDisabled,
-			sharedIgnores:      make(ignoresPerHooksDir, 10)},
-		shared
+	state = &ListingState{
+		Checksums:          &checksums,
+		Ignores:            &ignores,
+		isRepoTrusted:      isTrusted,
+		isGithooksDisabled: isDisabled,
+		sharedIgnores:      make(ignoresPerHooksDir, 10)}
+
+	return
 }
 
 // ListingState contains common state to successfully discover
@@ -106,7 +114,7 @@ type ListingState struct {
 	isRepoTrusted      bool
 	isGithooksDisabled bool
 
-	sharedIgnores ignoresPerHooksDir
+	sharedIgnores ignoresPerHooksDir // sharedIgnores contains all ignores for the shared hooks
 }
 
 func filterPendingSharedRepos(shared hooks.SharedRepos) (pending hooks.SharedRepos) {
@@ -314,11 +322,26 @@ func GetAllHooksIn(
 		return trusted, sha
 	}
 
-	// Cache repository ignores
+	// Overwrite namespace/name.
+	if isReplacedHook {
+		hookName = hooks.GetHookReplacementFileName(hookName)
+		cm.DebugAssert(strs.IsNotEmpty(hookNamespace), "Wrong namespace")
+
+	} else {
+		ns, err := hooks.GetHooksNamespace(hooksDir)
+		log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
+
+		if strs.IsNotEmpty(ns) {
+			hookNamespace = ns
+		}
+	}
+
+	// Cache shared repository ignores
 	hookDirIgnores := state.sharedIgnores[hooksDir]
 	if hookDirIgnores == nil && addInternalIgnores {
 		var e error
-		igns, e := hooks.GetHookPatternsHooksDir(hooksDir, []string{hookName})
+
+		igns, e := hooks.GetHookPatternsHooksDir(hooksDir, []string{hookName}, hookNamespace)
 		log.AssertNoErrorF(e, "Could not get worktree ignores in '%s'.", hooksDir)
 		state.sharedIgnores[hooksDir] = &igns
 		hookDirIgnores = &igns
@@ -334,20 +357,6 @@ func GetAllHooksIn(
 		}
 
 		return ignored
-	}
-
-	// Overwrite namespace/name.
-	if isReplacedHook {
-		hookName = hooks.GetHookReplacementFileName(hookName)
-		cm.DebugAssert(strs.IsNotEmpty(hookNamespace), "Wrong namespace")
-
-	} else {
-		ns, err := hooks.GetHooksNamespace(hooksDir)
-		log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
-
-		if strs.IsNotEmpty(ns) {
-			hookNamespace = ns
-		}
 	}
 
 	allHooks, _, err := hooks.GetAllHooksIn(

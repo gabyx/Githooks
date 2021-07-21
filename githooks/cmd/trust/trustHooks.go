@@ -87,9 +87,10 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 	repoHooksDir := hooks.GetGithooksDir(repoDir)
 	hookNames := hooks.ManagedHookNames
 
-	state, shared := list.PrepareListHookState(ctx, repoDir, repoHooksDir, gitDirWorktree, hookNames)
-
+	state, shared, hookNamespace := list.PrepareListHookState(ctx, repoDir, repoHooksDir, gitDirWorktree, hookNames)
 	allHooks := getAllHooks(ctx.Log, hookNames, repoDir, gitDir, repoHooksDir, shared, state)
+
+	patterns.MakeRelativePatternsAbsolute(hookNamespace, "")
 
 	countMatches := 0
 
@@ -103,7 +104,8 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 	}
 
 	ctx.Log.PanicIfF(countMatches == 0,
-		"Given pattern or paths did not match any hooks.")
+		"Given pattern or paths did not match any hooks '%v'.",
+		patterns)
 
 }
 
@@ -135,6 +137,7 @@ by '--patterns' or '--paths'.` + "\n\n" +
 		},
 
 		Run: func(cmd *cobra.Command, args []string) {
+
 			runTrustPatterns(ctx, reset, all, &patterns)
 		},
 	}

@@ -24,6 +24,7 @@ mkdir -p "$location1"/pre-commit &&
     cd "$location1" &&
     git init &&
     git remote add origin "$url1" &&
+    echo "repo1" >.namespace &&
     echo 'echo "Hello"' >pre-commit/shared-pre1 &&
     echo 'echo "Hello"' >commit-msg &&
     mkdir -p "$location1"/pre-commit/step-1 &&
@@ -36,6 +37,7 @@ mkdir -p "$location2"/githooks/pre-push &&
     cd "$location2" &&
     git init &&
     git remote add origin "$url2" &&
+    echo "repo2" >githooks/.namespace &&
     echo 'echo "Hello"' >githooks/post-commit &&
     echo 'echo "Hello"' >githooks/pre-push/shared-pre2 &&
     mkdir -p githooks/pre-push/step-2 &&
@@ -48,6 +50,7 @@ mkdir -p "$location3"/.githooks/post-update &&
     cd "$location3" &&
     git init &&
     git remote add origin "$url3" &&
+    echo "repo3" >.githooks/.namespace &&
     echo 'echo "Hello"' >.githooks/post-rewrite &&
     echo 'echo "Hello"' >.githooks/post-update/shared-pre3 &&
     mkdir -p .githooks/post-update/step-3 &&
@@ -135,36 +138,36 @@ fi
 
 # Check all parallel batch names
 OUT=$("$GH_INSTALL_BIN_DIR/cli" list --batch-name) || exit 11
-if ! echo "$OUT" | grep "step1.1" | grep -q -E "ns-path: +'\w+/pre-commit/step-1/step1.1'" ||
+if ! echo "$OUT" | grep "step1.1" | grep -q -E "ns-path: +'ns:repo1/pre-commit/step-1/step1.1'" ||
     ! echo "$OUT" | grep "step1.1" | grep -q -E "batch: +'step-1'" ||
-    ! echo "$OUT" | grep "step1.2" | grep -q -E "ns-path: +'\w+/pre-commit/step-1/step1.2'" ||
+    ! echo "$OUT" | grep "step1.2" | grep -q -E "ns-path: +'ns:repo1/pre-commit/step-1/step1.2'" ||
     ! echo "$OUT" | grep "step1.2" | grep -q -E "batch: +'step-1'"; then
     echo "! Unexpected cli list output (11):"
     echo "$OUT"
     exit 1
 fi
 
-if ! echo "$OUT" | grep "step2.1" | grep -q -E "ns-path: +'\w+/pre-push/step-2/step2.1'" ||
+if ! echo "$OUT" | grep "step2.1" | grep -q -E "ns-path: +'ns:repo2/pre-push/step-2/step2.1'" ||
     ! echo "$OUT" | grep "step2.1" | grep -q -E "batch: +'step-2'" ||
-    ! echo "$OUT" | grep "step2.2" | grep -q -E "ns-path: +'\w+/pre-push/step-2/step2.2'" ||
+    ! echo "$OUT" | grep "step2.2" | grep -q -E "ns-path: +'ns:repo2/pre-push/step-2/step2.2'" ||
     ! echo "$OUT" | grep "step2.2" | grep -q -E "batch: +'step-2'"; then
     echo "! Unexpected cli list output (12):"
     echo "$OUT"
     exit 1
 fi
 
-if ! echo "$OUT" | grep "step3.1" | grep -q -E "ns-path: +'\w+/post-update/step-3/step3.1'" ||
+if ! echo "$OUT" | grep "step3.1" | grep -q -E "ns-path: +'ns:repo3/post-update/step-3/step3.1'" ||
     ! echo "$OUT" | grep "step3.1" | grep -q -E "batch: +'step-3'" ||
-    ! echo "$OUT" | grep "step3.2" | grep -q -E "ns-path: +'\w+/post-update/step-3/step3.2'" ||
+    ! echo "$OUT" | grep "step3.2" | grep -q -E "ns-path: +'ns:repo3/post-update/step-3/step3.2'" ||
     ! echo "$OUT" | grep "step3.2" | grep -q -E "batch: +'step-3'"; then
     echo "! Unexpected cli list output (13):"
     echo "$OUT"
     exit 1
 fi
 
-if ! echo "$OUT" | grep "step4.1" | grep -q -E "ns-path: +'post-commit/step-4/step4.1'" ||
+if ! echo "$OUT" | grep "step4.1" | grep -q -E "ns-path: +'ns:gh-self/post-commit/step-4/step4.1'" ||
     ! echo "$OUT" | grep "step4.1" | grep -q -E "batch: +'step-4'" ||
-    ! echo "$OUT" | grep "step4.2" | grep -q -E "ns-path: +'post-commit/step-4/step4.2'" ||
+    ! echo "$OUT" | grep "step4.2" | grep -q -E "ns-path: +'ns:gh-self/post-commit/step-4/step4.2'" ||
     ! echo "$OUT" | grep "step4.2" | grep -q -E "batch: +'step-4'"; then
     echo "! Unexpected cli list output (14):"
     echo "$OUT"

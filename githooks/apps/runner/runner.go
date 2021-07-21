@@ -62,13 +62,21 @@ func mainRun() (exitCode int) {
 	log.AssertNoErrorF(err, "Errors while loading checksum store.")
 	log.DebugF("%s", checksums.Summary())
 
+	// Set this repositories hook namespace.
+	ns, err := hooks.GetHooksNamespace(settings.RepositoryHooksDir)
+	log.AssertNoErrorF(err, "Errors while loading hook namespace.")
+	if strs.IsNotEmpty(ns) {
+		settings.HookNamespace = ns
+	}
+
 	ignores, err := hooks.GetIgnorePatterns(
 		settings.RepositoryHooksDir,
 		settings.GitDirWorktree,
-		[]string{settings.HookName})
+		[]string{settings.HookName},
+		settings.HookNamespace)
 	log.AssertNoErrorF(err, "Errors while loading ignore patterns.")
-	log.DebugF("HooksDir ignore patterns: '%+q'.", ignores.HooksDir)
 	log.DebugF("User ignore patterns: '%+q'.", ignores.User)
+	log.DebugF("Accumuldated repository ignore patterns: '%q'.", ignores.HooksDir)
 
 	defer storePendingData(&settings, &uiSettings, &ignores, &checksums)
 
@@ -158,10 +166,10 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		GitDirWorktree:     gitDir,
 		InstallDir:         installDir,
 
-		HookPath: hookPath,
-		HookName: path.Base(hookPath),
-		HookDir:  path.Dir(hookPath),
-
+		HookPath:      hookPath,
+		HookName:      path.Base(hookPath),
+		HookDir:       path.Dir(hookPath),
+		HookNamespace: hooks.NamespaceRepositoryHook,
 		IsRepoTrusted: isTrusted,
 
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
@@ -449,9 +457,10 @@ func collectHooks(
 	checksums *hooks.ChecksumStore) (h hooks.Hooks) {
 
 	// Local hooks in repository
+	// No parsing of local includes because already happened.
 	h.LocalHooks = getHooksIn(
 		settings, uiSettings, settings.RepositoryDir, settings.RepositoryHooksDir,
-		true, hooks.NamespaceRepositoryHook, ignores, checksums)
+		false, settings.HookNamespace, false, ignores, checksums)
 
 	// All shared hooks
 	var allAddedShared = make([]string, 0)
@@ -658,6 +667,7 @@ func getHooksIn(
 	hooksDir string,
 	addInternalIgnores bool,
 	hookNamespace string,
+	readNamespace bool,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) (batches hooks.HookPrioList) {
 
@@ -674,11 +684,19 @@ func getHooksIn(
 		return trusted, sha
 	}
 
-	var internalIgnores hooks.HookPatterns
+	// Determine namespace
+	if readNamespace {
+		ns, err := hooks.GetHooksNamespace(hooksDir)
+		log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
+		if strs.IsNotEmpty(ns) {
+			hookNamespace = ns
+		}
+	}
 
+	var internalIgnores hooks.HookPatterns
 	if addInternalIgnores {
 		var e error
-		internalIgnores, e = hooks.GetHookPatternsHooksDir(hooksDir, []string{settings.HookName})
+		internalIgnores, e = hooks.GetHookPatternsHooksDir(hooksDir, []string{settings.HookName}, hookNamespace)
 		log.AssertNoErrorPanicF(e, "Could not get worktree ignores in '%s'.", hooksDir)
 	}
 
@@ -686,13 +704,6 @@ func getHooksIn(
 		ignored, _ := ignores.IsIgnored(namespacePath)
 
 		return ignored || internalIgnores.Matches(namespacePath)
-	}
-
-	// Determine namespace
-	ns, err := hooks.GetHooksNamespace(hooksDir)
-	log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
-	if strs.IsNotEmpty(ns) {
-		hookNamespace = ns
 	}
 
 	allHooks, maxBatches, err := hooks.GetAllHooksIn(
@@ -771,7 +782,7 @@ func getHooksInShared(settings *HookSettings,
 	dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir)
 	if cm.IsDirectory(dir) {
 		return getHooksIn(settings, uiSettings,
-			shRepo.RepositoryDir, dir, true, hookNamespace, ignores, checksums)
+			shRepo.RepositoryDir, dir, true, hookNamespace, true, ignores, checksums)
 	}
 
 	// 2. priority is the normal '.githooks' folder.
@@ -779,12 +790,12 @@ func getHooksInShared(settings *HookSettings,
 	dir = hooks.GetGithooksDir(shRepo.RepositoryDir)
 	if cm.IsDirectory(dir) {
 		return getHooksIn(settings, uiSettings,
-			shRepo.RepositoryDir, dir, true, hookNamespace, ignores, checksums)
+			shRepo.RepositoryDir, dir, true, hookNamespace, true, ignores, checksums)
 	}
 
 	// 3. Fallback to the whole repository.
 	return getHooksIn(settings, uiSettings,
-		shRepo.RepositoryDir, shRepo.RepositoryDir, true, hookNamespace, ignores, checksums)
+		shRepo.RepositoryDir, shRepo.RepositoryDir, true, hookNamespace, true, ignores, checksums)
 }
 
 func logBatches(title string, hooks hooks.HookPrioList) {

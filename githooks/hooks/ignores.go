@@ -2,7 +2,6 @@ package hooks
 
 import (
 	"path"
-	"path/filepath"
 	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
@@ -37,8 +36,8 @@ type HookPatterns struct {
 
 // RepoIgnorePatterns is the list of possible ignore patterns in a repository.
 type RepoIgnorePatterns struct {
-	HooksDir HookPatterns // Ignores set by `.ignore` file in the hooks directory of the repository.
-	User     HookPatterns // Ignores set by the `.ignore` file in the Git directory of the repository.
+	HooksDir HookPatterns // Ignores set by `.ignore.yaml` file in the hooks directory of the repository.
+	User     HookPatterns // Ignores set by the `.ignore.yaml` file in the Git directory of the repository.
 }
 
 // CombineIgnorePatterns combines two ignore patterns.
@@ -134,6 +133,39 @@ func (h *HookPatterns) RemoveAll() (removed int) {
 	return
 }
 
+// MakeRelativePatternsAbsolute makes all relative patterns (not starting with `ns:`) absolute
+// by prepending `ns:<hookNamespace>/<rootPath>/`.
+func (h *HookPatterns) MakeRelativePatternsAbsolute(hookNamespace string, rootPath string) {
+
+	cm.DebugAssertF(strs.IsNotEmpty(hookNamespace), "Namespace must not be empty in any case!")
+
+	replace := func(strs []string) {
+		var invertPref string
+		for i := range strs {
+
+			startIdx, inverted := checkPatternInversion(strs[i])
+			if inverted {
+				invertPref = patternInversionPrefix
+			} else {
+				invertPref = ""
+			}
+
+			if !strings.HasPrefix(strs[i][startIdx:], NamespacePrefix) {
+				// patterns like "**/*/pre-commit/*"
+				strs[i] = invertPref + path.Clean(path.Join(NamespacePrefix+hookNamespace, rootPath, strs[i][startIdx:]))
+			} else if strings.HasPrefix(strs[i][startIdx:], NamespacePrefix+NamespaceRepositoryHook) {
+				// "ns:gh-self..." prefixes are directly replaced by the current namespace.
+				strs[i] = invertPref + NamespacePrefix +
+					hookNamespace + strings.TrimPrefix(strs[i][startIdx:], NamespacePrefix+NamespaceRepositoryHook)
+			}
+
+		}
+	}
+
+	replace(h.Patterns)
+	replace(h.NamespacePaths)
+}
+
 // Reserve reserves 'nPatterns'.
 func (h *HookPatterns) Reserve(nPatterns int) {
 	if h.Patterns == nil {
@@ -145,16 +177,29 @@ func (h *HookPatterns) Reserve(nPatterns int) {
 	}
 }
 
-// checkPatternInversion checks a pattern for inversion prefix "!".
-func checkPatternInversion(p string) (string, bool) {
+const patternInversionPrefix = "!"
 
-	if strings.HasPrefix(p, "!") {
-		return p[1:], true
-	} else if strings.HasPrefix(p, `\!`) {
-		return p[1:], false
+// hasInvertPrefix checks a pattern for an inversion prefix "!".
+func hasInvertPrefix(p string) bool {
+	return strings.HasPrefix(p, patternInversionPrefix)
+}
+
+// hasInvertPrefixEscaped checks a pattern for an escaped inversion prefix "\!".
+func hasInvertPrefixEscaped(p string) bool {
+	return strings.HasPrefix(p, `\`+patternInversionPrefix)
+}
+
+// checkPatternInversion checks a pattern for inversion prefix "!" and returns
+// the start index where the pattern starts and if its an inverted pattern or not.
+func checkPatternInversion(p string) (int, bool) {
+
+	if hasInvertPrefix(p) {
+		return 1, true
+	} else if hasInvertPrefixEscaped(p) {
+		return 1, false
 	}
 
-	return p, false
+	return 0, false
 }
 
 // Matches returns true if `namespacePath` matches any of the patterns and otherwise `false`.
@@ -166,7 +211,7 @@ func (h *HookPatterns) Matches(namespacePath string) (matched bool) {
 		cm.DebugAssert(!strings.Contains(namespacePath, `\`),
 			"Only forward slashes")
 
-		rawP, inverted := checkPatternInversion(p)
+		startIdx, inverted := checkPatternInversion(p)
 
 		// If we currently have a match, only an inversion can revert this...
 		// so skip until we find an inversion.
@@ -174,7 +219,7 @@ func (h *HookPatterns) Matches(namespacePath string) (matched bool) {
 			continue
 		}
 
-		isMatch, err := cm.GlobMatch(rawP, namespacePath)
+		isMatch, err := cm.GlobMatch(p[startIdx:], namespacePath)
 		cm.DebugAssertNoErrorF(err, "List contains malformed pattern '%s'", p)
 		if err != nil {
 			continue
@@ -211,33 +256,48 @@ func (h *RepoIgnorePatterns) IsIgnored(namespacePath string) (bool, bool) {
 	return false, false
 }
 
-// GetHookIngoreFileHooksDir gets ignores files inside the hook directory.
+// GetHookIgnoreFileHooksDir gets ignores files inside the hook directory.
 // The `hookName` can be empty.
-func GetHookIngoreFileHooksDir(repoHooksDir string, hookName string) string {
-	return path.Join(repoHooksDir, hookName, ".ignore.yaml")
+func GetHookIgnoreFileHooksDir(hooksDir string, hookName string) string {
+	return path.Join(hooksDir, hookName, ".ignore.yaml")
 }
 
 // GetHookIgnoreFilesHooksDir gets ignores files inside the hook directory.
-func GetHookIgnoreFilesHooksDir(repoHooksDir string, hookNames []string) (files []string) {
+func GetHookIgnoreFilesHooksDir(hooksDir string, hookNames []string) (files []string) {
 	files = make([]string, 0, 1+len(hookNames))
 
-	files = append(files, GetHookIngoreFileHooksDir(repoHooksDir, ""))
 	for _, hookName := range hookNames {
-		files = append(files, GetHookIngoreFileHooksDir(repoHooksDir, hookName))
+		files = append(files, GetHookIgnoreFileHooksDir(hooksDir, hookName))
 	}
 
 	return
 }
 
 // GetHookPatternsHooksDir gets all ignored hooks in the hook directory.
-func GetHookPatternsHooksDir(repoHooksDir string, hookNames []string) (patterns HookPatterns, err error) {
-	files := GetHookIgnoreFilesHooksDir(repoHooksDir, hookNames)
+func GetHookPatternsHooksDir(
+	hooksDir string,
+	hookNames []string,
+	hookNamespace string) (patterns HookPatterns, err error) {
+
+	files := GetHookIgnoreFilesHooksDir(hooksDir, hookNames)
 	patterns.Reserve(2 * len(files)) // nolint: gomnd
 
-	for _, file := range files {
+	mainFile := GetHookIgnoreFileHooksDir(hooksDir, "")
+	if cm.IsFile(mainFile) {
+		ps, e := LoadIgnorePatterns(mainFile)
+		err = cm.CombineErrors(err, e)
+
+		ps.MakeRelativePatternsAbsolute(hookNamespace, "")
+		patterns.Add(&ps)
+	}
+
+	for _, hookName := range hookNames {
+		file := GetHookIgnoreFileHooksDir(hooksDir, hookName)
 		if cm.IsFile(file) {
 			ps, e := LoadIgnorePatterns(file)
 			err = cm.CombineErrors(err, e)
+
+			ps.MakeRelativePatternsAbsolute(hookNamespace, hookName)
 			patterns.Add(&ps)
 		}
 	}
@@ -252,14 +312,15 @@ func GetHookIgnoreFileGitDir(gitDir string) string {
 }
 
 // getHookPatternsGitDir gets all ignored hooks in the current Git directory.
-func getHookPatternsGitDir(gitDir string) (HookPatterns, error) {
+func getHookPatternsGitDir(gitDir string, hookeNamespace string) (ps HookPatterns, err error) {
 	file := GetHookIgnoreFileGitDir(gitDir)
-	exists, err := cm.IsPathExisting(file)
-	if exists {
-		return LoadIgnorePatterns(file)
+
+	if cm.IsFile(file) {
+		ps, err = LoadIgnorePatterns(file)
+		ps.MakeRelativePatternsAbsolute(hookeNamespace, "")
 	}
 
-	return HookPatterns{}, err
+	return
 }
 
 // StoreHookPatternsGitDir stores all ignored hooks in the worktrees Git directory `gitDirWorktree`.
@@ -326,35 +387,22 @@ func StoreIgnorePatterns(patterns HookPatterns, file string) (err error) {
 // GetIgnorePatterns loads all ignore patterns in the worktree's hooks dir and
 // also in the worktrees Git directory.
 func GetIgnorePatterns(
-	repoHooksDir string,
+	hooksDir string,
 	gitDirWorktree string,
-	hookNames []string) (patt RepoIgnorePatterns, err error) {
+	hookNames []string,
+	hookNamespace string) (patt RepoIgnorePatterns, err error) {
 
 	var e error
 
-	patt.HooksDir, e = GetHookPatternsHooksDir(repoHooksDir, hookNames)
+	patt.HooksDir, e = GetHookPatternsHooksDir(hooksDir, hookNames, hookNamespace)
 	if e != nil {
 		err = cm.CombineErrors(cm.Error("Could not get worktree ignore patterns."), e)
 	}
 
-	patt.User, e = getHookPatternsGitDir(gitDirWorktree)
+	patt.User, e = getHookPatternsGitDir(gitDirWorktree, hookNamespace)
 	if e != nil {
 		err = cm.CombineErrors(err, cm.Error("Could not get user ignore patterns."), e)
 	}
 
 	return
-}
-
-// MakeNamespacePath makes `path` relative to `basePath` and adds `namespace/` as prefix if not empty.
-func MakeNamespacePath(basePath string, path string, namespace string) (string, error) {
-	s, err := filepath.Rel(basePath, path)
-	if err != nil {
-		return path, err
-	}
-
-	if namespace != "" {
-		return namespace + "/" + filepath.ToSlash(s), nil
-	}
-
-	return filepath.ToSlash(s), nil
 }

@@ -146,6 +146,10 @@ func GetAllHooksIn(
 		cm.DebugAssertF(strings.TrimPrefix(hookPath, prefix) != hookPath,
 			"Prefix could not be removed '%s', '%s'.", prefix, hookPath)
 
+		if strs.IsNotEmpty(hookNamespace) {
+			hookNamespace = NamespacePrefix + hookNamespace
+		}
+
 		namespacedPath := path.Join(hookNamespace, strings.TrimPrefix(hookPath, prefix))
 		ignored := isIgnored(namespacedPath)
 

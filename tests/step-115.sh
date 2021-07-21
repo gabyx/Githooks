@@ -37,7 +37,7 @@ if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' | grep 'shared:repo' | 
     exit 5
 fi
 
-"$GH_INSTALL_BIN_DIR/cli" ignore add --pattern 'mygagahooks/**/test-shared' ||
+"$GH_INSTALL_BIN_DIR/cli" ignore add --pattern 'ns:mygagahooks/**/test-shared' ||
     exit 6
 
 if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' |
@@ -46,7 +46,7 @@ if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' |
     exit 7
 fi
 
-"$GH_INSTALL_BIN_DIR/cli" ignore add --pattern '!**/test-shared' ||
+"$GH_INSTALL_BIN_DIR/cli" ignore add --pattern '!ns:*/**/test-shared' ||
     exit 8
 
 if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' |
@@ -55,7 +55,7 @@ if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' |
     exit 7
 fi
 
-"$GH_INSTALL_BIN_DIR/cli" trust hooks --pattern '**/test-shared' ||
+"$GH_INSTALL_BIN_DIR/cli" trust hooks --pattern 'ns:my*hooks/**/test-shared' ||
     exit 10
 
 if ! "$GH_INSTALL_BIN_DIR/cli" list | grep 'test-shared' |
