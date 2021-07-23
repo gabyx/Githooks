@@ -59,10 +59,10 @@ func PromptExistingRepos(
 
 		var questionPrompt []string
 		if hasSearchDir {
-			questionPrompt = []string{"(Yes, no)", "Y/n"}
+			questionPrompt = []string{"(Yes/no)", "Y/n"}
 		} else {
 			searchDir = homeDir
-			questionPrompt = []string{"(yes, No)", "y/N"}
+			questionPrompt = []string{"(yes/No)", "y/N"}
 		}
 
 		answer, err := promptCtx.ShowOptions(

@@ -62,12 +62,21 @@ RUN echo "Commit build v9.9.1 to repo (no-skip)..." && \\
     git commit -a --allow-empty -m "Version 9.9.1" -m "Update-NoSkip: true" >/dev/null 2>&1 && \\
     git tag -f "v9.9.1"
 
-# Commit for to v9.9.2 (not used for update).
+# Commit for to v9.9.2 (not used for update tests).
 #################################
 RUN echo "Commit build v9.9.2 to repo ..." && \\
     cd "\$GH_TEST_REPO" && \\
-    git commit -a --allow-empty -m "Version 9.9.2" >/dev/null 2>&1 && \\
+    git commit -a --allow-empty -m "Version 9.9.2" \
+        -m "Update-Info: Bug fixes and improvements." >/dev/null 2>&1 && \\
     git tag -f "v9.9.2"
+
+# Commit for to v10.1.1 (build not used).
+#################################
+RUN echo "Commit build v10.1.1 to repo ..." && \\
+    cd "\$GH_TEST_REPO" && \\
+    git commit -a --allow-empty -m "Version v10.1.1" \
+        -m "Update-Info: Breaking changes for v10.x.x, read the change log." >/dev/null 2>&1 && \\
+    git tag -f "v10.1.1"
 
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
         sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\

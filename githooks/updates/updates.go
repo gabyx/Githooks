@@ -30,7 +30,7 @@ type ReleaseStatus struct {
 	UpdateCommitSHA   string           // The determined update SHA (always <= RemoteCommitSHA).
 	UpdateTag         string           // The update tag.
 	UpdateVersion     *version.Version // The update version.
-	UpdateInfo        string           // The update info read from the commit.
+	UpdateInfo        []string         // The update info read from the commit.
 
 	Branch       string
 	RemoteBranch string
@@ -70,14 +70,14 @@ func ResetCloneBranch() error {
 	return git.Ctx().UnsetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 }
 
-var updateInfoTrailerRe = regexp.MustCompile(`Update-Info:\s+(.*)`)
-var unskipTrailerRe = regexp.MustCompile(`Update-NoSkip:\s+true`)
+var updateInfoTrailerRe = regexp.MustCompile(`(?m)^Update-Info: *(.*)`)
+var unskipTrailerRe = regexp.MustCompile(`(?m)^Update-NoSkip: *true`)
 
 func getNewUpdateCommit(
 	gitx *git.Context,
 	firstSHA string,
 	lastSHA string,
-	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, infoF string, err error) {
+	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
 
 	// Get all commits in (firstSHA, lastSHA]
 	commits, err := gitx.GetCommits(firstSHA, lastSHA)
@@ -118,10 +118,10 @@ func getNewUpdateCommit(
 		tagF = tag
 		versionF = version
 
-		infoF = ""
+		// Add update info to the list.
 		info := updateInfoTrailerRe.FindStringSubmatch(mess)
 		if info != nil {
-			infoF = strings.TrimSpace(info[0])
+			infoF = append(infoF, strs.Fmt("%s : ", version.String())+strings.TrimSpace(info[1]))
 		}
 
 		if unskipTrailerRe.MatchString(mess) {
@@ -359,7 +359,7 @@ func getStatus(
 		return
 	}
 
-	updateInfo := ""
+	var updateInfo []string
 	updateCommit := ""
 	updateTag := ""
 	var updateVersion *version.Version
@@ -515,6 +515,15 @@ func RunUpdate(
 	return
 }
 
+// formatUpdateInfo formats all update infos.
+func formatUpdateInfo(updateInfo []string) string {
+	return strs.Fmt("\nUpdate Info:\n%s",
+		strings.Join(strs.Map(updateInfo,
+			func(s string) string {
+				return "  - " + strings.ReplaceAll(s, "\n", "\n    ")
+			}), "\n"))
+}
+
 // DefaultAcceptUpdateCallback creates a default accept update callback
 // which prompts the user.
 func DefaultAcceptUpdateCallback(
@@ -534,15 +543,16 @@ func DefaultAcceptUpdateCallback(
 
 		isMajorUpdate := build.GetBuildVersion().Segments()[0] < status.UpdateVersion.Segments()[0]
 
+		promptHint := "(Yes/no)"
 		promptDefault := "Y/n"
 		if isMajorUpdate {
 			versionText += " (Major Update)"
+			promptHint = "(yes/No)"
 			promptDefault = "y/N"
 		}
 
-		if strs.IsNotEmpty(status.UpdateInfo) {
-			versionText += "\n\n" +
-				strs.Fmt("Update Info: %s", strings.ReplaceAll(status.UpdateInfo, "\n", "\n   "))
+		if status.UpdateInfo != nil {
+			versionText += formatUpdateInfo(status.UpdateInfo)
 		}
 
 		if promptCtx != nil {
@@ -551,7 +561,7 @@ func DefaultAcceptUpdateCallback(
 				"Would you like to install it now?"
 
 			answer, err := promptCtx.ShowOptions(question,
-				"(Yes, no)",
+				promptHint,
 				promptDefault,
 				"Yes", "No")
 			log.AssertNoErrorF(err, "Could not show prompt.")
@@ -564,7 +574,7 @@ func DefaultAcceptUpdateCallback(
 		} else {
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
-			if acceptIfNoPrompt && !isMajorUpdate {
+			if acceptIfNoPrompt {
 
 				return true
 			}
