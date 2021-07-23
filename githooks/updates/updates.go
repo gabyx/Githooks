@@ -2,6 +2,7 @@ package updates
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/gabyx/githooks/githooks/build"
 	cm "github.com/gabyx/githooks/githooks/common"
@@ -26,9 +27,10 @@ type ReleaseStatus struct {
 	RemoteCommitSHA string // Remote head on the remote branch.
 
 	IsUpdateAvailable bool
-	UpdateCommitSHA   string // The determined update SHA (always <= RemoteCommitSHA).
-	UpdateTag         string
-	UpdateVersion     *version.Version
+	UpdateCommitSHA   string           // The determined update SHA (always <= RemoteCommitSHA).
+	UpdateTag         string           // The update tag.
+	UpdateVersion     *version.Version // The update version.
+	UpdateInfo        string           // The update info read from the commit.
 
 	Branch       string
 	RemoteBranch string
@@ -68,13 +70,14 @@ func ResetCloneBranch() error {
 	return git.Ctx().UnsetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 }
 
+var updateInfoTrailerRe = regexp.MustCompile(`Update-Info:\s+(.*)`)
 var unskipTrailerRe = regexp.MustCompile(`Update-NoSkip:\s+true`)
 
 func getNewUpdateCommit(
 	gitx *git.Context,
 	firstSHA string,
 	lastSHA string,
-	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, err error) {
+	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, infoF string, err error) {
 
 	// Get all commits in (firstSHA, lastSHA]
 	commits, err := gitx.GetCommits(firstSHA, lastSHA)
@@ -114,6 +117,12 @@ func getNewUpdateCommit(
 		commitF = commit
 		tagF = tag
 		versionF = version
+
+		infoF = ""
+		info := updateInfoTrailerRe.FindStringSubmatch(mess)
+		if info != nil {
+			infoF = strings.TrimSpace(info[0])
+		}
 
 		if unskipTrailerRe.MatchString(mess) {
 			// We stop at this commit since this update cannot be skipped!
@@ -350,6 +359,7 @@ func getStatus(
 		return
 	}
 
+	updateInfo := ""
 	updateCommit := ""
 	updateTag := ""
 	var updateVersion *version.Version
@@ -359,7 +369,7 @@ func getStatus(
 		// Get the latest update commit in the range (localSHA, remoteSHA]
 		// - Skip prerelease versions
 		// - also never skip annotated (Git trailers) "non-skip" versions.
-		updateCommit, updateTag, updateVersion, err =
+		updateCommit, updateTag, updateVersion, updateInfo, err =
 			getNewUpdateCommit(gitx, localSHA, remoteSHA, skipPrerelease)
 
 		if err != nil {
@@ -380,6 +390,7 @@ func getStatus(
 		UpdateVersion:     updateVersion,
 		UpdateCommitSHA:   updateCommit,
 		UpdateTag:         updateTag,
+		UpdateInfo:        updateInfo,
 
 		Branch:       branch,
 		RemoteBranch: remoteBranch}
@@ -516,10 +527,23 @@ func DefaultAcceptUpdateCallback(
 		cm.DebugAssert(status.IsUpdateAvailable, "Wrong input.")
 
 		versionText := strs.Fmt(
-			"Current version: '%s'\n"+
-				"New version: '%s'",
+			"Current Version: '%s'\n"+
+				"New Version: '%s'",
 			build.GetBuildVersion(),
 			status.UpdateVersion.String())
+
+		isMajorUpdate := build.GetBuildVersion().Segments()[0] < status.UpdateVersion.Segments()[0]
+
+		promptDefault := "Y/n"
+		if isMajorUpdate {
+			versionText += " (Major Update)"
+			promptDefault = "y/N"
+		}
+
+		if strs.IsNotEmpty(status.UpdateInfo) {
+			versionText += "\n\n" +
+				strs.Fmt("Update Info: %s", strings.ReplaceAll(status.UpdateInfo, "\n", "\n   "))
+		}
 
 		if promptCtx != nil {
 			question := "There is a new Githooks update available:\n" +
@@ -528,7 +552,7 @@ func DefaultAcceptUpdateCallback(
 
 			answer, err := promptCtx.ShowOptions(question,
 				"(Yes, no)",
-				"Y/n",
+				promptDefault,
 				"Yes", "No")
 			log.AssertNoErrorF(err, "Could not show prompt.")
 
@@ -540,7 +564,7 @@ func DefaultAcceptUpdateCallback(
 		} else {
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
-			if acceptIfNoPrompt {
+			if acceptIfNoPrompt && !isMajorUpdate {
 
 				return true
 			}
