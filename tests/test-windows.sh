@@ -56,7 +56,8 @@ ADD .githooks/README.md "$GH_TEST_REPO/.githooks/README.md"
 ADD examples "$GH_TEST_REPO/examples"
 ADD tests "$GH_TESTS"
 
-RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/test-windows-setup.sh"
+RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
+
 WORKDIR C:/githooks-tests/tests
 EOF
 

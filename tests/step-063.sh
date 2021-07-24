@@ -71,7 +71,7 @@ fi
 
 if ! echo "$out" | grep -q "Update Info:" ||
     ! echo "$out" | grep -q "Bug fixes and improvements." ||
-    ! echo "$out" | grep -q "Breaking changes for v10.x.x, read the change log."; then
+    ! echo "$out" | grep -q "Breaking changes, read the change log."; then
     echo "! Expected update info to be present in output."
     echo "$out"
     exit 1
