@@ -16,9 +16,10 @@ type HookSettings struct {
 	GitDirWorktree     string         // Git directory. (for worktrees this points to the worktree Git dir).
 	InstallDir         string         // Install directory.
 
-	HookPath string // Absolute path of the hook executing this runner.
-	HookName string // Name of the hook.
-	HookDir  string // Directory of the hook.
+	HookPath      string // Absolute path of the hook executing this runner.
+	HookName      string // Name of the hook.
+	HookDir       string // Directory of the hook.
+	HookNamespace string // Namespace of this repositorie's Githooks.
 
 	IsRepoTrusted              bool // If the repository is a trusted repository.
 	SkipNonExistingSharedHooks bool // If Githooks should skip non-existing shared hooks.

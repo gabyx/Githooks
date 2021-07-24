@@ -77,6 +77,8 @@ Also it searches for hooks in configured shared hook repositories.
 - [Tests and Debugging](#tests-and-debugging)
   - [Debugging in the Dev Container](#debugging-in-the-dev-container)
   - [Todos:](#todos)
+- [Changelog](#changelog)
+  - [Version 2.0.0](#version-200)
 - [FAQ](#faq)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
@@ -88,33 +90,36 @@ Also it searches for hooks in configured shared hook repositories.
 
 ## Layout and Options
 
-Take this snippet of a project layout as an example:
+Take this snippet of a Git repository layout as an example:
 
-```
+```bash
 /
-└── .githooks/
-    └── commit-msg/
-        ├── validate
-        └── add-text
-    └── pre-commit/
-        ├── 01-validate
-        ├── 02-lint
-        ├── 03-test.yaml
-        ├── docs.md
-        └── final/
-          ├── 01-validate
-          └── 02-upload
-        └── .ignore.yaml
-    └── post-checkout
-        ├── .all-parallel
-        └── ...
-    └── ...
-    └── .ignore.yaml
-    └── .shared.yaml
-    └── .lfs-required
-├── README.md
+├── .githooks/
+│    ├── commit-msg/          # All commit-msg hooks.
+│    │    ├── validate        # Normal hook script.
+│    │    └── add-text        # Normal hook script.
+│    │
+│    ├── pre-commit/          # All pre-commit hooks.
+│    │    ├── .ignore.yaml    # Ignores relative to 'pre-commit' folder.
+│    │    ├── 01-validate     # Normal hook script.
+│    │    ├── 02-lint         # Normal hook script.
+│    │    ├── 03-test.yaml    # Hook run configuration.
+│    │    ├── docs.md         # Ignored in '.ignore.yaml'.
+│    │    └── final/          # Batch folder 'final' which runs all in parallel.
+│    │        ├── 01-validate # Normal hook script.
+│    │        └── 02-upload   # Normal hook script.
+│    │
+│    ├── post-checkout/       # All post-checkout hooks.
+│    │   ├── .all-parallel    # All hooks in this folder run in parallel.
+│    │   └── ...
+│    ├── ...
+│    ├── .ignore.yaml         # Main ignores.
+│    ├── .shared.yaml         # Shared hook configuration.
+│    └── .lfs-required        # LFS is required.
 └── ...
 ```
+
+
 
 All hooks to be executed live under the `.githooks` top-level folder, that should be checked into the repository.
 Inside, we can have directories with the name of the hook (like `commit-msg` and `pre-commit` above),
@@ -379,8 +384,14 @@ Each of these directories can be of the same format as the normal `.githooks` fo
 
 ### Shared Repository Namespace
 
-A shared repository can optionally have a namespace associated with it. The name can be stored in a file `.namespace` in any possible hooks directory `<hooksDir>` of the shared repository, see [layout](#layout-of-shared-hook-repositories). The namespace
-comes into play when ignoring/disabling certain hooks. See [ignoring hooks](#ignoring-hooks-and-files).
+A shared repository can optionally have a namespace associated with it. The name can be stored in a file `.namespace` in any possible hooks directory `<hooksDir>` of the shared repository, see [layout](#layout-of-shared-hook-repositories).
+The namespace comes into play when ignoring/disabling certain hooks. See [ignoring hooks](#ignoring-hooks-and-files).
+The namespace name must not contain white spaces (`\s`) or slashes `/`.
+
+The following namespaces names are reserved interally:
+
+  - `gh-self` : for hooks in the repository where Githooks runs (if no `.namespace` is existing).
+  - `gh-self-repl` : for original Git hooks which were replaced by Githooks during install.
 
 ## Ignoring Hooks and Files
 
@@ -390,19 +401,23 @@ The `.ignore.yaml` (see [specs](#yaml-specifications)) files allow excluding fil
 - hooks from beeing run.
 
 You can ignore executing all sorts of hooks per Git repository by specifying **patterns**
-or **paths** which match against a hook's (file's) *namespace path*.
+or explicit **paths** which match against a hook's (file's) *namespace path*.
 
 Each hook either in the current repository `<repoPath>/.githooks/...` or inside a shared hooks
 repository has a so called *namespace path*.
-A *namespace path* consists of the *name of the hook* prefixed by a *namespace* , e.g. `<namespacePath> := <namespace>/<relPath> = 'core-hooks/pre-commit/check-numbers` where
-`<relPath> = pre-commit/check-numbers` is the relative path to the hook.
-Each shared repository can provide its own [namespace](#shared-repository-namespace).
-A [namespace](#shared-repository-namespace) will be used only when the hook belongs to a shared hook repository and will have a default unique value if it is not defined.
 
- All ignore entries in `.ignore.yaml` (patterns or paths) will match against these
+A *namespace path* consists of the *name of the hook* prefixed by a *namespace* , e.g. :
+
+```
+  <namespacePath> := ns:<namespace>/<relPath> = "ns:core-hooks/pre-commit/check-numbers.py"
+```
+
+where `<relPath> = pre-commit/check-numbers.py` is the relative path to the hook.
+Each shared repository can provide its own [namespace](#shared-repository-namespace).
+
+A [namespace](#shared-repository-namespace) will be used when the hook belongs to a shared hook repository and will have a default unique value if it is not defined. You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md)
+in the current repository. All ignore entries in `.ignore.yaml` (patterns or paths) will match against these
 *namespace paths*.
-You can inspect all *namespace paths* by inspecting `ns-path:` in the output of [git hooks list](docs/cli/git_hooks_list.md)
-in the current repository.
 
 Disabling works like:
 
@@ -410,15 +425,20 @@ Disabling works like:
 # Disable certain hooks by a pattern in this repository:
 # User ignore pattern stored in `.git/.githooks.ignore.yaml`:
 $ git hooks ignore add --pattern "pre-commit/**" # Store: `.git/.githooks.ignore.yaml`:
+# or stored inside the repository:
+$ git hooks ignore add --repository --pattern "pre-commit/**" # Store: `.githooks/.ignore.yaml`:
 
 # Disable certain shared hooks (with namespace 'my-shared-super-hooks')
 # by a glob pattern in this repository:
-$ git hooks ignore add --pattern "my-shared-super-hooks/pre-commit/**"
+$ git hooks ignore add --repository --pattern "my-shared-super-hooks://pre-commit/**"
 ```
 
-In the above [example](#layout-and-options]), one of the `.ignore.yaml` files should contain a glob pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file. Patterns can contain double star syntax to match multiple directories, e.g. `**/*.txt` instead of `*.txt`.
+In the above [example](#layout-and-options]), one of the `.ignore.yaml` files should contain a glob
+pattern `**/*.md` to exclude the `pre-commit/docs.md` Markdown file.
+Patterns can contain double star syntax to match multiple directories, e.g. `**/*.txt` instead of `*.txt`.
 
-The main `<repoPath>/<hookDir>/.ignore.yaml` file applies to all hooks. Any additional `<repoPath>/<hookDir>/<hookName>/.ignore.yaml` file inside `<hookDir>` will be accumulated to the main file. You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on the pattern syntax.
+The main ignore file `<repoPath>/<hookDir>/.ignore.yaml` applies to all hooks. Any additional `<repoPath>/<hookDir>/<hookName>/.ignore.yaml` file inside `<hookDir>` will be accumulated to the main file and patterns not starting with `ns:` **are made relative to the  folder `<hookName>`**.
+You can also manage `.ignore.yaml` files using [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult this command documentation for futher information on the pattern syntax.
 
 ## Trusting Hooks
 
@@ -858,6 +878,12 @@ which will start the `delve` debugger headless as a server in a terminal. You ca
   - Test: `githooks.disableSharedHooksUpdate`.
   - Finish deploy settings implementation for Gitea and sorts.
 
+## Changelog
+
+### Version 2.0.0
+
+See [braking change documention](docs/changes/Braking-Changes-v2.0.0.md).
+
 ## FAQ
 
 - **Shell on Windows shows weird characters:**
@@ -881,7 +907,6 @@ When you use Githooks and you would like to say thank you for its development an
 I am happy to receive any donation which will be distributed equally among all contributors.
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6S6BJL4GSMSG4)
-
 
 ## License
 

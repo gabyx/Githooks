@@ -25,7 +25,7 @@ type ignoreShowOptions struct {
 	OnlyExisting bool
 }
 
-func ignoreLoadIgnoreFile(
+func loadIgnoreFile(
 	ctx *ccm.CmdContext,
 	ignAct *ignoreActionOptions,
 	repoRoot string,
@@ -39,7 +39,7 @@ func ignoreLoadIgnoreFile(
 			"Given hook name '%s' is not any of the hook names:\n%s", ignAct.HookName,
 			ccm.GetFormattedHookList(""))
 
-		file = hooks.GetHookIngoreFileHooksDir(hooks.GetGithooksDir(repoRoot), ignAct.HookName)
+		file = hooks.GetHookIgnoreFileHooksDir(hooks.GetGithooksDir(repoRoot), ignAct.HookName)
 	} else {
 		file = hooks.GetHookIgnoreFileGitDir(gitDir)
 	}
@@ -59,7 +59,7 @@ func runIgnoreAddPattern(
 	remove bool, patterns *hooks.HookPatterns) {
 
 	repoRoot, _, gitDirWorktree := ccm.AssertRepoRoot(ctx)
-	file, ps := ignoreLoadIgnoreFile(ctx, ignAct, repoRoot, gitDirWorktree)
+	file, ps := loadIgnoreFile(ctx, ignAct, repoRoot, gitDirWorktree)
 
 	var text string
 
@@ -126,8 +126,11 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 	}
 
 	if ignShow.Repository {
+		root := hooks.GetGithooksDir(repoRoot)
+		print(hooks.GetHookIgnoreFileHooksDir(root, ""), "repo")
+
 		for _, file := range hooks.GetHookIgnoreFilesHooksDir(
-			hooks.GetGithooksDir(repoRoot),
+			root,
 			hooks.ManagedHookNames) {
 
 			print(file, "repo")
@@ -166,7 +169,7 @@ see '<ns-path>' in the output of 'git hooks list'.`
 const NamespaceHelpText = `#### Hook Namespace Path
 
 The namespaced path of a hook file consists of
-'<namespacePath>' ≔ '<namespace>/<relPath>', where '<relPath>' is the
+'<namespacePath>' ≔ 'ns:<namespace>/<relPath>', where '<relPath>' is the
 relative path of the hook with respect to a base directory
 '<hooksDir>'.
 Note that a namespace path '<namespacePath>' always contains
@@ -179,19 +182,19 @@ For local repository hooks in '<repo>/.githooks':
 
 - '<hooksDir>'  ≔ '<repo>/.githooks'
 - '<namespace>' ≔ The first white-space trimmed line in the
-                   file '<hooksDir>/.namespace' or empty.
+                   file '<hooksDir>/.namespace' or 'ns:gh-self'.
 
 For shared repository hooks in '<sharedRepo>' with url '<url>':
 
 - '<hooksDir>'  ≔ '<sharedRepo>'
 - '<namespace>' ≔ The first white-space trimmed line in the
-                    file '<hooksDir>/.namespace' or the first 10 digits
-					of the SHA1 hash of '<url>'.
+                   file '<hooksDir>/.namespace' or the first 10 digits
+                   of the SHA1 hash of '<url>'.
 
 For previous replace hooks in '<repo>/.git/hooks/<hookName>.replaced.githook':
 
 - '<hooksDir>'  ≔ '<repo>/.git/hooks'
-- '<namespace>' ≔ 'hooks'`
+- '<namespace>' ≔ 'ns:gh-replaced'`
 
 // PatternsHelpText contains common used help text.
 const PatternsHelpText = `#### Glob Pattern Syntax
@@ -199,7 +202,11 @@ const PatternsHelpText = `#### Glob Pattern Syntax
 The glob pattern syntax supports the 'globstar' (double star) syntax
 in addition to the syntax in 'https://golang.org/pkg/path/filepath/#Match'.
 Also you can use negation with a prefix '!', where the '!' character is
-escaped by '\!'.`
+escaped by '\!'.
+Every pattern which does not start with the namespace suffix 'ns:'
+is automatically treated as a relative pattern to the location of
+
+`
 
 func addFlags(cmd *cobra.Command, patterns *hooks.HookPatterns) {
 	cmd.Flags().StringArrayVar(&patterns.Patterns, "pattern", nil,
