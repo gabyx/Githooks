@@ -383,7 +383,7 @@ func executeLFSHooks(settings *HookSettings) {
 func executeOldHook(
 	settings *HookSettings,
 	uiSettings *UISettings,
-	ingores *hooks.RepoIgnorePatterns,
+	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) {
 
 	// e.g. 'hooks/pre-commit.replaced.githook's
@@ -392,7 +392,7 @@ func executeOldHook(
 
 	// Old hook can only be ignored by user ignores...
 	isIgnored := func(namespacePath string) bool {
-		ignored, byUser := ingores.IsIgnored(namespacePath)
+		ignored, byUser := ignores.IsIgnored(namespacePath)
 
 		return ignored && byUser
 	}

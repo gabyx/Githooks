@@ -20,12 +20,12 @@ type hookIgnoreFile struct {
 	Version int `yaml:"version"`
 }
 
-// hookIngoreFileVersion is the ignore file version.
-var hookIngoreFileVersion = 1
+// hookIgnoreFileVersion is the ignore file version.
+var hookIgnoreFileVersion = 1
 
 // createHookIgnoreFile creates the data for the hook ignore file.
 func createHookIgnoreFile() hookIgnoreFile {
-	return hookIgnoreFile{Version: hookIngoreFileVersion}
+	return hookIgnoreFile{Version: hookIgnoreFileVersion}
 }
 
 // HookPatterns for matching the namespace path of hooks.
@@ -377,7 +377,7 @@ func IsHookPatternValid(pattern string) bool {
 func StoreIgnorePatterns(patterns HookPatterns, file string) (err error) {
 
 	data := hookIgnoreFile{
-		Version:        hookIngoreFileVersion,
+		Version:        hookIgnoreFileVersion,
 		Patterns:       strs.MakeUnique(patterns.Patterns),
 		NamespacePaths: strs.MakeUnique(patterns.NamespacePaths)}
 
