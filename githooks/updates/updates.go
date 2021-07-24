@@ -2,6 +2,7 @@ package updates
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/gabyx/githooks/githooks/build"
 	cm "github.com/gabyx/githooks/githooks/common"
@@ -26,9 +27,10 @@ type ReleaseStatus struct {
 	RemoteCommitSHA string // Remote head on the remote branch.
 
 	IsUpdateAvailable bool
-	UpdateCommitSHA   string // The determined update SHA (always <= RemoteCommitSHA).
-	UpdateTag         string
-	UpdateVersion     *version.Version
+	UpdateCommitSHA   string           // The determined update SHA (always <= RemoteCommitSHA).
+	UpdateTag         string           // The update tag.
+	UpdateVersion     *version.Version // The update version.
+	UpdateInfo        []string         // The update info read from the commit.
 
 	Branch       string
 	RemoteBranch string
@@ -68,13 +70,14 @@ func ResetCloneBranch() error {
 	return git.Ctx().UnsetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 }
 
-var unskipTrailerRe = regexp.MustCompile(`Update-NoSkip:\s+true`)
+var updateInfoTrailerRe = regexp.MustCompile(`(?m)^Update-Info: *(.*)`)
+var unskipTrailerRe = regexp.MustCompile(`(?m)^Update-NoSkip: *true`)
 
 func getNewUpdateCommit(
 	gitx *git.Context,
 	firstSHA string,
 	lastSHA string,
-	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, err error) {
+	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
 
 	// Get all commits in (firstSHA, lastSHA]
 	commits, err := gitx.GetCommits(firstSHA, lastSHA)
@@ -114,6 +117,12 @@ func getNewUpdateCommit(
 		commitF = commit
 		tagF = tag
 		versionF = version
+
+		// Add update info to the list.
+		info := updateInfoTrailerRe.FindStringSubmatch(mess)
+		if info != nil {
+			infoF = append(infoF, strs.Fmt("%s : ", version.String())+strings.TrimSpace(info[1]))
+		}
 
 		if unskipTrailerRe.MatchString(mess) {
 			// We stop at this commit since this update cannot be skipped!
@@ -350,6 +359,7 @@ func getStatus(
 		return
 	}
 
+	var updateInfo []string
 	updateCommit := ""
 	updateTag := ""
 	var updateVersion *version.Version
@@ -359,7 +369,7 @@ func getStatus(
 		// Get the latest update commit in the range (localSHA, remoteSHA]
 		// - Skip prerelease versions
 		// - also never skip annotated (Git trailers) "non-skip" versions.
-		updateCommit, updateTag, updateVersion, err =
+		updateCommit, updateTag, updateVersion, updateInfo, err =
 			getNewUpdateCommit(gitx, localSHA, remoteSHA, skipPrerelease)
 
 		if err != nil {
@@ -380,6 +390,7 @@ func getStatus(
 		UpdateVersion:     updateVersion,
 		UpdateCommitSHA:   updateCommit,
 		UpdateTag:         updateTag,
+		UpdateInfo:        updateInfo,
 
 		Branch:       branch,
 		RemoteBranch: remoteBranch}
@@ -504,6 +515,15 @@ func RunUpdate(
 	return
 }
 
+// formatUpdateInfo formats all update infos.
+func formatUpdateInfo(updateInfo []string) string {
+	return strs.Fmt("\nUpdate Info:\n%s",
+		strings.Join(strs.Map(updateInfo,
+			func(s string) string {
+				return "  - " + strings.ReplaceAll(s, "\n", "\n    ")
+			}), "\n"))
+}
+
 // DefaultAcceptUpdateCallback creates a default accept update callback
 // which prompts the user.
 func DefaultAcceptUpdateCallback(
@@ -516,10 +536,24 @@ func DefaultAcceptUpdateCallback(
 		cm.DebugAssert(status.IsUpdateAvailable, "Wrong input.")
 
 		versionText := strs.Fmt(
-			"Current version: '%s'\n"+
-				"New version: '%s'",
+			"Current Version: '%s'\n"+
+				"New Version: '%s'",
 			build.GetBuildVersion(),
 			status.UpdateVersion.String())
+
+		isMajorUpdate := build.GetBuildVersion().Segments()[0] < status.UpdateVersion.Segments()[0]
+
+		promptHint := "(Yes/no)"
+		promptDefault := "Y/n"
+		if isMajorUpdate {
+			versionText += " (Major Update)"
+			promptHint = "(yes/No)"
+			promptDefault = "y/N"
+		}
+
+		if status.UpdateInfo != nil {
+			versionText += formatUpdateInfo(status.UpdateInfo)
+		}
 
 		if promptCtx != nil {
 			question := "There is a new Githooks update available:\n" +
@@ -527,8 +561,8 @@ func DefaultAcceptUpdateCallback(
 				"Would you like to install it now?"
 
 			answer, err := promptCtx.ShowOptions(question,
-				"(Yes, no)",
-				"Y/n",
+				promptHint,
+				promptDefault,
 				"Yes", "No")
 			log.AssertNoErrorF(err, "Could not show prompt.")
 

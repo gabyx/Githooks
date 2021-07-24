@@ -47,7 +47,7 @@ type Context struct {
 	promptFmt     Formatter
 	errorFmt      Formatter
 	termOut       io.Writer
-	termIn        *os.File
+	termIn        io.Reader
 	termInScanner *bufio.Scanner
 
 	// Promp settings
@@ -59,7 +59,10 @@ type Context struct {
 // Close closes the prompt context.
 func (p *Context) Close() {
 	if p.termIn != nil {
-		p.termIn.Close()
+		t, ok := p.termIn.(*os.File)
+		if ok {
+			t.Close()
+		}
 	}
 }
 
@@ -72,7 +75,7 @@ func CreateContext(
 
 	var err error
 
-	var input *os.File
+	var input io.Reader
 	printAnswer := false
 	maxTries := uint(3) //nolint: gomnd
 

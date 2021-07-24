@@ -1,14 +1,17 @@
 #!/bin/sh
+
+set -e
+set -u
+
 git config --global user.email "githook@test.com" &&
     git config --global user.name "Githook Tests" &&
-    git config --global init.defaultBranch master &&
+    git config --global init.defaultBranch main &&
     git config --global core.autocrlf false || exit 1
 
-rm -rf "$GH_TEST_REPO/.git" || exit 1
-# We use the bin folder.
-sed -i -E 's/^bin//' "$GH_TEST_REPO/githooks/.gitignore" || exit 1
-
+rm -rf "$GH_TEST_REPO/.git" || true
 echo "Make test gitrepo to clone from ..." &&
+    # We use the bin folder
+    sed -i -E 's/^bin//' "$GH_TEST_REPO/githooks/.gitignore" &&
     cd "$GH_TEST_REPO" && git init >/dev/null 2>&1 &&
     git add . >/dev/null 2>&1 &&
     git commit -a -m "Before build" >/dev/null 2>&1 || exit 1
@@ -43,9 +46,18 @@ echo "Commit build v9.9.1 to repo (no-skip)..." &&
 #################################
 echo "Commit build v9.9.2 to repo ..." &&
     cd "$GH_TEST_REPO" &&
-    git commit -a --allow-empty -m "Version 9.9.2" >/dev/null 2>&1 &&
+    git commit -a --allow-empty -m "Version 9.9.2" \
+        -m "Update-Info: Bug fixes and improvements." >/dev/null 2>&1 &&
     git tag -f "v9.9.2"
 
-if [ -n "$EXTRA_INSTALL_ARGS" ]; then
+# Commit for to v10.1.1 (build not used).
+#################################
+echo "Commit build v10.1.1 to repo ..." &&
+    cd "$GH_TEST_REPO" &&
+    git commit -a --allow-empty -m "Version v10.1.1" \
+        -m "Update-Info: Breaking changes, read the change log." >/dev/null 2>&1 &&
+    git tag -f "v10.1.1" || exit 1
+
+if [ -n "${EXTRA_INSTALL_ARGS:-}" ]; then
     sed -i -E "s|(.*)/cli\" installer|\1/cli\" installer $EXTRA_INSTALL_ARGS|g" "$GH_TESTS"/step-*
 fi

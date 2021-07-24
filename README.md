@@ -724,9 +724,14 @@ $ git hooks update --disable
 The update machanism works by tracking the tags on the Git branch (chosen at install time) which is checked out in `<installDir>/release`.
 Normally, if there are new tags (versions) available, the newest tag (version) is installed. However, [prerelease version](https://semver.org) tags (e.g. `v1.0.0-rc1`)
 are generally skipped. You can disable this behavior by setting the global Git config value `githooks.autoUpdateUsePrerelease = true`.
+Major version updates are **never** automatically installed an need the consent of the user.
 
-If the annotated version tag or the commit message it points to (`git tag -l --format=%(contents) <tag>`) contains a trailing header which matches the regex `Update-NoSkip:\s+true`, than this version **will not be skipped**.
+If the annotated version tag or the commit message it points to (`git tag -l --format=%(contents) <tag>`) contains a trailing header which matches the regex `^Update-NoSkip: *true`, than this version **will not be skipped**.
 This feature enables to enforce an update to a specific version. In some cases this is useful (serialization changes etc.).
+
+The single-line commit trailers `^Update-Info: *(.*)` on version tagged commits are used to assemble a small
+changelog during update, which is presented to the user.
+The single line can contain important information/links to relevant fixes and changes.
 
 You can also check for updates at any time by executing
 [`git hooks update`](docs/cli/git_hooks_update.md) or using

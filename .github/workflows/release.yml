@@ -3,7 +3,13 @@ name: goreleaser
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      # This is not a real version tag, its just used to trigger
+      # the release build. Glob pattern:
+      - 'prepare-v[0-9]+.[0-9]+.[0-9]+*'
+
+env:
+  BUILD_TAG: ${GITHUB_REF##*/}
+  RELEASE_TAG: ${GITHUB_REF##*prepare-}
 
 jobs:
   goreleaser:
@@ -23,9 +29,6 @@ jobs:
         with:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-      - name: Store Git Tag
-        id: "getTag"
-        run: echo ::set-output name=tag::$(echo "${GITHUB_REF##*/}")
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -33,9 +36,16 @@ jobs:
           workdir: githooks
           args: release --rm-dist
         env:
-          GORELEASER_CURRENT_TAG : ${{ steps.getTag.outputs.tag }}
+          GORELEASER_CURRENT_TAG : "$RELEASE_TAG"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+      - name: "Tag successful build"
+        run: |
+          git config user.name 'githooks-bot'
+          git config user.email 'githooks-bot@users.noreply.github.com'
+          git tag "$RELEASE_TAG"
+          git push origin "$RELEASE_TAG"
+          git push -f origin ":$BUILD_TAG"
 
   tagSourceCode:
     runs-on: ubuntu-latest
@@ -45,5 +55,5 @@ jobs:
         run: |
           git config user.name 'githooks-bot'
           git config user.email 'githooks-bot@users.noreply.github.com'
-          git tag "githooks/${GITHUB_REF##*/}"
+          git tag "githooks/$RELEASE_TAG"
           git push --tags
