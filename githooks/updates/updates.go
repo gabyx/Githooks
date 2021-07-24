@@ -230,7 +230,7 @@ func FetchUpdates(
 	// Fetch the whole branch because we need it.
 	// The head could be in between tags which we avoid by this.
 	depth := -1
-	isNewClone, err := git.FetchOrClone(cloneDir, url, branch, depth, true, check)
+	isNewClone, err := git.FetchOrClone(cloneDir, url, branch, depth, "v*", check)
 	if err != nil {
 		return
 	}
