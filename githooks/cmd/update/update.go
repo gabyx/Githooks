@@ -6,13 +6,16 @@ import (
 	"github.com/gabyx/githooks/githooks/cmd/config"
 	"github.com/gabyx/githooks/githooks/cmd/installer"
 	"github.com/gabyx/githooks/githooks/prompt"
-	strs "github.com/gabyx/githooks/githooks/strings"
 	"github.com/gabyx/githooks/githooks/updates"
 
 	"github.com/spf13/cobra"
 )
 
-func runUpdate(ctx *ccm.CmdContext, setOpts *config.SetOptions, answer string) {
+func runUpdate(
+	ctx *ccm.CmdContext,
+	setOpts *config.SetOptions,
+	nonInteractive bool,
+	nonInteractiveAccept updates.AcceptNonInteractiveMode) {
 
 	switch {
 	case setOpts.Set || setOpts.Unset:
@@ -21,13 +24,13 @@ func runUpdate(ctx *ccm.CmdContext, setOpts *config.SetOptions, answer string) {
 	default:
 
 		var promptCtx prompt.IContext
-		if strs.IsEmpty(answer) {
+		if !nonInteractive {
 			promptCtx = ctx.PromptCtx
 		}
 
 		updateAvailable, accepted, err := updates.RunUpdate(
 			ctx.InstallDir,
-			updates.DefaultAcceptUpdateCallback(ctx.Log, promptCtx, answer == "y"),
+			updates.DefaultAcceptUpdateCallback(ctx.Log, promptCtx, nonInteractiveAccept),
 			func() error {
 				installer := installer.NewCmd(ctx)
 				installer.SetArgs([]string{})
@@ -56,6 +59,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	yes := false
 	no := false
+	yesMajor := false
 
 	setOpts := config.SetOptions{}
 
@@ -73,21 +77,33 @@ the automatic checks that would normally run daily
 after a successful commit event.`,
 		Run: func(cmd *cobra.Command, args []string) {
 
-			answer := ""
-			if yes {
-				answer = "y"
+			nonInteractive := false
+			nonInteractiveAccept := updates.AcceptNonInteractiveNone
+
+			ctx.Log.PanicIfF(yes && no || no && yesMajor || yesMajor && yes,
+				"Options '--no', '--yes', '--yes-all' are mutualy exclusive.")
+
+			switch {
+			case no:
+				nonInteractive = true
+			case yes:
+				nonInteractive = true
+				nonInteractiveAccept = updates.AcceptNonInteractiveOnlyNonMajor
+			case yesMajor:
+				nonInteractive = true
+				nonInteractiveAccept = updates.AcceptNonInteractiveAll
 			}
 
-			if no {
-				answer = "n"
-			}
-
-			runUpdate(ctx, &setOpts, answer)
+			runUpdate(ctx, &setOpts, nonInteractive, nonInteractiveAccept)
 		},
 	}
 
-	updateCmd.Flags().BoolVar(&yes, "yes", false, "Always accepts a new update (non-interactive).")
-	updateCmd.Flags().BoolVar(&no, "no", false, "Always deny an update and only check for it.")
+	updateCmd.Flags().BoolVar(&yes, "yes", false,
+		"Always accepts a new update (non-interactive, only non-major versions).")
+	updateCmd.Flags().BoolVar(&no, "no", false,
+		"Always deny an update and only check for it.")
+	updateCmd.Flags().BoolVar(&yesMajor, "yes-all", false,
+		"Always accepts a new update (non-interactive, all versions).")
 
 	updateCmd.Flags().BoolVar(&setOpts.Set, "enable", false, "Enable daily Githooks update checks.")
 	updateCmd.Flags().BoolVar(&setOpts.Unset, "disable", false, "Disable daily Githooks update checks.")

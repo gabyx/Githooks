@@ -524,12 +524,21 @@ func formatUpdateInfo(updateInfo []string) string {
 			}), "\n"))
 }
 
+type AcceptNonInteractiveMode int
+
+const (
+	AcceptNonInteractiveNone         AcceptNonInteractiveMode = 0
+	AcceptNonInteractiveAll          AcceptNonInteractiveMode = 1
+	AcceptNonInteractiveOnlyNonMajor AcceptNonInteractiveMode = 2
+)
+
 // DefaultAcceptUpdateCallback creates a default accept update callback
-// which prompts the user.
+// which prompts the user. If no prompt context is given, the
+// `acceptNonInteractive` decides if an update happens.
 func DefaultAcceptUpdateCallback(
 	log cm.ILogContext,
 	promptCtx prompt.IContext,
-	acceptIfNoPrompt bool) AcceptUpdateCallback {
+	acceptNonInteractive AcceptNonInteractiveMode) AcceptUpdateCallback {
 
 	return func(status *ReleaseStatus) bool {
 		log.DebugF("Fetch status: '%v'", status)
@@ -575,7 +584,8 @@ func DefaultAcceptUpdateCallback(
 		} else {
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
-			if acceptIfNoPrompt {
+			if acceptNonInteractive == AcceptNonInteractiveAll ||
+				(!isMajorUpdate && acceptNonInteractive == AcceptNonInteractiveOnlyNonMajor) {
 				log.InfoF("Going to install version: '%s'.", status.UpdateVersion.String())
 
 				return true

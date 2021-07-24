@@ -54,9 +54,24 @@ if ! echo "$out" | grep -q -E "Would you like to install.*[y/N]"; then
     exit 1
 fi
 
+# Update to version 10.1.1
+CURRENT="$AFTER"
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes 2>&1) || {
+    echo "! Failed to run update"
+    echo "$out"
+    exit 1
+}
+AFTER2="$(cd ~/.githooks/release && git rev-parse HEAD)"
+
+if [ "$CURRENT" != "$AFTER2" ]; then
+    echo "! Release clone was updated, but it should not have!"
+    echo "$out"
+    exit 1
+fi
+
 # Try again, but now force it.
 CURRENT="$AFTER"
-out=$("$GH_INSTALL_BIN_DIR/cli" update --yes 2>&1) || {
+out=$("$GH_INSTALL_BIN_DIR/cli" update --yes-all 2>&1) || {
     echo "! Failed to run update"
     echo "$out"
     exit 1
