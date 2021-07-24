@@ -29,6 +29,12 @@ jobs:
         with:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+      - name: "Tag release commit"
+        run: |
+          git config user.name 'githooks-bot'
+          git config user.email 'githooks-bot@users.noreply.github.com'
+          git tag "$RELEASE_TAG"
+          git tag "githooks/$RELEASE_TAG"
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -39,21 +45,7 @@ jobs:
           GORELEASER_CURRENT_TAG : "$RELEASE_TAG"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-      - name: "Tag successful build"
+      - name: "Push release tags and delete trigger tag"
         run: |
-          git config user.name 'githooks-bot'
-          git config user.email 'githooks-bot@users.noreply.github.com'
-          git tag "$RELEASE_TAG"
-          git push origin "$RELEASE_TAG"
+          git push origin "$RELEASE_TAG" "githooks/$RELEASE_TAG"
           git push -f origin ":$BUILD_TAG"
-
-  tagSourceCode:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Tagging Source Code
-        run: |
-          git config user.name 'githooks-bot'
-          git config user.email 'githooks-bot@users.noreply.github.com'
-          git tag "githooks/$RELEASE_TAG"
-          git push --tags
