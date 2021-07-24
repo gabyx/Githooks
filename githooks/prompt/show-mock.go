@@ -15,10 +15,12 @@ var EnableGUI bool = os.Getenv("GH_ENABLE_GUI") == "true"
 // ShowOptions mocks the real ShowOptions by reading
 // from the environment or if not defined calls the normal implementation.
 // This is only for tests.
-func (p *Context) ShowOptions(text string,
+func (p Context) ShowOptions(text string,
 	hintText string,
 	shortOptions string,
 	longOptions ...string) (answer string, err error) {
+
+	// We need a copy to change the context.
 
 	if strings.Contains(text, "This repository wants you to trust all current") {
 		answer, defined := os.LookupEnv("TRUST_ALL_HOOKS")
@@ -40,7 +42,7 @@ func (p *Context) ShowOptions(text string,
 		}
 	}
 
-	return showOptions(p, text, hintText, shortOptions, longOptions...)
+	return showOptions(&p, text, hintText, shortOptions, longOptions...)
 }
 
 // ShowEntry mocks the real ShowPrompt by reading

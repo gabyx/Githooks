@@ -119,8 +119,8 @@ func GetHookTagNameMappings() []string {
 		TagNameSharedGLobal}
 }
 
-// IngoreCallback is the callback type for ignoring hooks.
-type IngoreCallback = func(namespacePath string) (ignored bool)
+// IgnoreCallback is the callback type for ignoring hooks.
+type IgnoreCallback = func(namespacePath string) (ignored bool)
 
 // TrustCallback is the callback type for trusting hooks.
 type TrustCallback = func(hookPath string) (trusted bool, sha1 string)
@@ -133,7 +133,7 @@ func GetAllHooksIn(
 	hooksDir string,
 	hookName string,
 	hookNamespace string,
-	isIgnored IngoreCallback,
+	isIgnored IgnoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
 	parseRunnerConfig bool) (allHooks []Hook, maxBatches int, err error) {

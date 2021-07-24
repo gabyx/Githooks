@@ -305,7 +305,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 
 	updateAvailable, accepted, err := updates.RunUpdate(
 		settings.InstallDir,
-		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, false),
+		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, updates.AcceptNonInteractiveNone),
 		func() error {
 			return updates.RunUpdateOverExecutable(settings.InstallDir,
 				&settings.ExecX,
