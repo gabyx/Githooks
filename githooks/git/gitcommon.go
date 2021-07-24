@@ -287,24 +287,18 @@ func (c *Context) Pull(remote string) error {
 
 // FetchBranch executes a fetch of a `branch` from the `remote` in `repoPath`.
 // This command sadly does not automatically (git 2.30) fetch the tags on this branch
-// automatically. Use `Fetch(remote)`.
-func (c *Context) FetchBranch(remote string, branch string) error {
+// automatically. Use `tagPattern` to specify explicitly which tags to fetch.
+func (c *Context) FetchBranch(remote string, branch string, tagPattern string) error {
+	cmd := []string{"fetch", "--prune", "--no-tags", remote, branch}
 
-	out, e := c.GetCombined("fetch", "--prune", "--prune-tags", remote, branch)
+	if strs.IsNotEmpty(tagPattern) {
+		cmd = append(cmd, "tag", tagPattern)
+	}
+
+	out, e := c.GetCombined(cmd...)
 	if e != nil {
 		return cm.ErrorF("Fetching of '%s' from '%s'\nin '%s' failed:\n%s",
 			branch, remote, c.Cwd, out)
-	}
-
-	return nil
-}
-
-// Fetch executes a fetch of a `branch` from the `remote` in `repoPath`.
-func (c *Context) Fetch(remote string) error {
-
-	out, e := c.GetCombined("fetch", "--prune", "--prune-tags", remote)
-	if e != nil {
-		return cm.ErrorF("Fetching from '%s'\nin '%s' failed:\n%s", remote, c.Cwd, out)
 	}
 
 	return nil
@@ -379,7 +373,7 @@ func FetchOrClone(
 	repoPath string,
 	url string, branch string,
 	depth int,
-	withTags bool,
+	tagPattern string,
 	repoCheck RepoCheck) (isNewClone bool, err error) {
 
 	gitx := CtxCSanitized(repoPath)
@@ -406,13 +400,7 @@ func FetchOrClone(
 		}
 		err = Clone(repoPath, url, branch, depth)
 	} else {
-		if withTags {
-			// Sadly here we fetch basically everything, which is not so specific.
-			// Fetching tags only on a branch is currently not really possible (git 2.30).
-			err = gitx.Fetch("origin")
-		} else {
-			err = gitx.FetchBranch("origin", branch)
-		}
+		err = gitx.FetchBranch("origin", branch, tagPattern)
 	}
 
 	return
