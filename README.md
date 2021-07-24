@@ -78,7 +78,7 @@ Also it searches for hooks in configured shared hook repositories.
   - [Debugging in the Dev Container](#debugging-in-the-dev-container)
   - [Todos:](#todos)
 - [Changelog](#changelog)
-  - [Version 2.0.0](#version-200)
+  - [Version v2.x.x](#version-v2xx)
 - [FAQ](#faq)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
@@ -880,9 +880,10 @@ which will start the `delve` debugger headless as a server in a terminal. You ca
 
 ## Changelog
 
-### Version 2.0.0
+### Version v2.x.x
 
-See [braking change documention](docs/changes/Braking-Changes-v2.0.0.md).
+For upgrading from `v1.x.x` to `v2.x.x` consider
+the [braking change documention](docs/changes/Braking-Changes-v2.0.0.md).
 
 ## FAQ
 
