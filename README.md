@@ -147,8 +147,8 @@ Hooks can also be specified by a run configuration in a corresponding YAML file,
 see [Hook Run Configuration](#hook-run-configuration).
 
 Hooks related to `commit` events (where it makes sense, not `post-commit`) will also have a `${STAGED_FILES}`
-environment variable setthat is the list of staged and changed files according to
-`git diff --cached --diff-filter=ACMR --name-only`.  File paths are separated by a newline `\n`.
+environment variable set, i.e. the list of staged and changed files according to
+`git diff --cached --diff-filter=ACMR --name-only`. File paths are separated by a newline `\n`.
 If you want to iterate in a shell script over them,
 and expect spaces in paths, you might want to set the `IFS` like this:
 
