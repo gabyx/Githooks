@@ -9,6 +9,7 @@
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 ![Git Version](https://img.shields.io/badge/Git-%E2%89%A5v.2.28.0-blue)
 ![Go Version](https://img.shields.io/badge/Go-1.16-blue)
+![OS](https://img.shields.io/badge/OS-linux,%20macOs,%20Windows-blue)
 
 A **platform-independend hooks manager** written in Go to support shared hook repositories and per-repository [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working repository. This implementation is the Go port and successor of the [original impementation](https://github.com/rycus86/githooks) (see [Migration](#migrating)).
 
@@ -70,7 +71,6 @@ Also it searches for hooks in configured shared hook repositories.
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
 - [Migration](#migration)
-  - [Supported Platforms](#supported-platforms)
 - [Dialog Tool](#dialog-tool)
   - [Build From Source](#build-from-source)
   - [Dependencies](#dependencies)
@@ -796,14 +796,6 @@ directly with a new install:
 
 Trusted hooks will be needed to be trusted again.
 To port Git configuration variables use the file `githooks/hooks/gitconfig.go` which contains all used Git config keys.
-
-### Supported Platforms
-
-The following platforms are tested:
-
-- Linux
-- macOs
-- Windows
 
 ## Dialog Tool
 
