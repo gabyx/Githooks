@@ -18,7 +18,7 @@ OUTPUT=$(
         "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
 )
 
-if ! cd ~/.githooks/release && git rev-parse HEAD; then
+if ! git -C ~/.githooks/release rev-parse HEAD; then
     echo "! Release clone was not cloned, but it should have!"
     exit 1
 fi

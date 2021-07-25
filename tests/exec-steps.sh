@@ -26,8 +26,9 @@ SKIPPED=0
 
 FAILED_TEST_LIST=""
 
-export GH_INSTALL_BIN_DIR="$HOME/.githooks/bin"
-COMMIT_BEFORE=$(cd "$GH_TEST_REPO" && git rev-parse HEAD)
+export GH_INSTALL_DIR="$HOME/.githooks"
+export GH_INSTALL_BIN_DIR="$GH_INSTALL_DIR/bin"
+COMMIT_BEFORE=$(git -C "$GH_TEST_REPO" rev-parse HEAD)
 
 cleanDirs() {
     if [ -w "$GH_TEST_GIT_CORE" ]; then
@@ -38,6 +39,38 @@ cleanDirs() {
     rm -rf ~/test*
     rm -rf "$GH_TEST_TMP"
     mkdir -p "$GH_TEST_TMP"
+}
+
+resetTestRepo() {
+    # Reset test repo
+    # shellcheck disable=SC2015
+    git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null reset --hard "$COMMIT_BEFORE" >/dev/null 2>&1 &&
+        git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null clean -df || {
+        echo "! Reset failed"
+        exit 1
+    }
+}
+
+unsetEnvironment() {
+    # Unset mock settings
+    git config --global --unset githooks.testingTreatFileProtocolAsRemote
+
+    # Check if no githooks settings are present anymore
+    if [ -n "$(git config --global --get-regexp "^githooks.*")" ] ||
+        [ -n "$(git config --global alias.hooks)" ]; then
+        echo "! Uninstall left artefacts behind!" >&2
+        echo "  You need to fix this!" >&2
+        git config --global --get-regexp "^githooks.*" >&2
+        git config --global --get-regexp "alias.*" >&2
+        FAILED=$((FAILED + 1))
+        return 1 # Fail es early as possible
+    fi
+
+    git config --global --unset init.templateDir
+    git config --global --unset core.hooksPath
+    rm -rf "$GH_INSTALL_DIR" 2>/dev/null || true
+
+    return 0
 }
 
 if [ -z "$GH_TESTS" ] ||
@@ -54,7 +87,7 @@ echo "Tests dir: '$GH_TESTS'"
 
 for STEP in "$GH_TESTS"/step-*.sh; do
     STEP_NAME=$(basename "$STEP" | sed 's/.sh$//')
-    STEP_DESC=$(head -3 "$STEP" | tail -1 | sed 's/#\s*//')
+    STEP_DESC=$(grep -m 1 -A 1 "Test:" "$STEP" | tail -1 | sed 's/#\s*//')
 
     if [ -n "$SEQUENCE" ] && ! echo "$SEQUENCE" | grep -q "$STEP_NAME"; then
         continue
@@ -64,9 +97,6 @@ for STEP in "$GH_TESTS"/step-*.sh; do
     echo "  :: $STEP_DESC"
 
     cleanDirs
-
-    git -C "$GH_TEST_REPO" reset --hard "$COMMIT_BEFORE" >/dev/null 2>&1 &&
-        git -C "$GH_TEST_REPO" clean -df >/dev/null 2>&1
 
     TEST_RUNS=$((TEST_RUNS + 1))
 
@@ -97,6 +127,7 @@ for STEP in "$GH_TESTS"/step-*.sh; do
     fi
 
     cleanDirs
+    resetTestRepo
 
     UNINSTALL_OUTPUT=$(printf "n\\n" | "$GH_TEST_BIN/cli" uninstaller --stdin 2>&1)
     # shellcheck disable=SC2181
@@ -107,23 +138,7 @@ for STEP in "$GH_TESTS"/step-*.sh; do
         break # Fail es early as possible
     fi
 
-    # Unset mock settings
-    git config --global --unset githooks.testingTreatFileProtocolAsRemote
-
-    # Check if no githooks settings are present anymore
-    if [ -n "$(git config --global --get-regexp "^githooks.*")" ] ||
-        [ -n "$(git config --global alias.hooks)" ]; then
-        echo "! Uninstall left artefacts behind!" >&2
-        echo "  You need to fix this!" >&2
-        git config --global --get-regexp "^githooks.*" >&2
-        git config --global --get-regexp "alias.*" >&2
-        FAILED=$((FAILED + 1))
-        break # Fail es early as possible
-    fi
-
-    git config --global --unset init.templateDir
-    git config --global --unset core.hooksPath
-    rm -rf ~/.githooks 2>/dev/null
+    unsetEnvironment || break
 
     echo
 

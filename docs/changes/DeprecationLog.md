@@ -1,4 +1,4 @@
-# Githooks v2.0
+# Githooks Upgrade from rycus86's version.
 
 ## Test Debugging
 

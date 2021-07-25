@@ -144,11 +144,13 @@ const (
 )
 
 // FetchUpdates fetches updates in the Githooks clone directory.
-// Arguments `url` and `branch` can be empty which triggers.
+// Arguments `url` and `branch` can be empty to get it from the settings.
+// On new clone the local branch is reset to the reachable `tag`.
 func FetchUpdates(
 	cloneDir string,
 	url string,
 	branch string,
+	tag string,
 	checkRemote bool,
 	checkRemoteAction RemoteCheckAction,
 	skipPrerelease bool) (status ReleaseStatus, err error) {
@@ -236,7 +238,6 @@ func FetchUpdates(
 	}
 
 	gitx := git.CtxCSanitized(cloneDir)
-	resetRemoteTo := ""
 
 	// If branch was empty (default branch), determine it now.
 	if strs.IsEmpty(branch) {
@@ -256,7 +257,7 @@ func FetchUpdates(
 		// Remote stays and might trigger a direct update).
 
 		// Check if current tag is reachable from HEAD.
-		reachable, e := git.IsRefReachable(gitx, "HEAD", build.BuildTag)
+		reachable, e := git.IsRefReachable(gitx, "HEAD", tag)
 		if e != nil || !reachable {
 			err = cm.CombineErrors(
 				cm.ErrorF("Current version tag '%v' could not be found on branch '%s'",
@@ -265,7 +266,7 @@ func FetchUpdates(
 			return
 		}
 
-		e = gitx.Check("reset", "--hard", build.BuildTag)
+		e = gitx.Check("reset", "--hard", tag)
 		if e != nil {
 			err = cm.CombineErrors(
 				cm.ErrorF("Could not reset branch '%s' to tag '%s'",
@@ -275,6 +276,7 @@ func FetchUpdates(
 		}
 	}
 
+	resetRemoteTo := ""
 	remoteBranch := DefaultRemote + "/" + branch
 	status, err = getStatus(gitx, url, DefaultRemote, branch, remoteBranch, skipPrerelease)
 
@@ -483,7 +485,7 @@ func RunUpdate(
 
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
 	skipPrerelease := true
-	status, err := FetchUpdates(cloneDir, "", "", true, ErrorOnWrongRemote, skipPrerelease)
+	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, skipPrerelease)
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not fetch updates."), err)
 

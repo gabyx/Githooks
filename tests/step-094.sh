@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 # Test:
 #   Cli tool: run an installation
 
@@ -41,18 +42,19 @@ if (cd "$GH_TEST_TMP/test094/c" && "$GH_INSTALL_BIN_DIR/cli" install); then
 fi
 
 # Reset to trigger a global update
-if ! (cd ~/.githooks/release && git status && git reset --hard HEAD^); then
-    echo "! Could not reset master to trigger update."
+if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1; then
+    echo "! Could not reset server to trigger update."
     exit 1
 fi
 
-CURRENT="$(cd ~/.githooks/release && git rev-parse HEAD)"
+CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
 if ! "$GH_INSTALL_BIN_DIR/cli" installer; then
     echo "! Expected global installation to succeed"
     exit 1
 fi
-AFTER="$(cd ~/.githooks/release && git rev-parse HEAD)"
-if [ "$CURRENT" = "$AFTER" ]; then
+AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
+if [ "$CURRENT" = "$AFTER" ] ||
+    [ "$(git -C "$GH_TEST_REPO" rev-parse v9.9.1)" != "$AFTER" ]; then
     echo "! Release clone was not updated, but it should have!"
     exit 1
 fi
