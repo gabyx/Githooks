@@ -12,8 +12,6 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 )
 
-const ()
-
 func ShowFileSave(ctx context.Context, s *set.FileSave) (r res.File, err error) {
 
 	s.Root, err = filepath.Abs(filepath.FromSlash(s.Root))
