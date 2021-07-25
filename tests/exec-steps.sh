@@ -44,7 +44,7 @@ cleanDirs() {
 resetTestRepo() {
     # Reset test repo
     # shellcheck disable=SC2015
-    git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null reset --hard "$COMMIT_BEFORE" &&
+    git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null reset --hard "$COMMIT_BEFORE" >/dev/null 2>&1 &&
         git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null clean -df || {
         echo "! Reset failed"
         exit 1

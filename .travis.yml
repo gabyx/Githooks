@@ -12,26 +12,45 @@ jobs:
     - name: coverage
 
   include:
-    - os: linux
+    # only on PR and main
+    - if: type = pull_request OR branch = main
+      os: linux
       name: coverage
       env:
         - TEST_INSTANCE=test-coverage
         - COVERALLS_TOKEN=$COVERALLS_TOKEN
-    - os: linux
+
+    # all tests only on PR
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-testsuite
-    - os: windows
+
+    - if: type = pull_request
+      os: windows
       env: TEST_INSTANCE=test-windows
-    - os: linux
+
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-alpine
-    - os: linux
+
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-alpine-user
-    - os: linux
+
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-alpine-nolfs
-    - os: linux
+
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-corehookspath
-    - os: linux
+
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-whitespace
-    - os: linux
+
+    - if: type = pull_request
+      os: linux
       env: TEST_INSTANCE=test-rules
 
 script:
