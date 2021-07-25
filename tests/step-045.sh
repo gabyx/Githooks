@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 # Test:
 #   Run an install, skipping the intro README files
 
@@ -53,19 +54,20 @@ fi
 CURRENT_TIME=$(date +%s)
 MOCK_LAST_RUN=$((CURRENT_TIME - 100000))
 # shellcheck disable=SC2015
-cd ~/.githooks/release && git reset --hard v9.9.0 >/dev/null || {
-    echo "! Could not reset master to trigger update."
+git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null || {
+    echo "! Could not reset server to trigger update."
     exit 1
 }
 
-CURRENT="$(cd ~/.githooks/release && git rev-parse HEAD)"
+CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
 cd "$GH_TEST_TMP/test045/001" &&
     git config --global githooks.autoUpdateEnabled true &&
     git config --global githooks.autoUpdateCheckTimestamp $MOCK_LAST_RUN &&
     OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
 
-AFTER="$(cd ~/.githooks/release && git rev-parse HEAD)"
-if [ "$CURRENT" = "$AFTER" ]; then
+AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
+if [ "$CURRENT" = "$AFTER" ] ||
+    [ "$(git -C "$GH_TEST_REPO" rev-parse v9.9.1)" != "$AFTER" ]; then
     echo "! Release clone was not updated, but it should have!"
     echo "$OUT"
     exit 1

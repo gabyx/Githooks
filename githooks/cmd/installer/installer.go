@@ -366,6 +366,7 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 			settings.CloneDir,
 			args.CloneURL,
 			args.CloneBranch,
+			build.BuildTag,
 			true,
 			updates.RecloneOnWrongRemote,
 			skipPrerelease)

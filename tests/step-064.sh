@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 # Test:
 #   Cli tool: run an update by building from source
 
@@ -15,15 +16,15 @@ mkdir -p "$GH_TEST_TMP/test064" &&
     git init || exit 1
 
 # Reset to trigger update
-if ! (cd ~/.githooks/release && git reset --hard v9.9.0 >/dev/null); then
-    echo "! Could not reset master to trigger update."
+if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
+    echo "! Could not reset server to trigger update."
     exit 1
 fi
 
 # Set to build from source
 git config --global githooks.buildFromSource "true"
 
-CURRENT="$(cd ~/.githooks/release && git rev-parse HEAD)"
+CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
 if ! OUT=$("$GH_INSTALL_BIN_DIR/cli" update --yes); then
     echo "! Failed to run the update"
 fi
@@ -33,9 +34,10 @@ if ! echo "$OUT" | grep -qi "building from source"; then
     exit 1
 fi
 
-AFTER="$(cd ~/.githooks/release && git rev-parse HEAD)"
+AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
 
-if [ "$CURRENT" = "$AFTER" ]; then
+if [ "$CURRENT" = "$AFTER" ] ||
+    [ "$(git -C "$GH_TEST_REPO" rev-parse v9.9.1)" != "$AFTER" ]; then
     echo "! Release clone was not updated, but it should have!"
     exit 1
 fi

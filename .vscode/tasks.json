@@ -6,7 +6,7 @@
     {
       "label": "go-build",
       "type": "shell",
-      "command": "${workspaceFolder}/githooks/scripts/build.sh --build-flags '-tags=debug'",
+      "command": "${workspaceFolder}/githooks/scripts/build.sh",
       "options": {
         "shell": {
           "executable": "/bin/bash",
@@ -39,8 +39,6 @@
       "type": "shell",
       "command": "${workspaceFolder}/githooks/scripts/build.sh",
       "args": [
-        "--build-flags",
-        "-tags=debug",
         "--bin-dir",
         "/tmp/githooks"
       ],
@@ -65,8 +63,6 @@
         "--headless",
         "--listen=127.0.0.1:2345",
         "--log",
-        "--build-flags",
-        "-tags debug",
         "--api-version=2",
         "./apps/cli",
         "--",
@@ -104,8 +100,6 @@
         "--headless",
         "--listen=127.0.0.1:2345",
         "--log",
-        "--build-flags",
-        "-tags debug",
         "--api-version=2",
         "./apps/cli",
         "--",
@@ -141,8 +135,6 @@
         "--headless",
         "--listen=127.0.0.1:2345",
         "--log",
-        "--build-flags",
-        "-tags debug",
         "--api-version=2",
         "./apps/cli",
         "--",
@@ -179,8 +171,6 @@
         "--headless",
         "--listen=127.0.0.1:2345",
         "--log",
-        "--build-flags",
-        "-tags debug",
         "--api-version=2",
         "./apps/test",
         "--"

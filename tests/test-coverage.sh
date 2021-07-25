@@ -1,20 +1,13 @@
 #!/bin/sh
-TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-
-cat <<EOF | docker build --force-rm -t githooks:alpine-coverage-base -
-FROM golang:1.16-alpine
-RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash jq
-RUN go get github.com/wadey/gocovmerge
-RUN go get github.com/mattn/goveralls
-
-ENV GH_COVERAGE_DIR="/cover"
-
-# Coveralls env. vars for upload.
-ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
-EOF
+ROOT_DIR=$(git rev-parse --show-toplevel)
+TEST_DIR="$ROOT_DIR/tests"
 
 IMAGE_TYPE="alpine-coverage"
+
+[ -n "$COVERALLS_TOKEN" ] || {
+    echo "! You need to set 'COVERALL_TOKEN'."
+    exit 1
+}
 
 cleanup() {
     docker rmi "githooks:$IMAGE_TYPE-base"
@@ -23,13 +16,26 @@ cleanup() {
 
 trap cleanup EXIT
 
+cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
+FROM golang:1.16-alpine
+RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
+RUN apk add bash jq curl
+RUN go get github.com/wadey/gocovmerge
+RUN go install github.com/mattn/goveralls@latest
+
+ENV GH_COVERAGE_DIR="/cover"
+
+# Coveralls env. vars for upload.
+ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
+EOF
+
 if echo "$IMAGE_TYPE" | grep -q "\-user"; then
     OS_USER="test"
 else
     OS_USER="root"
 fi
 
-cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - .
+cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 
 ENV GH_TESTS="/var/lib/githooks-tests"
@@ -42,60 +48,17 @@ ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
 # Add sources.
 COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
-RUN sed -i -E 's/^bin//' "\$GH_TEST_REPO/githooks/.gitignore" # We use the bin folder
 ADD .githooks/README.md \$GH_TEST_REPO/.githooks/README.md
 ADD examples "\$GH_TEST_REPO/examples"
-ADD tests "\$GH_TESTS"
-
-RUN git config --global user.email "githook@test.com" && \\
-    git config --global user.name "Githook Tests" && \\
-    git config --global init.defaultBranch main && \\
-    git config --global core.autocrlf false
-
-RUN echo "Make test gitrepo to clone from ..." && \\
-    cd \$GH_TEST_REPO && git init  >/dev/null 2>&1  && \\
-    git add . >/dev/null 2>&1  && \\
-    git commit -a -m "Before build" >/dev/null 2>&1
 
 # Replace run-wrapper with coverage run-wrapper
 RUN cd \$GH_TEST_REPO && \\
     cp githooks/build/embedded/run-wrapper-coverage.sh githooks/build/embedded/run-wrapper.sh
 
-# Build binaries for v9.9.0.
-#################################
-RUN cd \$GH_TEST_REPO/githooks && \\
-    git tag "v9.9.0" >/dev/null 2>&1 && \\
-     ./scripts/clean.sh && \\
-    ./scripts/build.sh --coverage --build-flags "-tags debug,mock,coverage" && \\
-    ./bin/cli githooksCoverage --version
-RUN echo "Commit build v9.9.0 to repo ..." && \\
-    cd \$GH_TEST_REPO && \\
-    git add . >/dev/null 2>&1 && \\
-    git commit -a --allow-empty -m "Version 9.9.0" >/dev/null 2>&1 && \\
-    git tag -f "v9.9.0"
+ADD tests/setup-githooks.sh "\$GH_TESTS/"
+RUN bash "\$GH_TESTS/setup-githooks.sh" --coverage
 
-# Build binaries for v9.9.1.
-#################################
-RUN cd \$GH_TEST_REPO/githooks && \\
-    git commit -a --allow-empty -m "Before build" >/dev/null 2>&1 && \\
-    git tag -f "v9.9.1" && \\
-    ./scripts/clean.sh && \\
-    ./scripts/build.sh --coverage --build-flags "-tags debug,mock,coverage" && \\
-    ./bin/cli githooksCoverage --version
-RUN echo "Commit build v9.9.1 to repo (no-skip)..." && \\
-    cd "\$GH_TEST_REPO" && \\
-    git commit -a --allow-empty -m "Version 9.9.1" -m "Update-NoSkip: true" >/dev/null 2>&1 && \\
-    git tag -f "v9.9.1"
-
-# Commit for to v9.9.2 (not used for update).
-#################################
-RUN echo "Commit build v9.9.2 to repo ..." && \\
-    cd "\$GH_TEST_REPO" && \\
-    git commit -a --allow-empty -m "Version 9.9.2" >/dev/null 2>&1 && \\
-    git tag -f "v9.9.2"
-RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
-        sed -i -E 's|(.*)/cli" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
-    fi
+ADD tests "\$GH_TESTS"
 
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
 RUN git config --global githooks.deleteDetectedLFSHooks "n"
@@ -118,7 +81,6 @@ RUN sed -i -E 's@".DIALOG"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1"@g' 
     "\$GH_TESTS"/step-*
 RUN sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GH_INSTALL_BIN_DIR/cli"@g' \\
     "\$GH_TESTS"/step-*
-
 
 ${ADDITIONAL_INSTALL_STEPS:-}
 
@@ -156,5 +118,11 @@ docker run --rm \
     -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks \
+    -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" \
+    -e TRAVIS_JOB_NAME="$TRAVIS_JOB_NAME" \
+    -e TRAVIS_JOB_NUMBER="$TRAVIS_JOB_NUMBER" \
+    -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" \
+    -e TRAVIS_PULL_REQUEST_BRANCH="$TRAVIS_PULL_REQUEST_BRANCH" \
+    -e TRAVIS_PULL_REQUEST_SHA="$TRAVIS_PULL_REQUEST_SHA" \
     "githooks:$IMAGE_TYPE-base" \
-    ./tests/upload-coverage.sh "$@" || exit $?
+    ./tests/upload-coverage.sh || exit $?

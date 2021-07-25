@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 # Test:
 #   Test template area is set up properly (core.hooksPath)
 
@@ -45,8 +46,8 @@ if ! grep 'Testing 114' "$GH_TEST_TMP/test114.out"; then
 fi
 
 # Reset to trigger update
-if ! (cd ~/.githooks/release && git reset --hard v9.9.0 >/dev/null); then
-    echo "! Could not reset master to trigger update."
+if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
+    echo "! Could not reset server to trigger update."
     exit 1
 fi
 

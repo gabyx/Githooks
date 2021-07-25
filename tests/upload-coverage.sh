@@ -14,13 +14,16 @@ if [ -n "$GH_COVERAGE_DIR" ]; then
     echo "Coverage created."
 
     # Remove dialog tool because we cannot yet really measure the coverage accurately
-    sed -i -E '/^gabyx\/githooks\/apps\/dialog.*/d' "$GH_COVERAGE_DIR/all.cov"
+    sed -i -E '/^.*gabyx\/githooks\/githooks\/apps\/dialog.*$/d' "$GH_COVERAGE_DIR/all.cov"
+    sed -i -E '/^.*gabyx\/githooks\/githooks\/prompt\/show\.go.*$/d' "$GH_COVERAGE_DIR/all.cov"
+    sed -i -E '/^.*gabyx\/githooks\/githooks\/prompt\/show-gui-impl\.go.*$/d' "$GH_COVERAGE_DIR/all.cov"
 fi
 
 # shellcheck disable=SC2015
 cd "githooks" &&
     scripts/build.sh && # Generate all files again such that we can upload the coverage
-    goveralls -coverprofile="$GH_COVERAGE_DIR/all.cov" -service=travis-ci || {
+    goveralls --coverprofile="$GH_COVERAGE_DIR/all.cov" --service=travis-ci \
+        --reponame githooks --repotoken="$COVERALLS_TOKEN" || {
     echo "! Goveralls failed." >&2
     exit 1
 }

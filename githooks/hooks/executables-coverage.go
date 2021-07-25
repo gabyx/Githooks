@@ -3,11 +3,13 @@
 package hooks
 
 import (
+	"os"
+	"path"
+	"runtime"
+
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/coverage"
 	strs "github.com/gabyx/githooks/githooks/strings"
-	"path"
-	"runtime"
 )
 
 // GetCLIExecutable gets the global Githooks CLI executable.
@@ -19,11 +21,15 @@ func GetCLIExecutable(installDir string) cm.Executable {
 
 	coverDir, _, covData := coverage.ReadCoverData("cli")
 
-	return cm.Executable{
-		Cmd: p,
-		Args: []string{"-test.coverprofile",
-			path.Join(coverDir, strs.Fmt("cli-%v.cov", covData.Counter)),
-			"githooksCoverage"}}
+	if _, exists := os.LookupEnv("GH_DEPLOY_SOURCE_IS_PROD"); exists {
+		return cm.Executable{Cmd: p}
+	} else {
+		return cm.Executable{
+			Cmd: p,
+			Args: []string{"-test.coverprofile",
+				path.Join(coverDir, strs.Fmt("cli-%v.cov", covData.Counter)),
+				"githooksCoverage"}}
+	}
 }
 
 // GetInstallerExecutable gets the global Githooks installer executable (cli with args).

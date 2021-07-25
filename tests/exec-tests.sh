@@ -1,4 +1,6 @@
 #!/bin/sh
+ROOT_DIR=$(git rev-parse --show-toplevel)
+
 IMAGE_TYPE="$1"
 shift
 
@@ -8,7 +10,7 @@ else
     OS_USER="root"
 fi
 
-cat <<EOF | docker build --force-rm -t "githooks:$IMAGE_TYPE" -f - .
+cat <<EOF | docker build --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 
 ENV GH_TESTS="/var/lib/githooks-tests"
@@ -23,9 +25,15 @@ ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
 ADD .githooks/README.md "\$GH_TEST_REPO/.githooks/README.md"
 ADD examples "\$GH_TEST_REPO/examples"
+
+ADD tests/setup-githooks.sh "\$GH_TESTS/"
+RUN bash "\$GH_TESTS/setup-githooks.sh"
+
 ADD tests "\$GH_TESTS"
 
-RUN bash "\$GH_TESTS/setup-githooks.sh"
+RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
+        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
+    fi
 
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
 RUN git config --global githooks.deleteDetectedLFSHooks "n"

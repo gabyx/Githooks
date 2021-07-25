@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 # Test:
 #   Disable, enable and accept a shared hook (no 'githooks' directory)
 

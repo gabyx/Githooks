@@ -111,14 +111,6 @@ func newChecksumData(paths ...string) ChecksumData {
 	return ChecksumData{paths}
 }
 
-// NewChecksumStore creates a checksum store from `path` (file or directory).
-func NewChecksumStore(path string, addAsDirIfNonExisting bool) (ChecksumStore, error) {
-	c := ChecksumStore{}
-	err := c.AddChecksums(path, addAsDirIfNonExisting)
-
-	return c, err
-}
-
 // AddChecksums adds checksum data from `path` (file or directory) to the store.
 func (t *ChecksumStore) AddChecksums(path string, addAsDirIfNonExisting bool) error {
 

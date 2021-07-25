@@ -20,7 +20,7 @@ git config --global githooks.autoUpdateEnabled true || exit 1
 
 ACCEPT_CHANGES=A "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-commit
 
-if ! cd ~/.githooks/release && git rev-parse HEAD; then
+if ! git -C ~/.githooks/release rev-parse HEAD; then
     echo "! Release clone was not updated, but it should have!"
     exit 1
 fi
