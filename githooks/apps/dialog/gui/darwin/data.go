@@ -1,5 +1,6 @@
 package gui
 
+// MsgOptions holds all options for a message dialog.
 type MsgOptions struct {
 	Message       string   `json:"message,omitempty"`
 	As            string   `json:"as,omitempty"`
@@ -9,6 +10,7 @@ type MsgOptions struct {
 	DefaultButton int      `json:"defaultButton,omitempty"`
 }
 
+// MsgData holds data for a message dialog.
 type MsgData struct {
 	Operation string
 	Text      string
@@ -17,6 +19,7 @@ type MsgData struct {
 	Opts MsgOptions `json:"opts"`
 }
 
+// EntryOpts holds all options for an entry dialog.
 type EntryOpts struct {
 	MsgOptions
 
@@ -24,6 +27,7 @@ type EntryOpts struct {
 	HiddenAnswer  bool   `json:"hiddenAnswer,omitempty"`
 }
 
+// EntryData holds data for an entry dialog.
 // Note: Adding member -> Check `NewFromEntry`.
 type EntryData struct {
 	Operation string
@@ -33,7 +37,7 @@ type EntryData struct {
 	Opts EntryOpts `json:"opts"`
 }
 
-// Create new entry data from message data.
+// NewFromEntry creates new entry data from message data.
 func NewFromEntry(m *MsgData) EntryData {
 	return EntryData{
 		Operation: m.Operation,
@@ -43,6 +47,7 @@ func NewFromEntry(m *MsgData) EntryData {
 	}
 }
 
+// OptionsOpts holds all options for an options dialog.
 type OptionsOpts struct {
 	WithTitle                string   `json:"withTitle,omitempty"`
 	WithPrompt               string   `json:"withPrompt,omitempty"`
@@ -53,6 +58,7 @@ type OptionsOpts struct {
 	EmptySelectionAllowed    bool     `json:"emptySelectionAllowed,omitempty"`
 }
 
+// OptionsData holds additional options for an options dialog.
 type OptionsData struct {
 	Operation string
 	Separator string
@@ -61,6 +67,7 @@ type OptionsData struct {
 	Opts OptionsOpts
 }
 
+// FileOpts holds all options for a file dialog.
 type FileOpts struct {
 	WithPrompt      string   `json:"withPrompt,omitempty"`
 	OfType          []string `json:"ofType,omitempty"`
@@ -71,6 +78,7 @@ type FileOpts struct {
 	ShowPackages    bool     `json:"showPackageContents,omitempty"`
 }
 
+// FileData holds all data for a file dialog.
 type FileData struct {
 	Operation string
 	Separator string
@@ -78,11 +86,13 @@ type FileData struct {
 	Opts FileOpts
 }
 
+// NotifyOpts holds all options for a system notification.
 type NotifyOpts struct {
 	WithTitle string `json:"withTitle"`
 	Subtitle  string `json:"subtitle,omitempty"`
 }
 
+// NotifyData holds all data for a system notification.
 type NotifyData struct {
 	Text string
 	Opts NotifyOpts

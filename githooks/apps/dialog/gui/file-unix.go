@@ -15,6 +15,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+// ShowFileSave shows a file-save dialog.
 func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
 
 	args := []string{"--file-selection", "--save"}
@@ -73,6 +74,7 @@ func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
 	return res.File{}, err
 }
 
+// ShowFileSelection shows a file-selection dialog.
 func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, error) {
 
 	args := []string{"--file-selection"}

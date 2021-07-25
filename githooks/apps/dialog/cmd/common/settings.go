@@ -4,6 +4,7 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 )
 
+// CmdContext is the command context for the dialog executable.
 type CmdContext struct {
 
 	// Exit code of the dialog app.
@@ -16,6 +17,7 @@ type CmdContext struct {
 	Log cm.ILogContext
 }
 
+// ExitCode is the exit code type of the executable.
 type ExitCode = uint
 
 const (

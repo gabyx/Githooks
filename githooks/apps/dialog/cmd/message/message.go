@@ -23,6 +23,7 @@ func handleResult(ctx *dcm.CmdContext, r *res.Message, err error) error {
 		nil, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
+// NewCmd creates the message command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 
 	settings := set.Message{}

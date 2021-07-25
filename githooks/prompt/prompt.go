@@ -121,19 +121,19 @@ func CreateContext(
 	return &p, err
 }
 
-// Context for the dialog tool script/executable, if one is installed.
+// ToolContext is the context for the dialog tool script/executable, if one is installed.
 // If `execCtx` and `tool` is nil, the context is not setup and will not be used.
 type ToolContext struct {
 	execCtx cm.IExecContext
 	tool    cm.IExecutable
 }
 
-// IsExecutable tells if the prompt context for the dialog tool is executable.
+// IsSetup tells if the prompt context for the dialog tool is executable.
 func (p *ToolContext) IsSetup() bool {
 	return p.execCtx != nil && p.tool != nil
 }
 
-// Creates a prompt context for the dialog tool script/executable.
+// CreateToolContext creates a prompt context for the dialog tool script/executable.
 func CreateToolContext(execCtx cm.IExecContext, tool cm.IExecutable) (ToolContext, error) {
 	return ToolContext{execCtx: execCtx, tool: tool}, nil
 }

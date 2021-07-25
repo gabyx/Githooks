@@ -28,14 +28,14 @@ func OutputArray(l []string, sep string) (err error) {
 	return
 }
 
-// Outputs a single string.
+// OutputString outputs a single string.
 func OutputString(s string) (err error) {
 	_, err = os.Stdout.WriteString(s)
 
 	return
 }
 
-// OutputArray outputs an index array to std output.
+// OutputIndexArray outputs an index array to std output.
 func OutputIndexArray(l []uint, sep string) error {
 	return OutputArray(indicesToList(l), sep)
 }

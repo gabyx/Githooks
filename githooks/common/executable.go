@@ -29,7 +29,7 @@ func (e *Executable) GetArgs(args ...string) []string {
 	return append(e.Args, args...)
 }
 
-// GetArgs gets all args.
+// GetString gets all args.
 func (e *Executable) GetString() string {
 	return strs.Fmt("%s %q", e.Cmd, e.Args)
 }

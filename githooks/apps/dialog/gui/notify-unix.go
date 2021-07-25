@@ -11,6 +11,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+// ShowNotification shows a system notifaction.
 func ShowNotification(ctx context.Context, s *set.Notification) error {
 
 	args := []string{"--notification"}

@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	// GithooksEmoji is the general Githooks emojii.
 	GithooksEmoji = "🦎"
 
 	githooksSuffix = "" // If you like you can make it: "Githooks: "

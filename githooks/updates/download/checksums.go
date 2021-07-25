@@ -13,13 +13,13 @@ import (
 // the checksums content.
 func verifyChecksums(checksums Checksums, publicPGP string) ([]byte, error) {
 
-	checksumFile, err := DownloadFile(checksums.File.URL)
+	checksumFile, err := GetFile(checksums.File.URL)
 	if err != nil {
 		return nil, err
 	}
 	defer checksumFile.Body.Close()
 
-	checksumFileSignature, err := DownloadFile(checksums.FileSignature.URL)
+	checksumFileSignature, err := GetFile(checksums.FileSignature.URL)
 	if err != nil {
 		return nil, err
 	}

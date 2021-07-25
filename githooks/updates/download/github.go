@@ -65,7 +65,7 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 				"Something is fishy!"))
 	}
 
-	response, err := DownloadFile(target.URL)
+	response, err := GetFile(target.URL)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}

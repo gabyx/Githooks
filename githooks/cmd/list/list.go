@@ -383,13 +383,13 @@ func formatHookState(
 	const disabledStateFmt = " state: ['disabled']"
 	const categeoryFmt = ", type: '%[4]s'"
 	const namespaceFmt = ", ns-path: '%[5]s'"
-	const batchIdFmt = ", batch: '%[6]s'"
+	const batchIDFmt = ", batch: '%[6]s'"
 
 	hookPath := strs.Fmt("'%s'", path.Base(hook.Path))
 	if isGithooksDisabled {
 		fmt := hooksFmt + disabledStateFmt + categeoryFmt + namespaceFmt
 		if withBatchName {
-			fmt += batchIdFmt
+			fmt += batchIDFmt
 		}
 		_, err := strs.FmtW(w, fmt,
 			hookPath, "", "", categeory, hook.NamespacePath, hook.BatchName)
@@ -412,7 +412,7 @@ func formatHookState(
 
 	fmt := hooksFmt + stateFmt + categeoryFmt + namespaceFmt
 	if withBatchName {
-		fmt += batchIdFmt
+		fmt += batchIDFmt
 	}
 
 	_, err := strs.FmtW(w, fmt,

@@ -6,9 +6,9 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 )
 
-// DownloadFile downloads a file from a `url`.
+// GetFile downloads a file from a `url`.
 // Response body needs to be closed by caller.
-func DownloadFile(url string) (response *http.Response, err error) {
+func GetFile(url string) (response *http.Response, err error) {
 	// Get the response bytes from the url
 	response, err = http.Get(url)
 	if err != nil {

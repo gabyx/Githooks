@@ -9,6 +9,7 @@ const (
 	extraButtonAction
 )
 
+// General holds common result info.
 type General struct {
 	Action         actionState
 	ExtraButtonIdx uint `yaml:"extraButtonIdx"`

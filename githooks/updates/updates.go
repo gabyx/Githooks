@@ -526,12 +526,16 @@ func formatUpdateInfo(updateInfo []string) string {
 			}), "\n"))
 }
 
+// AcceptNonInteractiveMode is the type for the non-interactive behavior when accepting an update.
 type AcceptNonInteractiveMode int
 
 const (
-	AcceptNonInteractiveNone         AcceptNonInteractiveMode = 0
-	AcceptNonInteractiveAll          AcceptNonInteractiveMode = 1
+	// AcceptNonInteractiveNone accepts no updates.
+	AcceptNonInteractiveNone AcceptNonInteractiveMode = 0
+	// AcceptNonInteractiveOnlyNonMajor accepts only non-major updates.
 	AcceptNonInteractiveOnlyNonMajor AcceptNonInteractiveMode = 2
+	// AcceptNonInteractiveAll accepts all updates.
+	AcceptNonInteractiveAll AcceptNonInteractiveMode = 1
 )
 
 // DefaultAcceptUpdateCallback creates a default accept update callback
@@ -598,7 +602,7 @@ func DefaultAcceptUpdateCallback(
 	}
 }
 
-// RunUpdateOverExecutbale executes the installer to run the update.
+// RunUpdateOverExecutable executes the installer to run the update.
 func RunUpdateOverExecutable(
 	installDir string,
 	execC cm.IExecContext,

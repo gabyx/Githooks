@@ -62,7 +62,7 @@ func downloadGitea(url string, owner string, repo string, versionTag string, dir
 				"Something is fishy!"))
 	}
 
-	response, err := DownloadFile(target.URL)
+	response, err := GetFile(target.URL)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}

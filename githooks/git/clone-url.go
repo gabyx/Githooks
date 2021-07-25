@@ -48,12 +48,12 @@ func ParseSCPSyntax(url string) ShortSCP {
 func (scp ShortSCP) String() string {
 	if strs.IsEmpty(scp[0]) {
 		return scp[1] + ":" + scp[2]
-	} else {
-		return scp[0] + "@" + scp[1] + ":" + scp[2]
 	}
+
+	return scp[0] + "@" + scp[1] + ":" + scp[2]
 }
 
-// IsRemoteHelperSyntax checks if `url` is a remote helper syntax.
+// IsCloneURLARemoteHelperSyntax checks if `url` is a remote helper syntax.
 // https://git-scm.com/docs/gitremote-helpers
 func IsCloneURLARemoteHelperSyntax(url string) bool {
 	return reRemoteHelperSyntax.MatchString(url)

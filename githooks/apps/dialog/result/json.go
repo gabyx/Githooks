@@ -1,5 +1,6 @@
 package result
 
+// JSONResult holds the data for the dialog executable Json result.
 type JSONResult struct {
 	Version int
 	Timeout bool

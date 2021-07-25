@@ -14,6 +14,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+// ShowEntry shows an entry dialog.
 func ShowEntry(ctx context.Context, entry *set.Entry) (r res.Entry, err error) {
 
 	args := []string{"--entry"}

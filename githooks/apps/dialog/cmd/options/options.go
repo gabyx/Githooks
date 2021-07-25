@@ -39,6 +39,7 @@ func handleResult(ctx *dcm.CmdContext, r *res.Options, err error, sep string) er
 		printRes, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
+// NewCmd creates the options command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 
 	settings := set.Options{}

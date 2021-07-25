@@ -28,6 +28,7 @@ func handleResult(ctx *dcm.CmdContext, r *res.Entry, err error) error {
 		}, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
+// NewCmd creates the entry command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 
 	settings := set.Entry{}

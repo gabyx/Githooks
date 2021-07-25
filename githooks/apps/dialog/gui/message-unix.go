@@ -13,6 +13,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+// ShowMessage shows a message dialog.
 func ShowMessage(ctx context.Context, msg *set.Message) (r res.Message, err error) {
 
 	msg.SetDefaultIcons()

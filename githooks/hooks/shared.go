@@ -163,19 +163,19 @@ func trimBranchSuffix(s string) (prefix, branch string) {
 	return
 }
 
-func parseSharedURLBranch(sharedUrl string) (prefix string, branch string, err error) {
+func parseSharedURLBranch(sharedURL string) (prefix string, branch string, err error) {
 
-	if !strings.ContainsAny(sharedUrl, "@") {
-		prefix = sharedUrl
+	if !strings.ContainsAny(sharedURL, "@") {
+		prefix = sharedURL
 
 		return
 	}
 
-	if git.IsCloneURLANormalURL(sharedUrl) {
+	if git.IsCloneURLANormalURL(sharedURL) {
 
 		// Parse normal URL.
 		var u *url.URL
-		u, err = url.Parse(sharedUrl)
+		u, err = url.Parse(sharedURL)
 		if err != nil {
 			return
 		}
@@ -185,20 +185,20 @@ func parseSharedURLBranch(sharedUrl string) (prefix string, branch string, err e
 
 		return
 
-	} else if scp := git.ParseSCPSyntax(sharedUrl); scp != nil {
+	} else if scp := git.ParseSCPSyntax(sharedURL); scp != nil {
 		// Try parse as SCP syntax.
 		scp[2], branch = trimBranchSuffix(scp[2])
 		prefix = scp.String()
 
 		return
 
-	} else if git.IsCloneURLARemoteHelperSyntax(sharedUrl) {
+	} else if git.IsCloneURLARemoteHelperSyntax(sharedURL) {
 		// Don't do anything for remote helper syntax.
 		return
 	}
 
 	// Otherwise its a local path, try our best to remove the branch '...@(.*)'
-	prefix, branch = trimBranchSuffix(sharedUrl)
+	prefix, branch = trimBranchSuffix(sharedURL)
 
 	return
 }
@@ -596,7 +596,7 @@ func SetDisableSharedHooksUpdate(gitx *git.Context, enable bool, reset bool, sco
 	}
 }
 
-// IsSharedHooksUpdateDisable checks if automatic updates for shared hooks is disabled.
+// IsSharedHooksUpdateDisabled checks if automatic updates for shared hooks is disabled.
 func IsSharedHooksUpdateDisabled(gitx *git.Context, scope git.ConfigScope) (disabled bool, isSet bool) {
 	conf := gitx.GetConfig(GitCKAutoUpdateSharedHooksDisabled, scope)
 	switch {

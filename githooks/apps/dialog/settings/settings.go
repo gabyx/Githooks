@@ -149,6 +149,7 @@ type FileSelection struct {
 	MultipleSelection bool
 }
 
+// SetDefaultIcons sets default icons for message dialogs.
 func (s *Message) SetDefaultIcons() {
 
 	switch s.Style {

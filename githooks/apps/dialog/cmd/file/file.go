@@ -27,6 +27,7 @@ func handleResult(ctx *dcm.CmdContext, r *res.File, err error, sep string) error
 		}, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
+// NewCmd creates the file command.
 func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 
 	setSave := set.FileSave{}

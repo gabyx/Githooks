@@ -31,6 +31,7 @@ func getChoices(output string) (indices []uint) {
 	return
 }
 
+// ShowOptions shows a option dialog.
 func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
 
 	if len(opts.Options) == 0 {

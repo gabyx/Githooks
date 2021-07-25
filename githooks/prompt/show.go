@@ -6,7 +6,7 @@ package prompt
 // is really a terminal.
 const AssertOutputIsTerminal = true
 
-// In general we enable the GUI dialogs
+// EnableGUI in general enables the GUI dialogs
 // For testing this is disabled.
 var EnableGUI = true
 
@@ -19,7 +19,7 @@ func (p *Context) ShowOptions(text string,
 	return showOptions(p, text, hintText, shortOptions, longOptions...)
 }
 
-// ShowPrompt shows a prompt to enter an answer and
+// ShowEntry shows a prompt to enter an answer and
 // validates it with a validator.
 func (p *Context) ShowEntry(
 	text string,

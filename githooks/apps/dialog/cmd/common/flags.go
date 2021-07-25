@@ -44,6 +44,7 @@ func addFlagsGeneralFile(cmd *cobra.Command, s *set.GeneralFile) {
 	cmd.Flags().BoolVar(&s.OnlyDirectories, "directory", false, "Activate directory-only selection.")
 }
 
+// AddFlagsMessage adds flags to the message command.
 func AddFlagsMessage(cmd *cobra.Command, s *set.Message) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
@@ -57,6 +58,7 @@ func AddFlagsMessage(cmd *cobra.Command, s *set.Message) {
 One of ['info', 'warning', 'error', 'question']`)
 }
 
+// AddFlagsOptions adds flags to the options command.
 func AddFlagsOptions(cmd *cobra.Command, s *set.Options) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
@@ -73,6 +75,7 @@ the first '--option'.`)
 	cmd.Flags().BoolVar(&s.MultipleSelection, "multiple", false, "Allow multiple selections.")
 }
 
+// AddFlagsEntry adds flags to the entry command.
 func AddFlagsEntry(cmd *cobra.Command, s *set.Entry) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralText(cmd, &s.GeneralText)
@@ -86,11 +89,13 @@ One of ['info', 'warning', 'error', 'question']`)
 	cmd.Flags().BoolVar(&s.HideDefaultEntry, "hide-entry", false, "Hide the text in the entry field.")
 }
 
+// AddFlagsNotification adds flags to the notification command.
 func AddFlagsNotification(cmd *cobra.Command, s *set.Notification) {
 	addFlagsGeneral(cmd, &s.General)
 	cmd.Flags().StringVar(&s.Text, "text", "", "Notification text.")
 }
 
+// AddFlagsFileSave adds flags to the file-save command.
 func AddFlagsFileSave(cmd *cobra.Command, s *set.FileSave) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralFile(cmd, &s.GeneralFile)
@@ -103,6 +108,7 @@ Cannot be disabled on macOS.`)
 		"Confirm if the chosen path does not exist (only Windows)")
 }
 
+// AddFlagsFileSelection adds flags to the file-selection command.
 func AddFlagsFileSelection(cmd *cobra.Command, s *set.FileSelection) {
 	addFlagsGeneral(cmd, &s.General)
 	addFlagsGeneralFile(cmd, &s.GeneralFile)

@@ -446,7 +446,7 @@ func GetCommitSHA(gitx *Context, ref string) (string, error) {
 	return gitx.Get("rev-parse", ref)
 }
 
-// GetLFSRequiredFile gets the LFS config file inside the repository and
+// GetLFSConfigFile gets the LFS config file inside the repository and
 // `true` if existing.
 func GetLFSConfigFile(repoDir string) (string, bool) {
 	s := path.Join(repoDir, ".lfsconfig")

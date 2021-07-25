@@ -12,6 +12,7 @@ import (
 // InstallIntoRepo installs run-wrappers into a repositories
 // It prompts for disabling detected LFS hooks and offers to
 // setup a README file.
+//nolint
 func InstallIntoRepo(
 	log cm.ILogContext,
 	repoGitDir string,

@@ -18,6 +18,7 @@ func handleResult(ctx *dcm.CmdContext, err error) error {
 	return err
 }
 
+// NewCmd creates the notify command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 
 	settings := set.Notification{}

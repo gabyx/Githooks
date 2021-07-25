@@ -9,6 +9,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+// GetZenityExecutable gets the installed `zenity` executable.
 func GetZenityExecutable() string {
 	for _, tool := range [3]string{"zenity", "qarma", "matedialog"} {
 		path, err := exec.LookPath(tool)
