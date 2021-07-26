@@ -19,10 +19,20 @@ if [ -n "$GH_COVERAGE_DIR" ]; then
     sed -i -E '/^.*gabyx\/githooks\/githooks\/prompt\/show-gui-impl\.go.*$/d' "$GH_COVERAGE_DIR/all.cov"
 fi
 
+service="travis-ci"
+if [ -n "$TRAVIS" ]; then
+    service="travis-ci"
+elif [ -n "$CIRCLECI" ]; then
+    service="circle-ci"
+else
+    echo "! Service environment not implemented for goveralls."
+    exit 1
+fi
+
 # shellcheck disable=SC2015
 cd "githooks" &&
     scripts/build.sh && # Generate all files again such that we can upload the coverage
-    goveralls --coverprofile="$GH_COVERAGE_DIR/all.cov" --service=travis-ci \
+    goveralls --coverprofile="$GH_COVERAGE_DIR/all.cov" --service="$service" \
         --reponame githooks --repotoken="$COVERALLS_TOKEN" || {
     echo "! Goveralls failed." >&2
     exit 1

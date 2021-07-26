@@ -118,11 +118,9 @@ docker run --rm \
     -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks \
+    -e CIRCLE_BUILD_NUM="$CIRCLE_BUILD_NUM" \
+    -e CIRCLE_PR_NUMBER="$CIRCLE_PR_NUMBER" \
     -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" \
-    -e TRAVIS_JOB_NAME="$TRAVIS_JOB_NAME" \
-    -e TRAVIS_JOB_NUMBER="$TRAVIS_JOB_NUMBER" \
     -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" \
-    -e TRAVIS_PULL_REQUEST_BRANCH="$TRAVIS_PULL_REQUEST_BRANCH" \
-    -e TRAVIS_PULL_REQUEST_SHA="$TRAVIS_PULL_REQUEST_SHA" \
     "githooks:$IMAGE_TYPE-base" \
     ./tests/upload-coverage.sh || exit $?

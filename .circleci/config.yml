@@ -1,0 +1,78 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.3.0
+
+jobs:
+  testsAll:
+    machine:
+      image: ubuntu-2004:202010-01
+    parallelism: 8
+    steps:
+      - checkout
+      - run:
+          command: circleci tests glob "tests/test-*" |
+            grep -Ev "windows" | circleci tests split | xargs -n 1 sh
+
+  linux:
+    parameters:
+      test:
+        description: "The test script name"
+        default: "test-alpine"
+        type: string
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - checkout
+      - run: sh tests/<<parameters.test>>.sh
+
+  windows:
+    parameters:
+      test:
+        description: "The test script name"
+        default: "test-alpine"
+        type: string
+    executor: win/default
+    steps:
+      - checkout
+      - run:
+          command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
+
+workflows:
+  version: 2
+  test-all:
+    jobs:
+      - linux:
+          matrix:
+            parameters:
+              test:
+                [
+                  "test-alpine",
+                  "test-alpine-nolfs",
+                  "test-alpine-user",
+                  "test-corehookspath",
+                  "test-whitespace",
+                  "test-testsuite",
+                  "test-rules",
+                ]
+          filters: &filters
+            branches:
+              only: &task-branches
+                - /feature\/.*/
+                - /bugfix\/.*/
+      - linux:
+          matrix:
+            parameters:
+              test: ["test-coverage"]
+          filters:
+            branches:
+              only:
+                - /feature\/.*/
+                - /bugfix\/.*/
+                - "main"
+
+      - windows:
+          matrix:
+            parameters:
+              test: ["test-windows"]
+          filters: *filters
