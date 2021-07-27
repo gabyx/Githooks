@@ -118,8 +118,10 @@ docker run --rm \
     -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks \
+    -e CIRCLECI \
     -e CIRCLE_BUILD_NUM="$CIRCLE_BUILD_NUM" \
     -e CIRCLE_PR_NUMBER="$CIRCLE_PR_NUMBER" \
+    -e TRAVIS \
     -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" \
     -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" \
     "githooks:$IMAGE_TYPE-base" \

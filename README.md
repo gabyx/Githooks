@@ -875,7 +875,7 @@ which will start the `delve` debugger headless as a server in a terminal. You ca
 ### Version v2.x.x
 
 For upgrading from `v1.x.x` to `v2.x.x` consider
-the [braking change documention](docs/changes/Braking-Changes-v2.0.0.md).
+the [braking change documention](docs/changes/Braking-Changes-v2.md).
 
 ## FAQ
 
