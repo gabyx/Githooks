@@ -16,7 +16,7 @@ if [ ! -x "$GITHOOKS_RUNNER" ]; then
 fi
 
 [ -z "$GH_COVERAGE_DIR" ] && {
-    echo "! Env variables 'GH_COVERAGE_DIR' not set"
+    echo "! Env variables 'GH_COVERAGE_DIR' not set" >&2
     exit 1
 }
 
@@ -25,8 +25,8 @@ COUNTER=$(head -1 "$COV_DATA" | sed -E 's@counter: ([0-9]+)@\1@')
 [ -z "$COUNTER" ] && COUNTER="0"
 COV_FILE="$GH_COVERAGE_DIR/runner-$COUNTER.cov"
 [ -f "$COV_FILE" ] && {
-    echo "! Coverage file '$COV_FILE' already existing."
+    echo "! Coverage file '$COV_FILE' already existing." >&2
     exit 1
 }
-echo "Writting to '$COV_FILE'"
+echo "Writing to '$COV_FILE'" >&2
 exec "$GITHOOKS_RUNNER" -test.coverprofile "$COV_FILE" githooksCoverage "$0" "$@"
