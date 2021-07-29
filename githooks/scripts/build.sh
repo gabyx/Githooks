@@ -14,6 +14,7 @@ BIN_DIR=""
 BUILD_TAGS=""
 BUILD_COVERAGE=""
 DEBUG_TAG="debug"
+LD_FLAGS=""
 
 export CGO_ENABLED=0
 
@@ -32,6 +33,7 @@ parseArgs() {
             BUILD_COVERAGE="true"
         elif [ "$p" = "--prod" ]; then
             DEBUG_TAG=""
+            LD_FLAGS="-ldflags -s -w" # strip debug information
         else
             echo "! Unknown argument \`$p\`" >&2
             return 1
@@ -67,7 +69,7 @@ if [ -z "$BUILD_COVERAGE" ]; then
     echo "go install ..."
     go generate -mod=vendor ./...
     # shellcheck disable=SC2086
-    go install -mod=vendor -tags "$BUILD_TAGS" ./...
+    go install -mod=vendor -tags "$BUILD_TAGS" $LD_FLAGS ./...
 else
     echo "Build coverage ..."
     BUILD_TAGS="$BUILD_TAGS,coverage"
