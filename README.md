@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/Githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/Githooks?branch=main)
-[![goreleaser](https://github.com/gabyx/Githooks/actions/workflows/release.yml/badge.svg)](https://github.com/gabyx/Githooks/actions/workflows/release.yml)
+[![goreleaser](https://github.com/gabyx/Githooks/actions/workflows/release.yml/badge.svg?branch=prepare-v2.0.3)](https://github.com/gabyx/Githooks/actions/workflows/release.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gabyx/githooks)](https://goreportcard.com/report/github.com/gabyx/githooks)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)

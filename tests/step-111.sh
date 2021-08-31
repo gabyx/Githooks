@@ -40,45 +40,47 @@ y
 $GH_TEST_TMP
 y
 
-n
+s
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if [ -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
-    echo '! Expected hook to be deleted'
+    echo '! Expected hook to be deleted (1)'
     exit 1
 fi
 if [ ! -f "$GH_TEST_TMP/test109.2/.git/hooks/pre-commit.disabled.githooks" ] &&
     [ ! -f "$GH_TEST_TMP/test109.3/.git/hooks/pre-commit.disabled.githooks" ]; then
-    echo '! Expected hook to be moved'
+    echo '! Expected hook to be moved (2)'
     exit 1
 fi
 
 cd "$GH_TEST_TMP/test109.2" &&
     git commit --allow-empty -m 'Init' 2>/dev/null || exit 1
 if grep 'Previous2' "$GH_TEST_TMP/test-109.out"; then
-    echo '! Expected hook to be disabled'
+    echo '! Expected hook to be disabled (3)'
     exit 1
 fi
 
 cd "$GH_TEST_TMP/test109.3" &&
     git commit --allow-empty -m 'Init' 2>/dev/null || exit 1
 if grep 'Previous3' "$GH_TEST_TMP/test-109.out"; then
-    echo '! Expected hook to be disabled'
+    echo '! Expected hook to be disabled (4)'
     exit 1
 fi
 
 out=$("$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --print)
-if ! echo "$out" | grep -q "default disabled and backed up"; then
-    echo "! Expected the correct config behavior"
+if ! echo "$out" | grep -q "but instead backed up"; then
+    echo "! Expected the correct config behavior (5)"
     echo "$out"
+    exit 1
 fi
 
 # For coverage
 "$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --reset || exit 1
 out=$("$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --print)
-if ! echo "$out" | grep -q "default disabled and backed up"; then
-    echo "! Expected the correct config behavior"
+if ! echo "$out" | grep -q "left to the user"; then
+    echo "! Expected the correct config behavior (6)"
     echo "$out"
+    exit 1
 fi
 
 # Reset every repo and do again
@@ -93,15 +95,16 @@ echo "n
 y
 $GH_TEST_TMP
 N
+
 a
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
 if [ ! -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
-    echo '! Expected hook to be moved'
+    echo '! Expected hook to be moved (7)'
     exit 1
 fi
 if [ -f "$GH_TEST_TMP/test109.2/.git/hooks/pre-commit.disabled.githooks" ] &&
     [ -f "$GH_TEST_TMP/test109.3/.git/hooks/pre-commit.disabled.githooks" ]; then
-    echo '! Expected hook to be deleted'
+    echo '! Expected hook to be deleted (8)'
     exit 1
 fi

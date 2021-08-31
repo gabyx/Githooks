@@ -40,8 +40,10 @@ func GetHookDisableCallback(
 
 			log.AssertNoError(err, "Could not show prompt.")
 
-			if userAnswer == "s" || userAnswer == "a" {
-				uiSettings.DeleteDetectedLFSHooks = userAnswer // Store the decision.
+			if userAnswer == "s" {
+				uiSettings.DeleteDetectedLFSHooks = "n" // Store the decision.
+			} else if userAnswer == "a" {
+				uiSettings.DeleteDetectedLFSHooks = "y" // Store the decision.
 			}
 
 		}
@@ -54,7 +56,7 @@ func GetHookDisableCallback(
 
 			return hooks.DeleteHook
 		default:
-			log.WarnF("Previous hook '%s' will be disabled (backuped)", file)
+			log.WarnF("Previous hook '%s' will be disabled (backed up)", file)
 
 			return hooks.BackupHook
 		}

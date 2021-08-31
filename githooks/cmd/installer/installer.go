@@ -1083,7 +1083,7 @@ func storeSettings(log cm.ILogContext, settings *Settings, uiSettings *install.U
 	if strs.IsNotEmpty(uiSettings.DeleteDetectedLFSHooks) {
 		err := git.Ctx().SetConfig(
 			hooks.GitCKDeleteDetectedLFSHooksAnswer, uiSettings.DeleteDetectedLFSHooks, git.GlobalScope)
-		log.AssertNoError(err, "Could not store config 'githooks.deleteDetectedLFSHooks'.")
+		log.AssertNoError(err, "Could not store config '%v'.", uiSettings.DeleteDetectedLFSHooks)
 	}
 
 	err := settings.RegisteredGitDirs.Store(settings.InstallDir)
