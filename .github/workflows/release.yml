@@ -5,7 +5,7 @@ on:
     tags:
       # This is not a real version tag, its just used to trigger
       # the release build. Glob pattern:
-      - 'prepare-v[0-9]+.[0-9]+.[0-9]+*'
+      - "prepare-v[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
   goreleaser:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-            go-version: 1.16
+          go-version: 1.16
 
       - name: Import GPG Key
         id: import_gpg
@@ -36,13 +36,21 @@ jobs:
 
       - name: "Tag release commit"
         env:
-            RELEASE_TAG : ${{ steps.getTag.outputs.releaseTag }}
+          RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
         run: |
           git config user.name 'githooks-bot'
           git config user.email 'githooks-bot@users.noreply.github.com'
           git tag "$RELEASE_TAG"
           git tag "githooks/$RELEASE_TAG"
-
+      - name: Safety Check
+        env:
+          CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
+        run: |
+          c=$(git rev-parse "$CURRENT_TAG")
+          [ -n "$(git rev-list --first-parent "$c^@..main")" ] || {
+            echo "Tag is not reachable from main (--first-parent) !" >&2
+            exit 1
+          }
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -50,14 +58,14 @@ jobs:
           workdir: githooks
           args: release --rm-dist
         env:
-          GORELEASER_CURRENT_TAG : ${{ steps.getTag.outputs.releaseTag }}
+          GORELEASER_CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
       - name: "Push release tags and delete trigger tag"
         env:
-          RELEASE_TAG : ${{ steps.getTag.outputs.releaseTag }}
-          TRIGGER_TAG : ${{ steps.getTag.outputs.triggerTag }}
+          RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
+          TRIGGER_TAG: ${{ steps.getTag.outputs.triggerTag }}
         run: |
           git push origin "$RELEASE_TAG" "githooks/$RELEASE_TAG"
           git push -f origin ":$TRIGGER_TAG"
