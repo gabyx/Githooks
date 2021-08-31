@@ -63,7 +63,7 @@ var lfsDetectionRe = regexp.MustCompile(`(git\s+lfs|git-lfs)`)
 type HookDisableOption int
 
 const (
-	// BackupHook defines that a hook file gets backuped.
+	// BackupHook defines that a hook file gets backed up.
 	BackupHook HookDisableOption = 1
 	// DeleteHook defines that a hook file gets deleted.
 	DeleteHook HookDisableOption = 2

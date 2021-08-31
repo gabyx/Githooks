@@ -175,14 +175,14 @@ if ! echo "$OUT" | grep "step4.1" | grep -q -E "ns-path: +'ns:gh-self/post-commi
 fi
 
 # Check if we can get the location
-root1=$(git hooks shared root "ns:repo1")
+root1=$("$GH_INSTALL_BIN_DIR/cli" shared root "ns:repo1")
 if [ "$root1" != "$location1" ]; then
     echo "! Unexpected cli shared root output (15):"
     echo "'$root1' != '$location1'"
     exit 1
 fi
 
-root2=$(git hooks shared root "ns:repo2")
+root2=$("$GH_INSTALL_BIN_DIR/cli" shared root "ns:repo2")
 if [ "$root2" != "$location2" ]; then
     echo "! Unexpected cli shared root output (16):"
     echo "'$root2' != '$location2'"
@@ -190,7 +190,7 @@ if [ "$root2" != "$location2" ]; then
     exit 1
 fi
 
-root3=$(git hooks shared root "ns:repo3")
+root3=$("$GH_INSTALL_BIN_DIR/cli" shared root "ns:repo3")
 if [ "$root3" != "$location3" ]; then
     echo "! Unexpected cli shared root output (17):"
     echo "'$root3' != '$location3'"
