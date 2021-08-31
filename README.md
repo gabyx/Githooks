@@ -36,7 +36,6 @@ Also it searches for hooks in configured shared hook repositories.
 <summary><b>Table of Content (click to expand)</b></summary>
 <!-- TOC -->
 
-- [asdasd](#asdasd)
 - [Layout and Options](#layout-and-options)
 - [Execution](#execution)
   - [Hook Run Configuration](#hook-run-configuration)
@@ -88,8 +87,6 @@ Also it searches for hooks in configured shared hook repositories.
 
 <!-- /TOC -->
 </details>
-
-## asdasd
 
 ## Layout and Options
 
