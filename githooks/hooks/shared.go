@@ -308,7 +308,7 @@ func saveConfigSharedHooks(gitx *git.Context, scope git.ConfigScope, config *sha
 
 // LoadConfigSharedHooks gets all shared hooks that are specified in
 // the local/global Git configuration.
-// No checks are made to the filesystem if paths are existing in `SharedHook`.
+// No checks are made to the filesystem if paths are existing in `SharedRepo`.
 func LoadConfigSharedHooks(
 	installDir string,
 	gitx *git.Context,
@@ -320,7 +320,7 @@ func LoadConfigSharedHooks(
 }
 
 // LoadRepoSharedHooks gets all shared hooks that reside inside `hooks.GetRepoSharedFile()`
-// No checks are made to the filesystem if paths are existing in `SharedHook`.
+// No checks are made to the filesystem if paths are existing in `SharedRepo`.
 func LoadRepoSharedHooks(installDir string, repoDir string) (hooks []SharedRepo, err error) {
 	file := GetRepoSharedFile(repoDir)
 

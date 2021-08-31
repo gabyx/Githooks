@@ -4,7 +4,7 @@ Update shared repositories.
 
 ### Synopsis
 
-Update all the shared repositories, either by
+Update all shared repositories, either by
 running `git pull` on existing ones or `git clone` on new ones.
 
 ```

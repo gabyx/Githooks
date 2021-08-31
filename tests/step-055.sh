@@ -11,13 +11,13 @@ acceptAllTrustPrompts || exit 1
 "$GH_TEST_BIN/cli" installer || exit 1
 
 url1="ssh://git@github.com/test/repo1.git"
-location1=$("$GH_INSTALL_BIN_DIR/cli" shared location "$url1") || exit 1
+location1=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url1") || exit 1
 
 url2="https://github.com/test/repo2.git"
-location2=$("$GH_INSTALL_BIN_DIR/cli" shared location "$url2") || exit 1
+location2=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url2") || exit 1
 
 url3="ftp://github.com/test/repo3.git"
-location3=$("$GH_INSTALL_BIN_DIR/cli" shared location "$url3") || exit 1
+location3=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url3") || exit 1
 
 # Shared with hooks in root directory.
 mkdir -p "$location1"/pre-commit &&
@@ -171,5 +171,29 @@ if ! echo "$OUT" | grep "step4.1" | grep -q -E "ns-path: +'ns:gh-self/post-commi
     ! echo "$OUT" | grep "step4.2" | grep -q -E "batch: +'step-4'"; then
     echo "! Unexpected cli list output (14):"
     echo "$OUT"
+    exit 1
+fi
+
+# Check if we can get the location
+root1=$(git hooks shared root "ns:repo1")
+if [ "$root1" != "$location1" ]; then
+    echo "! Unexpected cli shared root output (15):"
+    echo "'$root1' != '$location1'"
+    exit 1
+fi
+
+root2=$(git hooks shared root "ns:repo2")
+if [ "$root2" != "$location2" ]; then
+    echo "! Unexpected cli shared root output (16):"
+    echo "'$root2' != '$location2'"
+
+    exit 1
+fi
+
+root3=$(git hooks shared root "ns:repo3")
+if [ "$root3" != "$location3" ]; then
+    echo "! Unexpected cli shared root output (17):"
+    echo "'$root3' != '$location3'"
+
     exit 1
 fi

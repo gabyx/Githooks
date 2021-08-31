@@ -31,7 +31,7 @@ mkdir -p "$GH_TEST_TMP/test082" &&
 testShared() {
 
     url1="file://$GH_TEST_TMP/shared/first-shared.git"
-    location1=$("$GH_INSTALL_BIN_DIR/cli" shared location "$url1") || exit 1
+    location1=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url1") || exit 1
 
     "$GH_INSTALL_BIN_DIR/cli" shared add --global "$url1" || exit 1
     "$GH_INSTALL_BIN_DIR/cli" shared list | grep "first-shared" | grep "pending" || exit 2

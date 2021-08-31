@@ -18,10 +18,10 @@ const (
 	GithooksEmoji = "🦎"
 
 	githooksSuffix = "" // If you like you can make it: "Githooks: "
-	debugSuffix    = "🛠 " + githooksSuffix
+	debugSuffix    = "🛠  " + githooksSuffix
 	infoSuffix     = GithooksEmoji + " " + githooksSuffix
-	warnSuffix     = "⛑ " + githooksSuffix
-	errorSuffix    = "⛔ "
+	warnSuffix     = "⛑  " + githooksSuffix
+	errorSuffix    = "⛔  "
 	promptSuffix   = "❓ " + githooksSuffix
 	indent         = "   "
 
