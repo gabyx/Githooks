@@ -26,7 +26,10 @@ import (
 )
 
 // NewSettings creates common settings to use for all commands.
-func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
+func NewSettings(
+	log cm.ILogContext,
+	logStats cm.ILogStats,
+	wrapPanicExitCode func()) ccm.CmdContext {
 
 	var promptCtx prompt.IContext
 	var err error
@@ -40,13 +43,14 @@ func NewSettings(log cm.ILogContext, logStats cm.ILogStats) ccm.CmdContext {
 	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 
 	return ccm.CmdContext{
-		Cwd:        cwd,
-		GitX:       git.CtxC(cwd),
-		InstallDir: installDir,
-		CloneDir:   hooks.GetReleaseCloneDir(installDir),
-		PromptCtx:  promptCtx,
-		Log:        log,
-		LogStats:   logStats}
+		Cwd:               cwd,
+		GitX:              git.CtxC(cwd),
+		InstallDir:        installDir,
+		CloneDir:          hooks.GetReleaseCloneDir(installDir),
+		PromptCtx:         promptCtx,
+		Log:               log,
+		LogStats:          logStats,
+		WrapPanicExitCode: wrapPanicExitCode}
 }
 
 func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
@@ -98,15 +102,20 @@ func initArgs() {
 }
 
 // Run executes the main CLI function.
-func Run(log cm.ILogContext, logStats cm.ILogStats) {
+func Run(log cm.ILogContext, logStats cm.ILogStats, wrapPanicExitCode func()) error {
 
-	ctx := NewSettings(log, logStats)
+	ctx := NewSettings(log, logStats, wrapPanicExitCode)
 	cmd := MakeGithooksCtl(&ctx)
 
 	err := cmd.Execute()
+
 	if err != nil {
-		_ = cmd.Help()
+		// If its not a command exit, print the help.
+		if _, ok := err.(ccm.CmdExit); !ok {
+			ctx.Log.AssertNoErrorF(err, "Command failed.")
+			_ = cmd.Help()
+		}
 	}
 
-	ctx.Log.AssertNoErrorPanic(err, "Command failed.")
+	return err
 }

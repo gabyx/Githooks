@@ -36,6 +36,7 @@ Also it searches for hooks in configured shared hook repositories.
 <summary><b>Table of Content (click to expand)</b></summary>
 <!-- TOC -->
 
+- [asdasd](#asdasd)
 - [Layout and Options](#layout-and-options)
 - [Execution](#execution)
   - [Hook Run Configuration](#hook-run-configuration)
@@ -87,6 +88,8 @@ Also it searches for hooks in configured shared hook repositories.
 
 <!-- /TOC -->
 </details>
+
+## asdasd
 
 ## Layout and Options
 
@@ -381,6 +384,10 @@ The priority to find hooks in a shared hook repository is as follows: consider h
 3. in `<hooksDir> := <sharedRepo>` as the last fallback.
 
 Each of these directories can be of the same format as the normal `.githooks` folder in a single repository.
+
+You can get the root directory of a configured shared repository with namespace `<namespace>` by running
+`git hooks shared root ns:<namespace>`. This might be helpful in scripts if you have common
+shared functionality inside this shared repository you want to use.
 
 ### Shared Repository Namespace
 

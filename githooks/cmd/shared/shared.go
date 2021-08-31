@@ -167,18 +167,18 @@ func runSharedList(ctx *ccm.CmdContext, opts *sharedOpts) {
 			ccm.AssertRepoRoot(ctx)
 		}
 
-		shared, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.LocalScope)
+		local, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.LocalScope)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
 
-		ctx.Log.InfoF("Local shared hook repositories:\n%s", format(shared))
+		ctx.Log.InfoF("Local shared hook repositories:\n%s", format(local))
 
 	}
 
 	if opts.Global {
-		shared, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.GlobalScope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
+		global, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.GlobalScope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not load global shared hook list.")
 
-		ctx.Log.InfoF("Global shared hook repositories:\n%s", format(shared))
+		ctx.Log.InfoF("Global shared hook repositories:\n%s", format(global))
 	}
 
 }
@@ -198,7 +198,61 @@ func runSharedUpdate(ctx *ccm.CmdContext) {
 	ctx.Log.InfoF("Update '%v' shared repositories.", updated)
 }
 
-func runSharedLocation(ctx *ccm.CmdContext, urls []string) {
+func runSharedRoot(ctx *ccm.CmdContext, namespaces []string) (exitCode error) {
+	ctx.WrapPanicExitCode()
+	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
+
+	for i := range namespaces {
+		ns := strings.TrimPrefix(namespaces[i], "ns:")
+		ctx.Log.PanicIfF(ns == namespaces[i],
+			"Specify namespace name '%s' with suffix 'ns:'.", namespaces[i])
+		namespaces[i] = ns
+	}
+
+	// Cycle through all shared hooks an return the first with matching namespace.
+	allRepos, err := hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
+	ctx.Log.AssertNoErrorPanicF(err, "Could not load shared hook list '%s'.", hooks.GetRepoSharedFileRel())
+	local, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.LocalScope)
+	ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
+	global, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.GlobalScope)
+	ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
+
+	allRepos = append(allRepos, local...)
+	allRepos = append(allRepos, global...)
+
+	roots := make([]string, len(namespaces))
+	found := 0
+
+	for rI := range allRepos {
+		if !cm.IsDirectory(allRepos[rI].RepositoryDir) {
+			continue
+		}
+
+		hooksDir := hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
+		ns, err := hooks.GetHooksNamespace(hooksDir)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
+
+		for nI := range namespaces {
+			if namespaces[nI] == ns {
+				roots[nI] = allRepos[rI].RepositoryDir
+				found++
+			}
+		}
+	}
+
+	for i := range roots {
+		_, err := ctx.Log.GetInfoWriter().Write([]byte(roots[i] + "\n"))
+		ctx.Log.AssertNoErrorF(err, "Could not write output.")
+	}
+
+	if found != len(roots) {
+		exitCode = ctx.NewCmdExit(1, "Did not find all shared repositories.")
+	}
+
+	return
+}
+
+func runSharedRootFromUrl(ctx *ccm.CmdContext, urls []string) {
 	for _, url := range urls {
 		location := hooks.GetSharedCloneDir(ctx.InstallDir, url)
 		_, err := ctx.Log.GetInfoWriter().Write([]byte(location + "\n"))
@@ -288,21 +342,36 @@ file is modified in the local repository.`, hooks.GetRepoSharedFileRel())
 	sharedUpdateCmd := &cobra.Command{
 		Use:   "update",
 		Short: `Update shared repositories.`,
-		Long: `Update all the shared repositories, either by
+		Long: `Update all shared repositories, either by
 running 'git pull' on existing ones or 'git clone' on new ones.`,
 		Aliases: []string{"pull"},
 		Run: func(cmd *cobra.Command, args []string) {
 			runSharedUpdate(ctx)
 		}}
 
-	sharedLocationCmd := &cobra.Command{
-		Use:    "location [URL]...",
-		Short:  `Get the clone location of a shared repository URL.`,
-		Long:   `Returns the clone location of a shared repository URL.`,
+	sharedRootCmd := &cobra.Command{
+		Use:   "root <namespace>...",
+		Short: `Get the root directory of shared repository in the current repository.`,
+		Long: `Returns root directories of shared repository in the current repository
+by its namespace name (e.g. 'ns:my-namespace').
+Exit-code '1' is returned only if any shared repositories have not been found.
+The returned directories may not yet exist and will be empty in that case.
+Run 'git hooks shared update' for them to exist.`,
+		PreRun: ccm.PanicIfNotRangeArgs(ctx.Log, 1, -1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSharedRoot(ctx, args)
+		}}
+
+	sharedRootFromUrlCmd := &cobra.Command{
+		Use:   "root-from-url <git-url>...",
+		Short: `Get the root directory of a shared repository '<git-url>'.`,
+		Long: `Returns the root locations shared repository '<git-url>'s.
+The returned directories may not yet exist exist and will be empty in that case.
+To ensure run 'git hooks shared update'.`,
 		Hidden: true,
 		PreRun: ccm.PanicIfNotRangeArgs(ctx.Log, 1, -1),
 		Run: func(cmd *cobra.Command, args []string) {
-			runSharedLocation(ctx, args)
+			runSharedRootFromUrl(ctx, args)
 		}}
 
 	addSharedOpts(sharedAddCmd, &opts, false)
@@ -319,7 +388,8 @@ running 'git pull' on existing ones or 'git clone' on new ones.`,
 
 	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedPurgeCmd))
 	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedUpdateCmd))
-	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedLocationCmd))
+	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedRootCmd))
+	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedRootFromUrlCmd))
 
 	return ccm.SetCommandDefaults(ctx.Log, sharedCmd)
 }

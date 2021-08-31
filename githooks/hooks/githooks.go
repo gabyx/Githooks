@@ -111,8 +111,22 @@ func GetGithooksDir(repoDir string) string {
 }
 
 // GetSharedGithooksDir gets the hooks directory for Githooks inside a shared repository.
-func GetSharedGithooksDir(repoDir string) string {
-	return path.Join(repoDir, "githooks")
+func GetSharedGithooksDir(repoDir string) (dir string) {
+
+	// 1. priority has non-dot folder 'githooks'
+	// 2. priority is the normal '.githooks' folder.
+	// This is second, to allow internal development Githooks inside shared repos.
+	// 3. Fallback to the whole repository.
+
+	if dir = path.Join(repoDir, "githooks"); cm.IsDirectory(dir) {
+		return
+	} else if dir = GetGithooksDir(repoDir); cm.IsDirectory(dir) {
+		return
+	}
+
+	dir = repoDir
+
+	return
 }
 
 // GetInstallDir returns the Githooks install directory.

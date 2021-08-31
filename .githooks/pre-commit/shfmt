@@ -12,7 +12,7 @@ fi
 SUCCESS=0
 for FILE in $STAGED_FILES; do
     if echo "$FILE" | grep -qE "\.sh$" &&
-        ! shfmt -p -d -i 4 "$FILE"; then
+        ! shfmt -d -i 4 "$FILE"; then
         echo "! shfmt problems detected in $FILE" >&2
         SUCCESS=1
     fi
