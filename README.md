@@ -517,7 +517,7 @@ The `runner` will show prompts, either in the terminal or as GUI dialog, in the 
 2. **Update prompts**: The user is requested to accept a new update if automatic updates are enabled (`git hooks update --enable`): **non-fatal**.
     - Various other prompts when the updater is launched: **non-fatal**.
 
-User prompts during `runner` execution are sometimes not desirable (server infastructure, docker container, etc...) and need to be disabled. Setting `git hooks config runner-non-interactive --enable --global` will:
+User prompts during `runner` execution are sometimes not desirable (server infastructure, docker container, etc...) and need to be disabled. Setting `git hooks config non-interactive-runner --enable --global` will:
 
 - Take default answers for all **non-fatal** prompts. No warnings are shown.
 - Take default answer for a **fatal prompt** if it is configured:
