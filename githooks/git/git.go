@@ -56,9 +56,9 @@ func (c *Context) GetConfig(key string, scope ConfigScope) string {
 	var err error
 
 	if scope != Traverse {
-		out, err = c.Get("config", string(scope), key)
+		out, err = c.Get("config", "--includes", string(scope), key)
 	} else {
-		out, err = c.Get("config", key)
+		out, err = c.Get("config", "--includes", key)
 	}
 
 	if err == nil {
@@ -75,9 +75,9 @@ func (c *Context) LookupConfig(key string, scope ConfigScope) (string, bool) {
 	var err error
 
 	if scope != Traverse {
-		out, err = c.Get("config", string(scope), key)
+		out, err = c.Get("config", "--includes", string(scope), key)
 	} else {
-		out, err = c.Get("config", key)
+		out, err = c.Get("config", "--includes", key)
 	}
 
 	if err == nil {
@@ -93,9 +93,9 @@ func (c *Context) getConfigWithArgs(key string, scope ConfigScope, args ...strin
 	var err error
 
 	if scope != Traverse {
-		out, err = c.Get(append(append([]string{"config"}, args...), string(scope), key)...)
+		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), string(scope), key)...)
 	} else {
-		out, err = c.Get(append(append([]string{"config"}, args...), key)...)
+		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), key)...)
 	}
 
 	if err != nil {
@@ -120,7 +120,7 @@ func (c *Context) GetConfigAllU(key string, scope ConfigScope) string {
 // GetConfigRegex gets all Git configuration values for regex `regex`.
 // Returns a list of pairs.
 func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]string) {
-	configs, err := c.Get("config", string(scope), "--get-regexp", regex)
+	configs, err := c.Get("config", "--includes", string(scope), "--get-regexp", regex)
 
 	if err != nil {
 		return
