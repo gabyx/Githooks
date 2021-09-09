@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 50
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -46,8 +46,9 @@ jobs:
         env:
           CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
         run: |
+          git fetch --depth 50 origin main
           c=$(git rev-parse "$CURRENT_TAG")
-          [ -n "$(git rev-list --first-parent "$c^..main")" ] || {
+          [ -n "$(git rev-list --first-parent "$c^..origin/main")" ] || {
             echo "Tag is not reachable from main (--first-parent) !" >&2
             exit 1
           }
