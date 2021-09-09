@@ -47,7 +47,7 @@ jobs:
           CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
         run: |
           c=$(git rev-parse "$CURRENT_TAG")
-          [ -n "$(git rev-list --first-parent "$c^@..main")" ] || {
+          [ -n "$(git rev-list --first-parent "$c^..main")" ] || {
             echo "Tag is not reachable from main (--first-parent) !" >&2
             exit 1
           }
