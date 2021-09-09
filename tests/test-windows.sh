@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
-FROM mcr.microsoft.com/windows/servercore:1809
+FROM mcr.microsoft.com/windows/servercore:2004
 
 # $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261324
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
