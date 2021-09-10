@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-if command -v "gsed" &>/dev/null; then
+if command -v gsed &>/dev/null; then
     SED="gsed"
 else
     SED="sed"
 fi
 
-if [ "$(echo "a" | $SED -E 's|a|\n|')" = "n" ]; then
+if ! $SED --version 2>&1 | grep -q "GNU"; then
     echo "! Install GNU sed for updating the templates." >&2
     exit 1
 fi

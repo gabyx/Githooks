@@ -136,7 +136,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 			continue
 		}
 
-		keyValue := strings.SplitN(list[i], " ", 2)
+		keyValue := strings.SplitN(list[i], " ", 2) // nolint: gomnd
 		cm.PanicIf(len(keyValue) == 0, "Wrong split.")
 		// Handle unset values
 		if len(keyValue) == 1 {

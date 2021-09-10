@@ -301,8 +301,8 @@ func (c *LogContext) GetInfoFormatter(withColor bool) func(format string, args .
 // ErrorWithStacktrace logs and error with the stack trace.
 func (c *LogContext) ErrorWithStacktrace(lines ...string) {
 	stackLines := strs.SplitLines(string(debug.Stack()))
-	l := append(lines, "", "Stacktrace:", "-----------")
-	c.Error(append(l, stackLines...)...)
+	lines = append(lines, "", "Stacktrace:", "-----------")
+	c.Error(append(lines, stackLines...)...)
 }
 
 // ErrorWithStacktraceF logs and error with the stack trace.

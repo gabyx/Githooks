@@ -22,7 +22,7 @@ func getChoices(output string) (indices []uint) {
 	indices = make([]uint, 0, len(out))
 
 	for i := range out {
-		idx, err := strconv.ParseUint(out[i], 10, 32)
+		idx, err := strconv.ParseUint(out[i], 10, 32) // nolint: gomnd
 		if err == nil {
 			indices = append(indices, uint(idx))
 		}
