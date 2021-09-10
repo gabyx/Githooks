@@ -1,4 +1,4 @@
-// +build coverage
+//go:build coverage
 
 package hooks
 

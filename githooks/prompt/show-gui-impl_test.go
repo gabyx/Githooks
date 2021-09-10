@@ -1,4 +1,4 @@
-// +build dontbuild
+//go:build dontbuild
 
 package prompt_test
 

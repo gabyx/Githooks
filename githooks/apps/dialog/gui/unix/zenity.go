@@ -1,4 +1,4 @@
-// +build !windwos,!darwin
+//go:build !windwos && !darwin
 
 package gui
 

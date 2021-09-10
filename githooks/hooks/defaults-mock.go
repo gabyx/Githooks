@@ -1,4 +1,4 @@
-// +build mock debug
+//go:build mock || debug
 
 package hooks
 

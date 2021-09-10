@@ -1,13 +1,14 @@
-// +build darwin
+//go:build darwin
 
 package gui
 
 import (
 	"context"
+	"strings"
+
 	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	strs "github.com/gabyx/githooks/githooks/strings"
-	"strings"
 )
 
 func ShowNotification(ctx context.Context, s *sets.Notification) error {
