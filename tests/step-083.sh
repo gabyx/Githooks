@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Cli tool: manage local shared hook repositories
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 acceptAllTrustPrompts || exit 1
@@ -30,7 +30,7 @@ mkdir -p "$GH_TEST_TMP/test083" &&
     cd "$GH_TEST_TMP/test083" &&
     git init || exit 1
 
-testShared() {
+function testShared() {
 
     url1="file://$GH_TEST_TMP/shared/first-shared.git"
     location1=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url1") || exit 1

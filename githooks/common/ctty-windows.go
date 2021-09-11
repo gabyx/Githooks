@@ -1,5 +1,4 @@
-// +build windows
-// +build !mock
+//go:build windows && !mock
 
 package common
 

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 
@@ -10,9 +11,9 @@ repoDir="$DIR/../.."
 
 cd "$repoDir" || exit 1
 
-if command -v "gstat" ; then
+if command -v "gstat" &>/dev/null; then
     STAT="gstat"
-else 
+else
     STAT="stat"
 fi
 
@@ -28,7 +29,6 @@ for FILE in $STAGED_FILES; do
                     echo "! Doc regeneration failed!" >&2
                     exit 1
                 }
-
 
                 git add "$repoDir/docs/cli/"*
 

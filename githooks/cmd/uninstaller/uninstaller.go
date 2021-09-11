@@ -106,7 +106,7 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings
 			InstallDir:         installDir,
 			CloneDir:           hooks.GetReleaseCloneDir(installDir),
 			TempDir:            tempDir,
-			UninstalledGitDirs: make(UninstallSet, 10),
+			UninstalledGitDirs: make(UninstallSet, 10), // nolint: gomnd
 			LFSAvailable:       git.IsLFSAvailable()},
 		UISettings{PromptCtx: promptCtx}
 }

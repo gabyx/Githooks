@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
-FROM golang:1.16-alpine
+FROM golang:1.17-alpine
 RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
 RUN curl -fsSL https://github.com/mvdan/sh/releases/download/v3.1.1/shfmt_v3.1.1_linux_amd64 -o /usr/local/bin/shfmt \
@@ -16,7 +16,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 
 EOF
 
-if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules sh "tests/exec-rules.sh"; then
+if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules tests/exec-rules.sh; then
     echo "! Check rules had failures."
     exit 1
 fi

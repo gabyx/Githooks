@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if [ "$1" = "--skip-docker-check" ]; then
     shift
@@ -30,18 +30,25 @@ export GH_INSTALL_DIR="$HOME/.githooks"
 export GH_INSTALL_BIN_DIR="$GH_INSTALL_DIR/bin"
 COMMIT_BEFORE=$(git -C "$GH_TEST_REPO" rev-parse HEAD)
 
-cleanDirs() {
-    if [ -w "$GH_TEST_GIT_CORE" ]; then
-        mkdir -p "$GH_TEST_GIT_CORE/templates/hooks"
+function cleanDirs() {
+
+    if [ -d "$GH_TEST_GIT_CORE" ]; then
+        mkdir -p "$GH_TEST_GIT_CORE/templates/hooks" || {
+            echo "! Cleanup failed."
+            exit 1
+        }
         rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"*
     fi
 
     rm -rf ~/test*
     rm -rf "$GH_TEST_TMP"
-    mkdir -p "$GH_TEST_TMP"
+    mkdir -p "$GH_TEST_TMP" || {
+        echo "! Cleanup failed."
+        exit 1
+    }
 }
 
-resetTestRepo() {
+function resetTestRepo() {
     # Reset test repo
     # shellcheck disable=SC2015
     git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null reset --hard "$COMMIT_BEFORE" >/dev/null 2>&1 &&
@@ -51,7 +58,7 @@ resetTestRepo() {
     }
 }
 
-unsetEnvironment() {
+function unsetEnvironment() {
     # Unset mock settings
     git config --global --unset githooks.testingTreatFileProtocolAsRemote
 
@@ -100,7 +107,7 @@ for STEP in "$GH_TESTS"/step-*.sh; do
 
     TEST_RUNS=$((TEST_RUNS + 1))
 
-    TEST_OUTPUT=$(sh "$STEP" 2>&1)
+    TEST_OUTPUT=$("$STEP" 2>&1)
     TEST_RESULT=$?
     # shellcheck disable=SC2181
     if [ $TEST_RESULT -eq 249 ]; then

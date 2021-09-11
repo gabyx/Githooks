@@ -49,7 +49,7 @@ func (c *Context) GetMainWorktree() (string, error) {
 		return "", err
 	}
 
-	list := strs.SplitLinesN(trees, 2)
+	list := strs.SplitLinesN(trees, 2) // nolint: gomnd
 	if len(list) == 0 {
 		return "", cm.ErrorF("Could not get main worktree in '%s'", c.Cwd)
 	}

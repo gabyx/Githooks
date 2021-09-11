@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 assertStaged() {
     # Export if run without githooks...

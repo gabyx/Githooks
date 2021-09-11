@@ -20,7 +20,7 @@ func (i *indexArgs) Type() string {
 
 func (i *indexArgs) Set(s string) error {
 
-	value, err := strconv.ParseInt(s, 10, 32)
+	value, err := strconv.ParseInt(s, 10, 32) // nolint: gomnd
 	if err != nil {
 		return cm.ErrorF("Could not parse index '%s'.", s)
 	}

@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Direct runner execution: test a shared repo with checked in compiled hooks
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 "$GH_TEST_BIN/cli" installer || exit 1
 acceptAllTrustPrompts || exit 1
 
-cleanup() {
+function cleanup() {
     true
 }
 

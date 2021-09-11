@@ -882,7 +882,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 	var pool *threadpool.ThreadPool
 	if hooks.UseThreadPool && hs.GetHooksCount() > 1 {
 		log.Debug("Launching with thread pool")
-		p := threadpool.New(nThreads, 15)
+		p := threadpool.New(nThreads, 15) // nolint: gomnd
 		pool = &p
 	}
 

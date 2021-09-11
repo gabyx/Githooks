@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-whitespace-base -
-FROM golang:1.16-alpine
+FROM golang:1.17-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq curl
 
@@ -17,4 +17,4 @@ export ADDITIONAL_INSTALL_STEPS='
 RUN find "$GH_TESTS" -name "*.sh" -exec sed -i -E "s|GH_TEST_TMP(\})?/test([0-9.]+)|GH_TEST_TMP\1/test \2|g" {} \;
 '
 
-exec sh "$TEST_DIR"/exec-tests.sh 'alpine-lfs-whitespace' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-whitespace' "$@"

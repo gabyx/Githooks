@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run an install including the intro README files for one repo
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 acceptAllTrustPrompts || exit 1

@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Do not reenable automatic update checks in non-interactive mode
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 acceptAllTrustPrompts || exit 1

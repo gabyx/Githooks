@@ -1,5 +1,4 @@
-// +build !mock
-// +build !debug
+//go:build !mock && !debug
 
 package hooks
 

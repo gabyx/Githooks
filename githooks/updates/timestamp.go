@@ -34,7 +34,7 @@ func GetUpdateCheckTimestamp() (t time.Time, isSet bool, err error) {
 	}
 	isSet = true
 
-	value, err := strconv.ParseInt(timeLastUpdateCheck, 10, 64)
+	value, err := strconv.ParseInt(timeLastUpdateCheck, 10, 64) // nolint: gomnd
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not parse update time."), err)
 

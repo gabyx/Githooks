@@ -26,7 +26,7 @@ func LoadJSON(file string, repr interface{}) error {
 
 // StoreJSON stores a representation in a JSON file.
 func StoreJSON(file string, repr interface{}) error {
-	jsonFile, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0664)
+	jsonFile, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0664) //nolint: gomnd
 	if err != nil {
 		return err
 	}

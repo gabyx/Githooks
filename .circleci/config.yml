@@ -4,16 +4,6 @@ orbs:
   win: circleci/windows@2.3.0
 
 jobs:
-  testsAll:
-    machine:
-      image: ubuntu-2004:202010-01
-    parallelism: 8
-    steps:
-      - checkout
-      - run:
-          command: circleci tests glob "tests/test-*" |
-            grep -Ev "windows" | circleci tests split | xargs -n 1 sh
-
   linux:
     parameters:
       test:

@@ -55,4 +55,4 @@ jobs:
 
 script:
   - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - sh "tests/${TEST_INSTANCE}.sh"
+  - bash "tests/${TEST_INSTANCE}.sh"

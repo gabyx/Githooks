@@ -1,16 +1,16 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Direct runner execution: test a single pre-commit hook file with a runner script
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 acceptAllTrustPrompts || exit 1
 
 [ "$(id -u)" -eq 0 ] && ROOT_ACCESS="true"
 
-cleanup() {
+function cleanup() {
     git config --unset --global "githooks.monkey"
     [ -n "$ROOT_ACCESS" ] && git config --unset --system "githooks.monkey"
 }

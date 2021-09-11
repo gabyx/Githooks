@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ROOT_DIR=$(git rev-parse --show-toplevel)
 TEST_DIR="$ROOT_DIR/tests"
 
@@ -9,7 +9,7 @@ IMAGE_TYPE="alpine-coverage"
     exit 1
 }
 
-cleanup() {
+function cleanup() {
     docker rmi "githooks:$IMAGE_TYPE-base"
     docker rmi "githooks:$IMAGE_TYPE"
 }
@@ -17,7 +17,7 @@ cleanup() {
 trap cleanup EXIT
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
-FROM golang:1.16-alpine
+FROM golang:1.17-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq curl
 RUN go get github.com/wadey/gocovmerge
@@ -103,7 +103,7 @@ docker run --rm \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks/tests \
     "githooks:$IMAGE_TYPE-base" \
-    sh ./exec-testsuite.sh ||
+    ./exec-testsuite.sh ||
     exit $?
 
 # Run the integration tests

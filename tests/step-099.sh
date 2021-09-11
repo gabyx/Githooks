@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Git worktrees: list hooks
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 "$GH_TEST_BIN/cli" installer || exit 1

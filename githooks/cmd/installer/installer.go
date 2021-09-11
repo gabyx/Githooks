@@ -226,7 +226,7 @@ func setMainVariables(
 			InstallDir:       installDir,
 			CloneDir:         hooks.GetReleaseCloneDir(installDir),
 			TempDir:          tempDir,
-			InstalledGitDirs: make(InstallSet, 10)},
+			InstalledGitDirs: make(InstallSet, 10)}, // nolint: gomnd
 		install.UISettings{PromptCtx: promptCtx}
 }
 

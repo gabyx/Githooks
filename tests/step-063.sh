@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
 #   Cli tool: run an update
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 acceptAllTrustPrompts || exit 1

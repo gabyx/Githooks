@@ -100,7 +100,7 @@ func PrepareListHookState(
 		Ignores:            &ignores,
 		isRepoTrusted:      isTrusted,
 		isGithooksDisabled: isDisabled,
-		sharedIgnores:      make(ignoresPerHooksDir, 10)}
+		sharedIgnores:      make(ignoresPerHooksDir, 10)} // nolint: gomnd
 
 	return
 }
