@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	strs "github.com/gabyx/githooks/githooks/strings"
 
@@ -13,9 +14,9 @@ import (
 
 // LoadInstallDir loads the install directory and uses a default if
 // it does not exist.
-func LoadInstallDir(log cm.ILogContext) (installDir string) {
+func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string) {
 
-	installDir = hooks.GetInstallDir()
+	installDir = hooks.GetInstallDir(gitx)
 
 	if !cm.IsDirectory(installDir) {
 

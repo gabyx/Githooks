@@ -1,6 +1,7 @@
 package uninstaller
 
 import (
+	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	"github.com/gabyx/githooks/githooks/prompt"
 	strs "github.com/gabyx/githooks/githooks/strings"
@@ -11,10 +12,10 @@ type UninstallSet = strs.StringSet
 
 // Settings are the settings for the installer.
 type Settings struct {
-	Cwd        string // The current working directory.
-	InstallDir string // The install directory.
-	CloneDir   string // The release clone dir inside the install dir.
-	TempDir    string // The temporary directory inside the install dir.
+	Gitx       *git.Context // The git command context.
+	InstallDir string       // The install directory.
+	CloneDir   string       // The release clone dir inside the install dir.
+	TempDir    string       // The temporary directory inside the install dir.
 
 	PromptCtx prompt.IContext // The prompt context for UI prompts.
 

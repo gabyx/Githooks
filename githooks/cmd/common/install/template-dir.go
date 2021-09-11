@@ -29,7 +29,7 @@ func CheckTemplateDir(targetDir string, subFolderIfExists string) (string, error
 }
 
 // FindHookTemplateDir finds the hook template directory.
-func FindHookTemplateDir(useCoreHooksPath bool) (hooksTemplateDir string, err error) {
+func FindHookTemplateDir(gitx *git.Context, useCoreHooksPath bool) (hooksTemplateDir string, err error) {
 	// 1. Try setup from environment variables
 	gitTempDir, exists := os.LookupEnv("GIT_TEMPLATE_DIR")
 	if exists {
@@ -43,10 +43,10 @@ func FindHookTemplateDir(useCoreHooksPath bool) (hooksTemplateDir string, err er
 	// 2. Try setup from git config
 	if useCoreHooksPath {
 		hooksTemplateDir, err = CheckTemplateDir(
-			git.Ctx().GetConfig(git.GitCKCoreHooksPath, git.GlobalScope), "")
+			gitx.GetConfig(git.GitCKCoreHooksPath, git.GlobalScope), "")
 	} else {
 		hooksTemplateDir, err = CheckTemplateDir(
-			git.Ctx().GetConfig(git.GitCKInitTemplateDir, git.GlobalScope), "hooks")
+			gitx.GetConfig(git.GitCKInitTemplateDir, git.GlobalScope), "hooks")
 	}
 
 	if err != nil {

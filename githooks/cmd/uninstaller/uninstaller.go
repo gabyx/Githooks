@@ -77,20 +77,19 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	setupMockFlags(cmd, vi)
 }
 
-func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings) {
+func setMainVariables(log cm.ILogContext, gitx *git.Context, args *Arguments) (Settings, UISettings) {
 
-	var promptCtx prompt.IContext
+	var promptx prompt.IContext
 	var err error
 
-	cwd, err := os.Getwd()
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	if !args.NonInteractive {
-		promptCtx, err = prompt.CreateContext(log, false, args.UseStdin)
+		promptx, err = prompt.CreateContext(log, false, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
-	installDir := install.LoadInstallDir(log)
+	installDir := install.LoadInstallDir(log, gitx)
 
 	// Safety check.
 	log.PanicIfF(!strings.Contains(installDir, ".githooks"),
@@ -102,13 +101,13 @@ func setMainVariables(log cm.ILogContext, args *Arguments) (Settings, UISettings
 		"Could not clean temporary directory in '%s'", installDir)
 
 	return Settings{
-			Cwd:                cwd,
+			Gitx:               gitx,
 			InstallDir:         installDir,
 			CloneDir:           hooks.GetReleaseCloneDir(installDir),
 			TempDir:            tempDir,
 			UninstalledGitDirs: make(UninstallSet, 10), // nolint: gomnd
 			LFSAvailable:       git.IsLFSAvailable()},
-		UISettings{PromptCtx: promptCtx}
+		UISettings{PromptCtx: promptx}
 }
 
 func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
@@ -163,6 +162,7 @@ func thankYou(log cm.ILogContext) {
 
 func uninstallFromExistingRepos(
 	log cm.ILogContext,
+	gitx *git.Context,
 	lfsAvailable bool,
 	tempDir string,
 	nonInteractive bool,
@@ -173,6 +173,7 @@ func uninstallFromExistingRepos(
 	// Show prompt and run callback.
 	install.PromptExistingRepos(
 		log,
+		gitx,
 		nonInteractive,
 		true,
 		uiSettings.PromptCtx,
@@ -220,10 +221,10 @@ func uninstallFromRegisteredRepos(
 		})
 }
 
-func cleanTemplateDir(log cm.ILogContext) {
-	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
+func cleanTemplateDir(log cm.ILogContext, gitx *git.Context) {
+	installUsesCoreHooksPath := gitx.GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 
-	hookTemplateDir, err := install.FindHookTemplateDir(installUsesCoreHooksPath == git.GitCVTrue)
+	hookTemplateDir, err := install.FindHookTemplateDir(gitx, installUsesCoreHooksPath == git.GitCVTrue)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 
 	if strs.IsEmpty(hookTemplateDir) {
@@ -289,8 +290,7 @@ func cleanReleaseClone(
 	}
 }
 
-func cleanGitConfig(log cm.ILogContext) {
-	gitx := git.Ctx()
+func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 
 	// Remove core.hooksPath if we are using it.
 	pathForUseCoreHooksPath := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
@@ -336,6 +336,7 @@ func runUninstallSteps(
 
 	uninstallFromExistingRepos(
 		log,
+		settings.Gitx,
 		settings.LFSAvailable,
 		settings.TempDir,
 		args.NonInteractive,
@@ -352,14 +353,14 @@ func runUninstallSteps(
 		&settings.RegisteredGitDirs,
 		uiSettings)
 
-	cleanTemplateDir(log)
+	cleanTemplateDir(log, settings.Gitx)
 
 	cleanSharedClones(log, settings.InstallDir)
 	cleanReleaseClone(log, settings.InstallDir)
 	cleanBinaries(log, settings.InstallDir, settings.TempDir)
 	cleanRegister(log, settings.InstallDir)
 
-	cleanGitConfig(log)
+	cleanGitConfig(log, settings.Gitx)
 }
 
 func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
@@ -373,7 +374,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setMainVariables(log, &args)
+	settings, uiSettings := setMainVariables(log, ctx.GitX, &args)
 
 	if !args.InternalPostDispatch {
 		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {

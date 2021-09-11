@@ -27,7 +27,7 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, nonInteractive bool) {
 		hooks.GitCKUseCoreHooksPath, value, gitDir)
 
 	uiSettings := inst.UISettings{PromptCtx: ctx.PromptCtx}
-	inst.InstallIntoRepo(ctx.Log, gitDir, nonInteractive, false, false, &uiSettings)
+	inst.InstallIntoRepo(ctx.Log, ctx.GitX, gitDir, nonInteractive, false, false, &uiSettings)
 }
 
 func runUninstallFromRepo(ctx *ccm.CmdContext) {

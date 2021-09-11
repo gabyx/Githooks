@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
@@ -10,10 +11,10 @@ type InstallSet = strs.StringSet
 
 // Settings are the settings for the installer.
 type Settings struct {
-	Cwd        string // The current working directory.
-	InstallDir string // The install directory.
-	CloneDir   string // The release clone dir inside the install dir.
-	TempDir    string // The temporary directory inside the install dir.
+	GitX       *git.Context // The git command context.
+	InstallDir string       // The install directory.
+	CloneDir   string       // The release clone dir inside the install dir.
+	TempDir    string       // The temporary directory inside the install dir.
 
 	HookTemplateDir string // The chosen hook template directory.
 

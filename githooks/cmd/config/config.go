@@ -274,7 +274,7 @@ func runCloneURL(ctx *ccm.CmdContext, opts *SetOptions) {
 		ctx.Log.InfoF("Set Githooks clone URL to '%s'.", opts.Values[0])
 
 	case opts.Print:
-		url, branch := updates.GetCloneURL()
+		url, branch := updates.GetCloneURL(ctx.GitX)
 		if strs.IsNotEmpty(branch) {
 			ctx.Log.InfoF("Githooks clone URL is set to '%s' at branch '%s'.", url, branch)
 		} else {
@@ -299,7 +299,7 @@ func runCloneBranch(ctx *ccm.CmdContext, opts *SetOptions) {
 		ctx.Log.Info("Unset Githooks clone branch. Using default branch.")
 
 	case opts.Print:
-		url, branch := updates.GetCloneURL()
+		url, branch := updates.GetCloneURL(ctx.GitX)
 		if strs.IsNotEmpty(branch) {
 			ctx.Log.InfoF("Githooks clone URL is set to '%s' at branch '%s'.", url, branch)
 		} else {
@@ -320,7 +320,7 @@ func runUpdateTime(ctx *ccm.CmdContext, opts *SetOptions) {
 		ctx.Log.InfoF("Reset %s.", text)
 
 	case opts.Print:
-		ts, isSet, err := updates.GetUpdateCheckTimestamp()
+		ts, isSet, err := updates.GetUpdateCheckTimestamp(ctx.GitX)
 		ctx.Log.AssertNoErrorPanic(err, "Could not get %s.", text)
 		if isSet {
 			ctx.Log.InfoF("%s set to '%s'.", ts.Format(time.RFC1123))
@@ -391,7 +391,7 @@ func RunUpdate(ctx *ccm.CmdContext, opts *SetOptions) {
 		ctx.Log.InfoF("%s setting is now unset.", text)
 
 	case opts.Print:
-		enabled, _ := updates.GetAutomaticUpdateCheckSettings()
+		enabled, _ := updates.GetAutomaticUpdateCheckSettings(ctx.GitX)
 		switch {
 		case enabled:
 			ctx.Log.InfoF("%s checks are enabled.", text)

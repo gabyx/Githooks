@@ -188,18 +188,18 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 
 func setMainVariables(
 	log cm.ILogContext,
+	gitx *git.Context,
 	args *Arguments) (Settings, install.UISettings) {
 
-	var promptCtx prompt.IContext
+	var promptx prompt.IContext
 	var err error
 
-	cwd, err := os.Getwd()
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	if !args.NonInteractive {
 		// Use GUI fallback if we are running an auto-update triggered from the runner.
 		useGUIFallback := args.InternalAutoUpdate
-		promptCtx, err = prompt.CreateContext(log, useGUIFallback, args.UseStdin)
+		promptx, err = prompt.CreateContext(log, useGUIFallback, args.UseStdin)
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
@@ -213,7 +213,7 @@ func setMainVariables(
 		installDir = path.Join(args.InstallPrefix, ".githooks")
 
 	} else {
-		installDir = install.LoadInstallDir(log)
+		installDir = install.LoadInstallDir(log, gitx)
 	}
 
 	// Remove temporary directory if existing
@@ -222,16 +222,16 @@ func setMainVariables(
 		"Could not clean temporary directory in '%s'", installDir)
 
 	return Settings{
-			Cwd:              cwd,
+			GitX:             gitx,
 			InstallDir:       installDir,
 			CloneDir:         hooks.GetReleaseCloneDir(installDir),
 			TempDir:          tempDir,
 			InstalledGitDirs: make(InstallSet, 10)}, // nolint: gomnd
-		install.UISettings{PromptCtx: promptCtx}
+		install.UISettings{PromptCtx: promptx}
 }
 
-func setInstallDir(log cm.ILogContext, installDir string) {
-	log.AssertNoErrorPanic(hooks.SetInstallDir(installDir),
+func setInstallDir(log cm.ILogContext, gitx *git.Context, installDir string) {
+	log.AssertNoErrorPanic(hooks.SetInstallDir(gitx, installDir),
 		"Could not set install dir '%s'", installDir)
 }
 
@@ -265,7 +265,7 @@ func buildFromSource(
 	log.InfoF("Building binaries at '%s'", tag)
 
 	// Build the binaries.
-	binPath, err := builder.Build(tempDir, buildTags)
+	binPath, err := builder.Build(gitx, buildTags)
 	log.AssertNoErrorPanicF(err, "Could not build release branch in '%s'.", tempDir)
 
 	bins, err := cm.GetAllFiles(binPath)
@@ -472,15 +472,17 @@ func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments)
 // not using the core.hooksPath method.
 func findGitHookTemplates(
 	log cm.ILogContext,
+	gitx *git.Context,
 	installDir string,
 	useCoreHooksPath bool,
 	nonInteractive bool,
-	promptCtx prompt.IContext) (string, string) {
+	promptx prompt.IContext) (string, string) {
 
-	installUsesCoreHooksPath := git.Ctx().GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
+	installUsesCoreHooksPath := gitx.GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 	haveInstall := strs.IsNotEmpty(installUsesCoreHooksPath)
 
-	hookTemplateDir, err := install.FindHookTemplateDir(useCoreHooksPath || installUsesCoreHooksPath == git.GitCVTrue)
+	hookTemplateDir, err := install.FindHookTemplateDir(gitx,
+		useCoreHooksPath || installUsesCoreHooksPath == git.GitCVTrue)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 	if err == nil && strs.IsNotEmpty(hookTemplateDir) {
 		return hookTemplateDir, ""
@@ -502,7 +504,7 @@ func findGitHookTemplates(
 	}
 
 	// 5. Try to search for it on disk
-	answer, err := promptCtx.ShowOptions(
+	answer, err := promptx.ShowOptions(
 		"Could not find the Git hook template directory.\n"+
 			"Do you want to search for it?",
 		"(yes, No)",
@@ -512,7 +514,7 @@ func findGitHookTemplates(
 
 	if answer == "y" {
 
-		templateDir := searchTemplateDirOnDisk(log, promptCtx)
+		templateDir := searchTemplateDirOnDisk(log, promptx)
 
 		if strs.IsNotEmpty(templateDir) {
 
@@ -523,7 +525,7 @@ func findGitHookTemplates(
 			// If we dont use core.hooksPath, we ask
 			// if the user wants to continue setting this as
 			// 'init.templateDir'.
-			answer, err := promptCtx.ShowOptions(
+			answer, err := promptx.ShowOptions(
 				"Do you want to set this up as the Git template\n"+
 					"directory (e.g setting 'init.templateDir')\n"+
 					"for future use?",
@@ -541,7 +543,7 @@ func findGitHookTemplates(
 	}
 
 	// 6. Set up as new
-	answer, err = promptCtx.ShowOptions(
+	answer, err = promptx.ShowOptions(
 		"Do you want to set up a new Git templates folder?",
 		"(yes, No)",
 		"y/N",
@@ -549,14 +551,14 @@ func findGitHookTemplates(
 	log.AssertNoErrorF(err, "Could not show prompt.")
 
 	if answer == "y" {
-		templateDir := setupNewTemplateDir(log, installDir, promptCtx)
+		templateDir := setupNewTemplateDir(log, installDir, promptx)
 		return path.Join(templateDir, "hooks"), templateDir // nolint:nlreturn
 	}
 
 	return "", ""
 }
 
-func searchPreCommitFile(log cm.ILogContext, startDirs []string, promptCtx prompt.IContext) (result string) {
+func searchPreCommitFile(log cm.ILogContext, startDirs []string, promptx prompt.IContext) (result string) {
 
 	for _, dir := range startDirs {
 
@@ -579,7 +581,7 @@ func searchPreCommitFile(log cm.ILogContext, startDirs []string, promptCtx promp
 
 			templateDir := path.Dir(path.Dir(filepath.ToSlash(match)))
 
-			answer, err := promptCtx.ShowOptions(
+			answer, err := promptx.ShowOptions(
 				strs.Fmt("--> Is it '%s'", templateDir),
 				"(yes, No)",
 				"y/N",
@@ -597,15 +599,15 @@ func searchPreCommitFile(log cm.ILogContext, startDirs []string, promptCtx promp
 	return
 }
 
-func searchTemplateDirOnDisk(log cm.ILogContext, promptCtx prompt.IContext) string {
+func searchTemplateDirOnDisk(log cm.ILogContext, promptx prompt.IContext) string {
 
 	first, second := GetDefaultTemplateSearchDir()
 
-	templateDir := searchPreCommitFile(log, first, promptCtx)
+	templateDir := searchPreCommitFile(log, first, promptx)
 
 	if strs.IsEmpty(templateDir) {
 
-		answer, err := promptCtx.ShowOptions(
+		answer, err := promptx.ShowOptions(
 			"Git hook template directory not found\n"+
 				"Do you want to keep searching?",
 			"(yes, No)",
@@ -615,22 +617,22 @@ func searchTemplateDirOnDisk(log cm.ILogContext, promptCtx prompt.IContext) stri
 		log.AssertNoErrorF(err, "Could not show prompt.")
 
 		if answer == "y" {
-			templateDir = searchPreCommitFile(log, second, promptCtx)
+			templateDir = searchPreCommitFile(log, second, promptx)
 		}
 	}
 
 	return templateDir
 }
 
-func setupNewTemplateDir(log cm.ILogContext, installDir string, promptCtx prompt.IContext) string {
+func setupNewTemplateDir(log cm.ILogContext, installDir string, promptx prompt.IContext) string {
 	templateDir := path.Join(installDir, "templates")
 
 	homeDir, err := homedir.Dir()
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
-	if promptCtx != nil {
+	if promptx != nil {
 		var err error
-		templateDir, err = promptCtx.ShowEntry(
+		templateDir, err = promptx.ShowEntry(
 			"Enter the target folder",
 			templateDir,
 			nil)
@@ -645,21 +647,23 @@ func setupNewTemplateDir(log cm.ILogContext, installDir string, promptCtx prompt
 
 func getTargetTemplateDir(
 	log cm.ILogContext,
+	gitx *git.Context,
 	installDir string,
 	templateDir string,
 	useCoreHooksPath bool,
 	nonInteractive bool,
 	dryRun bool,
-	promptCtx prompt.IContext) (hookTemplateDir string) {
+	promptx prompt.IContext) (hookTemplateDir string) {
 
 	if strs.IsEmpty(templateDir) {
 		// Automatically find a template directory.
 		hookTemplateDir, templateDir = findGitHookTemplates(
 			log,
+			gitx,
 			installDir,
 			useCoreHooksPath,
 			nonInteractive,
-			promptCtx)
+			promptx)
 
 		log.PanicIfF(strs.IsEmpty(hookTemplateDir),
 			"Could not determine Git hook template directory.")
@@ -680,16 +684,20 @@ func getTargetTemplateDir(
 
 	// Set the global Git configuration
 	if useCoreHooksPath {
-		setGithooksDirectory(log, true, hookTemplateDir, dryRun)
+		setGithooksDirectory(log, gitx, true, hookTemplateDir, dryRun)
 	} else {
-		setGithooksDirectory(log, false, templateDir, dryRun)
+		setGithooksDirectory(log, gitx, false, templateDir, dryRun)
 	}
 
 	return
 }
 
-func setGithooksDirectory(log cm.ILogContext, useCoreHooksPath bool, directory string, dryRun bool) {
-	gitx := git.Ctx()
+func setGithooksDirectory(
+	log cm.ILogContext,
+	gitx *git.Context,
+	useCoreHooksPath bool,
+	directory string,
+	dryRun bool) {
 
 	prefix := "Setting"
 	if dryRun {
@@ -782,6 +790,7 @@ func setGithooksDirectory(log cm.ILogContext, useCoreHooksPath bool, directory s
 
 func setupHookTemplates(
 	log cm.ILogContext,
+	gitx *git.Context,
 	hookTemplateDir string,
 	cloneDir string,
 	tempDir string,
@@ -814,7 +823,7 @@ func setupHookTemplates(
 		func(dest string) {
 			log.InfoF(" %s '%s'", cm.ListItemLiteral, path.Base(dest))
 		},
-		install.GetHookDisableCallback(log, nonInteractive, uiSettings),
+		install.GetHookDisableCallback(log, gitx, nonInteractive, uiSettings),
 		log)
 
 	log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookTemplateDir)
@@ -869,9 +878,14 @@ func installBinaries(
 		"Could not set dialog executable to '%s'.", dialog)
 }
 
-func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, promptCtx prompt.IContext) {
+func setupAutomaticUpdate(
+	log cm.ILogContext,
+	gitx *git.Context,
+	nonInteractive bool,
+	dryRun bool,
+	promptx prompt.IContext) {
 
-	enabled, isSet := updates.GetAutomaticUpdateCheckSettings()
+	enabled, isSet := updates.GetAutomaticUpdateCheckSettings(gitx)
 	promptMsg := ""
 
 	switch {
@@ -892,7 +906,7 @@ func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, 
 	if nonInteractive {
 		activate = true
 	} else {
-		answer, err := promptCtx.ShowOptions(
+		answer, err := promptx.ShowOptions(
 			promptMsg,
 			"(Yes, no)",
 			"Y/n", "Yes", "No")
@@ -920,6 +934,7 @@ func setupAutomaticUpdate(log cm.ILogContext, nonInteractive bool, dryRun bool, 
 
 func installIntoExistingRepos(
 	log cm.ILogContext,
+	gitx *git.Context,
 	tempDir string,
 	nonInteractive bool,
 	dryRun bool,
@@ -931,6 +946,7 @@ func installIntoExistingRepos(
 	// Show prompt and run callback.
 	install.PromptExistingRepos(
 		log,
+		gitx,
 		nonInteractive,
 		false,
 		uiSettings.PromptCtx,
@@ -938,7 +954,7 @@ func installIntoExistingRepos(
 		func(gitDir string) {
 
 			if install.InstallIntoRepo(
-				log, gitDir,
+				log, gitx, gitDir,
 				nonInteractive, dryRun,
 				skipReadme, uiSettings) {
 
@@ -951,6 +967,7 @@ func installIntoExistingRepos(
 
 func installIntoRegisteredRepos(
 	log cm.ILogContext,
+	gitx *git.Context,
 	tempDir string,
 	nonInteractive bool,
 	dryRun bool,
@@ -977,7 +994,7 @@ func installIntoRegisteredRepos(
 		uiSettings.PromptCtx,
 		func(gitDir string) {
 			if install.InstallIntoRepo(
-				log, gitDir,
+				log, gitx, gitDir,
 				nonInteractive, dryRun,
 				skipReadme, uiSettings) {
 
@@ -1131,6 +1148,7 @@ func thankYou(log cm.ILogContext) {
 
 func runUpdate(
 	log cm.ILogContext,
+	gitx *git.Context,
 	settings *Settings,
 	uiSettings *install.UISettings,
 	args *Arguments) {
@@ -1144,6 +1162,7 @@ func runUpdate(
 
 	settings.HookTemplateDir = getTargetTemplateDir(
 		log,
+		gitx,
 		settings.InstallDir,
 		args.TemplateDir,
 		args.UseCoreHooksPath,
@@ -1163,6 +1182,7 @@ func runUpdate(
 
 	setupHookTemplates(
 		log,
+		gitx,
 		settings.HookTemplateDir,
 		settings.CloneDir,
 		settings.TempDir,
@@ -1172,7 +1192,7 @@ func runUpdate(
 		uiSettings)
 
 	if !args.InternalAutoUpdate {
-		setupAutomaticUpdate(log, args.NonInteractive, args.DryRun, uiSettings.PromptCtx)
+		setupAutomaticUpdate(log, gitx, args.NonInteractive, args.DryRun, uiSettings.PromptCtx)
 	}
 
 	if !args.SkipInstallIntoExisting && !args.UseCoreHooksPath &&
@@ -1180,6 +1200,7 @@ func runUpdate(
 
 		installIntoExistingRepos(
 			log,
+			gitx,
 			settings.TempDir,
 			args.NonInteractive,
 			args.DryRun,
@@ -1193,6 +1214,7 @@ func runUpdate(
 	if !args.UseCoreHooksPath {
 		installIntoRegisteredRepos(
 			log,
+			gitx,
 			settings.TempDir,
 			args.NonInteractive,
 			args.DryRun,
@@ -1230,10 +1252,10 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setMainVariables(log, &args)
+	settings, uiSettings := setMainVariables(log, ctx.GitX, &args)
 
 	if !args.DryRun {
-		setInstallDir(log, settings.InstallDir)
+		setInstallDir(log, ctx.GitX, settings.InstallDir)
 	}
 
 	if !args.InternalPostDispatch {
@@ -1242,5 +1264,5 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 		}
 	}
 
-	runUpdate(log, &settings, &uiSettings, &args)
+	runUpdate(log, ctx.GitX, &settings, &uiSettings, &args)
 }

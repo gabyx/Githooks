@@ -31,23 +31,24 @@ func NewSettings(
 	logStats cm.ILogStats,
 	wrapPanicExitCode func()) ccm.CmdContext {
 
-	var promptCtx prompt.IContext
+	var promptx prompt.IContext
 	var err error
 
 	cwd, err := os.Getwd()
+	gitx := git.CtxC(cwd)
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
-	installDir := inst.LoadInstallDir(log)
+	installDir := inst.LoadInstallDir(log, gitx)
 
-	promptCtx, err = prompt.CreateContext(log, false, false)
+	promptx, err = prompt.CreateContext(log, false, false)
 	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 
 	return ccm.CmdContext{
 		Cwd:               cwd,
-		GitX:              git.CtxC(cwd),
+		GitX:              gitx,
 		InstallDir:        installDir,
 		CloneDir:          hooks.GetReleaseCloneDir(installDir),
-		PromptCtx:         promptCtx,
+		PromptCtx:         promptx,
 		Log:               log,
 		LogStats:          logStats,
 		WrapPanicExitCode: wrapPanicExitCode}

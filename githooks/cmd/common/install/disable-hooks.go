@@ -11,10 +11,9 @@ import (
 // during install procedure.
 func GetHookDisableCallback(
 	log cm.ILogContext,
+	gitx *git.Context,
 	nonInteractive bool,
 	uiSettings *UISettings) func(file string) hooks.HookDisableOption {
-
-	gitx := git.Ctx()
 
 	if strs.IsEmpty(uiSettings.DeleteDetectedLFSHooks) {
 		// Load default UI value from config.
