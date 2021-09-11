@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Direct runner execution: execute in parallel and check priority list and sequence.
 

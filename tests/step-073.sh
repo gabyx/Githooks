@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run the cli tool trying to list a not yet trusted repo
 

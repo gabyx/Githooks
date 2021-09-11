@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Check if dialog executable is installed and works
 

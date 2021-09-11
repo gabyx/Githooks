@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run an install with multiple shared hooks set up, and verify those trigger properly
 

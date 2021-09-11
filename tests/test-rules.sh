@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
 FROM golang:1.17-alpine
@@ -16,7 +16,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 
 EOF
 
-if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules sh "tests/exec-rules.sh"; then
+if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules tests/exec-rules.sh; then
     echo "! Check rules had failures."
     exit 1
 fi

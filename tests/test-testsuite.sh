@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cat <<EOF | docker build --force-rm -t githooks:testsuite -
 FROM golang:1.17-alpine
@@ -12,7 +12,7 @@ EOF
 if ! docker run --rm -it \
     -v "$(pwd)":/githooks \
     -w /githooks githooks:testsuite \
-    sh "tests/exec-testsuite.sh"; then
+    tests/exec-testsuite.sh; then
 
     echo "! Check rules had failures."
     exit 1

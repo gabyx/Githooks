@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
 #   Run a single-repo install and try the auto-update

@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-acceptAllTrustPrompts() {
+function acceptAllTrustPrompts() {
     export ACCEPT_CHANGES=Y
     return 0
 }

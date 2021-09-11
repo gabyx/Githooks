@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Direct runner execution: test a single pre-commit hook file with a runner script
 
@@ -10,7 +10,7 @@ acceptAllTrustPrompts || exit 1
 
 [ "$(id -u)" -eq 0 ] && ROOT_ACCESS="true"
 
-cleanup() {
+function cleanup() {
     git config --unset --global "githooks.monkey"
     [ -n "$ROOT_ACCESS" ] && git config --unset --system "githooks.monkey"
 }

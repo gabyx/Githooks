@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run an install that preserves an existing hook in an existing repo
 
@@ -28,7 +28,7 @@ y
 $GH_TEST_TMP/test9
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
-git commit -m 'Test'
+git commit --allow-empty -m 'Test'
 
 if ! grep 'Previous' "$GH_TEST_TMP/test-009.out"; then
     echo '! Saved hook was not run'

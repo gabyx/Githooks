@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if ! grep '/docker/' </proc/self/cgroup >/dev/null 2>&1; then
     echo "! This script is only meant to be run in a Docker container"
@@ -20,9 +20,9 @@ cd "$REPO_DIR" || exit 1
 
 FAILURES=""
 
-run_pre_commit_test() {
+function run_pre_commit_test() {
     echo "Run pre-commit '$1'..."
-    if ! sh "$REPO_DIR/.githooks/pre-commit/$1"; then
+    if ! bash "$REPO_DIR/.githooks/pre-commit/$1"; then
         FAILURES="$FAILURES
   - $1 failed"
     fi

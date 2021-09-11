@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -17,4 +17,4 @@ export ADDITIONAL_INSTALL_STEPS='
 RUN find "$GH_TESTS" -name "*.sh" -exec sed -i -E "s|GH_TEST_TMP(\})?/test([0-9.]+)|GH_TEST_TMP\1/test \2|g" {} \;
 '
 
-exec sh "$TEST_DIR"/exec-tests.sh 'alpine-lfs-whitespace' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-whitespace' "$@"

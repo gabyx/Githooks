@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ROOT_DIR=$(git rev-parse --show-toplevel)
 TEST_DIR="$ROOT_DIR/tests"
 
@@ -9,7 +9,7 @@ IMAGE_TYPE="alpine-coverage"
     exit 1
 }
 
-cleanup() {
+function cleanup() {
     docker rmi "githooks:$IMAGE_TYPE-base"
     docker rmi "githooks:$IMAGE_TYPE"
 }
@@ -103,7 +103,7 @@ docker run --rm \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks/tests \
     "githooks:$IMAGE_TYPE-base" \
-    sh ./exec-testsuite.sh ||
+    ./exec-testsuite.sh ||
     exit $?
 
 # Run the integration tests

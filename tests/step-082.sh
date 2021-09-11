@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Cli tool: manage global shared hook repositories
 
@@ -28,7 +28,7 @@ mkdir -p "$GH_TEST_TMP/test082" &&
     cd "$GH_TEST_TMP/test082" &&
     git init || exit 1
 
-testShared() {
+function testShared() {
 
     url1="file://$GH_TEST_TMP/shared/first-shared.git"
     location1=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url1") || exit 1

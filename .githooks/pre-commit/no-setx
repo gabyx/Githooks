@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 

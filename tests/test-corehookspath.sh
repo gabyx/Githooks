@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -9,4 +9,4 @@ RUN apk add bash jq curl
 ENV EXTRA_INSTALL_ARGS --use-core-hookspath
 EOF
 
-exec sh "$TEST_DIR"/exec-tests.sh 'alpine-lfs-corehookspath' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-corehookspath' "$@"

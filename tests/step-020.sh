@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run an install, and let it set up a new template directory (non-tilde)
 

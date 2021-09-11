@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   PR #135: Bugfix: Test that init.templateDir is not set when using core.hooksPath.
 

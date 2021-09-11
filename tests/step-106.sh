@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Git LFS delegation
 
@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-onExit() {
+function onExit() {
     if [ -n "$ORIGINAL_GIT_LFS" ]; then
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs-backup" "$ORIGINAL_GIT_LFS" || {
             echo "WARNING: LFS recovery failure! All succeeding tests will be UNSTABLE!"

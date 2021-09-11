@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
 #   Download from deploy url and install latest version

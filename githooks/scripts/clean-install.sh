@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 echo "Unset all githooks configs ..."
 git config --global --unset githooks.runner

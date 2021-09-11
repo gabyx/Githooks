@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Trigger hooks on a bare repo with a push from a local repo.
 

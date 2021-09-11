@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
 #   Run an install, skipping the intro README files

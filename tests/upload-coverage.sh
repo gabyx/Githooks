@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 [ -d "$GH_COVERAGE_DIR" ] || {
     echo "! No coverage dir existing" >&2

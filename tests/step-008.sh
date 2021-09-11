@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run an install that preserves an existing hook in the templates directory
 
@@ -8,7 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 acceptAllTrustPrompts || exit 1
 
-acceptAllTrustPrompts || exit 1
+echo "WHATS:::: "
+ls -al "$GH_TEST_GIT_CORE/templates"
 
 cd "$GH_TEST_GIT_CORE/templates/hooks" &&
     echo '#!/bin/sh' >>pre-commit &&
@@ -17,8 +18,6 @@ cd "$GH_TEST_GIT_CORE/templates/hooks" &&
     exit 1
 
 "$GH_TEST_BIN/cli" installer || exit 1
-
-ls -al "$GH_TEST_GIT_CORE/templates/templates/hooks"
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test8" &&

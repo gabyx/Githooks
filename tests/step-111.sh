@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Run an install that deletes/backups existing detected LFS hooks in existing repos
 

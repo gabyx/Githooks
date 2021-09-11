@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Set up local repos, run the install and skip installing hooks into existing directories
 

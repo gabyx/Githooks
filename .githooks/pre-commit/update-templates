@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 
 if command -v gsed &>/dev/null; then
     SED="gsed"
@@ -12,6 +13,7 @@ if ! $SED --version 2>&1 | grep -q "GNU"; then
 fi
 
 # Patch the hooks
+# shellcheck disable=SC2016
 HOOK_NAMES=$($SED -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githooks/hooks/githooks.go) ||
     {
         echo "update-templates:: Replacement command failed!" >&2

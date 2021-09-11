@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
 #   Test template area is set up properly (core.hooksPath)

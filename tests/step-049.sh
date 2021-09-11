@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Do not reenable automatic update checks in non-interactive mode
 

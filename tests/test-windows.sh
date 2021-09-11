@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/windows/servercore:2004

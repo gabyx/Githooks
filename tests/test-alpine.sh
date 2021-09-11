@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -8,4 +8,4 @@ RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/
 RUN apk add bash jq curl
 EOF
 
-exec sh "$TEST_DIR"/exec-tests.sh 'alpine-lfs' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs' "$@"

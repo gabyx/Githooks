@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Test:
 #   Direct runner execution: test a shared repo with checked in compiled hooks
 
@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 "$GH_TEST_BIN/cli" installer || exit 1
 acceptAllTrustPrompts || exit 1
 
-cleanup() {
+function cleanup() {
     true
 }
 

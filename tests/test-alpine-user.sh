@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -20,4 +20,4 @@ RUN mkdir -p /home/test/tmp
 ENV GH_TEST_TMP=/home/test/tmp
 '
 
-exec sh "$TEST_DIR"/exec-tests.sh 'alpine-user' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-user' "$@"
