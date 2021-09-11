@@ -16,6 +16,7 @@ func ShowFileSave(ctx context.Context, s *set.FileSave) (r res.File, err error) 
 	if err != nil {
 		return
 	}
+
 	return ShowFileSaveZenity(ctx, zenity, s)
 }
 
@@ -25,5 +26,6 @@ func ShowFileSelection(ctx context.Context, s *set.FileSelection) (r res.File, e
 	if err != nil {
 		return
 	}
+
 	return ShowFileSelectionZenity(ctx, zenity, s)
 }

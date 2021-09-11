@@ -11,6 +11,5 @@ import (
 )
 
 func ShowEntry(ctx context.Context, e *set.Entry) (res.Entry, error) {
-
 	return gwin.ShowEntry(ctx, e)
 }

@@ -16,5 +16,6 @@ func ShowMessage(ctx context.Context, msg *set.Message) (r res.Message, err erro
 	if err != nil {
 		return
 	}
+
 	return ShowMessageZenity(ctx, zenity, msg)
 }

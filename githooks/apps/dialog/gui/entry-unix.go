@@ -16,5 +16,6 @@ func ShowEntry(ctx context.Context, e *set.Entry) (r res.Entry, err error) {
 	if err != nil {
 		return
 	}
+
 	return ShowEntryZenity(ctx, zenity, e)
 }

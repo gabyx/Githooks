@@ -16,5 +16,6 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 	if err != nil {
 		return
 	}
+
 	return ShowOptionsZenity(ctx, zenity, opts)
 }

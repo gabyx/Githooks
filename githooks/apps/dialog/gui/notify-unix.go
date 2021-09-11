@@ -15,5 +15,6 @@ func ShowNotification(ctx context.Context, n *set.Notification) error {
 	if err != nil {
 		return err
 	}
+
 	return ShowNotificationZenity(ctx, zenity, n)
 }
