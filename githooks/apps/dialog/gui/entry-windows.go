@@ -10,7 +10,7 @@ import (
 	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
-func ShowEntry(ctx context.Context, s *set.Entry) (res.Entry, error) {
+func ShowEntry(ctx context.Context, e *set.Entry) (res.Entry, error) {
 
-	return gwin.ShowEntry(ctx, s)
+	return gwin.ShowEntry(ctx, e)
 }

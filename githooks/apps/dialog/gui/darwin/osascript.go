@@ -18,8 +18,15 @@ var osascripts embed.FS
 // RunOSAScript runs Apple's `osascripts` to execute JavaScript or AppleScript.
 func RunOSAScript(ctx context.Context, script string, data interface{}, workingDir string) ([]byte, error) {
 	var buf strings.Builder
+	lang := "JavaScript"
 
 	tmpl, err := osascripts.ReadFile(path.Join("osascripts", script+".js.tmpl"))
+	if err != nil {
+		tmpl, err = osascripts.ReadFile(path.Join("osascripts", script+".scpt.tmpl"))
+		cm.AssertNoErrorPanic(err, "Template not embedded.")
+		lang = "AppleScript"
+	}
+
 	cm.AssertNoErrorPanic(err, "Template not embedded.")
 	template, err := template.New("").Funcs(templateFuncs).Parse(string(tmpl))
 	cm.AssertNoErrorPanic(err, "Template '%s' invalid.", script)
@@ -30,7 +37,6 @@ func RunOSAScript(ctx context.Context, script string, data interface{}, workingD
 	}
 
 	script = buf.String()
-	lang := "JavaScript"
 
 	var cmd *exec.Cmd
 	if ctx != nil {
