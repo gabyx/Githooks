@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 
@@ -12,7 +12,7 @@ cd "$repoDir" || exit 1
 
 if command -v "gstat" ; then
     STAT="gstat"
-else 
+else
     STAT="stat"
 fi
 

@@ -3,7 +3,7 @@
 #   Direct runner execution: accept changes to hooks
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 mkdir -p "$GH_TEST_TMP/test28" &&

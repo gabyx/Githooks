@@ -4,7 +4,7 @@
 #   Download from deploy url and install latest version
 
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
 git -C "$GH_TEST_REPO" reset --hard v2.0.0 >/dev/null 2>&1 || exit 1

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # shellcheck disable=SC2153
 if [ -n "${STAGED_FILES}" ]; then
     echo "* Staged files:" >&2

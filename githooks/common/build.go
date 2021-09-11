@@ -1,9 +1,10 @@
+//go:build !debug
 // +build !debug
 
 package common
 
 const (
-	// IsDebug set to `true` will disable debug asserts and other stuff.
+	// IsDebug set to `false` will disable debug asserts and other stuff.
 	IsDebug = false
 
 	// DebugLog set to `true` will turn on debug logging.

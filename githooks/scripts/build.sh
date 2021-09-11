@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 GO_SRC="$DIR/.."
 
@@ -59,8 +59,9 @@ if [ ! -d "$GO_SRC/vendor" ]; then
     go mod vendor
 fi
 
-# Add debug tag it set
-if [ -n "$BUILD_TAGS" ]; then
+# Add debug tag if set
+if [ -n "$DEBUG_TAG" ] &&
+    ! echo "$BUILD_TAGS" | grep -q "$DEBUG_TAG"; then
     BUILD_TAGS="$BUILD_TAGS,$DEBUG_TAG"
 fi
 

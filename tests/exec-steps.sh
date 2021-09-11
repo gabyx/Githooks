@@ -100,7 +100,7 @@ for STEP in "$GH_TESTS"/step-*.sh; do
 
     TEST_RUNS=$((TEST_RUNS + 1))
 
-    TEST_OUTPUT=$(sh "$STEP" 2>&1)
+    TEST_OUTPUT=$(bash "$STEP" 2>&1)
     TEST_RESULT=$?
     # shellcheck disable=SC2181
     if [ $TEST_RESULT -eq 249 ]; then

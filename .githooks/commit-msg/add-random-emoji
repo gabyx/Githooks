@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Add a random emoji to the end of the first line in every commit message.
 
@@ -8,7 +8,7 @@ if [ ! -f "$1" ] || grep -q "fixup!" "$1"; then
     exit 0
 fi
 
-if command -v "gsed" ; then
+if command -v "gsed" &>/dev/null ; then
     SED="gsed"
 else
     SED="sed"

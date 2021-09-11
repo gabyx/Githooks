@@ -848,14 +848,14 @@ Running the integration tests with Docker:
 
 ```shell
 cd githooks
-sh tests/test-alpine.sh # and other 'test-XXXX.sh' files...
+bash tests/test-alpine.sh # and other 'test-XXXX.sh' files...
 ```
 
 Run certain tests only:
 
 ```shell
-sh tests/test-alpine.sh --seq {001..120}
-sh tests/test-alpine.sh --seq 065
+bash tests/test-alpine.sh --seq {001..120}
+bash tests/test-alpine.sh --seq 065
 ```
 
 ### Debugging in the Dev Container
