@@ -20,7 +20,7 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 	}
 
 	if opts.Style == sets.OptionsStyleButtons && !opts.MultipleSelection {
-		return showOptionsWithButtons(ctx, opts)
+		return showOptionsWithButtons(ctx, opts, nil)
 	}
 
 	return gwin.ShowOptions(ctx, opts)

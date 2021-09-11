@@ -12,9 +12,14 @@ import (
 
 // ShowOptions shows a option dialog.
 func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
+
 	zenity, err := gunix.GetZenityExecutable()
 	if err != nil {
 		return
+	}
+
+	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
+		return showOptionsWithButtons(ctx, opts, nil)
 	}
 
 	return ShowOptionsZenity(ctx, zenity, opts)

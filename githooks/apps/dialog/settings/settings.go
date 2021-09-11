@@ -67,7 +67,8 @@ const (
 
 	// OptionsStyleButtons renders the list dialog with a buttons list.
 	// Multiple selections can therefore not be performed.
-	// Unsupported at the moment.
+	// On macOS only two buttons can be shown if
+	// `zenity` is not available.
 	OptionsStyleButtons
 )
 

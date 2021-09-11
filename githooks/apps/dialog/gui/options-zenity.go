@@ -40,10 +40,6 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 		return
 	}
 
-	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
-		return showOptionsWithButtons(ctx, opts)
-	}
-
 	args := []string{
 		"--list",
 		"--hide-header",
