@@ -24,7 +24,7 @@ jobs:
       image: ubuntu-2004:202010-01
     steps:
       - checkout
-      - run: sh tests/<<parameters.test>>.sh
+      - run: bash tests/<<parameters.test>>.sh
 
   windows:
     parameters:
