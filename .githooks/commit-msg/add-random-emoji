@@ -9,7 +9,6 @@ if [ ! -f "$1" ] || grep -q "fixup!" "$1"; then
 fi
 
 if command -v gsed &>/dev/null; then
-    echo "WTFFFF"
     SED="gsed"
 else
     SED="sed"
