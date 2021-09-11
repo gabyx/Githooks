@@ -58,9 +58,10 @@ func translateEntry(entry *sets.Entry) (d gmac.EntryData, err error) {
 	return
 }
 
-func ShowEntry(ctx context.Context, s *sets.Entry) (res.Entry, error) {
+func ShowEntry(ctx context.Context, e *sets.Entry) (res.Entry, error) {
+	var err error
 
-	data, err := translateEntry(s)
+	data, err := translateEntry(e)
 	if err != nil {
 		return res.Entry{}, err
 	}

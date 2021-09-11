@@ -1,0 +1,6 @@
+tell application "System Events"
+	set processList to every process whose unix id is {{json .Pid}}
+	repeat with proc in processList
+		set the frontmost of proc to true
+	end repeat
+end tell

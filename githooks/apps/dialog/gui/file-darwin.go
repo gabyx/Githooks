@@ -8,10 +8,32 @@ import (
 	"strings"
 
 	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
+
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
 	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
+
+func initFiltersOSAScript(filters []set.FileFilter) []string {
+	var filter []string
+	for _, f := range filters {
+		for _, p := range f.Patterns {
+			star := strings.LastIndexByte(p, '*')
+			if star >= 0 {
+				dot := strings.LastIndexByte(p, '.')
+				if star > dot {
+					return nil // we got ".*" -> return no filter
+				}
+
+				filter = append(filter, p[dot+1:]) // append the *.()
+			} else {
+				filter = append(filter, p)
+			}
+		}
+	}
+
+	return filter
+}
 
 func translateFileSelection(f *sets.FileSelection) (d gmac.FileData, err error) {
 
@@ -21,7 +43,7 @@ func translateFileSelection(f *sets.FileSelection) (d gmac.FileData, err error) 
 		d.Operation = "chooseFolder"
 	} else {
 		d.Operation = "chooseFile"
-		d.Opts.OfType = initFilters(f.FileFilters)
+		d.Opts.OfType = initFiltersOSAScript(f.FileFilters)
 	}
 
 	d.Opts.ShowPackages = true
@@ -42,7 +64,7 @@ func translateFileSave(f *sets.FileSave) (d gmac.FileData, err error) {
 		d.Operation = "chooseFolder"
 	} else {
 		d.Operation = "chooseFileName"
-		d.Opts.OfType = initFilters(f.FileFilters)
+		d.Opts.OfType = initFiltersOSAScript(f.FileFilters)
 	}
 
 	d.Opts.ShowPackages = true
@@ -104,26 +126,4 @@ func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, err
 	}
 
 	return res.File{}, err
-}
-
-func initFilters(filters []set.FileFilter) []string {
-	var filter []string
-	for _, f := range filters {
-		for _, p := range f.Patterns {
-			star := strings.LastIndexByte(p, '*')
-			if star >= 0 {
-				dot := strings.LastIndexByte(p, '.')
-				if star > dot {
-					return nil // we got ".*" -> return no filter
-				}
-
-				filter = append(filter, p[dot+1:]) // append the *.()
-
-			} else {
-				filter = append(filter, p)
-			}
-		}
-	}
-
-	return filter
 }

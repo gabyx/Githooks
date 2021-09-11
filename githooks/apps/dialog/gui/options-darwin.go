@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
+	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
 	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
@@ -63,7 +64,7 @@ func getIndex(item string, maxOptions int) int {
 	return i - 1
 }
 
-func getChoices(output string, maxOptions int) (indices []uint) {
+func getChoicesOSAScript(output string, maxOptions int) (indices []uint) {
 	s := strings.TrimSpace(output)
 	if strs.IsEmpty(s) {
 		return
@@ -79,14 +80,19 @@ func getChoices(output string, maxOptions int) (indices []uint) {
 	return
 }
 
-func ShowOptions(ctx context.Context, s *set.Options) (r res.Options, err error) {
-	if len(s.Options) == 0 {
+func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
+	zenity, err := gunix.GetZenityExecutable()
+	if err == nil {
+		return ShowOptionsZenity(ctx, zenity, opts)
+	}
+
+	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at least one option specified.")
 
 		return
 	}
 
-	data, err := translateOptions(s)
+	data, err := translateOptions(opts)
 	if err != nil {
 		return
 	}
@@ -96,7 +102,7 @@ func ShowOptions(ctx context.Context, s *set.Options) (r res.Options, err error)
 	if err == nil {
 		return res.Options{
 			General: res.OkResult(),
-			Options: getChoices(string(out), len(s.Options))}, nil
+			Options: getChoicesOSAScript(string(out), len(opts.Options))}, nil
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
