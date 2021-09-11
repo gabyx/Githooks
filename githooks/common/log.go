@@ -115,24 +115,24 @@ type LogContext struct {
 // CreateLogContext creates a log context.
 func CreateLogContext(onlyStderr bool) (*LogContext, error) {
 
-	var debug, info, warn, error *os.File
+	var debug, info, warn, err *os.File
 
 	if onlyStderr {
 		info = os.Stderr
 		warn = info
-		error = info
+		err = info
 	} else {
 		info = os.Stdout
 		warn = os.Stderr
-		error = warn
+		err = warn
 	}
 
 	if DebugLog {
-		debug = error
+		debug = err
 	}
 
 	infoIsATerminal := term.IsTerminal(int(info.Fd()))
-	errorIsATerminal := term.IsTerminal(int(error.Fd()))
+	errorIsATerminal := term.IsTerminal(int(err.Fd()))
 	hasColors := (infoIsATerminal && errorIsATerminal) && color.IsSupportColor()
 
 	var colorInfo func(string) string
@@ -151,7 +151,7 @@ func CreateLogContext(onlyStderr bool) (*LogContext, error) {
 	}
 
 	log := LogContext{
-		debug, info, warn, error,
+		debug, info, warn, err,
 		infoIsATerminal, errorIsATerminal, hasColors,
 		colorInfo, colorError, colorPrompt, true, 0, 0}
 

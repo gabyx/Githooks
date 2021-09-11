@@ -26,7 +26,6 @@ func initFiltersOSAScript(filters []set.FileFilter) []string {
 				}
 
 				filter = append(filter, p[dot+1:]) // append the *.()
-
 			} else {
 				filter = append(filter, p)
 			}
