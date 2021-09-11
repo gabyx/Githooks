@@ -19,7 +19,7 @@ const (
 	NullRef = "0000000000000000000000000000000000000000"
 )
 
-// IsBareRepo returns `true` if `c.Cwd` is a bare repository.
+// IsBareRepo returns `true` if `c.GetCwd()` is a bare repository.
 func (c *Context) IsBareRepo() bool {
 	out, _ := c.Get("rev-parse", "--is-bare-repository")
 	return out == GitCVTrue // nolint:nlreturn
@@ -30,7 +30,7 @@ func (c *Context) IsGitRepo() bool {
 	return c.Check("rev-parse") == nil
 }
 
-// IsGitDir returns `true` if `c.Cwd` is a git repository (bare or non-bare).
+// IsGitDir returns `true` if `c.GetCwd()` is a git repository (bare or non-bare).
 func (c *Context) IsGitDir() bool {
 	s, err := c.Get("rev-parse", "--is-inside-git-dir")
 
@@ -51,7 +51,7 @@ func (c *Context) GetMainWorktree() (string, error) {
 
 	list := strs.SplitLinesN(trees, 2) // nolint: gomnd
 	if len(list) == 0 {
-		return "", cm.ErrorF("Could not get main worktree in '%s'", c.Cwd)
+		return "", cm.ErrorF("Could not get main worktree in '%s'", c.GetCwd())
 	}
 
 	tree := strings.TrimSuffix(
@@ -60,7 +60,7 @@ func (c *Context) GetMainWorktree() (string, error) {
 		"/.git")
 
 	if strs.IsEmpty(tree) {
-		return "", cm.ErrorF("Could not get main worktree in '%s'", c.Cwd)
+		return "", cm.ErrorF("Could not get main worktree in '%s'", c.GetCwd())
 	}
 
 	return filepath.ToSlash(tree), nil
@@ -79,7 +79,7 @@ func (c *Context) GetGitDirCommon() (gitDir string, err error) {
 	}
 
 	if !filepath.IsAbs(gitDir) {
-		gitDir = filepath.Join(c.Cwd, gitDir)
+		gitDir = filepath.Join(c.GetCwd(), gitDir)
 	}
 
 	gitDir, err = filepath.Abs(gitDir)
@@ -220,14 +220,13 @@ func Clone(repoPath string, url string, branch string, depth int) error {
 
 	args = append(args, []string{url, repoPath}...)
 
-	ctx := CtxSanitized()
 	// We must not execute this clone command inside a Git repo  (e.g. A)
 	// due to `core.hooksPath=.git/hooks` which get applied to `A` -> Bug ?:
 	// https://stackoverflow.com/questions/67273420/why-does-git-execute-hooks-from-an-other-repository
-	ctx.Cwd = path.Dir(repoPath)
-	if !cm.IsDirectory(ctx.Cwd) {
-		if e := os.MkdirAll(ctx.Cwd, cm.DefaultFileModeDirectory); e != nil {
-			return cm.ErrorF("Could not create working directory '%s'.", ctx.Cwd)
+	ctx := CtxCSanitized(path.Dir(repoPath))
+	if !cm.IsDirectory(ctx.GetCwd()) {
+		if e := os.MkdirAll(ctx.GetCwd(), cm.DefaultFileModeDirectory); e != nil {
+			return cm.ErrorF("Could not create working directory '%s'.", ctx.GetCwd())
 		}
 	}
 
@@ -244,7 +243,7 @@ func Clone(repoPath string, url string, branch string, depth int) error {
 func (c *Context) Pull(remote string) error {
 	out, e := c.GetCombined("pull", remote)
 	if e != nil {
-		return cm.ErrorF("Pulling '%s' in '%s' failed:\n%s", remote, c.Cwd, out)
+		return cm.ErrorF("Pulling '%s' in '%s' failed:\n%s", remote, c.GetCwd(), out)
 	}
 
 	return nil
@@ -263,7 +262,7 @@ func (c *Context) FetchBranch(remote string, branch string, tagPattern string) e
 	out, e := c.GetCombined(cmd...)
 	if e != nil {
 		return cm.ErrorF("Fetching of '%s' from '%s'\nin '%s' failed:\n%s",
-			branch, remote, c.Cwd, out)
+			branch, remote, c.GetCwd(), out)
 	}
 
 	return nil

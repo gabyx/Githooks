@@ -37,8 +37,7 @@ type ReleaseStatus struct {
 }
 
 // GetCloneURL get the clone url and clone branch.
-func GetCloneURL() (url string, branch string) {
-	gitx := git.Ctx()
+func GetCloneURL(gitx *git.Context) (url string, branch string) {
 	url = gitx.GetConfig(hooks.GitCKCloneURL, git.GlobalScope)
 	branch = gitx.GetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 
@@ -166,7 +165,7 @@ func FetchUpdates(
 		if e != nil {
 			return false,
 				cm.CombineErrors(cm.ErrorF("Could not check dirty state in '%s'",
-					gitx.Cwd),
+					gitx.GetCwd()),
 					e)
 		}
 
@@ -174,7 +173,7 @@ func FetchUpdates(
 			return false, cm.ErrorF("Cannot fetch updates because the clone\n"+
 				"'%s'\n"+
 				"is dirty! Either fix this or delete the clone\n"+
-				"to trigger a new checkout.", gitx.Cwd)
+				"to trigger a new checkout.", gitx.GetCwd())
 		}
 
 		if checkRemote {
@@ -182,7 +181,7 @@ func FetchUpdates(
 
 			if e != nil {
 				return false, cm.CombineErrors(cm.ErrorF(
-					"Could not check url & branch in repository at '%s'", gitx.Cwd), e)
+					"Could not check url & branch in repository at '%s'", gitx.GetCwd()), e)
 
 			} else if u != url || b != branch {
 				if checkRemoteAction != RecloneOnWrongRemote {
@@ -199,7 +198,7 @@ func FetchUpdates(
 						"    'git hooks config [set|print] clone-branch'\n"+
 						"Either fix this or delete the clone\n"+
 						"'%[1]s'\n"+
-						"to trigger a new checkout.", gitx.Cwd, u, b, url, branch, DefaultRemote)
+						"to trigger a new checkout.", gitx.GetCwd(), u, b, url, branch, DefaultRemote)
 				}
 
 				// Do a reclone
@@ -210,7 +209,8 @@ func FetchUpdates(
 		return reclone, nil
 	}
 
-	cURL, cBranch := GetCloneURL()
+	gitx := git.CtxCSanitized(cloneDir)
+	cURL, cBranch := GetCloneURL(gitx)
 
 	// Fallback for url
 	if strs.IsEmpty(url) {
@@ -236,8 +236,6 @@ func FetchUpdates(
 	if err != nil {
 		return
 	}
-
-	gitx := git.CtxCSanitized(cloneDir)
 
 	// If branch was empty (default branch), determine it now.
 	if strs.IsEmpty(branch) {
@@ -312,7 +310,7 @@ func GetStatus(cloneDir string, checkRemote, skipPrerelease bool) (status Releas
 	}
 
 	if checkRemote {
-		configURL, configBranch := GetCloneURL()
+		configURL, configBranch := GetCloneURL(gitx)
 
 		if url != configURL || branch != configBranch {
 			// Default action is error out:
@@ -328,7 +326,7 @@ func GetStatus(cloneDir string, checkRemote, skipPrerelease bool) (status Releas
 				"    'git hooks config [set|print] clone-branch'\n"+
 				"Either fix this or delete the clone\n"+
 				"'%[1]s'\n"+
-				"to trigger a new checkout.", gitx.Cwd, url, branch, configURL, configBranch)
+				"to trigger a new checkout.", gitx.GetCwd(), url, branch, configURL, configBranch)
 
 			return
 		}
@@ -410,11 +408,11 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 		return //nolint: nlreturn
 	}
 
-	// Get configured branches...
-	_, branch := GetCloneURL()
-	remoteBranch := "origin/" + branch
-
 	gitx := git.CtxCSanitized(cloneDir)
+
+	// Get configured branches...
+	_, branch := GetCloneURL(gitx)
+	remoteBranch := "origin/" + branch
 
 	// Safety check that branches are the same.
 	currentBranch, err := gitx.Get("rev-parse", "--abbrev-ref", git.HEAD)
@@ -543,7 +541,7 @@ const (
 // `acceptNonInteractive` decides if an update happens.
 func DefaultAcceptUpdateCallback(
 	log cm.ILogContext,
-	promptCtx prompt.IContext,
+	promptx prompt.IContext,
 	acceptNonInteractive AcceptNonInteractiveMode) AcceptUpdateCallback {
 
 	return func(status *ReleaseStatus) bool {
@@ -570,12 +568,12 @@ func DefaultAcceptUpdateCallback(
 			versionText += formatUpdateInfo(status.UpdateInfo)
 		}
 
-		if promptCtx != nil {
+		if promptx != nil {
 			question := "There is a new Githooks update available:\n" +
 				versionText + "\n" +
 				"Would you like to install it now?"
 
-			answer, err := promptCtx.ShowOptions(question,
+			answer, err := promptx.ShowOptions(question,
 				promptHint,
 				promptDefault,
 				"Yes", "No")

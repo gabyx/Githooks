@@ -30,9 +30,10 @@ var existingWarn = []string{
 // into existing repositories.
 func PromptExistingRepos(
 	log cm.ILogContext,
+	gitx *git.Context,
 	nonInteractive bool,
 	uninstall bool,
-	promptCtx prompt.IContext,
+	promptx prompt.IContext,
 	callback func(string)) {
 
 	// Message index.
@@ -41,7 +42,6 @@ func PromptExistingRepos(
 		idx = 1
 	}
 
-	gitx := git.Ctx()
 	homeDir, err := homedir.Dir()
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
@@ -65,7 +65,7 @@ func PromptExistingRepos(
 			questionPrompt = []string{"(yes/No)", "y/N"}
 		}
 
-		answer, err := promptCtx.ShowOptions(
+		answer, err := promptx.ShowOptions(
 			existingPrompt[idx],
 			questionPrompt[0],
 			questionPrompt[1],
@@ -76,7 +76,7 @@ func PromptExistingRepos(
 			return
 		}
 
-		searchDir, err = promptCtx.ShowEntry(
+		searchDir, err = promptx.ShowEntry(
 			"Where do you want to start the search?",
 			searchDir,
 			prompt.CreateValidatorIsDirectory(homeDir))
@@ -131,7 +131,7 @@ func PromptRegisteredRepos(
 	dirs []string,
 	nonInteractive bool,
 	uninstall bool,
-	promptCtx prompt.IContext,
+	promptx prompt.IContext,
 	callback func(string)) {
 
 	// Message index.
@@ -142,7 +142,7 @@ func PromptRegisteredRepos(
 
 	if !nonInteractive && len(dirs) != 0 {
 
-		answer, err := promptCtx.ShowOptions(
+		answer, err := promptx.ShowOptions(
 			"The following remaining registered repositories\n"+
 				"contain Githooks installation:\n"+
 				strings.Join(

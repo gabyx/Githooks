@@ -130,13 +130,13 @@ func GetSharedGithooksDir(repoDir string) (dir string) {
 }
 
 // GetInstallDir returns the Githooks install directory.
-func GetInstallDir() string {
-	return filepath.ToSlash(git.Ctx().GetConfig(GitCKInstallDir, git.GlobalScope))
+func GetInstallDir(gitx *git.Context) string {
+	return filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
 }
 
 // SetInstallDir sets the global Githooks install directory.
-func SetInstallDir(path string) error {
-	return git.Ctx().SetConfig(GitCKInstallDir, path, git.GlobalScope)
+func SetInstallDir(gitx *git.Context, path string) error {
+	return gitx.SetConfig(GitCKInstallDir, path, git.GlobalScope)
 }
 
 // GetBinaryDir returns the Githooks binary directory inside the install directory.

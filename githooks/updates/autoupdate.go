@@ -21,8 +21,8 @@ func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
 }
 
 // GetAutomaticUpdateCheckSettings gets the automatic update settings.
-func GetAutomaticUpdateCheckSettings() (enabled bool, isSet bool) {
-	conf := git.Ctx().GetConfig(hooks.GitCKAutoUpdateEnabled, git.GlobalScope)
+func GetAutomaticUpdateCheckSettings(gitx *git.Context) (enabled bool, isSet bool) {
+	conf := gitx.GetConfig(hooks.GitCKAutoUpdateEnabled, git.GlobalScope)
 	switch {
 	case conf == git.GitCVTrue:
 		return true, true

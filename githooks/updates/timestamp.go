@@ -23,12 +23,12 @@ func ResetUpdateCheckTimestamp() error {
 }
 
 // GetUpdateCheckTimestamp gets the update check time.
-func GetUpdateCheckTimestamp() (t time.Time, isSet bool, err error) {
+func GetUpdateCheckTimestamp(gitx *git.Context) (t time.Time, isSet bool, err error) {
 
 	// Initialize with too old time...
 	t = time.Unix(0, 0)
 
-	timeLastUpdateCheck := git.Ctx().GetConfig(hooks.GitCKAutoUpdateCheckTimestamp, git.GlobalScope)
+	timeLastUpdateCheck := gitx.GetConfig(hooks.GitCKAutoUpdateCheckTimestamp, git.GlobalScope)
 	if strs.IsEmpty(timeLastUpdateCheck) {
 		return
 	}

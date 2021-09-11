@@ -29,13 +29,13 @@ type Context struct {
 // CtxC creates a git command execution context with
 // working dir `cwd`.
 func CtxC(cwd string) *Context {
-	return &Context{cm.CmdContext{BaseCmd: "git", Cwd: cwd}}
+	return &Context{cm.NewCommandCtx("git", cwd, nil)}
 }
 
 // CtxCSanitized creates a git command execution context with
 // working dir `cwd` and sanitized environement.
 func CtxCSanitized(cwd string) *Context {
-	return (&Context{cm.CmdContext{BaseCmd: "git", Cwd: cwd, Env: SanitizeEnv(os.Environ())}})
+	return &Context{cm.NewCommandCtx("git", cwd, SanitizeEnv(os.Environ()))}
 }
 
 // Ctx creates a git command execution context

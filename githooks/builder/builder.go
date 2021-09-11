@@ -19,7 +19,7 @@ var relPathGoSrc = "githooks"
 var goVersionMin = "1.16.0"
 var versionRe = regexp.MustCompile(`\d+\.\d+(\.\d+)?`)
 
-func findGoExec() (cm.CmdContext, error) {
+func findGoExec(cwd string) (cm.CmdContext, error) {
 
 	check := func(gox cm.CmdContext) error {
 
@@ -27,14 +27,14 @@ func findGoExec() (cm.CmdContext, error) {
 		if err != nil {
 			return cm.ErrorF(
 				"Executable '%s' is not found.",
-				gox.BaseCmd)
+				gox.GetBaseCmd())
 		}
 
 		ver := versionRe.FindString(verS)
 		if strs.IsEmpty(ver) {
 			return cm.ErrorF(
 				"Executable version of '%s' cannot be matched.",
-				gox.BaseCmd)
+				gox.GetBaseCmd())
 		}
 
 		verMin, err := version.NewVersion(goVersionMin)
@@ -44,13 +44,13 @@ func findGoExec() (cm.CmdContext, error) {
 		if err != nil {
 			return cm.ErrorF(
 				"Executable version '%s' of '%s' cannot be parsed.",
-				ver, gox.BaseCmd)
+				ver, gox.GetBaseCmd())
 		}
 
 		if verCurr.LessThan(verMin) {
 			return cm.ErrorF(
 				"Executable version of '%s' is '%s' -> min. required is '%s'.",
-				gox.BaseCmd, ver, goVersionMin)
+				gox.GetBaseCmd(), ver, goVersionMin)
 		}
 
 		return nil
@@ -62,7 +62,7 @@ func findGoExec() (cm.CmdContext, error) {
 	// Check from config.
 	goExec := git.Ctx().GetConfig(hooks.GitCKGoExecutable, git.GlobalScope)
 	if strs.IsNotEmpty(goExec) && cm.IsFile(goExec) {
-		gox = cm.CmdContext{BaseCmd: goExec}
+		gox = cm.NewCommandCtx(goExec, cwd, nil)
 
 		e := check(gox)
 		if e == nil {
@@ -72,7 +72,7 @@ func findGoExec() (cm.CmdContext, error) {
 	}
 
 	// Check globally in path.
-	gox = cm.CmdContext{BaseCmd: "go"}
+	gox = cm.NewCommandCtx("go", cwd, nil)
 	e := check(gox)
 	if e == nil {
 		return gox, nil
@@ -83,8 +83,9 @@ func findGoExec() (cm.CmdContext, error) {
 
 // Build compiles this repos executable with Go and reports
 // the output binary directory where all built binaries reside.
-func Build(repoPath string, buildTags []string) (string, error) {
+func Build(gitx *git.Context, buildTags []string) (string, error) {
 
+	repoPath := gitx.GetCwd()
 	goSrc := path.Join(repoPath, relPathGoSrc)
 	if !cm.IsDirectory(goSrc) {
 		return "", cm.ErrorF("Source directors '%s' is not existing.", goSrc)
@@ -94,7 +95,7 @@ func Build(repoPath string, buildTags []string) (string, error) {
 	goBinPath := path.Join(repoPath, relPathGoSrc, "bin")
 
 	// Find the go executable
-	gox, err := findGoExec()
+	gox, err := findGoExec(goSrc)
 	if err != nil {
 		return goBinPath,
 			cm.CombineErrors(
@@ -108,9 +109,6 @@ func Build(repoPath string, buildTags []string) (string, error) {
 	if e1 != nil || e2 != nil {
 		return goBinPath, cm.Error("Could not remove temporary build files.")
 	}
-
-	// Set working dir.
-	gox.Cwd = goSrc
 
 	// Modify environment for compile.
 	gox.Env = strs.Filter(os.Environ(), func(s string) bool {
@@ -128,7 +126,7 @@ func Build(repoPath string, buildTags []string) (string, error) {
 	if err != nil {
 		return goBinPath,
 			cm.ErrorF("Module vendor command failed:\n'%s %q'\nOutput:\n%s",
-				gox.BaseCmd, vendorCmd, out)
+				gox.GetBaseCmd(), vendorCmd, out)
 	}
 
 	// Genereate everything.
@@ -137,7 +135,7 @@ func Build(repoPath string, buildTags []string) (string, error) {
 	if err != nil {
 		return goBinPath,
 			cm.ErrorF("Generate command failed:\n'%s %q'\nOutput:\n%s",
-				gox.BaseCmd, generateCmd, out)
+				gox.GetBaseCmd(), generateCmd, out)
 	}
 
 	// Compile everything.
@@ -157,7 +155,7 @@ func Build(repoPath string, buildTags []string) (string, error) {
 	if err != nil {
 		return goBinPath,
 			cm.ErrorF("Compile command failed:\n'%s %q'\nOutput:\n%s",
-				gox.BaseCmd, cmd, out)
+				gox.GetBaseCmd(), cmd, out)
 	}
 
 	return goBinPath, nil

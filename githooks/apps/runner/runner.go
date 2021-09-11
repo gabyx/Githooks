@@ -143,9 +143,9 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		os.Args[1])
 	hookPath = filepath.ToSlash(hookPath)
 
-	installDir := getInstallDir()
+	installDir := getInstallDir(gitx)
 
-	promptCtx, err := prompt.CreateContext(log, true, false)
+	promptx, err := prompt.CreateContext(log, true, false)
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
 	nonInteractive := hooks.IsRunnerNonInteractive(gitx, git.Traverse)
@@ -154,7 +154,7 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)
 	if !isTrusted && hasTrustFile && !nonInteractive {
-		isTrusted = showTrustRepoPrompt(gitx, promptCtx)
+		isTrusted = showTrustRepoPrompt(gitx, promptx)
 	}
 
 	s := HookSettings{
@@ -178,11 +178,11 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	log.DebugF(s.toString())
 
-	return s, UISettings{AcceptAllChanges: false, PromptCtx: promptCtx}
+	return s, UISettings{AcceptAllChanges: false, PromptCtx: promptx}
 }
 
-func getInstallDir() string {
-	installDir := hooks.GetInstallDir()
+func getInstallDir(gitx *git.Context) string {
+	installDir := hooks.GetInstallDir(gitx)
 
 	setDefault := func() {
 		usr, err := homedir.Dir()
@@ -236,13 +236,13 @@ func assertRegistered(gitx *git.Context, installDir string) {
 	}
 }
 
-func showTrustRepoPrompt(gitx *git.Context, promptCtx prompt.IContext) (isTrusted bool) {
+func showTrustRepoPrompt(gitx *git.Context, promptx prompt.IContext) (isTrusted bool) {
 	question := "This repository wants you to trust all current and\n" +
 		"future hooks without prompting.\n" +
 		"Do you want to allow running every current and future hooks?"
 
 	var answer string
-	answer, err := promptCtx.ShowOptions(question, "(yes, no)", "y/n", "Yes", "No")
+	answer, err := promptx.ShowOptions(question, "(yes, no)", "y/n", "Yes", "No")
 	log.AssertNoErrorF(err, "Could not get trust prompt answer.")
 	if err != nil {
 		return
@@ -337,12 +337,12 @@ func shouldRunUpdateCheck(settings *HookSettings) bool {
 		return false
 	}
 
-	enabled, _ := updates.GetAutomaticUpdateCheckSettings()
+	enabled, _ := updates.GetAutomaticUpdateCheckSettings(settings.GitX)
 	if !enabled {
 		return false
 	}
 
-	lastUpdateCheck, _, err := updates.GetUpdateCheckTimestamp()
+	lastUpdateCheck, _, err := updates.GetUpdateCheckTimestamp(settings.GitX)
 	log.AssertNoErrorF(err, "Could get last update check time.")
 
 	return time.Since(lastUpdateCheck).Hours() > 24.0 //nolint: gomnd

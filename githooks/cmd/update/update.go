@@ -23,14 +23,14 @@ func runUpdate(
 
 	default:
 
-		var promptCtx prompt.IContext
+		var promptx prompt.IContext
 		if !nonInteractive {
-			promptCtx = ctx.PromptCtx
+			promptx = ctx.PromptCtx
 		}
 
 		updateAvailable, accepted, err := updates.RunUpdate(
 			ctx.InstallDir,
-			updates.DefaultAcceptUpdateCallback(ctx.Log, promptCtx, nonInteractiveAccept),
+			updates.DefaultAcceptUpdateCallback(ctx.Log, promptx, nonInteractiveAccept),
 			func() error {
 				installer := installer.NewCmd(ctx)
 				installer.SetArgs([]string{})

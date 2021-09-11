@@ -15,6 +15,7 @@ import (
 //nolint
 func InstallIntoRepo(
 	log cm.ILogContext,
+	gitx *git.Context,
 	repoGitDir string,
 	nonInteractive bool,
 	dryRun bool,
@@ -45,7 +46,7 @@ func InstallIntoRepo(
 		err := hooks.InstallRunWrappers(
 			hookDir, hookNames,
 			nil,
-			GetHookDisableCallback(log, nonInteractive, uiSettings),
+			GetHookDisableCallback(log, gitx, nonInteractive, uiSettings),
 			nil)
 
 		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookDir)
