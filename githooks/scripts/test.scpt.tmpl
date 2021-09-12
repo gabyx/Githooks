@@ -1,0 +1,131 @@
+-- The following provides a way to show
+-- a NSAlert window with a list. Its still editable
+use AppleScript version "2.5"
+use scripting additions
+use framework "Foundation"
+use framework "AppKit"
+
+property NSAlert : a reference to current application's NSAlert
+property NSImage : a reference to current application's NSImage
+property NSIndexSet : a reference to current application's NSIndexSet
+property NSScrollView : a reference to current application's NSScrollView
+property NSTableView : a reference to current application's NSTableView
+property NSTableColumn : a reference to current application's NSTableColumn
+property NSMutableArray : a reference to current application's NSMutableArray
+property NSRunningApplication : a reference to current application's NSRunningApplication
+property NSAlertSecondButtonReturn : a reference to current application's NSAlertSecondButtonReturn
+
+property theAlert : missing value
+property theResult : 0
+property returnCode : 0
+property theDataSource : {}
+
+on createAlert()
+	-- Create an alert
+	set my theAlert to current application's NSAlert's alloc()'s init()
+	my performSelectorOnMainThread:"displayAlert:" withObject:theAlert waitUntilDone:true
+end createAlert
+
+my performSelectorOnMainThread:"createAlert" withObject:(missing value) waitUntilDone:true
+my performSelectorOnMainThread:"displayAlert" withObject:(missing value) waitUntilDone:true
+if theResult = (current application's NSAlertSecondButtonReturn) then error number -128
+
+set paramObj to {myMessage:"Item selection", mySubMessage:"Please select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk ja", aTableList:{"None", "Apple", "Chick", "Gyouza", "Snagi also", "Alone", "Peaches"}}
+set aRes to my chooseItemByTableView:paramObj
+aRes
+
+on chooseItemByTableView:paramObj
+	set aMainMes to myMessage of paramObj
+	set aSubMes to mySubMessage of paramObj
+	set aTList to (aTableList of paramObj) as list
+
+	-- set cautionName to aN of NSImage:Name
+
+	-- define the matrix size where you’ll put the radio buttons
+	set aScrollWithTable to makeTableView(aTList, 900, 300) of me
+	set theImage to current application's NSImage's alloc()
+
+	-- set up alert
+	tell theAlert
+		its setAlertStyle:0
+		its setIcon:theImage
+		its setMessageText:aMainMes
+		its setInformativeText:aSubMes
+		its addButtonWithTitle:"OK"
+		its addButtonWithTitle:"Cancel"
+		-- its setAccessoryView:aScrollWithTable
+		its addButtonWithTitle:"a"
+		its addButtonWithTitle:"b"
+
+
+	end tell
+
+	-- show alert in modal loop
+	NSRunningApplication's currentApplication()'s activateWithOptions:0
+	my performSelectorOnMainThread:"doModal:" withObject:(theAlert) waitUntilDone:true
+	if (my returnCode as number) = 1001 then error number -128
+	return {(aScrollWithTable's documentView's selectedRow()) + 1, returnCode}
+end chooseItemByTableView:
+
+on doModal:aParam
+	set (my returnCode) to aParam's runModal()
+end doModal:
+
+on makeTableView(aList as list, aWidth as number, aHeight as number)
+	set aOffset to 40
+
+	set sourceList to {}
+	repeat with i in aList
+		set the end of sourceList to {dataItem:(contents of i)}
+	end repeat
+
+	set theDataSource to NSMutableArray's alloc()'s init()
+	theDataSource's addObjectsFromArray:sourceList
+
+	set aScroll to NSScrollView's alloc()'s initWithFrame:(current application's NSMakeRect(0, aOffset, aWidth, aHeight))
+	set aView to NSTableView's alloc()'s initWithFrame:(current application's NSMakeRect(0, aOffset, aWidth, aHeight))
+
+	set aColumn to (NSTableColumn's alloc()'s initWithIdentifier:"dataItem")
+	(aColumn's setWidth:aWidth)
+	(aColumn's headerCell()'s setStringValue:"dataItem")
+	(aView's addTableColumn:aColumn)
+
+	aView's setDelegate:me
+	aView's setDataSource:me
+	aView's reloadData()
+
+	aScroll's setDocumentView:aView
+	aView's enclosingScrollView()'s setHasVerticalScroller:true
+
+	-- Select line
+	set aIndexSet to NSIndexSet's indexSetWithIndex:0
+	aView's selectRowIndexes:aIndexSet byExtendingSelection:false
+
+	-- Force scroll to top
+	-- set maxHeight to aScroll’s documentView()’s |bounds|()’s |size|()’s height
+	set aDBounds to aScroll's documentView()'s |bounds|()
+	if class of aDBounds = list then
+		-- macOS 10.13 or later
+		set maxHeight to item 2 of item 1 of aDBounds
+	else
+		-- macOS 10.10….10.12
+		set maxHeight to height of |size| of aDBounds
+	end if
+
+	set aPT to current application's NSMakePoint(0.0, -40.0) -- (aScroll’s documentView()’s |bounds|()’s |size|()’s height))
+	aScroll's documentView()'s scrollPoint:aPT
+
+	return aScroll
+end makeTableView
+
+-- TableView Event Handlers
+on numberOfRowsInTableView:aView
+	return my theDataSource's |count|()
+end numberOfRowsInTableView:
+
+on tableView:aView objectValueForTableColumn:aColumn row:aRow
+	set aRec to (my theDataSource)'s objectAtIndex:(aRow as number)
+	set aTitle to (aColumn's headerCell()'s title()) as string
+	set aRes to (aRec's valueForKey:aTitle)
+	return aRes
+end tableView:objectValueForTableColumn:row:
