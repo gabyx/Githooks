@@ -133,61 +133,15 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
         return (data?.count)!
     }
 
-    func tableView(tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+    func tableView(tableView: NSTableView, viewFor row: Int) -> NSView? {
 
         let item = (data!)[row]
 
-        let cell = tableView.makeView(withIdentifier:tableColumn!.identifier, owner: self) as? NSTableCellView
-        cell?.textField?.stringValue = item[(tableColumn?.identifier)!]!
+        let cell = tableView.makeView(withIdentifier:NSUserInterfaceItemIdentifier("firstName"), owner: self) as? NSTableCellView
+        cell?.textField?.stringValue = item["firstName"]!
         return cell
     }
 }
-// on makeTableView(aList as list, aWidth as number, aHeight as number)
-// 	set aOffset to 40
-
-// 	set sourceList to {}
-// 	repeat with i in aList
-// 		set the end of sourceList to {dataItem:(contents of i)}
-// 	end repeat
-
-// 	set theDataSource to NSMutableArray's alloc()'s init()
-// 	theDataSource's addObjectsFromArray:sourceList
-
-// 	set aScroll to NSScrollView's alloc()'s initWithFrame:(current application's NSMakeRect(0, aOffset, aWidth, aHeight))
-// 	set aView to NSTableView's alloc()'s initWithFrame:(current application's NSMakeRect(0, aOffset, aWidth, aHeight))
-
-// 	set aColumn to (NSTableColumn's alloc()'s initWithIdentifier:"dataItem")
-// 	(aColumn's setWidth:aWidth)
-// 	(aColumn's headerCell()'s setStringValue:"dataItem")
-// 	(aView's addTableColumn:aColumn)
-
-// 	aView's setDelegate:me
-// 	aView's setDataSource:me
-// 	aView's reloadData()
-
-// 	aScroll's setDocumentView:aView
-// 	aView's enclosingScrollView()'s setHasVerticalScroller:true
-
-// 	-- Select line
-// 	set aIndexSet to NSIndexSet's indexSetWithIndex:0
-// 	aView's selectRowIndexes:aIndexSet byExtendingSelection:false
-
-// 	-- Force scroll to top
-// 	-- set maxHeight to aScroll’s documentView()’s |bounds|()’s |size|()’s height
-// 	set aDBounds to aScroll's documentView()'s |bounds|()
-// 	if class of aDBounds = list then
-// 		-- macOS 10.13 or later
-// 		set maxHeight to item 2 of item 1 of aDBounds
-// 	else
-// 		-- macOS 10.10….10.12
-// 		set maxHeight to height of |size| of aDBounds
-// 	end if
-
-// 	set aPT to current application's NSMakePoint(0.0, -40.0) -- (aScroll’s documentView()’s |bounds|()’s |size|()’s height))
-// 	aScroll's documentView()'s scrollPoint:aPT
-
-// 	return aScroll
-// end makeTableView
 
 func runOptionsDialog(args: [String]) {
 
