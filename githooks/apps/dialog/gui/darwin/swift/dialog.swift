@@ -58,17 +58,17 @@ switch(type){
 
 func runMessageDialog(args: [String]) {
 
-    let appIcon = args[1]
-    let icon = args[2]
-    let title = args[3]
-    let text = args[4]
-    let okButton = args[5]
-    let cancelButton = args[6]
+    let appIcon = args[0]
+    let icon = args[1]
+    let title = args[2]
+    let text = args[3]
+    let okButton = args[4]
+    let cancelButton = args[5]
 
-    let nButtons = Int(args[7]) ??  0
+    let nButtons = Int(args[6]) ??  0
     var extraButtons = [String]()
     if nButtons > 0 {
-        extraButtons = Array<String>(args[8..<8+nButtons])
+        extraButtons = Array<String>(args[7..<7+nButtons])
     }
 
     // Set dock icon
@@ -102,46 +102,46 @@ func runMessageDialog(args: [String]) {
     exit(0)
 }
 
-class ViewController: NSViewController {
+// class ViewController: NSViewController {
 
-    @IBOutlet var tableView: NSTableView!
-    var data: [[String: String]]?
+//     @IBOutlet var tableView: NSTableView!
+//     var data: [[String: String]]?
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+//     override func viewDidLoad() {
+//         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
-        data = [
-                [
-                    "firstName" : "Andrew"
-                ],
-                [
-                    "firstName" : "Gabriel"
-                ],
-                [
-                    "firstName" : "Olga"
-            ]
-        ]
+//         // Do any additional setup after loading the view.
+//         data = [
+//                 [
+//                     "firstName" : "Andrew"
+//                 ],
+//                 [
+//                     "firstName" : "Gabriel"
+//                 ],
+//                 [
+//                     "firstName" : "Olga"
+//             ]
+//         ]
 
-        self.tableView.reloadData()
-    }
-}
+//         self.tableView.reloadData()
+//     }
+// }
 
-extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
+// extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
 
-    func numberOfRowsInTableView(tableView: NSTableView) -> Int {
-        return (data?.count)!
-    }
+//     func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+//         return (data?.count)!
+//     }
 
-    func tableView(tableView: NSTableView, viewFor row: Int) -> NSView? {
+//     func tableView(tableView: NSTableView, viewFor row: Int) -> NSView? {
 
-        let item = (data!)[row]
+//         let item = (data!)[row]
 
-        let cell = tableView.makeView(withIdentifier:NSUserInterfaceItemIdentifier("firstName"), owner: self) as? NSTableCellView
-        cell?.textField?.stringValue = item["firstName"]!
-        return cell
-    }
-}
+//         let cell = tableView.makeView(withIdentifier:NSUserInterfaceItemIdentifier("firstName"), owner: self) as? NSTableCellView
+//         cell?.textField?.stringValue = item["firstName"]!
+//         return cell
+//     }
+// }
 
 func runOptionsDialog(args: [String]) {
 
@@ -177,20 +177,17 @@ func runOptionsDialog(args: [String]) {
         a.addButton(withTitle: extra)
     }
 
-    let scrollView = NSScrollView(frame: NSRect(x: 0, y: 4, width: 200, height: 500))
-    let tableView = NSTableView(frame: NSRect(x: 0, y: 2, width: 200, height: 500))
-    let c = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("firstName"))
-    c.width = 200
-    c.title = "First Name"
-    scrollView.documentView = tableView
-    a.accessoryView = scrollView
+    // let scrollView = NSScrollView(frame: NSRect(x: 0, y: 4, width: 200, height: 500))
+    // let tableView = NSTableView(frame: NSRect(x: 0, y: 2, width: 200, height: 500))
+    // let c = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("firstName"))
+    // c.width = 200
+    // c.title = "First Name"
+    // scrollView.documentView = tableView
+    // a.accessoryView = scrollView
 
-    let con = ViewController()
-    tableView.delegate = con
-    tableView.reloadData()
-    // for c in ["A", "B", "C", "D"] {
-    //     c.
-    // }
+    // let con = ViewController()
+    // tableView.delegate = con
+    // tableView.reloadData()
 
     app.activate(ignoringOtherApps: true)
     let res = a.runModal()
