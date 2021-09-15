@@ -32,18 +32,18 @@ if theResult = (current application's NSAlertSecondButtonReturn) then error numb
 
 set paramObj to {myMessage:"Item selection", mySubMessage:"Please select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk jaPlease select the appropriate one from the following jashdk jalskd jöklasjd alkösjdf ölkajsdfölk jasödlkfj asldjkf ölaksjd fölkjasdlöfjkaölskdj fölakjsd fölkajsdölfk jasöldkfj ölaksjd fölkajs döflk ja", aTableList:{"None", "Apple", "Chick", "Gyouza", "Snagi also", "Alone", "Peaches"}}
 set aRes to my chooseItemByTableView:paramObj
-aRes
 
 on chooseItemByTableView:paramObj
 	set aMainMes to myMessage of paramObj
 	set aSubMes to mySubMessage of paramObj
 	set aTList to (aTableList of paramObj) as list
 
-	-- set cautionName to aN of NSImage:Name
-
 	-- define the matrix size where you’ll put the radio buttons
 	set aScrollWithTable to makeTableView(aTList, 900, 300) of me
-	set theImage to current application's NSImage's alloc()
+
+	set theImage to current application's NSImage's imageNamed:(current application's NSImageNameCaution)
+
+	-- set tWin to theAlert's window
 
 	-- set up alert
 	tell theAlert
