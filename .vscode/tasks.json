@@ -32,16 +32,13 @@
       "presentation": {
         "reveal": "always",
         "panel": "shared"
-      },
+      }
     },
     {
       "label": "[Dev Container] go-build-temp",
       "type": "shell",
       "command": "${workspaceFolder}/githooks/scripts/build.sh",
-      "args": [
-        "--bin-dir",
-        "/tmp/githooks"
-      ],
+      "args": ["--bin-dir", "/tmp/githooks"],
       "options": {
         "shell": {
           "executable": "/bin/bash",
@@ -78,7 +75,7 @@
         },
         "env": {
           "CGO_ENABLED": "0",
-          "GOBIN": "${workspaceFolder}/githooks/bin",
+          "GOBIN": "${workspaceFolder}/githooks/bin"
         }
       },
       "presentation": {
@@ -103,7 +100,7 @@
         "--api-version=2",
         "./apps/cli",
         "--",
-        "uninstaller",
+        "uninstaller"
       ],
       "options": {
         "cwd": "${workspaceFolder}/githooks",
@@ -113,7 +110,7 @@
         },
         "env": {
           "CGO_ENABLED": "0",
-          "GOBIN": "${workspaceFolder}/githooks/bin",
+          "GOBIN": "${workspaceFolder}/githooks/bin"
         }
       },
       "presentation": {
@@ -149,7 +146,7 @@
         },
         "env": {
           "CGO_ENABLED": "0",
-          "GOBIN": "${workspaceFolder}/githooks/bin",
+          "GOBIN": "${workspaceFolder}/githooks/bin"
         }
       },
       "presentation": {
@@ -183,7 +180,7 @@
         },
         "env": {
           "CGO_ENABLED": "0",
-          "GOBIN": "${workspaceFolder}/githooks/bin",
+          "GOBIN": "${workspaceFolder}/githooks/bin"
         }
       },
       "presentation": {
@@ -195,6 +192,24 @@
         "[Dev Container] go-build-temp"
       ],
       "problemMatcher": []
+    },
+    {
+      "label": "Dialog Run [swift]",
+      "type": "process",
+      "command": "swift",
+      "group": "build",
+      "args": [
+        "${file}",
+        "demo"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      }
     }
   ]
 }
