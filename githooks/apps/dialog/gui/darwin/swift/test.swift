@@ -1,219 +1,203 @@
-#!/usr/bin/env swift
+#!/usr/bin/swift
 
-import AppKit
-import Foundation
+import Cocoa
+import SwiftUI
+
+// MARK: - Constants
 
 let app = NSApplication.shared
-app.setActivationPolicy(.regular)  // Magic to accept keyboard input and be docked!
+let origin = CGPoint(
+  x: NSScreen.main?.frame.midX ?? 50,
+  y: NSScreen.main?.frame.midY ?? 50)
 
-struct DialogError: Error, LocalizedError {
-  let errorDescription: String?
+// MARK: - Views
 
-  init(_ description: String) {
-    errorDescription = description
+struct DialogButton: View {
+
+  private var spacing = 5
+
+  var body: some View {
+
+    // GeometryReader { g in
+    HStack(
+      spacing: CGFloat(self.spacing)
+    ) {
+
+      Button(action: ok) {
+        Text("Ok")
+          .frame(maxWidth: .infinity, minHeight: 32)
+          .foregroundColor(Color.white)
+          .background(Color.blue)
+          .cornerRadius(5)
+      }
+      .buttonStyle(PlainButtonStyle())
+      Spacer()
+      Button(action: cancel) {
+        Text("Cancel")
+          .frame(maxWidth: .infinity, minHeight: 32)
+          .foregroundColor(Color.white)
+          .background(Color.gray)
+          .cornerRadius(5)
+      }
+      .buttonStyle(PlainButtonStyle())
+    }
+    //}
+  }
+
+}
+
+let iconDefault =
+  "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+let errorPath =
+  "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertStopIcon.icns"
+let warningPath =
+  "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns"
+let questionPath =
+  "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns"
+
+func getIcon(_ what: String) -> NSImage? {
+  switch what {
+  case "info":
+    return NSImage(contentsOfFile: iconDefault)
+  case "error":
+    return NSImage(contentsOfFile: errorPath)
+  case "warning":
+    return NSImage(contentsOfFile: warningPath) ?? NSImage(named: NSImage.cautionName)
+  case "question":
+    return NSImage(contentsOfFile: questionPath)
+  default:
+    return NSImage(contentsOfFile: iconDefault)
   }
 }
 
-struct Settings {
-  var title: String
-  var text: String
-  var okButton: String
-  var cancelButton: String
-
-  var width = 300
-  var height = 400
+func getIcon2(_ what: String) -> NSImage? {
+  let i = getIcon(what)
+  let rep = i!.bestRepresentation(
+    for: NSRect(x: 0, y: 0, width: 128, height: 128), context: nil, hints: nil)
+  let i2 = NSImage(size: rep!.size)
+  i2.addRepresentation(rep!)
+  return i2
 }
 
-struct ListOptions {
-  var options = [String]()
-  var defaultOption = 0
-  var multiple = false
-}
+struct OptionView: View {
 
-class TableViewController: NSViewController, NSTableViewDelegate, NSTableViewDataSource {
+  struct Option: Identifiable, Hashable {
+    let name: String
+    var index = 0
 
-  var initialized = false
-  var frame = NSRect()
-  var opts = ListOptions()
-  var texts = [NSTextField]()
-  var rowHeights = [CGFloat]()
-  var defaultOption = 0
-  var tableView = NSTableView()
-
-  convenience init(frame: NSRect, options: ListOptions) {
-    self.init()
-    self.frame = frame
-    self.opts = options
-    self.rowHeights = Array(repeating: CGFloat(0.0), count: self.opts.options.count)
-    self.tableView = NSTableView()
-    self.view = self.tableView
+    let id = UUID()
   }
 
-  override func viewDidLayout() {
-    if !initialized {
-      initialized = true
-      setupTableView()
+  private var options = [Option]()
+
+  init(_ opts: [String]) {
+    for (i, s) in opts.enumerated() {
+      self.options.append(Option(name: s, index: i))
     }
   }
 
-  func setupTableView() {
-    self.tableView.delegate = self
-    self.tableView.dataSource = self
+  @State private var multiSelection = Set<UUID>()
 
-    self.tableView.style = .sourceList
-    self.tableView.headerView = nil
-    self.tableView.gridStyleMask = .solidHorizontalGridLineMask
-    self.tableView.allowsMultipleSelection = self.opts.multiple
-    self.tableView.usesAutomaticRowHeights = true
-    //self.tableView.backgroundColor = NSColor.systemGray
-    self.tableView.selectionHighlightStyle = NSTableView.SelectionHighlightStyle.regular
-    self.tableView.selectRowIndexes(
-      IndexSet(integer: self.opts.defaultOption), byExtendingSelection: false)
-    //tableView!.appearance = NSAppearance(named: NSAppearance.Name.vibrantDark)
+  var body: some View {
 
-    let col = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(rawValue: "col"))
-    col.minWidth = self.frame.width - 30
-    self.tableView.addTableColumn(col)
+    VStack(
+      alignment: .leading,
+      spacing: 10
+    ) {
 
-    for i in 0..<self.opts.options.count {
-      let text = NSTextField(wrappingLabelWithString: self.opts.options[i])
-      text.preferredMaxLayoutWidth = self.frame.width
-      text.isEditable = false
-      text.drawsBackground = false
-      text.isBordered = false
+      HStack(alignment: .center) {
+        Spacer()
+        Image(nsImage: getIcon2("warning")!).resizable()
+          .frame(maxWidth: 64, maxHeight: 64)
+          .aspectRatio(contentMode: .fit)
+        Spacer()
+      }
 
-      self.rowHeights[i] = max(self.rowHeights[i], text.fittingSize.height)
-      print(self.rowHeights[i])
-      texts.append(text)
+      VStack(spacing: 5) {
+        Text("This is a message").font(.title2).fontWeight(.bold)
+        Spacer(minLength: 5)
+        Text(
+          """
+          This is a message laksjd lkajs dlökja södlkj aslökdj alöskjd lakjsd ölkajsd lökjas dlkjasldkj alskdj ölaksjd ölajksd löajks d
+          .asjd lkjsad fölkjasöldkfj alsökjdf löasdf
+          asdf älkasjd fölkajsdf
+          asd flasjdf ölsaj
+          """
+        ).font(.body).fontWeight(.bold)
+      }
+
+      GeometryReader { g in
+        ScrollView {
+          List(selection: $multiSelection) {
+            ForEach(self.options) { o in
+              Text("\(o.name)")
+            }
+          }
+          .frame(width: g.size.width, height: g.size.height)
+        }
+        .border(Color.gray)
+      }
+
+      Spacer()
+      Text("\(multiSelection.count) selections")
+
+      DialogButton()
     }
+    .frame(
+      minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
   }
 
-  func tableView(_ tableView: NSTableView, heightOfRow: Int) -> CGFloat {
-    return max(self.rowHeights[heightOfRow] + 10, 16.0)
-  }
-
-  func numberOfRows(in tableView: NSTableView) -> Int {
-    return self.opts.options.count
-  }
-
-  func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int)
-    -> NSView?
-  {
-    let text = self.texts[row]
-    let cell = NSTableCellView()
-    cell.addSubview(text)
-    text.translatesAutoresizingMaskIntoConstraints = false
-
-    cell.addConstraint(
-      NSLayoutConstraint(
-        item: text, attribute: .centerY, relatedBy: .equal, toItem: cell,
-        attribute: .centerY,
-        multiplier: 1, constant: 0))
-    cell.addConstraint(
-      NSLayoutConstraint(
-        item: text, attribute: .left, relatedBy: .equal, toItem: cell, attribute: .left,
-        multiplier: 1, constant: 0))
-    cell.addConstraint(
-      NSLayoutConstraint(
-        item: text, attribute: .right, relatedBy: .equal, toItem: cell, attribute: .right,
-        multiplier: 1, constant: 0))
-
-    return cell
-  }
-
-  func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
-    let rowView = NSTableRowView()
-    rowView.isEmphasized = true
-    return rowView
-  }
 }
 
-func makeDefaultAlert(_ settings: Settings, listOpts: ListOptions) -> (NSAlert, TableViewController)
-{
-  let a = NSAlert()
-  a.messageText = settings.title
-  a.alertStyle = NSAlert.Style.informational
-  a.addButton(withTitle: settings.okButton)
-  a.addButton(withTitle: settings.cancelButton)
-
-  a.buttons[0].keyEquivalent = "\r"
-  a.buttons[1].keyEquivalent = "\u{1b}"
-
-  // Text as accessory view since
-  // Height can not be changed
-  let v = NSStackView()
-  v.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0,  right: 0)
-  v.orientation = NSUserInterfaceLayoutOrientation.vertical
-  v.distribution = NSStackView.Distribution.fill
-  v.spacing = 15
-
-  // Text 1
-  let text = NSTextField(wrappingLabelWithString: settings.text)
-  text.preferredMaxLayoutWidth = CGFloat(settings.width - 20)
-  // text.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-  text.isEditable = false
-  text.isBordered = false
-  text.drawsBackground = false
-  v.addView(text, in: NSStackView.Gravity.center)
-  print(text.fittingSize)
-
-  // Text 2
-  let text2 = NSTextField(wrappingLabelWithString: settings.text)
-  text2.preferredMaxLayoutWidth = CGFloat(settings.width - 20)
-  // text2.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
-  text2.isBordered = false
-  text2.isEditable = false
-  text2.drawsBackground = false
-  print(text2.fittingSize)
-  v.addView(text2, in: NSStackView.Gravity.center)
-
-  // //Table
-  let sFr = NSRect(x: 0, y: 0, width: settings.width, height: min(200, 30 * listOpts.options.count))
-  let scrollView = NSScrollView(
-    frame: sFr)
-  scrollView.hasVerticalScroller = true
-  scrollView.hasHorizontalScroller = true
-  let clipView = NSClipView(frame: scrollView.bounds)
-  let con = TableViewController(frame: clipView.bounds, options: listOpts)
-  con.tableView.sizeToFit()
-  clipView.documentView = con.tableView
-  scrollView.contentView = clipView
-  // scrollView.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
-  // scrollView.setContentHuggingPriority(.defaultLow, for: .vertical)
-  v.addView(scrollView, in: NSStackView.Gravity.center)
-
-  // v.setVisibilityPriority(.mustHold, for: text)
-  // v.setVisibilityPriority(.mustHold, for: text2)
-  // v.setVisibilityPriority(.mustHold, for: scrollView)
-  // v.setClippingResistancePriority(.defaultHigh, for: .vertical)
-  // v.setContentHuggingPriority(.defaultLow, for: .vertical)
-  a.accessoryView = v
-
-  let b = text.fittingSize.height + text2.fittingSize.height + sFr.height
-  print(text.fittingSize, text2.fittingSize, sFr, b)
-  v.frame = NSRect(x: 0, y: 0, width: settings.width, height: Int(b))
-  a.layout()
-
-  return (a, con)
+func ok() {
+  print("ok")
 }
 
-func runOptionsDialog() throws {
+func cancel() {
+  print("cancel")
+}
 
-  let text = """
-    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore
-    et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
-    Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-    """
+// MARK: - Setup
 
-  let listOpts = ListOptions(
-    options: Array(repeating: "as as as as as ass as as as as as as as as as as as as as ", count: 30), multiple: true
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+  let window = NSWindow(
+    contentRect: NSRect(
+      origin: origin,
+      size: CGSize(
+        width: 300,
+        height: 400
+      )
+    ),
+    styleMask: [.resizable, .titled, .closable, .miniaturizable],
+    backing: .buffered,
+    defer: false,
+    screen: nil
   )
-  let settings = Settings(title: "Title", text: text, okButton: "Ok", cancelButton: "Cancel")
 
-  let a = makeDefaultAlert(settings, listOpts: listOpts)
-  let alert = a.0
-  app.activate(ignoringOtherApps: true)
-  alert.runModal()
+  func applicationDidFinishLaunching(_ notification: Notification) {
+
+    let o = OptionView([String](repeating: "Option 1", count: 40))
+
+    // setup the window
+    window.titlebarAppearsTransparent = true
+
+    window.makeKeyAndOrderFront(nil)
+    NSApp.setActivationPolicy(.regular)
+    NSApp.activate(ignoringOtherApps: true)
+
+    window.contentView = NSHostingView(
+      rootView: o.padding(20)
+    )
+  }
+
+  func applicationShouldTerminateAfterLastWindowClosed(
+    _ sender: NSApplication
+  ) -> Bool {
+    return true
+  }
 }
 
-try runOptionsDialog()
+let delegate = AppDelegate()
+app.delegate = delegate
+app.run()
