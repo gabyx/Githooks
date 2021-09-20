@@ -67,7 +67,6 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 
 	cmd.AddCommand(installer.NewCmd(ctx))
 	cmd.AddCommand(uninstaller.NewCmd(ctx))
-
 }
 
 // MakeGithooksCtl returns the root command of the Githooks CLI executable.
@@ -92,14 +91,17 @@ func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 	addSubCommands(rootCmd, ctx)
 
 	ccm.SetCommandDefaults(ctx.Log, rootCmd)
-	cobra.OnInitialize(initArgs)
+	cobra.OnInitialize(func() { initArgs(ctx) })
 
 	return rootCmd
 }
 
-func initArgs() {
+func initArgs(ctx *ccm.CmdContext) {
 	// Initialize from config , ENV -> viper
 	// not yet needed...
+
+	ctx.Log.AssertNoErrorF(hooks.CheckGithooksSetup(ctx.GitX),
+		"Githooks setup is corrupt.")
 }
 
 // Run executes the main CLI function.
