@@ -15,6 +15,10 @@ import (
 //go:embed osascripts
 var osascripts embed.FS
 
+const (
+	ExitCodeCancel = 5 // nolint: gomnd
+)
+
 // RunOSAScript runs Apple's `osascripts` to execute JavaScript or AppleScript.
 func RunOSAScript(ctx context.Context, script string, data interface{}, workingDir string) ([]byte, error) {
 	var buf strings.Builder
@@ -37,7 +41,7 @@ func RunOSAScript(ctx context.Context, script string, data interface{}, workingD
 	}
 
 	script = buf.String()
-
+	print(script)
 	var cmd *exec.Cmd
 	if ctx != nil {
 		cmd = exec.CommandContext(ctx, "osascript", "-l", lang)

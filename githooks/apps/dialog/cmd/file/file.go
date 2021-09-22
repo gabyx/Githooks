@@ -107,7 +107,7 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 
 	cmdSelect.Flags().UintVar(&timeout, "timeout", 0, "Timeout for the dialog")
 	cmdSelect.Flags().StringVar(&separator, "separator", "\x00",
-		"Path separator to use for output, default is '\x00' (null-terminator).")
+		"Path separator to use for output.")
 
 	dcm.AddFlagsFileSelection(cmdSelect, &setSelection)
 	ccm.SetCommandDefaults(ctx.Log, cmdSelect)

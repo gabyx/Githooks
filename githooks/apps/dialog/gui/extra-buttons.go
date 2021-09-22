@@ -63,8 +63,9 @@ func getResultButtons(out string, maxButtons int) res.General {
 	}
 
 	cm.DebugAssert(i >= 1)
-	// 1 'idPrefix' found -> its the ok Button.
-	if i <= 1 {
+
+	// One 'idPrefix' found -> its the ok Button.
+	if i == 1 {
 		return res.OkResult()
 	}
 

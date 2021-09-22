@@ -78,7 +78,7 @@ func ShowEntry(ctx context.Context, e *sets.Entry) (res.Entry, error) {
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+		if err.ExitCode() == gmac.ExitCodeCancel {
 			return res.Entry{General: res.CancelResult()}, nil
 		}
 	}
