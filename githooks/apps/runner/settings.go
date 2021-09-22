@@ -29,7 +29,7 @@ type HookSettings struct {
 
 func (s HookSettings) toString() string {
 	return strs.Fmt(
-		"\n- Args: '%q'\n"+
+		" • Args: '%q'\n"+
 			" • Repo Path: '%s'\n"+
 			" • Repo Hooks: '%s'\n"+
 			" • Git Dir Worktree: '%s'\n"+
