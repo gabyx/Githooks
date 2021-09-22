@@ -70,6 +70,12 @@ checksum:
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
+  filters:
+    # Commit messages matching the regexp listed here will be removed from
+    # the changelog
+    exclude:
+      - '^[np]'
+      - '^[docs]'
 signs:
   - artifacts: checksum
     cmd: gpg
