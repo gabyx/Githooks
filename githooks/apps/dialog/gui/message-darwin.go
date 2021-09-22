@@ -13,6 +13,48 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+const (
+	infoIcon     = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+	warningIcon  = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns"
+	warningIcon2 = "/System/Library/UserNotifications/Bundles/com.apple.notificationcenter.askpermissions.bundle/Contents/Resources/AlertCautionIcon.icns" // nolint
+	errorIcon    = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertStopIcon.icns"
+	questionIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns"
+)
+
+func getDefaultInfoIcon() string {
+	if cm.IsFile(infoIcon) {
+		return infoIcon
+	}
+
+	return "info"
+}
+
+func getDefaultWarningIcon() string {
+	if cm.IsFile(warningIcon) {
+		return warningIcon
+	} else if cm.IsFile(warningIcon2) {
+		return warningIcon2
+	}
+
+	return "caution"
+}
+
+func getDefaultErrorIcon() string {
+	if cm.IsFile(errorIcon) {
+		return errorIcon
+	}
+
+	return "stop"
+}
+
+func getDefaultQuestionIcon() string {
+	if cm.IsFile(questionIcon) {
+		return questionIcon
+	}
+
+	return "info"
+}
+
 func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 
 	msg.SetDefaultIcons()
@@ -27,25 +69,27 @@ func translateMessage(msg *sets.Message) (d gmac.MsgData, err error) {
 	default:
 		fallthrough
 	case sets.InfoStyle:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+		d.Opts.WithIcon = getDefaultInfoIcon()
 	case sets.ErrorStyle:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertStopIcon.icns"
+		d.Opts.WithIcon = getDefaultErrorIcon()
 	case sets.WarningStyle:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns"
+		d.Opts.WithIcon = getDefaultWarningIcon()
 	case sets.QuestionStyle:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns"
+		d.Opts.WithIcon = getDefaultQuestionIcon()
 	}
 
 	// Overwrite icon
 	switch msg.Icon {
-	case sets.ErrorIcon:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertStopIcon.icns"
-	case sets.WarningIcon:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns"
+	default:
+		fallthrough
 	case sets.InfoIcon:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+		d.Opts.WithIcon = getDefaultInfoIcon()
+	case sets.ErrorIcon:
+		d.Opts.WithIcon = getDefaultErrorIcon()
+	case sets.WarningIcon:
+		d.Opts.WithIcon = getDefaultWarningIcon()
 	case sets.QuestionIcon:
-		d.WithIcon = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns"
+		d.Opts.WithIcon = getDefaultQuestionIcon()
 	}
 
 	if len(msg.ExtraButtons) > 1 {
@@ -105,7 +149,7 @@ func ShowMessage(ctx context.Context, s *sets.Message) (res.Message, error) {
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+		if err.ExitCode() == gmac.ExitCodeCancel {
 			return res.Message{General: res.CancelResult()}, nil
 		}
 	}

@@ -93,8 +93,10 @@ func ExampleShowOptions() {
 	t.Title = "What pizza do you want to order?"
 	t.OkLabel = "Okey"
 	t.CancelLabel = "Cancel it"
-	t.Text = "Choose a pizza from below:"
-	t.Options = []string{"Margherita", "Curry & Banana", "Hawai-Style"}
+	t.Text = "Choose a pizza from below:\n" +
+		"Make sure that you can swallow it otherwise you need to consult a doctor.\n" +
+		"We do not take any responsibility."
+	t.Options = []string{"Margherita", "Curry & Banana", "Hawai-Style", "Burger"}
 	t.MultipleSelection = true
 	t.Width = 300
 	t.Height = 500

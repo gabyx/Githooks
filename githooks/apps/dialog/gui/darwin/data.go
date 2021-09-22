@@ -8,13 +8,13 @@ type MsgOptions struct {
 	Buttons       []string `json:"buttons,omitempty"`
 	CancelButton  int      `json:"cancelButton,omitempty"`
 	DefaultButton int      `json:"defaultButton,omitempty"`
+	WithIcon      string   `json:"withIcon,omitempty"`
 }
 
 // MsgData holds data for a message dialog.
 type MsgData struct {
 	Operation string
 	Text      string
-	WithIcon  string
 
 	Opts MsgOptions `json:"opts"`
 }
@@ -42,7 +42,6 @@ func NewFromEntry(m *MsgData) EntryData {
 	return EntryData{
 		Operation: m.Operation,
 		Text:      m.Text,
-		WithIcon:  m.WithIcon,
 		Opts:      EntryOpts{MsgOptions: m.Opts},
 	}
 }

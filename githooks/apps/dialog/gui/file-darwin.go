@@ -96,7 +96,7 @@ func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+		if err.ExitCode() == gmac.ExitCodeCancel {
 			return res.File{General: res.CancelResult()}, nil
 		}
 	}
@@ -120,7 +120,7 @@ func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, err
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+		if err.ExitCode() == gmac.ExitCodeCancel {
 			return res.File{General: res.CancelResult()}, nil
 		}
 	}

@@ -106,7 +106,7 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 	}
 
 	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+		if err.ExitCode() == gmac.ExitCodeCancel {
 			return res.Options{General: res.CancelResult()}, nil
 		}
 	}

@@ -1,3 +1,6 @@
+ObjC.import("stdlib")
+ObjC.import("stdio")
+
 var app = Application.currentApplication()
 app.includeStandardAdditions = true
 app.activate()
@@ -6,13 +9,20 @@ var opts = {{json .Opts}}
 
 try{
 	var res = app[{{json .Operation}}](opts)
-	if (Array.isArray(res)) {
-		res.join({{json .Separator}})
-	} else {
-		res.toString()
+	if (res.length > 1) {
+		res.slice(0, -1).forEach((e) => {
+			$.printf(e)
+			$.putchar('\u0000')
+		});
+    	$.printf(res[res.length-1])
+  	} else {
+		$.printf(res.toString())
 	}
 } catch (e) {
-	if(String(e).includes("cancelled")){
-		$.exit(1)
+	if(String(e).includes("cancel")){
+		$.exit(5)
 	}
+	$.exit(1)
 }
+
+$.exit(0)
