@@ -120,6 +120,12 @@ func createLog() {
 	cm.AssertOrPanic(err == nil, "Could not create log")
 }
 
+func logInvocation(s *HookSettings) {
+	if strs.IsNotEmpty(os.Getenv("GITHOOKS_RUNNER_TRACE")) {
+		log.InfoF("Running hooks for: '%s' %q", s.HookName, s.Args)
+	}
+}
+
 func setMainVariables(repoPath string) (HookSettings, UISettings) {
 
 	cm.PanicIf(
@@ -177,6 +183,7 @@ func setMainVariables(repoPath string) (HookSettings, UISettings) {
 		NonInteractive:             nonInteractive}
 
 	log.DebugF(s.toString())
+	logInvocation(&s)
 
 	return s, UISettings{AcceptAllChanges: false, PromptCtx: promptx}
 }

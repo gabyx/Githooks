@@ -53,6 +53,7 @@ Also it searches for hooks in configured shared hook repositories.
 - [Ignoring Hooks and Files](#ignoring-hooks-and-files)
 - [Trusting Hooks](#trusting-hooks)
 - [Disabling Githooks](#disabling-githooks)
+- [Log & Traces](#log--traces)
 - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
 - [User Prompts](#user-prompts)
 - [Installation](#installation)
@@ -487,6 +488,14 @@ $ git hooks config disable --set --global # Same thing... Config: `githooks.disa
 ```
 
 Also, as mentioned above, all hook executions can be bypassed with a non-empty value in the `GITHOOKS_DISABLE` environment variable.
+
+## Log & Traces
+
+You can see how the Githooks `runner` is been called by setting the environment variable `GITHOOKS_TRACE` to a non empty value.
+
+```shell
+GITHOOKS_TRACE=1 git <command> ...
+```
 
 ## Installing or Removing Run-Wrappers
 
