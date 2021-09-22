@@ -6,6 +6,7 @@ import SwiftUI
 // MARK: - Constants
 
 let app = NSApplication.shared
+var exitCode : Int32 = 1
 let origin = CGPoint(
   x: NSScreen.main?.frame.midX ?? 50,
   y: NSScreen.main?.frame.midY ?? 50)
@@ -14,7 +15,16 @@ let origin = CGPoint(
 
 struct DialogButton: View {
 
+  typealias Callback = () -> Void
+
   private var spacing = 5
+  private var ok: Callback
+  private var cancel: Callback
+
+  init(ok: @escaping Callback, cancel: @escaping Callback) {
+    self.ok = ok
+    self.cancel = cancel
+  }
 
   var body: some View {
 
@@ -53,6 +63,7 @@ let errorPath =
 let warningPath =
   "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns"
 let questionPath =
+
   "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericQuestionMarkIcon.icns"
 
 func getIcon(_ what: String) -> NSImage? {
@@ -141,20 +152,26 @@ struct OptionView: View {
       Spacer()
       Text("\(multiSelection.count) selections")
 
-      DialogButton()
+      DialogButton(ok: ok, cancel: cancel)
     }
     .frame(
       minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
   }
 
-}
+  func ok() {
+    let sel = self.options.filter { el in return self.multiSelection.contains(el.id) }
+    print(sel.map { "\($0.index)" }.joined(separator: ","))
 
-func ok() {
-  print("ok")
-}
 
-func cancel() {
-  print("cancel")
+    exitCode = 0
+    app.terminate(self)
+  }
+
+  func cancel() {
+    exitCode = 1
+    app.terminate(self)
+  }
+
 }
 
 // MARK: - Setup
@@ -196,6 +213,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   ) -> Bool {
     return true
   }
+
+  func applicationWillTerminate(_ aNotification: Notification) {
+    exit(exitCode)
+  }
+
 }
 
 let delegate = AppDelegate()
