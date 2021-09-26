@@ -5,6 +5,7 @@ orbs:
 
 jobs:
   linux:
+    resource_class: small
     parameters:
       test:
         description: "The test script name"

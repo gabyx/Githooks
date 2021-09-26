@@ -134,22 +134,33 @@ func Map(vs []string, f func(string) string) []string {
 type StringSet map[string]bool
 
 // Insert adds `s` to the set.
-func (m StringSet) Insert(s string) {
-	m[s] = true
+func (m *StringSet) Insert(s string) {
+	(*m)[s] = true
 }
 
 // Remove removes `s` from the set.
-func (m StringSet) Remove(s string) {
-	m[s] = false
+func (m *StringSet) Remove(s string) {
+	(*m)[s] = false
 }
 
 // Exists checks existence of `s` in the set.
-func (m StringSet) Exists(s string) bool {
-	return m[s]
+func (m *StringSet) Exists(s string) bool {
+	return (*m)[s]
+}
+
+// ToList gets a list of all strings.
+func (m *StringSet) ToList() (keys []string) {
+	for k, v := range *m {
+		if v {
+			keys = append(keys, k)
+		}
+	}
+
+	return
 }
 
 // ToList gets the keys of a string set.
-func (m *StringSet) ToList() (keys []string) {
+func (m *StringSet) Keys() (keys []string) {
 	keys = make([]string, len(*m))
 
 	i := 0
