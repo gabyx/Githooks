@@ -491,10 +491,10 @@ Also, as mentioned above, all hook executions can be bypassed with a non-empty v
 
 ## Log & Traces
 
-You can see how the Githooks `runner` is been called by setting the environment variable `GITHOOKS_TRACE` to a non empty value.
+You can see how the Githooks `runner` is been called by setting the environment variable `GITHOOKS_RUNNER_TRACE` to a non empty value.
 
 ```shell
-GITHOOKS_TRACE=1 git <command> ...
+GITHOOKS_RUNNER_TRACE=1 git <command> ...
 ```
 
 ## Installing or Removing Run-Wrappers
