@@ -8,7 +8,7 @@ const (
 
 	GitCKDisable = "githooks.disable"
 
-	GitCKMaintainOnlyServerHooks = "githooks.maintainOnlyServerHooks"
+	GitCKMaintainOnlyServerHooks = "githooks.maintainOnlyServerHooks" // deprecate
 
 	GitCKAutoUpdateEnabled        = "githooks.autoUpdateEnabled"
 	GitCKAutoUpdateCheckTimestamp = "githooks.autoUpdateCheckTimestamp"
@@ -40,6 +40,8 @@ const (
 
 // Git config keys for local/global config.
 const (
+	GitCKMaintainedHooks = "githooks.maintainedHooks"
+
 	GitCKShared                        = "githooks.shared"
 	GitCKSharedUpdateTriggers          = "githooks.sharedHooksUpdateTriggers"
 	GitCKAutoUpdateSharedHooksDisabled = "githooks.autoUpdateSharedHooksDisabled"
@@ -59,7 +61,8 @@ func GetGlobalGitConfigKeys() []string {
 
 		GitCKDisable,
 
-		GitCKMaintainOnlyServerHooks,
+		GitCKMaintainOnlyServerHooks, // deprecate
+		GitCKMaintainedHooks,
 		GitCKPreviousSearchDir,
 
 		GitCKAutoUpdateEnabled,
@@ -98,6 +101,8 @@ func GetLocalGitConfigKeys() []string {
 	return []string{
 		GitCKRegistered,
 		GitCKTrustAll,
+
+		GitCKMaintainedHooks,
 
 		GitCKShared,
 		GitCKSharedUpdateTriggers,

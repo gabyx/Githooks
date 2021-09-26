@@ -27,7 +27,11 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, nonInteractive bool) {
 		hooks.GitCKUseCoreHooksPath, value, gitDir)
 
 	uiSettings := inst.UISettings{PromptCtx: ctx.PromptCtx}
-	inst.InstallIntoRepo(ctx.Log, ctx.GitX, gitDir, nonInteractive, false, false, &uiSettings)
+
+	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
+	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
+
+	inst.InstallIntoRepo(ctx.Log, ctx.GitX, gitDir, lfsHooksCache, nonInteractive, false, false, &uiSettings)
 }
 
 func runUninstallFromRepo(ctx *ccm.CmdContext) {
@@ -39,8 +43,10 @@ func runUninstallFromRepo(ctx *ccm.CmdContext) {
 	ctx.Log.AssertNoErrorPanicF(err, "Could not load register file in '%s'.",
 		ctx.InstallDir)
 
-	lfsIsAvailable := git.IsLFSAvailable()
-	if inst.UninstallFromRepo(ctx.Log, gitDir, lfsIsAvailable, false) {
+	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
+	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
+
+	if inst.UninstallFromRepo(ctx.Log, gitDir, lfsHooksCache, false) {
 
 		registeredGitDirs.Remove(gitDir)
 		err := registeredGitDirs.Store(ctx.InstallDir)

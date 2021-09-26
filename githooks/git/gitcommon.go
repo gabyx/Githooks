@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -18,6 +19,20 @@ const (
 	// NullRef is the null reference used by git during certain hook execution.
 	NullRef = "0000000000000000000000000000000000000000"
 )
+
+var lfsVersionRegex = regexp.MustCompile(`\d+\.\d+\.\d+`)
+
+// Get Git LFS version.
+func GetGitLFSVersion() (ver *version.Version, err error) {
+	res, err := Ctx().Get("lfs", "--version")
+	if err != nil {
+		return nil, err
+	}
+
+	ver, err = version.NewVersion(lfsVersionRegex.FindString(res))
+
+	return
+}
 
 // IsBareRepo returns `true` if `c.GetCwd()` is a bare repository.
 func (c *Context) IsBareRepo() bool {
@@ -189,15 +204,40 @@ func FindGitDirs(searchDir string) (all []string, err error) {
 
 		// Check if its really a git directory.
 		if e == nil &&
-			!repos[gitDir] && // Is not already in the set.
 			CtxC(gitDir).IsGitRepo() {
-			repos[gitDir] = true
+			repos.Insert(gitDir)
 		}
 	}
 
 	all = repos.ToList()
 
 	return
+}
+
+// Initialize an empty repo at path `repoPath`.
+func Init(repoPath string, bare bool) error {
+	args := []string{"-c", "core.hooksPath=.git/hooks", "init", "--template="}
+	if bare {
+		args = append(args, "--bare")
+	}
+
+	// We must not execute this clone command inside a Git repo  (e.g. A)
+	// due to `core.hooksPath=.git/hooks` which get applied to `A` -> Bug ?:
+	// https://stackoverflow.com/questions/67273420/why-does-git-execute-hooks-from-an-other-repository
+	ctx := CtxCSanitized(repoPath)
+	if !cm.IsDirectory(ctx.GetCwd()) {
+		if e := os.MkdirAll(ctx.GetCwd(), cm.DefaultFileModeDirectory); e != nil {
+			return cm.ErrorF("Could not create working directory '%s'.", ctx.GetCwd())
+		}
+	}
+
+	out, e := ctx.GetCombined(args...)
+
+	if e != nil {
+		return cm.ErrorF("Init Git repository in '%s' failed:\n%s", repoPath, out)
+	}
+
+	return nil
 }
 
 // Clone an URL to a path `repoPath`.

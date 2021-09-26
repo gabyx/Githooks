@@ -55,3 +55,30 @@ func GetSHA1Hash(reader io.Reader) (string, error) {
 
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
+
+// AreChecksumsIdentical checks if the two files are identical.
+func AreChecksumsIdentical(fileA string, fileB string) (bool, error) {
+	fA, err := os.Open(fileA)
+	if err != nil {
+		return false, err
+	}
+	defer fA.Close()
+
+	fB, err := os.Open(fileB)
+	if err != nil {
+		return false, err
+	}
+	defer fB.Close()
+
+	shaA, err := GetSHA1Hash(fA)
+	if err != nil {
+		return false, err
+	}
+
+	shaB, err := GetSHA1Hash(fB)
+	if err != nil {
+		return false, err
+	}
+
+	return shaA == shaB, nil
+}

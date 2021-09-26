@@ -370,7 +370,7 @@ func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
 }
 
-// RunUpdate runs an automatic Githooks update.
+// RunUpdate enables/disables automatic Githooks update.
 func RunUpdate(ctx *ccm.CmdContext, opts *SetOptions) {
 	const text = "Automatic Githooks update"
 

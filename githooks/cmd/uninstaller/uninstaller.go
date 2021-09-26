@@ -100,13 +100,16 @@ func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Sett
 	log.AssertNoErrorPanicF(err,
 		"Could not clean temporary directory in '%s'", installDir)
 
+	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(installDir))
+	log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
+
 	return Settings{
 			Gitx:               gitx,
 			InstallDir:         installDir,
 			CloneDir:           hooks.GetReleaseCloneDir(installDir),
 			TempDir:            tempDir,
 			UninstalledGitDirs: make(UninstallSet, 10), // nolint: gomnd
-			LFSAvailable:       git.IsLFSAvailable()},
+			LFSHooksCache:      lfsHooksCache},
 		UISettings{PromptCtx: promptx}
 }
 
@@ -163,8 +166,7 @@ func thankYou(log cm.ILogContext) {
 func uninstallFromExistingRepos(
 	log cm.ILogContext,
 	gitx *git.Context,
-	lfsAvailable bool,
-	tempDir string,
+	lfsHooksCache hooks.LFSHooksCache,
 	nonInteractive bool,
 	uninstalledRepos UninstallSet,
 	registeredRepos *hooks.RegisterRepos,
@@ -179,7 +181,7 @@ func uninstallFromExistingRepos(
 		uiSettings.PromptCtx,
 		func(gitDir string) {
 
-			if install.UninstallFromRepo(log, gitDir, lfsAvailable, true) {
+			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, true) {
 
 				registeredRepos.Remove(gitDir)
 				uninstalledRepos.Insert(gitDir)
@@ -189,8 +191,7 @@ func uninstallFromExistingRepos(
 
 func uninstallFromRegisteredRepos(
 	log cm.ILogContext,
-	lfsAvailable bool,
-	tempDir string,
+	lfsHooksCache hooks.LFSHooksCache,
 	nonInteractive bool,
 	uninstalledRepos UninstallSet,
 	registeredRepos *hooks.RegisterRepos,
@@ -213,7 +214,7 @@ func uninstallFromRegisteredRepos(
 		true,
 		uiSettings.PromptCtx,
 		func(gitDir string) {
-			if install.UninstallFromRepo(log, gitDir, lfsAvailable, true) {
+			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, true) {
 
 				registeredRepos.Remove(gitDir)
 				uninstalledRepos.Insert(gitDir)
@@ -221,7 +222,7 @@ func uninstallFromRegisteredRepos(
 		})
 }
 
-func cleanTemplateDir(log cm.ILogContext, gitx *git.Context) {
+func cleanTemplateDir(log cm.ILogContext, gitx *git.Context, lfsHooksCache hooks.LFSHooksCache) {
 	installUsesCoreHooksPath := gitx.GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
 
 	hookTemplateDir, err := install.FindHookTemplateDir(gitx, installUsesCoreHooksPath == git.GitCVTrue)
@@ -232,7 +233,7 @@ func cleanTemplateDir(log cm.ILogContext, gitx *git.Context) {
 			"Git hook templates directory not found.\n" +
 				"Installation is corrupt!")
 	} else {
-		err = hooks.UninstallRunWrappers(hookTemplateDir, hooks.ManagedHookNames)
+		_, err = hooks.UninstallRunWrappers(hookTemplateDir, lfsHooksCache)
 		log.AssertNoErrorF(err, "Could not uninstall Githooks run-wrappers in\n'%s'.", hookTemplateDir)
 	}
 }
@@ -342,8 +343,7 @@ func runUninstallSteps(
 	uninstallFromExistingRepos(
 		log,
 		settings.Gitx,
-		settings.LFSAvailable,
-		settings.TempDir,
+		settings.LFSHooksCache,
 		args.NonInteractive,
 		settings.UninstalledGitDirs,
 		&settings.RegisteredGitDirs,
@@ -351,14 +351,13 @@ func runUninstallSteps(
 
 	uninstallFromRegisteredRepos(
 		log,
-		settings.LFSAvailable,
-		settings.TempDir,
+		settings.LFSHooksCache,
 		args.NonInteractive,
 		settings.UninstalledGitDirs,
 		&settings.RegisteredGitDirs,
 		uiSettings)
 
-	cleanTemplateDir(log, settings.Gitx)
+	cleanTemplateDir(log, settings.Gitx, settings.LFSHooksCache)
 
 	cleanSharedClones(log, settings.InstallDir)
 	cleanReleaseClone(log, settings.InstallDir)
