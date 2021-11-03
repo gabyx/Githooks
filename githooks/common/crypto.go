@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/crypto/openpgp/armor"
-	"golang.org/x/crypto/openpgp/packet"
+	"golang.org/x/crypto/openpgp/armor"  // nolint: staticcheck
+	"golang.org/x/crypto/openpgp/packet" // nolint: staticcheck
 )
 
 // VerifyFile verifies an input `file` with its `signature`
