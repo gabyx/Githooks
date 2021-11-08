@@ -73,7 +73,7 @@ fi
 CURRENT_TIME=$(date +%s)
 ELAPSED_TIME=$((CURRENT_TIME - LAST_UPDATE))
 
-if [ $ELAPSED_TIME -gt 0 ]; then
-    echo "! Update did not execute properly>"
+if [ $ELAPSED_TIME -eq 0 ]; then
+    echo "! Update did not execute properly"
     exit 1
 fi
