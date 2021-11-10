@@ -535,7 +535,7 @@ func getRepoSharedHooks(
 		shRepo := &shared[i]
 
 		if checkSharedHook(settings, shRepo, allAddedHooks, hooks.SharedHookTypeV.Repo) {
-			hs = getHooksInShared(settings, uiSettings, shRepo, ignores, checksums)
+			hs = append(hs, getHooksInShared(settings, uiSettings, shRepo, ignores, checksums)...)
 			*allAddedHooks = append(*allAddedHooks, shRepo.RepositoryDir)
 		}
 	}

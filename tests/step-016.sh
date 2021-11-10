@@ -28,13 +28,23 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-016-b.git/.githooks/pre-commit" &&
     git commit -m 'Initial commit' ||
     exit 1
 
+mkdir -p "$GH_TEST_TMP/shared/hooks-016-c.git/.githooks/pre-commit" &&
+    echo "echo 'From shared hook C' >> '$GH_TEST_TMP/test-016.out'" \
+        >"$GH_TEST_TMP/shared/hooks-016-c.git/.githooks/pre-commit/say-hello" &&
+    cd "$GH_TEST_TMP/shared/hooks-016-c.git" &&
+    git init &&
+    git add . &&
+    git commit -m 'Initial commit' ||
+    exit 1
+
 mkdir -p "$GH_TEST_TMP/test16" &&
     cd "$GH_TEST_TMP/test16" &&
     git init || exit 1
 
 mkdir -p .githooks &&
     git config --global githooks.shared "$GH_TEST_TMP/shared/hooks-016-a.git" &&
-    echo "urls: - file://$GH_TEST_TMP/shared/hooks-016-b.git" >.githooks/.shared.yaml &&
+    echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-016-b.git" \
+        "\n  - file://$GH_TEST_TMP/shared/hooks-016-c.git" >.githooks/.shared.yaml &&
     "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-merge unused ||
     exit 1
 
@@ -48,6 +58,11 @@ fi
 
 if ! grep -q 'From shared hook B' "$GH_TEST_TMP/test-016.out"; then
     echo "! The second shared hook was not run"
+    exit 1
+fi
+
+if ! grep -q 'From shared hook C' "$GH_TEST_TMP/test-016.out"; then
+    echo "! The third shared hook was not run"
     exit 1
 fi
 
