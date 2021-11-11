@@ -30,7 +30,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/nwaples/rardecode v1.1.2 // indirect
-	github.com/otiai10/copy v1.6.0
+	github.com/otiai10/copy v1.7.0
 	github.com/pbenner/threadpool v0.0.0-20200729220145-19cbae573817
 	github.com/pierrec/lz4/v4 v4.1.10 // indirect
 	github.com/pkg/math v0.0.0-20141027224758-f2ed9e40e245
