@@ -65,7 +65,12 @@ func showOptionsDialog(
 	case err != nil || res.IsCanceled():
 		return defaultAnswer, err
 	case res.IsOk():
-		return options[res.Options[0]], err
+		if res.Options == nil {
+			// nothing chosen
+			return defaultAnswer, err
+		} else {
+			return options[res.Options[0]], err
+		}
 	}
 
 	cm.Panic("Wrong dialog result state")
