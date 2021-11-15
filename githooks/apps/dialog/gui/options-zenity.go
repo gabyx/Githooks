@@ -12,6 +12,7 @@ import (
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
 	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
+	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
@@ -41,7 +42,10 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 	}
 
 	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
-		return showOptionsWithButtons(ctx, opts)
+		return showOptionsWithButtons(ctx, opts,
+			func(ctx context.Context, m *sets.Message) (res.Message, error) {
+				return ShowMessageZenity(ctx, zenity, m)
+			})
 	}
 
 	args := []string{

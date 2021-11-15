@@ -8,7 +8,10 @@ import (
 )
 
 // showOptionsWithButtons shows a option dialog with buttons instead of a list box.
-func showOptionsWithButtons(ctx context.Context, opts *sets.Options) (r res.Options, err error) {
+func showOptionsWithButtons(
+	ctx context.Context,
+	opts *sets.Options,
+	showMessage func(context.Context, *sets.Message) (res.Message, error)) (r res.Options, err error) {
 
 	// Wrap it through `ShowMessage`.
 	msg := sets.Message{
@@ -38,7 +41,7 @@ func showOptionsWithButtons(ctx context.Context, opts *sets.Options) (r res.Opti
 	}
 
 	msg.ExtraButtons = append(extraButtons, msg.ExtraButtons...)
-	mRes, err := ShowMessage(ctx, &msg)
+	mRes, err := showMessage(ctx, &msg)
 
 	if err == nil {
 		if mRes.IsOk() {
