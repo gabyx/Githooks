@@ -6,9 +6,16 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+useSymlink="false"
+[ "$1" = "--use-symbolic-link" ] && useSymlink="true"
+
 mkdir -p "$GH_TEST_TMP/test28" &&
     cd "$GH_TEST_TMP/test28" &&
     git init || exit 1
+
+if [ "$useSymlink" = "true" ]; then
+    ln -s "$GH_TEST_TMP/checksums" ".git/.githooks.checksums"
+fi
 
 mkdir -p .githooks &&
     mkdir -p .githooks/pre-commit &&

@@ -58,7 +58,7 @@ func mainRun() (exitCode int) {
 	settings, uiSettings := setMainVariables(cwd)
 	assertRegistered(settings.GitX, settings.InstallDir)
 
-	checksums, err := hooks.GetChecksumStorage(settings.GitX, settings.GitDirWorktree)
+	checksums, err := hooks.GetChecksumStorage(settings.GitDirWorktree)
 	log.AssertNoErrorF(err, "Errors while loading checksum store.")
 	log.DebugF("%s", checksums.Summary())
 

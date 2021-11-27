@@ -90,9 +90,9 @@ type ChecksumResult struct {
 // ChecksumStore represents a set of checksum which
 // can be consulted to check if a hook is trusted or not.
 type ChecksumStore struct {
-	// checksumDirs are the paths to the checksum directories containing files
+	// checksumDir is the path to the checksum directories containing files
 	// with file name equal to the checksum.
-	checksumDirs []string
+	checksumDir string
 
 	// Checksums are the checksums manually added to this store
 	checksums map[string]ChecksumData
@@ -111,14 +111,9 @@ func newChecksumData(paths ...string) ChecksumData {
 	return ChecksumData{paths}
 }
 
-// AddChecksums adds checksum data from `path` (file or directory) to the store.
-func (t *ChecksumStore) AddChecksums(path string, addAsDirIfNonExisting bool) error {
-
-	if cm.IsDirectory(path) || addAsDirIfNonExisting {
-		t.checksumDirs = append(t.checksumDirs, path)
-	}
-
-	return nil
+// AddChecksums sets the search directory to `path`.
+func (t *ChecksumStore) SetSearchDirectory(path string) {
+	t.checksumDir = path
 }
 
 func (t *ChecksumStore) assertData() {
@@ -143,9 +138,9 @@ func (t *ChecksumStore) AddChecksum(sha1 string, filePath string) bool {
 	return false
 }
 
-// SyncChecksumAdd adds SHA1 checksums of a path to the first search directory.
+// SyncChecksumAdd adds SHA1 checksums of a path to the search directory.
 func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
-	if len(t.checksumDirs) == 0 {
+	if strs.IsEmpty(t.checksumDir) {
 		return cm.Error("No checksum directory.")
 	}
 
@@ -154,7 +149,7 @@ func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
 
 		cm.DebugAssertF(len(checksum.SHA1) == 40, "Wrong SHA1 hash '%s'", checksum.SHA1) // nolint:gomnd
 
-		dir := path.Join(t.checksumDirs[0], checksum.SHA1[0:2])
+		dir := path.Join(t.checksumDir, checksum.SHA1[0:2])
 		err := os.MkdirAll(dir, cm.DefaultFileModeDirectory)
 		if err != nil {
 			return err
@@ -170,10 +165,10 @@ func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
 }
 
 // SyncChecksumRemove removes SHA1 checksums
-// of a path from the first search directory.
+// of a path from the search directory.
 func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err error) {
 
-	if len(t.checksumDirs) == 0 {
+	if strs.IsEmpty(t.checksumDir) {
 		err = cm.Error("No checksum directory.")
 
 		return
@@ -183,7 +178,7 @@ func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err er
 
 		cm.DebugAssertF(len(sha1) == 40, "Wrong SHA1 hash '%s'", sha1) // nolint:gomnd
 
-		dir := path.Join(t.checksumDirs[0], sha1[0:2])
+		dir := path.Join(t.checksumDir, sha1[0:2])
 		file := path.Join(dir, sha1[2:])
 
 		if cm.IsFile(file) {
@@ -207,10 +202,10 @@ func (t *ChecksumStore) IsTrusted(filePath string) (bool, string, error) {
 			cm.CombineErrors(cm.ErrorF("Could not get hash for '%s'", filePath), err)
 	}
 
-	// Check first all directories ...
-	for _, dir := range t.checksumDirs {
+	// Check first search directory ...
+	if strs.IsNotEmpty(t.checksumDir) {
 		bucket := sha1[0:2]
-		exists, err := cm.IsPathExisting(path.Join(dir, bucket, sha1[2:]))
+		exists, err := cm.IsPathExisting(path.Join(t.checksumDir, bucket, sha1[2:]))
 		if exists {
 			return true, sha1, nil
 		} else if err != nil {
@@ -231,9 +226,9 @@ func (t *ChecksumStore) IsTrusted(filePath string) (bool, string, error) {
 func (t *ChecksumStore) Summary() string {
 	return strs.Fmt(
 		"Checksum store contains '%v' checksums\n"+
-			"and '%v' directory search paths.",
+			"and directory search path '%v'.",
 		len(t.checksums),
-		len(t.checksumDirs))
+		t.checksumDir)
 }
 
 // GetChecksumDirectoryGitDir gets the checksum file inside the Git directory.
@@ -241,30 +236,28 @@ func GetChecksumDirectoryGitDir(gitDir string) string {
 	return path.Join(gitDir, ".githooks.checksums")
 }
 
-// GetChecksumStorage loads the checksum store from the Git config
-// 'GitCKChecksumCacheDir' and if not possible from the
+// GetChecksumStorage loads the checksum store from the
 // current Git directory.
-func GetChecksumStorage(gitx *git.Context, gitDirWorktree string) (store ChecksumStore, err error) {
+func GetChecksumStorage(gitDirWorktree string) (store ChecksumStore, err error) {
 
-	// Get the store from the config variable and fallback to Git dir if not existing.
-	cacheDir := gitx.GetConfig(GitCKChecksumCacheDir, git.Traverse)
-	loadFallback := strs.IsEmpty(cacheDir)
+	cacheDir := GetChecksumDirectoryGitDir(gitDirWorktree)
 
-	if !loadFallback {
-		e := store.AddChecksums(cacheDir, true)
-		if e != nil {
-			loadFallback = true
-			err = cm.CombineErrors(err, cm.ErrorF("Could not add checksums from '%s'.", cacheDir), e)
+	fi, e := os.Lstat(cacheDir)
+
+	if e == nil && fi.Mode()&os.ModeSymlink == os.ModeSymlink {
+		cacheDir, err = os.Readlink(cacheDir)
+		if err != nil {
+			return
+		}
+
+		if !path.IsAbs(cacheDir) {
+			err = cm.ErrorF("Checksum store symbolic link '%v' needs to be absolute.", cacheDir)
+
+			return
 		}
 	}
 
-	if loadFallback {
-		cacheDir = GetChecksumDirectoryGitDir(gitDirWorktree)
-		e := store.AddChecksums(cacheDir, true)
-		if e != nil {
-			err = cm.CombineErrors(err, cm.ErrorF("Could not add checksums from '%s'.", cacheDir), e)
-		}
-	}
+	store.SetSearchDirectory(cacheDir)
 
 	return
 }

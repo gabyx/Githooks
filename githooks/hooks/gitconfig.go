@@ -16,8 +16,6 @@ const (
 
 	GitCKBugReportInfo = "githooks.bugReportInfo"
 
-	GitCKChecksumCacheDir = "githooks.checksumCacheDir"
-
 	GitCKCloneBranch     = "githooks.cloneBranch"
 	GitCKCloneURL        = "githooks.cloneUrl"
 	GitCKBuildFromSource = "githooks.buildFromSource"
@@ -69,8 +67,6 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKAutoUpdateUsePrerelease,
 
 		GitCKBugReportInfo,
-
-		GitCKChecksumCacheDir,
 
 		GitCKCloneBranch,
 		GitCKCloneURL,
