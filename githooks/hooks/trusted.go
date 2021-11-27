@@ -242,20 +242,17 @@ func GetChecksumStorage(gitDirWorktree string) (store ChecksumStore, err error) 
 
 	cacheDir := GetChecksumDirectoryGitDir(gitDirWorktree)
 
-	fi, err := os.Lstat(cacheDir)
-	if err == nil && fi.Mode()&os.ModeSymlink == os.ModeSymlink {
-		var link string
-		link, _ = os.Readlink(cacheDir)
+	fi, e := os.Lstat(cacheDir)
 
-		if !path.IsAbs(link) {
-			err = cm.ErrorF("Checksum store symbolic link '%v' needs to be absolute.", link)
-
+	if e == nil && fi.Mode()&os.ModeSymlink == os.ModeSymlink {
+		cacheDir, err = os.Readlink(cacheDir)
+		if err != nil {
 			return
 		}
 
-		// Its a file and a symlink: resolve it
-		cacheDir, err = filepath.EvalSymlinks(cacheDir)
-		if err != nil {
+		if !path.IsAbs(cacheDir) {
+			err = cm.ErrorF("Checksum store symbolic link '%v' needs to be absolute.", cacheDir)
+
 			return
 		}
 	}
