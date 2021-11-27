@@ -68,8 +68,6 @@ func GetGlobalGitConfigKeys() []string {
 
 		GitCKBugReportInfo,
 
-		GitCKChecksumCacheDir,
-
 		GitCKCloneBranch,
 		GitCKCloneURL,
 		GitCKGoExecutable,

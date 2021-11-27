@@ -63,7 +63,7 @@ func PrepareListHookState(
 	hookNames []string) (state *ListingState, shared hooks.SharedRepos, hookNamespace string) {
 
 	// Load checksum store
-	checksums, err := hooks.GetChecksumStorage(ctx.GitX, gitDirWorktree)
+	checksums, err := hooks.GetChecksumStorage(gitDirWorktree)
 	ctx.Log.AssertNoErrorF(err, "Errors while loading checksum store.")
 	ctx.Log.DebugF("%s", checksums.Summary())
 
