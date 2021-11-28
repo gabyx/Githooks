@@ -9,11 +9,11 @@ import (
 )
 
 func formatTitle(p *Context) string {
-	return cm.FormatInfo("Githooks - Git Hook Manager")
+	return cm.FormatInfoMessage("Githooks - Git Hook Manager")
 }
 
 func formatTitleQuestion(p *Context) string {
-	return cm.FormatPrompt("Githooks - Git Hook Manager")
+	return cm.FormatPromptMessage("Githooks - Git Hook Manager")
 }
 
 // showMessage shows a message to the user with `text`.
@@ -36,16 +36,19 @@ func showMessage(p *Context, text string, asError bool) error {
 		err = cm.CombineErrors(err, e)
 
 		if asError {
-			m = cm.FormatPrompt(m, text)
-			p.log.Info(m)
+			p.log.InfoF(m, text)
 		} else {
-			m = strs.Fmt(m, text)
-			p.log.Error(m)
+			p.log.ErrorF(m, text)
 		}
 
 	} else {
 		// Use the terminal (if possible...)
-		message := cm.FormatPrompt(m, text)
+		var message string
+		if asError {
+			message = cm.FormatErrorMessage(m, text)
+		} else {
+			message = cm.FormatInformationMessage(m, text)
+		}
 
 		isPromptDisplayed, e := showMessageTerminal(
 			p,
@@ -59,11 +62,7 @@ func showMessage(p *Context, text string, asError bool) error {
 
 		if !isPromptDisplayed {
 			// Show the prompt in the log output
-			if asError {
-				p.log.Info(message)
-			} else {
-				p.log.Error(message)
-			}
+			p.log.Info(message)
 		}
 	}
 
@@ -102,12 +101,12 @@ func showOptions(
 		}
 
 		err = cm.CombineErrors(err, e)
-		p.log.Info(cm.FormatPrompt(m, text, hintText, shortOptions))
+		p.log.Info(cm.FormatPromptMessage(m, text, hintText, shortOptions))
 
 	} else {
 		// Use the terminal (if possible...)
 		emptyCausesDefault := strs.IsNotEmpty(defaultAnswer)
-		question := cm.FormatPrompt(m, text, hintText, shortOptions)
+		question := cm.FormatPromptMessage(m, text, hintText, shortOptions)
 
 		ans, isPromptDisplayed, e :=
 			showOptionsTerminal(
@@ -274,9 +273,9 @@ func showEntry(
 	} else {
 
 		if strs.IsNotEmpty(defaultAnswer) {
-			text = cm.FormatPrompt("%s [%s]: ", text, defaultAnswer)
+			text = cm.FormatPromptMessage("%s [%s]: ", text, defaultAnswer)
 		} else {
-			text = cm.FormatPrompt("%s : ", text)
+			text = cm.FormatPromptMessage("%s : ", text)
 		}
 
 		var isPromptDisplayed bool

@@ -17,13 +17,14 @@ const (
 	// GithooksEmoji is the general Githooks emojii.
 	GithooksEmoji = "🦎"
 
-	githooksSuffix = "" // If you like you can make it: "Githooks: "
-	debugSuffix    = "🛠  " + githooksSuffix
-	infoSuffix     = GithooksEmoji + " " + githooksSuffix
-	warnSuffix     = "⛑  " + githooksSuffix
-	errorSuffix    = "⛔  "
-	promptSuffix   = "❓ " + githooksSuffix
-	indent         = "   "
+	githooksSuffix    = "" // If you like you can make it: "Githooks: "
+	debugSuffix       = "🛠  " + githooksSuffix
+	infoSuffix        = GithooksEmoji + " " + githooksSuffix
+	warnSuffix        = "⛑  " + githooksSuffix
+	errorSuffix       = "⛔  "
+	promptSuffix      = "❓ " + githooksSuffix
+	informationSuffix = "ℹ️   "
+	indent            = "   "
 
 	// ListItemLiteral is the list item used for CLI and other printing stuff.
 	ListItemLiteral = "•"
@@ -287,8 +288,23 @@ func (c *LogContext) ErrorF(format string, args ...interface{}) {
 	}
 }
 
-// GetPromptFormatter formats a prompt.
-func FormatPrompt(format string, args ...interface{}) string {
+// FormatInfoMessage formats a info message.
+func FormatInfoMessage(format string, args ...interface{}) string {
+	return FormatMessageF(infoSuffix, indent, format, args...)
+}
+
+// FormatInfoMessage formats a informational message.
+func FormatInformationMessage(format string, args ...interface{}) string {
+	return FormatMessageF(informationSuffix, indent, format, args...)
+}
+
+// FormatError formats an error message.
+func FormatErrorMessage(format string, args ...interface{}) string {
+	return FormatMessageF(errorSuffix, indent, format, args...)
+}
+
+// FormatPrompt formats a prompt message.
+func FormatPromptMessage(format string, args ...interface{}) string {
 	return FormatMessageF(promptSuffix, indent, format, args...)
 }
 

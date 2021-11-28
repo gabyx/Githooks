@@ -322,7 +322,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 
 	if err != nil {
 		m := strs.Fmt("Running update failed. See latest log '%s' !", path.Join(os.TempDir(), "githooks-installer-*.log"))
-		log.AssertNoError(err, m)
+		log.Error(m)
 		err = uiSettings.PromptCtx.ShowMessage(m, true)
 		log.AssertNoError(err, "Could not show message.")
 	}
