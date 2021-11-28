@@ -1274,10 +1274,13 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	log := ctx.Log
 	logStats := ctx.LogStats
 
+	logFile := addInstallerLog(args.InternalLog, log)
+	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
+	dt := time.Now()
+	log.InfoF("Started at: %s", dt.String())
+
 	initArgs(log, &args, vi)
 	validateArgs(log, cmd, &args)
-
-	logFile := addInstallerLog(args.InternalLog, log)
 
 	if strs.IsNotEmpty(logFile) {
 		args.InternalLog = logFile
@@ -1296,7 +1299,6 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 		}()
 	}
 
-	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
 	log.InfoF("Logfile: '%s'", logFile)
 
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
