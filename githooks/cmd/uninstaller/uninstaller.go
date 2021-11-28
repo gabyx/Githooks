@@ -307,6 +307,11 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 		log.AssertNoErrorF(gitx.UnsetConfig(k, git.GlobalScope),
 			"Could not unset global Git config '%s'.", k)
 	}
+
+	// Remove legacy values
+	k := "githooks.checksumCacheDir"
+	log.AssertNoErrorF(gitx.UnsetConfig(k, git.GlobalScope),
+		"Could not unset global Git config '%s'.", k)
 }
 
 func cleanRegister(log cm.ILogContext, installDir string) {
