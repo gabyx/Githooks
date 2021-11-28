@@ -10,6 +10,11 @@ const AssertOutputIsTerminal = true
 // For testing this is disabled.
 var EnableGUI = true
 
+// ShowMessage shows a message to the user with `text`.
+func (p *Context) ShowMessage(text string, asError bool) (err error) {
+	return showMessage(p, text, asError)
+}
+
 // ShowOptions shows a prompt to the user with `text`
 // with the options `shortOptions` and optional long options `longOptions`.
 func (p *Context) ShowOptions(text string,

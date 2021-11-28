@@ -10,7 +10,7 @@ import (
 	"github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
-func showPromptDialog(
+func showEntryDialog(
 	title string,
 	text string,
 	defaultAnswer string) (string, error) {
@@ -144,6 +144,30 @@ func showPromptLoop(
 	return defaultAnswer, err
 }
 
+func showMessageGUI(
+	p *Context,
+	title string,
+	message string,
+	asError bool) error {
+
+	opts := settings.Message{}
+	opts.Title = title
+	opts.Text = message
+
+	if asError {
+		opts.WindowIcon = settings.InfoIcon
+		opts.Icon = settings.InfoIcon
+	} else {
+		opts.WindowIcon = settings.ErrorIcon
+		opts.Icon = settings.ErrorIcon
+	}
+	opts.Width = 400
+
+	_, err := gui.ShowMessage(nil, &opts) // nolint
+
+	return err
+}
+
 func showOptionsGUI(
 	p *Context,
 	title string,
@@ -176,7 +200,7 @@ func showEntryGUI(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return showPromptDialog(title, text, defaultAnswer)
+			return showEntryDialog(title, text, defaultAnswer)
 		},
 		validator,
 		canCancel)

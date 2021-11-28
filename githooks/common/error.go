@@ -103,14 +103,13 @@ func PanicIfF(condition bool, format string, args ...interface{}) {
 // AssertNoErrorPanic Assert no error, otherwise panic.
 func AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
-		PanicIf(true,
-			append(lines, " -> errors:\n"+FormatError(err))...)
+		Panic(append(lines, " -> errors:\n"+FormatError(err))...)
 	}
 }
 
 // AssertNoErrorPanicF Assert no error, otherwise panic.
 func AssertNoErrorPanicF(err error, format string, args ...interface{}) {
 	if err != nil {
-		PanicIfF(true, format+" -> errors:\n"+FormatError(err), args...)
+		PanicF(format+" -> errors:\n"+FormatError(err), args...)
 	}
 }

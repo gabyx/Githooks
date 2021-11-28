@@ -83,7 +83,7 @@ func findGoExec(cwd string) (cm.CmdContext, error) {
 
 // Build compiles this repos executable with Go and reports
 // the output binary directory where all built binaries reside.
-func Build(gitx *git.Context, buildTags []string) (string, error) {
+func Build(gitx *git.Context, buildTags []string, cleanUpX *cm.InterruptContext) (string, error) {
 
 	repoPath := gitx.GetCwd()
 	goSrc := path.Join(repoPath, relPathGoSrc)
@@ -119,6 +119,11 @@ func Build(gitx *git.Context, buildTags []string) (string, error) {
 	gox.Env = append(gox.Env,
 		strs.Fmt("GOBIN=%s", goBinPath),
 		strs.Fmt("GOPATH=%s", goPath))
+
+	// Cleanup on interrupt.
+	cleanUpX.AddHandler(func() {
+		_ = gox.Check("clean", "-modcache")
+	})
 
 	// Initialize modules.
 	vendorCmd := []string{"mod", "vendor"}

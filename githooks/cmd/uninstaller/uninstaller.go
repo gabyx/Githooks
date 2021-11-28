@@ -77,7 +77,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	setupMockFlags(cmd, vi)
 }
 
-func setMainVariables(log cm.ILogContext, gitx *git.Context, args *Arguments) (Settings, UISettings) {
+func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Settings, UISettings) {
 
 	var promptx prompt.IContext
 	var err error
@@ -374,7 +374,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setMainVariables(log, ctx.GitX, &args)
+	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
 
 	if !args.InternalPostDispatch {
 		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {

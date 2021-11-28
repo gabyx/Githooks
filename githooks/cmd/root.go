@@ -29,7 +29,8 @@ import (
 func NewSettings(
 	log cm.ILogContext,
 	logStats cm.ILogStats,
-	wrapPanicExitCode func()) ccm.CmdContext {
+	wrapPanicExitCode func(),
+	cleanUpX *cm.InterruptContext) ccm.CmdContext {
 
 	var promptx prompt.IContext
 	var err error
@@ -51,7 +52,8 @@ func NewSettings(
 		PromptCtx:         promptx,
 		Log:               log,
 		LogStats:          logStats,
-		WrapPanicExitCode: wrapPanicExitCode}
+		WrapPanicExitCode: wrapPanicExitCode,
+		CleanupX:          cleanUpX}
 }
 
 func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
@@ -72,8 +74,7 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 // MakeGithooksCtl returns the root command of the Githooks CLI executable.
 func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 
-	fmt := ctx.Log.GetInfoFormatter(false)
-	title := fmt("Githooks CLI [version: '%s']", build.BuildVersion)
+	title := cm.FormatInfoF("Githooks CLI [version: '%s']", build.BuildVersion)
 	firstPrefix := " ▶ "
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())
 
@@ -105,9 +106,13 @@ func initArgs(ctx *ccm.CmdContext) {
 }
 
 // Run executes the main CLI function.
-func Run(log cm.ILogContext, logStats cm.ILogStats, wrapPanicExitCode func()) error {
+func Run(
+	log cm.ILogContext,
+	logStats cm.ILogStats,
+	wrapPanicExitCode func(),
+	cleanUpX *cm.InterruptContext) error {
 
-	ctx := NewSettings(log, logStats, wrapPanicExitCode)
+	ctx := NewSettings(log, logStats, wrapPanicExitCode, cleanUpX)
 	cmd := MakeGithooksCtl(&ctx)
 
 	err := cmd.Execute()
