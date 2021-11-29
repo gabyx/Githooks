@@ -18,9 +18,5 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 		return
 	}
 
-	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
-		return showOptionsWithButtons(ctx, opts, nil)
-	}
-
 	return ShowOptionsZenity(ctx, zenity, opts)
 }

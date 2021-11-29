@@ -160,6 +160,47 @@
       "problemMatcher": []
     },
     {
+      "label": "[Dev Container] go-delve-dialog",
+      "type": "shell",
+      "command": "dlv",
+      "args": [
+        "debug",
+        "--headless",
+        "--listen=127.0.0.1:2345",
+        "--log",
+        "--api-version=2",
+        "./apps/dialog",
+        "--",
+        "options",
+        "--style",
+        "1",
+        "--option",
+        "A",
+        "--option",
+        "B"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/githooks",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": ["-c"]
+        },
+        "env": {
+          "CGO_ENABLED": "0",
+          "GOBIN": "${workspaceFolder}/githooks/bin"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "dependsOn": [
+        "[Dev Container] clean-install",
+        "[Dev Container] go-build-temp"
+      ],
+      "problemMatcher": []
+    },
+    {
       "label": "[Dev Container] go-delve-test",
       "type": "shell",
       "command": "dlv",
@@ -198,10 +239,7 @@
       "type": "process",
       "command": "swift",
       "group": "build",
-      "args": [
-        "${file}",
-        "demo"
-      ],
+      "args": ["${file}", "demo"],
 
       "presentation": {
         "echo": true,

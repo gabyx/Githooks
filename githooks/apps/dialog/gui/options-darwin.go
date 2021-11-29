@@ -85,16 +85,6 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 
 	zenity, err := gunix.GetZenityExecutable()
 	if err == nil {
-
-		if showWithButtons {
-			// Run over Buttons but with zenity, because we have it available.
-			showFunc := func(c context.Context, m *sets.Message) (res.Message, error) {
-				return ShowMessageZenity(ctx, zenity, m)
-			}
-
-			return showOptionsWithButtons(ctx, opts, showFunc)
-		}
-
 		return ShowOptionsZenity(ctx, zenity, opts)
 	}
 
@@ -104,7 +94,11 @@ func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err err
 
 		return
 	} else if len(opts.Options) <= 2 && showWithButtons {
-		return showOptionsWithButtons(ctx, opts, nil)
+		showFunc := func(c context.Context, m *sets.Message) (res.Message, error) {
+			return ShowMessage(ctx, m)
+		}
+
+		return showOptionsWithButtons(ctx, opts, showFunc)
 	}
 
 	data, err := translateOptions(opts)
