@@ -40,6 +40,7 @@ function cleanDirs() {
         rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"*
     fi
 
+    rm -rf /tmp/githooks-installer-*
     rm -rf ~/test*
     rm -rf "$GH_TEST_TMP"
     mkdir -p "$GH_TEST_TMP" || {

@@ -16,6 +16,7 @@ if ! "$GH_INSTALL_BIN_DIR/cli" --version; then
 fi
 
 if [ -z "$GH_ON_WINDOWS" ]; then
+    find "/tmp" -type f -name "githooks-installer*"
     nCount=$(find "/tmp" -type f -name "githooks-installer-*.log" | wc -l)
     if [ "$nCount" != "1" ]; then
         echo "! The installer log should be created."

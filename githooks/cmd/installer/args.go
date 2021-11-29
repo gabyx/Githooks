@@ -4,7 +4,7 @@ package installer
 type Arguments struct {
 	Config string
 
-	InternalLog          string // The log file.
+	Log                  string // The log file.
 	InternalAutoUpdate   bool   // If the installer is run from the runner.
 	InternalPostDispatch bool   // If the installer has already dispatched itself to the downloaded/build installer.
 

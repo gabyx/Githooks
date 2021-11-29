@@ -70,6 +70,9 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("config"))
 	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("config"))
 
+	cmd.PersistentFlags().String("log", "", "Log file path (only for installer).")
+	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagFilename("log"))
+
 	cmd.PersistentFlags().Bool("internal-auto-update", false,
 		"Internal argument, do not use!")
 	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("internal-auto-update"))
@@ -132,6 +135,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
+	cm.AssertNoErrorPanic(
+		vi.BindPFlag("log", cmd.PersistentFlags().Lookup("log")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("internalAutoUpdate", cmd.PersistentFlags().Lookup("internal-auto-update")))
 	cm.AssertNoErrorPanic(
@@ -1274,17 +1279,15 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	log := ctx.Log
 	logStats := ctx.LogStats
 
-	logFile := addInstallerLog(args.InternalLog, log)
+	initArgs(log, &args, vi)
+	validateArgs(log, cmd, &args)
+
+	args.Log = addInstallerLog(args.Log, log)
 	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
 	dt := time.Now()
 	log.InfoF("Started at: %s", dt.String())
 
-	initArgs(log, &args, vi)
-	validateArgs(log, cmd, &args)
-
-	if strs.IsNotEmpty(logFile) {
-		args.InternalLog = logFile
-
+	if strs.IsNotEmpty(args.Log) {
 		// Only delete the log file if no panic, and no errors and
 		// when not in the dispatch process.
 		defer func() {
@@ -1294,12 +1297,12 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 			log.RemoveFileWriter()
 			if RemoveInstallerLogOnSuccess && !args.InternalPostDispatch &&
 				logStats.ErrorCount() == 0 {
-				_ = os.Remove(logFile)
+				_ = os.Remove(args.Log)
 			}
 		}()
 	}
 
-	log.InfoF("Logfile: '%s'", logFile)
+	log.InfoF("Logfile: '%s'", args.Log)
 
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
 
