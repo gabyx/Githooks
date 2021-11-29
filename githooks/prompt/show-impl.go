@@ -9,11 +9,64 @@ import (
 )
 
 func formatTitle(p *Context) string {
-	return p.log.GetInfoFormatter(false)("Githooks - Git Hook Manager")
+	return cm.FormatInfoMessage("Githooks - Git Hook Manager")
 }
 
 func formatTitleQuestion(p *Context) string {
-	return p.log.GetPromptFormatter(false)("Githooks - Git Hook Manager")
+	return cm.FormatPromptMessage("Githooks - Git Hook Manager")
+}
+
+// showMessage shows a message to the user with `text`.
+func showMessage(p *Context, text string, asError bool) error {
+	var err error
+
+	m := "%s [any key to continue]: "
+
+	if p.useGUI {
+		// Use the GUI dialog.
+		e := showMessageGUI(
+			p,
+			formatTitle(p),
+			text, asError)
+
+		if e == nil {
+			return nil
+		}
+
+		err = cm.CombineErrors(err, e)
+
+		if asError {
+			p.log.InfoF(m, text)
+		} else {
+			p.log.ErrorF(m, text)
+		}
+
+	} else {
+		// Use the terminal (if possible...)
+		var message string
+		if asError {
+			message = cm.FormatErrorMessage(m, text)
+		} else {
+			message = cm.FormatInformationMessage(m, text)
+		}
+
+		isPromptDisplayed, e := showMessageTerminal(
+			p,
+			message,
+			asError)
+
+		if e == nil {
+			return nil // is already in lower case
+		}
+		err = cm.CombineErrors(err, e)
+
+		if !isPromptDisplayed {
+			// Show the prompt in the log output
+			p.log.Info(message)
+		}
+	}
+
+	return err
 }
 
 // showOptions shows a prompt to the user with `text`
@@ -30,6 +83,7 @@ func showOptions(
 	validator := CreateValidatorAnswerOptions(options)
 
 	defaultAnswer, defaultOptionIdx := getDefaultAnswer(options)
+	m := "%s %s [%s]: "
 
 	if p.useGUI {
 		// Use the GUI dialog.
@@ -47,15 +101,15 @@ func showOptions(
 		}
 
 		err = cm.CombineErrors(err, e)
-		p.log.Info(p.promptFmt("%s %s [%s]: ", text, hintText, shortOptions))
+		p.log.Info(cm.FormatPromptMessage(m, text, hintText, shortOptions))
 
 	} else {
 		// Use the terminal (if possible...)
 		emptyCausesDefault := strs.IsNotEmpty(defaultAnswer)
-		question := p.promptFmt("%s %s [%s]: ", text, hintText, shortOptions)
+		question := cm.FormatPromptMessage(m, text, hintText, shortOptions)
 
 		ans, isPromptDisplayed, e :=
-			showPromptOptionsTerminal(
+			showOptionsTerminal(
 				p,
 				question,
 				defaultAnswer,
@@ -103,9 +157,15 @@ func showEntryLoopTerminal(
 		err = cm.CombineErrors(err, e)
 	}
 
+	writeErr := func(s string) {
+		_, e := p.termErr.Write([]byte(s))
+		err = cm.CombineErrors(err, e)
+	}
+
 	for nPrompts < maxPrompts {
 
-		writeOut(text)
+		_, e := p.termPrompt.Write([]byte(text))
+		err = cm.CombineErrors(err, e)
 		nPrompts++
 
 		success := p.termInScanner.Scan()
@@ -141,12 +201,10 @@ func showEntryLoopTerminal(
 			return ans, true, nil
 		}
 
-		warning := p.errorFmt("Answer validation error: %s", valErr.Error())
-		writeOut(warning + "\n")
+		writeErr(strs.Fmt("Answer validation error: %s\n", valErr.Error()))
 
 		if nPrompts < maxPrompts {
-			warning := p.errorFmt("Remaining tries %v.", maxPrompts-nPrompts)
-			writeOut(warning + "\n")
+			writeErr(strs.Fmt("Remaining tries %v.\n", maxPrompts-nPrompts))
 		} else {
 			msg := strs.Fmt("Could not validate answer in '%v' tries.", maxPrompts)
 			if p.panicIfMaxTries {
@@ -157,13 +215,27 @@ func showEntryLoopTerminal(
 		}
 	}
 
-	warning := p.errorFmt("Could not get answer, taking default '%s'.", defaultAnswer)
-	writeOut(warning + "\n")
+	writeErr(strs.Fmt("Could not get answer, taking default '%s'.\n", defaultAnswer))
 
 	return defaultAnswer, nPrompts != 0, err
 }
 
-func showPromptOptionsTerminal(
+func showMessageTerminal(
+	p *Context,
+	message string,
+	asError bool) (bool, error) {
+
+	_, isPromptDisplayed, err := showEntryLoopTerminal(
+		p,
+		message,
+		"",
+		true,
+		nil)
+
+	return isPromptDisplayed, err
+}
+
+func showOptionsTerminal(
 	p *Context,
 	question string,
 	defaultAnswer string,
@@ -196,12 +268,14 @@ func showEntry(
 			return defaultAnswer, err
 		}
 
+		p.log.Info(text)
+
 	} else {
 
 		if strs.IsNotEmpty(defaultAnswer) {
-			text = p.promptFmt("%s [%s]: ", text, defaultAnswer)
+			text = cm.FormatPromptMessage("%s [%s]: ", text, defaultAnswer)
 		} else {
-			text = p.promptFmt("%s : ", text)
+			text = cm.FormatPromptMessage("%s : ", text)
 		}
 
 		var isPromptDisplayed bool

@@ -77,24 +77,24 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 		return cm.ErrorF("Could create dir '%s'.", dir)
 	}
 
-	tempFile := cm.GetTempPath(dir, target.FileName)
-	temp, err := os.Create(tempFile)
+	temp, err := os.CreateTemp(dir, "*-"+target.FileName)
 	if err != nil {
-		return cm.ErrorF("Could open temp file '%s' for download.", tempFile)
+		return cm.ErrorF("Could open temp file '%s' for download.", target.FileName)
 	}
 	_, err = io.Copy(temp, response.Body)
 	if err != nil {
-		return cm.CombineErrors(err, cm.ErrorF("Could not store download in '%s'.", tempFile))
+		return cm.CombineErrors(err, cm.ErrorF("Could not store download in '%s'.", temp.Name()))
 	}
+	temp.Close()
 
 	// Validate checksum.
-	err = checkChecksum(tempFile, checksumData)
+	err = checkChecksum(temp.Name(), checksumData)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Checksum validation failed."))
 	}
 
 	// Extract the file.
-	err = Extract(tempFile, target.Extension, dir)
+	err = Extract(temp.Name(), target.Extension, dir)
 	if err != nil {
 		return cm.CombineErrors(err,
 			cm.ErrorF("Archive extraction from url '%s' failed.", target.URL))

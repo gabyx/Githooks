@@ -4,8 +4,9 @@ package installer
 type Arguments struct {
 	Config string
 
-	InternalAutoUpdate   bool
-	InternalPostDispatch bool
+	Log                  string // The log file.
+	InternalAutoUpdate   bool   // If the installer is run from the runner.
+	InternalPostDispatch bool   // If the installer has already dispatched itself to the downloaded/build installer.
 
 	InternalUpdateFromVersion string   // Build version we are updating from.
 	InternalUpdateTo          string   // Commit SHA to update local branch to remote.

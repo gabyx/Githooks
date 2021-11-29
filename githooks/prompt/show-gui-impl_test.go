@@ -16,7 +16,7 @@ func TestCoverage(t *testing.T) {
 	cm.AssertNoErrorPanic(err)
 
 	os.Stdin = nil
-	promptx, _ := prompt.CreateContext(log, prompt.ToolContext{}, false, false)
+	promptx, _ := prompt.CreateContext(log, false, false)
 
 	ans, err := promptx.ShowEntry("Enter a default string:",
 		"This is the default string", prompt.ValidatorAnswerNotEmpty)
@@ -36,5 +36,8 @@ func TestCoverage(t *testing.T) {
 	a, e := promptx.ShowEntryMulti("Enter strings", "exit",
 		prompt.ValidatorAnswerNotEmpty)
 	log.InfoF("Answer: '%+q'", a)
+	log.AssertNoErrorF(e, "Error occurred.")
+
+	e = promptx.ShowMessage("This is a warning prompt message", true)
 	log.AssertNoErrorF(e, "Error occurred.")
 }

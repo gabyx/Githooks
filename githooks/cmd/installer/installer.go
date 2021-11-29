@@ -70,8 +70,11 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("config"))
 	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("config"))
 
+	cmd.PersistentFlags().String("log", "", "Log file path (only for installer).")
+	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagFilename("log"))
+
 	cmd.PersistentFlags().Bool("internal-auto-update", false,
-		"Internal argument, do not use!") // @todo Remove this...
+		"Internal argument, do not use!")
 	cm.AssertNoErrorPanic(cmd.PersistentFlags().MarkHidden("internal-auto-update"))
 
 	// User commands
@@ -132,7 +135,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
-	// @todo Remove this internalAutoUpdate...
+	cm.AssertNoErrorPanic(
+		vi.BindPFlag("log", cmd.PersistentFlags().Lookup("log")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("internalAutoUpdate", cmd.PersistentFlags().Lookup("internal-auto-update")))
 	cm.AssertNoErrorPanic(
@@ -186,7 +190,7 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 
 }
 
-func setMainVariables(
+func setupSettings(
 	log cm.ILogContext,
 	gitx *git.Context,
 	args *Arguments) (Settings, install.UISettings) {
@@ -200,6 +204,7 @@ func setMainVariables(
 		// Use GUI fallback if we are running an auto-update triggered from the runner.
 		useGUIFallback := args.InternalAutoUpdate
 		promptx, err = prompt.CreateContext(log, useGUIFallback, args.UseStdin)
+		promptx.AddFileWriter(log.GetFileWriter())
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
@@ -237,6 +242,7 @@ func setInstallDir(log cm.ILogContext, gitx *git.Context, installDir string) {
 
 func buildFromSource(
 	log cm.ILogContext,
+	cleanUpX *cm.InterruptContext,
 	buildTags []string,
 	tempDir string,
 	url string,
@@ -265,7 +271,7 @@ func buildFromSource(
 	log.InfoF("Building binaries at '%s'", tag)
 
 	// Build the binaries.
-	binPath, err := builder.Build(gitx, buildTags)
+	binPath, err := builder.Build(gitx, buildTags, cleanUpX)
 	log.AssertNoErrorPanicF(err, "Could not build release branch in '%s'.", tempDir)
 
 	bins, err := cm.GetAllFiles(binPath)
@@ -345,7 +351,12 @@ func getDeploySettings(
 	return deploySettings
 }
 
-func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, args *Arguments) bool {
+func prepareDispatch(
+	log cm.ILogContext,
+	gitx *git.Context,
+	settings *Settings,
+	args *Arguments,
+	cleanUpX *cm.InterruptContext) (bool, error) {
 
 	skipPrerelease := !(gitx.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue)
 
@@ -374,6 +385,8 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 		log.AssertNoErrorPanicF(err,
 			"Could not assert release clone '%s' existing",
 			settings.CloneDir)
+
+		log.DebugF("Status: %v", status)
 	}
 
 	updateAvailable := status.LocalCommitSHA != status.RemoteCommitSHA
@@ -392,8 +405,11 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 
 		log.Info("Getting Githooks binaries...")
 
-		tempDir, err := os.MkdirTemp(os.TempDir(), "*-githooks-update")
+		tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
 		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
+		cleanUpX.AddHandler(func() {
+			_ = os.RemoveAll(tempDir) // @todo does not remove write protected files (go build)
+		})
 		defer os.RemoveAll(tempDir)
 
 		buildFromSrc := args.BuildFromSource ||
@@ -403,6 +419,7 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 			log.Info("Building from source...")
 			binaries = buildFromSource(
 				log,
+				cleanUpX,
 				args.BuildTags,
 				tempDir,
 				status.RemoteURL,
@@ -436,16 +453,15 @@ func prepareDispatch(log cm.ILogContext, gitx *git.Context, settings *Settings, 
 	}
 
 	if DevIsDispatchSkipped {
-		return false
+		return false, nil
 	}
 
 	log.PanicIfF(!cm.IsFile(installer.Cmd), "Githooks executable '%s' is not existing.", installer)
-	runInstaller(log, &installer, args)
 
-	return true
+	return true, runInstaller(log, &installer, args)
 }
 
-func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) {
+func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) error {
 
 	log.Info("Dispatching to new installer ...")
 
@@ -458,13 +474,11 @@ func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments)
 	writeArgs(log, file.Name(), args)
 
 	// Run the installer binary
-	err = cm.RunExecutable(
+	return cm.RunExecutable(
 		&cm.ExecContext{},
 		installer,
-		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetErrorWriter()),
+		cm.UseStreams(os.Stdin, os.Stdout, os.Stderr),
 		"--config", file.Name())
-
-	log.AssertNoErrorPanic(err, "Running installer failed.")
 }
 
 // findGitHookTemplates returns the Git hook template directory
@@ -1022,9 +1036,9 @@ func setupSharedRepositories(
 		question = "You can set up shared hook repositories to avoid\n" +
 			"duplicating common hooks across repositories you work on\n" +
 			"See information on what are these in the project's documentation:\n" +
-			strs.Fmt("'%s#shared-hook-repositories'\n", hooks.GithooksWebpage) +
+			strs.Fmt("'%s#shared-hook-repositories'\n\n", hooks.GithooksWebpage) +
 			strs.Fmt("Note: you can also have a '%s' file listing the\n", hooks.GetRepoSharedFileRel()) +
-			"      repositories where you keep the shared hook files.\n" +
+			"repositories where you keep the shared hook files.\n\n" +
 			"Would you like to set up shared hook repos now?"
 	}
 
@@ -1236,33 +1250,87 @@ func runUpdate(
 		storeSettings(log, settings, uiSettings)
 		updateClone(log, settings.CloneDir, args.InternalUpdateTo)
 	}
+}
 
-	thankYou(log)
+func addInstallerLog(path string, log cm.ILogContext) string {
+	var err error
+	var file *os.File
+
+	if strs.IsEmpty(path) {
+		file, err = os.CreateTemp("", "githooks-installer-*.log")
+		log.AssertNoErrorF(err, "Failed to create installer log at '%v'", path)
+	} else {
+		file, err = os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_APPEND, cm.DefaultFileModeFile)
+		log.AssertNoErrorF(err, "Failed to append to installer log at '%v'", path)
+	}
+
+	if err != nil {
+		return ""
+	}
+
+	log.AddFileWriter(file)
+
+	return file.Name()
 }
 
 func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	args := Arguments{}
 	log := ctx.Log
-
-	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
+	logStats := ctx.LogStats
 
 	initArgs(log, &args, vi)
 	validateArgs(log, cmd, &args)
 
-	log.DebugF("Arguments: %+v", args)
+	args.Log = addInstallerLog(args.Log, log)
+	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
+	dt := time.Now()
+	log.InfoF("Started at: %s", dt.String())
 
-	settings, uiSettings := setMainVariables(log, ctx.GitX, &args)
+	if strs.IsNotEmpty(args.Log) {
+		// Only delete the log file if no panic, and no errors and
+		// when not in the dispatch process.
+		defer func() {
+			if r := recover(); r != nil {
+				panic(r)
+			}
+			log.RemoveFileWriter()
+			if RemoveInstallerLogOnSuccess && !args.InternalPostDispatch &&
+				logStats.ErrorCount() == 0 {
+				_ = os.Remove(args.Log)
+			}
+		}()
+	}
+
+	log.InfoF("Logfile: '%s'", args.Log)
+
+	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
+
+	log.DebugF("Arguments: %+v", args)
+	log.DebugF("Settings: %+v", settings)
 
 	if !args.DryRun {
 		setInstallDir(log, ctx.GitX, settings.InstallDir)
 	}
 
 	if !args.InternalPostDispatch {
-		if isDispatched := prepareDispatch(log, ctx.GitX, &settings, &args); isDispatched {
+		isDispatched, err := prepareDispatch(log, ctx.GitX, &settings, &args, ctx.CleanupX)
+		log.MoveFileWriterToEnd() // We are logging to the same file. Move it to the end.
+		log.AssertNoErrorPanic(err, "Running installer failed.")
+		if isDispatched {
 			return
 		}
+		// intended fallthrough ... (only debug)
 	}
 
 	runUpdate(log, ctx.GitX, &settings, &uiSettings, &args)
+
+	if logStats.ErrorCount() == 0 {
+		thankYou(log)
+	} else {
+		log.ErrorF("Tried my best at installing, but\n"+
+			" • %v errors\n"+
+			" • %v warnings\n"+
+			"occurred!", logStats.ErrorCount(), logStats.WarningCount())
+	}
 }

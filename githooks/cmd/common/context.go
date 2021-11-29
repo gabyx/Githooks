@@ -21,6 +21,8 @@ type CmdContext struct {
 	PromptCtx prompt.IContext // The general prompt context (will be different for install/uninstall).
 
 	WrapPanicExitCode func() // Wraps the panic exit code to 111 instead of 1.
+
+	CleanupX *cm.InterruptContext // Crucial tasks to perform when singal is received.
 }
 
 // CmdExit is generic exit error with exit code.

@@ -14,3 +14,12 @@ if ! "$GH_INSTALL_BIN_DIR/cli" --version; then
     echo "! The command line helper tool is not available"
     exit 1
 fi
+
+if [ -z "$GH_ON_WINDOWS" ]; then
+    find "/tmp" -type f -name "githooks-installer*"
+    nCount=$(find "/tmp" -type f -name "githooks-installer-*.log" | wc -l)
+    if [ "$nCount" != "1" ]; then
+        echo "! The installer log should be created."
+        exit 1
+    fi
+fi

@@ -14,6 +14,9 @@ type AnswerValidator func(string) error
 
 // IContext defines the interface to show a prompt to the user.
 type IContext interface {
+	ShowMessage(
+		text string, asError bool) error
+
 	ShowOptions(
 		text string,
 		hintText string,
@@ -31,6 +34,8 @@ type IContext interface {
 		validator AnswerValidator) ([]string, error)
 
 	Close()
+
+	AddFileWriter(sink io.Writer)
 }
 
 // Formatter is the format function to format a prompt or error.
@@ -44,9 +49,11 @@ type Context struct {
 	useGUI bool
 
 	// Terminal data
-	promptFmt     Formatter
-	errorFmt      Formatter
-	termOut       io.Writer
+	termOut    io.Writer
+	hasColor   bool
+	termErr    io.Writer
+	termPrompt io.Writer
+
 	termIn        io.Reader
 	termInScanner *bufio.Scanner
 
@@ -63,6 +70,22 @@ func (p *Context) Close() {
 		if ok {
 			t.Close()
 		}
+	}
+}
+
+// AddFileWriter adds a another sink to all sinks log.
+func (c *Context) AddFileWriter(file io.Writer) {
+	if file == nil {
+		return
+	}
+	if c.termOut != nil {
+		c.termOut = io.MultiWriter(c.termOut, file)
+	}
+	if c.termErr != nil {
+		c.termErr = io.MultiWriter(c.termErr, file)
+	}
+	if c.termPrompt != nil {
+		c.termPrompt = io.MultiWriter(c.termPrompt, file)
 	}
 }
 
@@ -96,7 +119,7 @@ func CreateContext(
 		//   be shown and the user has not notion what to input, in that case
 		//   output == nil, which results in the default answer.
 		// For tests: AssertOutputIsTerminal == false, which always sets the output.
-		output = log.GetInfoWriter()
+		output = log.GetInfoWriterOriginal()
 	}
 
 	p := Context{
@@ -106,9 +129,10 @@ func CreateContext(
 		// fallback to using the GUI if enabled.
 		useGUI: EnableGUI && useGUIFallback && (input == nil || output == nil),
 
-		errorFmt:      log.GetErrorFormatter(true),
-		promptFmt:     log.GetPromptFormatter(true),
+		hasColor:      log.HasColor(),
 		termOut:       output,
+		termErr:       cm.NewColoredErrorWriter(output),
+		termPrompt:    cm.NewColoredPromptWriter(output),
 		termIn:        input,
 		termInScanner: bufio.NewScanner(input),
 

@@ -3,5 +3,6 @@
 package installer
 
 const (
-	DevIsDispatchSkipped = false
+	DevIsDispatchSkipped        = false
+	RemoveInstallerLogOnSuccess = false
 )

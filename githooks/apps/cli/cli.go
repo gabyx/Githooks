@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/signal"
 	"path/filepath"
 
 	"github.com/gabyx/githooks/githooks/cmd"
@@ -24,6 +25,20 @@ func mainRun() (exitCode int) {
 		panicExitCode = 111
 	}
 
+	// Install signal handling
+	var cleanUpX cm.InterruptContext
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	defer func() {
+		signal.Stop(c)
+	}()
+
+	go func() {
+		<-c
+		cleanUpX.RunHandlers()
+		os.Exit(1) // Return 1 := canceled always...
+	}()
+
 	// Handle all panics and report the error
 	defer func() {
 		r := recover()
@@ -32,7 +47,7 @@ func mainRun() (exitCode int) {
 		}
 	}()
 
-	err = cmd.Run(log, log, wrapPanicExitCode)
+	err = cmd.Run(log, log, wrapPanicExitCode, &cleanUpX)
 
 	// Overwrite the exit code if its a command exit error.
 	if v, ok := err.(ccm.CmdExit); ok {

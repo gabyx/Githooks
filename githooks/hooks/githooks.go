@@ -179,7 +179,7 @@ func GetTemporaryDir(installDir string) string {
 // AssertTemporaryDir returns the Githooks temporary directory inside the install directory.
 func AssertTemporaryDir(installDir string) (tempDir string, err error) {
 	tempDir = GetTemporaryDir(installDir)
-	err = os.MkdirAll(GetTemporaryDir(installDir), cm.DefaultFileModeDirectory)
+	err = os.MkdirAll(tempDir, cm.DefaultFileModeDirectory)
 
 	return
 }

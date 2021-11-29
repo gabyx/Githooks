@@ -55,7 +55,7 @@ func mainRun() (exitCode int) {
 		}
 	}()
 
-	settings, uiSettings := setMainVariables(cwd)
+	settings, uiSettings := setupSettings(cwd)
 	assertRegistered(settings.GitX, settings.InstallDir)
 
 	checksums, err := hooks.GetChecksumStorage(settings.GitDirWorktree)
@@ -126,7 +126,7 @@ func logInvocation(s *HookSettings) {
 	}
 }
 
-func setMainVariables(repoPath string) (HookSettings, UISettings) {
+func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	cm.PanicIf(
 		len(os.Args) <= 1,
@@ -316,11 +316,16 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		func() error {
 			return updates.RunUpdateOverExecutable(settings.InstallDir,
 				&settings.ExecX,
-				cm.UseStreams(nil, log.GetInfoWriter(), log.GetErrorWriter()),
+				cm.UseStreams(nil, os.Stderr, os.Stderr), // Must not use stdout, because Git hooks.
 				opts...)
 		})
 
-	log.AssertNoErrorPanic(err, "Running update failed.")
+	if err != nil {
+		m := strs.Fmt("Running update failed. See latest log '%s' !", path.Join(os.TempDir(), "githooks-installer-*.log"))
+		log.Error(m)
+		err = uiSettings.PromptCtx.ShowMessage(m, true)
+		log.AssertNoError(err, "Could not show message.")
+	}
 
 	switch {
 	case updateAvailable:

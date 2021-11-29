@@ -9,7 +9,7 @@ func GetProgressBar(log ILogContext, title string, length int) (bar *pb.Progress
 	if log.IsInfoATerminal() {
 		bar = pb.NewOptions(length,
 			pb.OptionSetWriter(log.GetInfoWriter()),
-			pb.OptionEnableColorCodes(log.HasColors()),
+			pb.OptionEnableColorCodes(log.HasColor()),
 			pb.OptionShowBytes(false),
 			pb.OptionSetWidth(15),    // nolint:gomnd
 			pb.OptionSpinnerType(69), // nolint:gomnd

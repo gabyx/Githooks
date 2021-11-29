@@ -63,3 +63,8 @@ func (p *Context) ShowEntryMulti(
 	validator AnswerValidator) (answers []string, err error) {
 	return showEntryMulti(p, text, exitAnswer, validator)
 }
+
+// ShowMessage shows a message to the user with `text`.
+func (p *Context) ShowMessage(text string, asError bool) (err error) {
+	return showMessage(p, text, asError)
+}

@@ -7,4 +7,7 @@ const (
 	// This should never be switched to true here, because that is what we want always.
 	// This is for testing/debugging only.
 	DevIsDispatchSkipped = false
+
+	// Remove the installer log on success.
+	RemoveInstallerLogOnSuccess = true
 )

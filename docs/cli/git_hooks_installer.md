@@ -14,6 +14,7 @@ git hooks installer [flags]
 ### Options
 
 ```
+      --log string                   Log file path (only for installer).
       --dry-run                      Dry run the installation showing whats being done.
       --non-interactive              Run the installation non-interactively
                                      without showing prompts.
