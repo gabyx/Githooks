@@ -154,7 +154,6 @@
         "panel": "shared"
       },
       "dependsOn": [
-        "[Dev Container] clean-install",
         "[Dev Container] go-build-temp"
       ],
       "problemMatcher": []
@@ -195,7 +194,6 @@
         "panel": "shared"
       },
       "dependsOn": [
-        "[Dev Container] clean-install",
         "[Dev Container] go-build-temp"
       ],
       "problemMatcher": []

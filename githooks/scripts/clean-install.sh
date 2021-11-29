@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! grep '/docker/' </proc/self/cgroup >/dev/null 2>&1; then
+    echo "! This script is only meant to be run in a Docker container" >&2
+    exit 1
+fi
+
 echo "Unset all githooks configs ..."
 git config --global --unset githooks.runner
 git config --global --unset-all githooks.shared
