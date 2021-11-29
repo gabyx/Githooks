@@ -81,15 +81,30 @@ func getChoicesOSAScript(output string, maxOptions int) (indices []uint) {
 }
 
 func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
+	showWithButtons := opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection
+
 	zenity, err := gunix.GetZenityExecutable()
 	if err == nil {
+
+		if showWithButtons {
+			// Run over Buttons but with zenity, because we have it available.
+			showFunc := func(c context.Context, m *sets.Message) (res.Message, error) {
+				return ShowMessageZenity(ctx, zenity, m)
+			}
+
+			return showOptionsWithButtons(ctx, opts, showFunc)
+		}
+
 		return ShowOptionsZenity(ctx, zenity, opts)
 	}
 
+	// Fallback over native shitty list Gui...
 	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at least one option specified.")
 
 		return
+	} else if len(opts.Options) <= 2 && showWithButtons {
+		return showOptionsWithButtons(ctx, opts, nil)
 	}
 
 	data, err := translateOptions(opts)

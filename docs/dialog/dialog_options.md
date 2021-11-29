@@ -6,10 +6,11 @@ Shows a options selection dialog.
 
 Shows a list selection dialog similar to `zenity`.
 
-Extra buttons are only supported on Unix and Windows.
-If not using `--multiple` you can also use the
-button style options with `--style 1` which uses buttons instead
-of a listbox.
+If not using `--multiple` you can also use the style option
+`--style 1` which uses buttons instead of a listbox.
+More than 2 button options are only supported on Unix and Windows.
+On macOS, more than 2 button options will only work if `zenity`
+is installed, otherwise the button style is ignored.
 
 # Exit Codes:
 

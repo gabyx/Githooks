@@ -62,39 +62,33 @@ func HandleGeneralResult(ctx *CmdContext,
 		ctx.ExitCode = 5
 
 		return nil
-
-	} else if err != nil {
-		// All other errors are not handled.
-		return err
 	}
 
-	// Handle non-errors.
-	if g.IsOk() {
-		ctx.ExitCode = 0
-		if okCallback != nil {
-			e := okCallback()
-			if e != nil {
-				return e // callback error...
+	// Errors can still be happened
+	// forward them. Now handle the callbacks if we have a result.
+	if g != nil {
+		if g.IsOk() {
+			ctx.ExitCode = 0
+			if okCallback != nil {
+				e := okCallback()
+				err = cm.CombineErrors(err, e)
 			}
-		}
-	} else if g.IsCanceled() {
-		ctx.ExitCode = 1
-		if cancelCallback != nil {
-			e := cancelCallback()
-			if e != nil {
-				return e // callback error...
+		} else if g.IsCanceled() {
+			ctx.ExitCode = 1
+			if cancelCallback != nil {
+				e := cancelCallback()
+				err = cm.CombineErrors(err, e)
 			}
-		}
-	} else if clicked, _ := g.IsExtraButton(); clicked {
-		ctx.ExitCode = 2
-		if extraCallback != nil {
-			if e := extraCallback(); e != nil {
-				return e // callback error...
+		} else if clicked, _ := g.IsExtraButton(); clicked {
+			ctx.ExitCode = 2
+			if extraCallback != nil {
+				e := extraCallback()
+				err = cm.CombineErrors(err, e)
 			}
 		}
 	}
 
-	return nil
+	return err
 }
 
 // HandleGeneralJSONResult handles the output of the general result.
