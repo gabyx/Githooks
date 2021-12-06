@@ -158,8 +158,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	skipNonExistingSharedHooks, _ := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
 	skipUntrustedHooks, _ := hooks.SkipUntrustedHooks(gitx, git.Traverse)
 
-	isTrusted, hasTrustFile := hooks.IsRepoTrusted(gitx, repoPath)
-	if !isTrusted && hasTrustFile && !nonInteractive {
+	isTrusted, hasTrustFile, trustAllSet := hooks.IsRepoTrusted(gitx, repoPath)
+	if !isTrusted && hasTrustFile && !trustAllSet && !nonInteractive {
 		isTrusted = showTrustRepoPrompt(gitx, promptx)
 	}
 
