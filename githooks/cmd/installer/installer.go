@@ -370,7 +370,7 @@ func prepareDispatch(
 	if args.InternalAutoUpdate {
 		log.Info("Executing auto update...")
 
-		status, err = updates.GetStatus(settings.CloneDir, true, args.usePreRelease)
+		status, err = updates.GetStatus(settings.CloneDir, true, args.UsePreRelease)
 		log.AssertNoErrorPanic(err,
 			"Could not get status of release clone '%s'",
 			settings.CloneDir)
@@ -384,7 +384,7 @@ func prepareDispatch(
 			build.BuildTag,
 			true,
 			updates.RecloneOnWrongRemote,
-			args.usePreRelease)
+			args.UsePreRelease)
 
 		log.AssertNoErrorPanicF(err,
 			"Could not assert release clone '%s' existing",

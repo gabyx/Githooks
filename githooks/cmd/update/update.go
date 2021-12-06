@@ -34,8 +34,13 @@ func runUpdate(
 			updates.DefaultAcceptUpdateCallback(ctx.Log, promptx, nonInteractiveAccept),
 			usePreRelease,
 			func() error {
+
 				installer := installer.NewCmd(ctx)
-				installer.SetArgs([]string{})
+				args := []string{} // should not be empty, because of SetArgs
+				if usePreRelease {
+					args = append(args, "--use-pre-release")
+				}
+				installer.SetArgs(args)
 
 				return installer.Execute()
 			})
