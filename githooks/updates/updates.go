@@ -76,7 +76,7 @@ func getNewUpdateCommit(
 	gitx *git.Context,
 	firstSHA string,
 	lastSHA string,
-	skipPrerelease bool) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
+	usePreRelease bool) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
 
 	// Get all commits in (firstSHA, lastSHA]
 	commits, err := gitx.GetCommits(firstSHA, lastSHA)
@@ -98,7 +98,7 @@ func getNewUpdateCommit(
 			return
 		case version == nil || strs.IsEmpty(tag):
 			continue // no version tag on this commit
-		case skipPrerelease && strs.IsNotEmpty(version.Prerelease()):
+		case !usePreRelease && strs.IsNotEmpty(version.Prerelease()):
 			// Skipping prerelease version
 			continue
 		}
@@ -152,7 +152,7 @@ func FetchUpdates(
 	tag string,
 	checkRemote bool,
 	checkRemoteAction RemoteCheckAction,
-	skipPrerelease bool) (status ReleaseStatus, err error) {
+	usePreRelease bool) (status ReleaseStatus, err error) {
 
 	cm.AssertOrPanic(strs.IsNotEmpty(cloneDir))
 
@@ -276,7 +276,7 @@ func FetchUpdates(
 
 	resetRemoteTo := ""
 	remoteBranch := DefaultRemote + "/" + branch
-	status, err = getStatus(gitx, url, DefaultRemote, branch, remoteBranch, skipPrerelease)
+	status, err = getStatus(gitx, url, DefaultRemote, branch, remoteBranch, usePreRelease)
 
 	status.IsNewClone = isNewClone
 	if status.IsUpdateAvailable {
@@ -343,7 +343,7 @@ func getStatus(
 	remoteName string,
 	branch string,
 	remoteBranch string,
-	skipPrerelease bool) (status ReleaseStatus, err error) {
+	usePreRelease bool) (status ReleaseStatus, err error) {
 
 	localSHA, err := gitx.Get("rev-parse", branch)
 	if err != nil {
@@ -370,7 +370,7 @@ func getStatus(
 		// - Skip prerelease versions
 		// - also never skip annotated (Git trailers) "non-skip" versions.
 		updateCommit, updateTag, updateVersion, updateInfo, err =
-			getNewUpdateCommit(gitx, localSHA, remoteSHA, skipPrerelease)
+			getNewUpdateCommit(gitx, localSHA, remoteSHA, usePreRelease)
 
 		if err != nil {
 			return
@@ -471,6 +471,7 @@ type AcceptUpdateCallback func(status *ReleaseStatus) bool
 func RunUpdate(
 	installDir string,
 	acceptUpdate AcceptUpdateCallback,
+	usePreRelease bool,
 	run func() error) (updateAvailable bool, accepted bool, err error) {
 
 	err = RecordUpdateCheckTimestamp()
@@ -482,8 +483,7 @@ func RunUpdate(
 	}
 
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
-	skipPrerelease := true
-	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, skipPrerelease)
+	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease)
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not fetch updates."), err)
 

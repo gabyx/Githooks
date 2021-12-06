@@ -133,6 +133,10 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"build-tags", nil,
 		"Build tags for building from source (get extended with defaults).")
 
+	cmd.PersistentFlags().Bool(
+		"use-pre-release", false,
+		"When fetching the latest installer, also consider pre-release versions.")
+
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
 	cm.AssertNoErrorPanic(
@@ -161,6 +165,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("buildFromSource", cmd.PersistentFlags().Lookup("build-from-source")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("buildTags", cmd.PersistentFlags().Lookup("build-tags")))
+	cm.AssertNoErrorPanic(
+		vi.BindPFlag("usePreRelease", cmd.PersistentFlags().Lookup("use-pre-release")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("installPrefix", cmd.PersistentFlags().Lookup("prefix")))
 	cm.AssertNoErrorPanic(
@@ -358,15 +364,13 @@ func prepareDispatch(
 	args *Arguments,
 	cleanUpX *cm.InterruptContext) (bool, error) {
 
-	skipPrerelease := !(gitx.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue)
-
 	var status updates.ReleaseStatus
 	var err error
 
 	if args.InternalAutoUpdate {
 		log.Info("Executing auto update...")
 
-		status, err = updates.GetStatus(settings.CloneDir, true, skipPrerelease)
+		status, err = updates.GetStatus(settings.CloneDir, true, args.usePreRelease)
 		log.AssertNoErrorPanic(err,
 			"Could not get status of release clone '%s'",
 			settings.CloneDir)
@@ -380,7 +384,7 @@ func prepareDispatch(
 			build.BuildTag,
 			true,
 			updates.RecloneOnWrongRemote,
-			skipPrerelease)
+			args.usePreRelease)
 
 		log.AssertNoErrorPanicF(err,
 			"Could not assert release clone '%s' existing",

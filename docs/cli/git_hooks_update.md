@@ -4,7 +4,6 @@ Performs an update check.
 
 ### Synopsis
 
-
 Executes an update check for a newer Githooks version.
 
 If it finds one and the user accepts the prompt (or `--yes` is used)
@@ -21,12 +20,13 @@ git hooks update
 ### Options
 
 ```
-      --yes       Always accepts a new update (non-interactive, only non-major versions).
-      --no        Always deny an update and only check for it.
-      --yes-all   Always accepts a new update (non-interactive, all versions).
-      --enable    Enable daily Githooks update checks.
-      --disable   Disable daily Githooks update checks.
-  -h, --help      help for update
+      --yes               Always accepts a new update (non-interactive, only non-major versions).
+      --no                Always deny an update and only check for it.
+      --yes-all           Always accepts a new update (non-interactive, all versions).
+      --use-pre-release   Also discover pre-release versions when updating.
+      --enable            Enable daily Githooks update checks.
+      --disable           Disable daily Githooks update checks.
+  -h, --help              help for update
 ```
 
 ### SEE ALSO
