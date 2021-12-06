@@ -41,13 +41,13 @@ func SetTrustAllSetting(gitx *git.Context, enable bool, reset bool) error {
 // On any error `false` is reported together with the error.
 func IsRepoTrusted(
 	gitx *git.Context,
-	repoPath string) (isTrusted bool, hasTrustFile bool) {
+	repoPath string) (isTrusted bool, hasTrustFile bool, trustAllSet bool) {
 
 	trustFile := GetTrustMarkerFile(repoPath)
 
 	if cm.IsFile(trustFile) {
 		hasTrustFile = true
-		isTrusted, _ = GetTrustAllSetting(gitx)
+		isTrusted, trustAllSet = GetTrustAllSetting(gitx)
 	}
 
 	return
