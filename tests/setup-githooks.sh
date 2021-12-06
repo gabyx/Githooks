@@ -84,5 +84,13 @@ echo "Commit build v10.1.1 to repo ..." &&
         -m "Update-Info: Breaking changes, read the change log." >/dev/null 2>&1 &&
     git tag -f "v10.1.1" || exit 1
 
+# Commit for to v10.1.2-rc1 (build not used, only for pre-release).
+#################################
+echo "Commit build v10.1.1 to repo ..." &&
+    cd "$GH_TEST_REPO" &&
+    git commit -a --allow-empty -m "Version v10.1.2-rc1" \
+        -m "Update-Info: Release candidate." >/dev/null 2>&1 &&
+    git tag -f "v10.1.2-rc1" || exit 1
+
 echo "Reset main to 9.9.0 ..." &&
     git reset --hard v9.9.0 || exit 1

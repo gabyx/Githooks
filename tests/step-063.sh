@@ -64,7 +64,7 @@ if ! echo "$out" | grep -q -E "Would you like to install.*[y/N]"; then
     exit 1
 fi
 
-# Update to version 10.1.1
+# Update to version 10.1.1 (its a major update which should be declined)
 echo "Try update to 10.1.1 (2)"
 CURRENT="$AFTER"
 out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes 2>&1) || {
@@ -81,7 +81,7 @@ if [ "$CURRENT" != "$AFTER" ] ||
     exit 1
 fi
 
-# Try again, but now force it.
+# Try again, but now force the major update.
 echo "Force update to 10.1.1"
 CURRENT="$AFTER"
 out=$("$GH_INSTALL_BIN_DIR/cli" update --yes-all 2>&1) || {
@@ -103,5 +103,44 @@ if ! echo "$out" | grep -q "Update Info:" ||
     ! echo "$out" | grep -q "Breaking changes, read the change log."; then
     echo "$out"
     echo "! Expected update info to be present in output."
+    exit 1
+fi
+
+echo "Update to pre-release 10.1.2-rc1"
+# Reset to trigger update
+if ! git -C "$GH_TEST_REPO" reset --hard v10.1.2-rc1 >/dev/null; then
+    echo "! Could not reset server to trigger update."
+    exit 1
+fi
+
+echo "Try update to 10.1.2-rc1"
+CURRENT="$AFTER"
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes-all 2>&1) || {
+    echo "$out"
+    echo "! Failed to run update"
+    exit 1
+}
+AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
+
+if [ "$CURRENT" != "$AFTER" ] ||
+    [ "$(git -C "$GH_TEST_REPO" rev-parse v10.1.1)" != "$AFTER" ]; then
+    echo "$out"
+    echo "! Release clone was updated, but it should not have!"
+    exit 1
+fi
+
+echo "Force update to 10.1.2-rc1"
+CURRENT="$AFTER"
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes-all --use-pre-release 2>&1) || {
+    echo "$out"
+    echo "! Failed to run update"
+    exit 1
+}
+AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
+
+if [ "$CURRENT" = "$AFTER" ] ||
+    [ "$(git -C "$GH_TEST_REPO" rev-parse v10.1.2-rc1)" != "$AFTER" ]; then
+    echo "$out"
+    echo "! Release clone was not updated, but it should have!"
     exit 1
 fi

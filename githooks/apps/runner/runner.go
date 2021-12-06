@@ -310,9 +310,16 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		opts = append(opts, "--non-interactive")
 	}
 
+	var usePreRelease bool
+	if settings.GitX.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue {
+		usePreRelease = true
+		opts = append(opts, "--use-prerelease")
+	}
+
 	updateAvailable, accepted, err := updates.RunUpdate(
 		settings.InstallDir,
 		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, updates.AcceptNonInteractiveNone),
+		usePreRelease,
 		func() error {
 			return updates.RunUpdateOverExecutable(settings.InstallDir,
 				&settings.ExecX,

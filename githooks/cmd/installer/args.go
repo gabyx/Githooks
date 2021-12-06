@@ -32,5 +32,7 @@ type Arguments struct {
 	BuildFromSource bool     // If we build the install/update from source.
 	BuildTags       []string // Go build tags.
 
+	UsePreRelease bool // If also pre-release versions should be considered.
+
 	UseStdin bool
 }

@@ -15,7 +15,8 @@ func runUpdate(
 	ctx *ccm.CmdContext,
 	setOpts *config.SetOptions,
 	nonInteractive bool,
-	nonInteractiveAccept updates.AcceptNonInteractiveMode) {
+	nonInteractiveAccept updates.AcceptNonInteractiveMode,
+	usePreRelease bool) {
 
 	switch {
 	case setOpts.Set || setOpts.Unset:
@@ -31,9 +32,15 @@ func runUpdate(
 		updateAvailable, accepted, err := updates.RunUpdate(
 			ctx.InstallDir,
 			updates.DefaultAcceptUpdateCallback(ctx.Log, promptx, nonInteractiveAccept),
+			usePreRelease,
 			func() error {
+
 				installer := installer.NewCmd(ctx)
-				installer.SetArgs([]string{})
+				args := []string{} // should not be empty, because of SetArgs
+				if usePreRelease {
+					args = append(args, "--use-pre-release")
+				}
+				installer.SetArgs(args)
 
 				return installer.Execute()
 			})
@@ -60,14 +67,14 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	yes := false
 	no := false
 	yesMajor := false
+	usePreRelease := false
 
 	setOpts := config.SetOptions{}
 
 	updateCmd := &cobra.Command{
 		Use:   "update",
 		Short: "Performs an update check.",
-		Long: `
-Executes an update check for a newer Githooks version.
+		Long: `Executes an update check for a newer Githooks version.
 
 If it finds one and the user accepts the prompt (or '--yes' is used)
 the installer is executed to update to the latest version.
@@ -94,7 +101,7 @@ after a successful commit event.`,
 				nonInteractiveAccept = updates.AcceptNonInteractiveAll
 			}
 
-			runUpdate(ctx, &setOpts, nonInteractive, nonInteractiveAccept)
+			runUpdate(ctx, &setOpts, nonInteractive, nonInteractiveAccept, usePreRelease)
 		},
 	}
 
@@ -104,7 +111,8 @@ after a successful commit event.`,
 		"Always deny an update and only check for it.")
 	updateCmd.Flags().BoolVar(&yesMajor, "yes-all", false,
 		"Always accepts a new update (non-interactive, all versions).")
-
+	updateCmd.Flags().BoolVar(&usePreRelease, "use-pre-release", false,
+		"Also discover pre-release versions when updating.")
 	updateCmd.Flags().BoolVar(&setOpts.Set, "enable", false, "Enable daily Githooks update checks.")
 	updateCmd.Flags().BoolVar(&setOpts.Unset, "disable", false, "Disable daily Githooks update checks.")
 

@@ -40,6 +40,7 @@ git hooks installer [flags]
       --build-from-source            If the binaries are built from source instead of
                                      downloaded from the deploy url.
       --build-tags stringArray       Build tags for building from source (get extended with defaults).
+      --use-pre-release              When fetching the latest installer, also consider pre-release versions.
   -h, --help                         help for installer
 ```
 
