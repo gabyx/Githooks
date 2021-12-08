@@ -84,6 +84,11 @@ if ! "$GH_TEST_BIN/cli" uninstall; then
     exit 1
 fi
 
+if [ "$(git config --local githooks.registered)" = "true" ]; then
+    echo "! Expected repo 1 to be marked unregistered"
+    exit 1
+fi
+
 if grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
     (! grep -qE ".+/test *116.2/.git$" "$REGISTER_FILE" &&
         ! grep -qE ".+/test *116.3/.git$" "$REGISTER_FILE"); then

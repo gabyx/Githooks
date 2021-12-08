@@ -37,6 +37,12 @@ func MarkRepoRegistered(gitx *git.Context) error {
 	return gitx.SetConfig(GitCKRegistered, true, git.LocalScope)
 }
 
+// UnmarkRepoRegistered unsets the register flag inside the repo
+// to denote the repository as registered.
+func UnmarkRepoRegistered(gitx *git.Context) error {
+	return gitx.UnsetConfig(GitCKRegistered, git.LocalScope)
+}
+
 // Load gets the registered repos loaded from the register file in the
 // install folder.
 func (r *RegisterRepos) Load(installDir string, filterExisting bool, filterGitDirs bool) (err error) {
