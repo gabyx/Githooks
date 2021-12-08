@@ -90,6 +90,13 @@ func cleanGitConfigInRepo(log cm.ILogContext, gitDir string) {
 	}
 }
 
+func unregisterRepo(log cm.ILogContext, gitDir string) {
+	gitx := git.CtxC(gitDir)
+
+	log.AssertNoErrorF(hooks.UnmarkRepoRegistered(gitx),
+		"Could not unregister Git repo '%s'.", gitDir)
+}
+
 // UninstallFromRepo uninstalls run-wrappers from the repositories Git directory.
 // LFS hooks will be reinstalled if available.
 func UninstallFromRepo(
@@ -122,6 +129,9 @@ func UninstallFromRepo(
 			}
 		}
 	}
+
+	// Always unregister repo.
+	unregisterRepo(log, gitDir)
 
 	if cleanArtefacts {
 		cleanArtefactsInRepo(log, gitDir)
