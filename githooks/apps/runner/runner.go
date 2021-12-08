@@ -637,7 +637,9 @@ func checkSharedHook(
 
 		if hook.IsCloned {
 			mess += "It is not available. To fix, run:\n" +
-				"$ git hooks shared update"
+				"$ git hooks shared update\n" +
+				"or gracefully continue by setting:\n" +
+				"$ git hooks config skip-non-existing-shared-hooks --enable [--global]"
 		} else {
 			mess += "It does not exist."
 		}
