@@ -209,8 +209,7 @@ func FetchUpdates(
 		return reclone, nil
 	}
 
-	gitx := git.CtxCSanitized(cloneDir)
-	cURL, cBranch := GetCloneURL(gitx)
+	cURL, cBranch := GetCloneURL(git.CtxSanitized())
 
 	// Fallback for url
 	if strs.IsEmpty(url) {
@@ -236,6 +235,8 @@ func FetchUpdates(
 	if err != nil {
 		return
 	}
+
+	gitx := git.CtxCSanitized(cloneDir)
 
 	// If branch was empty (default branch), determine it now.
 	if strs.IsEmpty(branch) {
