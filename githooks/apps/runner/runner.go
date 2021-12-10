@@ -155,7 +155,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
 	nonInteractive := hooks.IsRunnerNonInteractive(gitx, git.Traverse)
-	skipNonExistingSharedHooks, _ := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
+	skipNonExistingSharedHooks := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
 	skipUntrustedHooks, _ := hooks.SkipUntrustedHooks(gitx, git.Traverse)
 
 	isTrusted, hasTrustFile, trustAllSet := hooks.IsRepoTrusted(gitx, repoPath)
@@ -399,6 +399,22 @@ func executeLFSHooks(settings *HookSettings) {
 	}
 }
 
+func failOrWarnOnActiveUntrusted(skipUntrustedHooks bool, hook *hooks.Hook) {
+	if hook.Active && !hook.Trusted {
+		if skipUntrustedHooks {
+			log.WarnF(
+				"Hook '%s'\nis active and needs to be trusted first. Skipping.", hook.NamespacePath)
+		} else {
+			log.PanicF(
+				"Hook '%s' is active and needs to be trusted first.\n"+
+					"Either trust the hook or disable it, or skip active,\n"+
+					"untrusted hooks by running:\n"+
+					"  $ git hooks config skip-untrusted-hooks --enable",
+				hook.NamespacePath)
+		}
+	}
+}
+
 func executeOldHook(
 	settings *HookSettings,
 	uiSettings *UISettings,
@@ -439,21 +455,16 @@ func executeOldHook(
 		return
 	}
 
-	hook := hooks[0]
+	hook := &hooks[0]
 
 	if hook.Active && !hook.Trusted {
 		if !settings.NonInteractive {
 			// Active hook, but not trusted:
 			// Show trust prompt to let user trust it or disable it.
-			showTrustPrompt(uiSettings, checksums, &hook)
+			showTrustPrompt(uiSettings, checksums, hook)
 		}
 
-		log.PanicIfF(!settings.SkipUntrustedHooks && hook.Active && !hook.Trusted,
-			"Hook '%s' is active and needs to be trusted first.\n"+
-				"Either trust the hook or disable it, or skip active,\n"+
-				"untrusted hooks by running:\n"+
-				"  $ git hooks config skip-untrusted-hooks --enable",
-			hook.NamespacePath)
+		failOrWarnOnActiveUntrusted(settings.SkipNonExistingSharedHooks, hook)
 	}
 
 	if !hook.Active || !hook.Trusted {
@@ -464,7 +475,7 @@ func executeOldHook(
 	}
 
 	log.DebugF("Executing hook: '%s'.", hook.Path)
-	err = cm.RunExecutable(&settings.ExecX, &hook, cm.UseStdStreams(true, true, true))
+	err = cm.RunExecutable(&settings.ExecX, hook, cm.UseStdStreams(true, true, true))
 
 	log.AssertNoErrorPanicF(err, "Hook launch failed: '%q'.", hook)
 }
@@ -637,16 +648,16 @@ func checkSharedHook(
 
 	if !exists {
 
-		mess := "Failed to execute shared hooks in:\n" +
+		mess := "Repository: '%s'\nneeds shared hooks in:\n" +
 			"'%s'\n"
 
 		if hook.IsCloned {
-			mess += "It is not available. To fix, run:\n" +
+			mess += "which are are not available. To fix, run:\n" +
 				"$ git hooks shared update\n" +
 				"or gracefully continue by setting:\n" +
 				"$ git hooks config skip-non-existing-shared-hooks --enable [--global]"
 		} else {
-			mess += "It does not exist."
+			mess += "which does not exist."
 		}
 
 		if settings.SkipNonExistingSharedHooks {
@@ -654,7 +665,7 @@ func checkSharedHook(
 		}
 
 		log.ErrorOrPanicF(isFatal && !settings.SkipNonExistingSharedHooks,
-			err, mess, hook.OriginalURL)
+			err, mess, hook.RepositoryDir, hook.OriginalURL)
 
 		return false
 	}
@@ -769,12 +780,7 @@ func getHooksIn(
 				showTrustPrompt(uiSettings, checksums, hook)
 			}
 
-			log.PanicIfF(!settings.SkipUntrustedHooks && hook.Active && !hook.Trusted,
-				"Hook '%s' is active and needs to be trusted first.\n"+
-					"Either trust the hook or disable it, or skip active,\n"+
-					"untrusted hooks by running:\n"+
-					"  $ git hooks config skip-untrusted-hooks --enable",
-				hook.NamespacePath)
+			failOrWarnOnActiveUntrusted(settings.SkipUntrustedHooks, hook)
 		}
 
 		if !hook.Active || !hook.Trusted {
@@ -861,6 +867,7 @@ func showTrustPrompt(
 			disableHook = true
 		default:
 			// Don't run hook ...
+			// Trusted == false
 		}
 	} else {
 		log.Info("-> Already accepted.")
