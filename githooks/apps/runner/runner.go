@@ -602,6 +602,11 @@ func checkSharedHook(
 	allAddedHooks *[]string,
 	sharedType hooks.SharedHookType) bool {
 
+	// Aborting a 'reference-transaction' hook (type 'prepared') leads
+	// to all sorts of problems, therefore
+	// do only print an error and continue.
+	isFatal := settings.HookName == "reference-transaction"
+
 	if strs.Includes(*allAddedHooks, hook.RepositoryDir) {
 		log.WarnF(
 			"Shared hooks entry:\n'%s'\n"+
@@ -612,7 +617,7 @@ func checkSharedHook(
 
 	// Check that no local paths are in repository configured
 	// shared hooks
-	log.PanicIfF(!hooks.AllowLocalURLInRepoSharedHooks() &&
+	log.ErrorOrPanicIfF(isFatal, !hooks.AllowLocalURLInRepoSharedHooks() &&
 		sharedType == hooks.SharedHookTypeV.Repo && hook.IsLocal,
 		"Shared hooks in '%[1]s' contain a local path\n"+
 			"'%[2]s'\n"+
@@ -648,7 +653,8 @@ func checkSharedHook(
 			mess += "\nContinuing..."
 		}
 
-		log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks, err, mess, hook.OriginalURL)
+		log.ErrorOrPanicF(isFatal && !settings.SkipNonExistingSharedHooks,
+			err, mess, hook.OriginalURL)
 
 		return false
 	}
@@ -671,7 +677,7 @@ func checkSharedHook(
 				mess += "\nContinuing..."
 			}
 
-			log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks,
+			log.ErrorOrPanicF(isFatal && !settings.SkipNonExistingSharedHooks,
 				nil, mess, hook.OriginalURL, url)
 
 			return false
