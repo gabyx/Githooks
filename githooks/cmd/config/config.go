@@ -480,7 +480,7 @@ func runSkipNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpt
 			localOrGlobal = ""
 		}
 
-		enabled, _ := hooks.SkipNonExistingSharedHooks(ctx.GitX, scope)
+		enabled := hooks.SkipNonExistingSharedHooks(ctx.GitX, scope)
 		if enabled {
 			ctx.Log.InfoF("Skipping %s is enabled%s.", text, localOrGlobal)
 		} else {

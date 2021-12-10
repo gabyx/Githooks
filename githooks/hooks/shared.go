@@ -564,7 +564,7 @@ func (s *SharedRepo) IsCloneValid() bool {
 	return false
 }
 
-// SetSkipNonExistingSharedHooks sets settings if the hook runner should fail on non existing hooks.
+// SetSkipNonExistingSharedHooks sets settings if the hook runner should skip on non existing hooks.
 func SetSkipNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
 	switch {
 	case reset:
@@ -574,14 +574,14 @@ func SetSkipNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, s
 	}
 }
 
-// SkipNonExistingSharedHooks gets the settings if the hook runner should fail on non existing hooks.
-func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) (enabled bool, isSet bool) {
+// SkipNonExistingSharedHooks gets the settings if the hook runner should skip on non existing hooks.
+func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) bool {
 	conf := gitx.GetConfig(GitCKSkipNonExistingSharedHooks, scope)
 	switch {
 	case strs.IsEmpty(conf):
-		return
+		return false
 	default:
-		return conf == git.GitCVTrue, true
+		return conf == git.GitCVTrue
 	}
 }
 
