@@ -52,7 +52,6 @@ type ILogContext interface {
 
 	// Assert helper functions
 	ErrorOrPanicF(isFatal bool, err error, format string, args ...interface{})
-	ErrorOrPanicIfF(isFatal bool, condition bool, format string, args ...interface{})
 	AssertWarn(condition bool, lines ...string)
 	AssertWarnF(condition bool, format string, args ...interface{})
 	DebugIf(condition bool, lines ...string)

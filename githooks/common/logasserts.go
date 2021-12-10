@@ -136,12 +136,3 @@ func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args 
 		}
 	}
 }
-
-// ErrorOrPanicIfF logs an error or a fatal error if the condition is met.
-func (c *LogContext) ErrorOrPanicIfF(isFatal bool, condition bool, format string, args ...interface{}) {
-	if isFatal {
-		c.PanicIfF(condition, format, args...)
-	} else {
-		c.ErrorIfF(condition, format, args...)
-	}
-}
