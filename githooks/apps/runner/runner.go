@@ -665,7 +665,7 @@ func checkSharedHook(
 		}
 
 		log.ErrorOrPanicF(isFatal && !settings.SkipNonExistingSharedHooks,
-			err, mess, hook.OriginalURL)
+			err, mess, hook.RepositoryDir, hook.OriginalURL)
 
 		return false
 	}

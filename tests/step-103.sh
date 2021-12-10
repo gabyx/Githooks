@@ -125,7 +125,7 @@ git add A || exit 1
 OUTPUT=$(git commit -a -m "Test" 2>&1)
 
 # shellcheck disable=SC2181
-if [ $? -eq 0 ] || ! echo "$OUTPUT" | grep -q "Failed to execute shared hook"; then
+if [ $? -eq 0 ] || ! echo "$OUTPUT" | grep -q "needs shared hooks in:"; then
     echo "! Expected to fail on not availabe shared hooks. output:"
     echo "$OUTPUT"
     exit 1
