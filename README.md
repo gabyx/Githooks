@@ -56,11 +56,13 @@ repositories.
   - [Local Configuration](#local-configuration)
   - [Repository Configuration](#repository-configuration)
   - [Supported URLS](#supported-urls)
+  - [Skip Non-Existing Shared Hooks](#skip-non-existing-shared-hooks)
 - [Layout of Shared Hook Repositories](#layout-of-shared-hook-repositories)
   - [Shared Repository Namespace](#shared-repository-namespace)
 - [Ignoring Hooks and Files](#ignoring-hooks-and-files)
 - [Trusting Hooks](#trusting-hooks)
 - [Disabling Githooks](#disabling-githooks)
+- [Environment Variables](#environment-variables)
 - [Log & Traces](#log--traces)
 - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
 - [User Prompts](#user-prompts)
@@ -415,14 +417,20 @@ other hook names by setting a comma-separated list of additional hook names in
 the Git configuration parameter `githooks.sharedHooksUpdateTriggers` on any
 configuration level.
 
-An additional global configuration parameter
-`githooks.skipNonExistingSharedHooks` makes Githooks skip any configured
-non-existing shared hooks. Otherwise, Githooks will fail and you need to update
-them by running `git hooks update`. See
-[`git hooks config skip-non-existing-shared-hooks --help`](docs/cli/skip-non-existing-shared-hooks.md)
-
 You can also manage and update shared hook repositories using the
 [`git hooks shared update`](docs/cli/git_hooks_shared.md) command.
+
+### Skip Non-Existing Shared Hooks
+
+**By default, Githooks will fail if any configured shared hooks are not
+available and you need to update them by running `git hooks update`**.
+
+By using
+[`git hooks config skip-non-existing-shared-hooks --help`](docs/cli/skip-non-existing-shared-hooks.md)
+you can disable this behavior locally/globally or by environment variable
+`GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS` (see
+[env. variables](#environment-variables)) which makes Githooks skip non-existing
+shared hooks.
 
 ## Layout of Shared Hook Repositories
 
@@ -540,10 +548,12 @@ running them until you decide otherwise. The trust prompt is always **fatal**
 meaning that failing to answer the prompt, or any other prompt error, will
 result in a failing Git hook. To make the `runner` non-interactive, see
 [user prompts](#user-prompts). If a hook is still _active and untrusted_ after
-the prompt, Githooks will fail by default. This is useful to be sure that all
-hooks get executed. However, you can disabled this behavior by skipping active,
-untrusted hooks with
-[`git hooks config skip-untrusted-hooks --enable`](docs/cli/git_hooks_config_skip-untrusted-hooks.md).
+the prompt, **Githooks will fail by default**. This is useful to be sure that
+all hooks get executed. However, you can disabled this behavior by skipping
+active, untrusted hooks with
+[`git hooks config skip-untrusted-hooks --enable`](docs/cli/git_hooks_config_skip-untrusted-hooks.md)
+or by setting `GITHOOKS_SKIP_UNTRUSTED_HOOKS` (see
+[env. variables](#environment-variables)).
 
 The accepted checksums are maintained in the
 `<repoPath>/.git/.githooks.checksum` directory, per local repository. You can
@@ -584,6 +594,21 @@ $ git hooks config disable --set --global # Same thing... Config: `githooks.disa
 
 Also, as mentioned above, all hook executions can be bypassed with a non-empty
 value in the `GITHOOKS_DISABLE` environment variable.
+
+## Environment Variables
+
+All of these environment variables are either defined during Githooks runner
+executing or affect its behavior. These should mostly only be used locally and
+not globally be defined.
+
+| Environment Variables                          | Effect                                                                                                                    |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `GITHOOKS_OS` (defined)                        | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
+| `GITHOOKS_ARCH` (defined)                      | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
+| `GITHOOKS_DISABLE`                             | If defined, disables running hooks run by Githooks,<br>except `git lfs` and the replaced old hooks.                       |
+| `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution.                                                         |
+| `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
+| `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).           |
 
 ## Log & Traces
 

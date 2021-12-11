@@ -131,6 +131,16 @@ if [ $? -eq 0 ] || ! echo "$OUTPUT" | grep -q "needs shared hooks in:"; then
     exit 1
 fi
 
+# Try to skip them.
+OUTPUT=$(GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true git commit -a -m "Test" 2>&1)
+
+# shellcheck disable=SC2181
+if [ $? -ne 0 ]; then
+    echo "! Expected to skip on not availabe shared hooks. output:"
+    echo "$OUTPUT"
+    exit 1
+fi
+
 "$GH_INSTALL_BIN_DIR/cli" shared pull || exit 1
 
 # Change url and try to make it fail
