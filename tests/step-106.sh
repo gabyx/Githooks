@@ -30,6 +30,10 @@ import (
 )
 
 func main() {
+    if os.Args[1] == "--version" {
+        fmt.Print("git-lfs version 100.100.100")
+        return
+    }
     f, err := os.Create("$GH_TEST_TMP/test106/lfs.out")
     if err != nil {
         fmt.Printf("git-lfs-mock failed!")

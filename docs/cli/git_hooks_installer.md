@@ -23,7 +23,14 @@ git hooks installer [flags]
       --prefix string                Githooks installation prefix such that
                                      `<prefix>/.githooks` will be the installation directory.
       --template-dir string          The preferred template directory to use.
-      --only-server-hooks            Only install and maintain server hooks.
+      --maintained-hooks strings     A set of hook names which are maintained in the template directory.
+                                     Any argument can be a hook name `<hookName>`, `all` or `server`.
+                                     An optional prefix '!' means subtraction from the current set.
+                                     The initial value of the internally built set defaults
+                                     to all hook names if `all` or `server` is not given as first argument:
+                                       - `all` : All hooks supported by Githooks.
+                                       - `server` : Only server hooks supported by Githooks.
+                                     You can list them seperatly or comma-separated in one argument.
       --use-core-hookspath           If the install mode `core.hooksPath` should be used.
       --clone-url string             The clone url from which Githooks should clone
                                      and install/update itself. Githooks tries to
@@ -39,7 +46,8 @@ git hooks installer [flags]
                                      `--clone-url`. See the documentation for further details.
       --build-from-source            If the binaries are built from source instead of
                                      downloaded from the deploy url.
-      --build-tags stringArray       Build tags for building from source (get extended with defaults).
+      --build-tags strings           Build tags for building from source (get extended with defaults).
+                                     You can list them seperatly or comma-separated in one argument.
       --use-pre-release              When fetching the latest installer, also consider pre-release versions.
   -h, --help                         help for installer
 ```

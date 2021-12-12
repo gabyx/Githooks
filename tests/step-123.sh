@@ -24,7 +24,7 @@ mkdir -p "$GH_TEST_TMP/shared" &&
 mkdir -p "githooks/pre-commit" "dist" || exit 4
 
 # Git LFS (if available)
-if ! git-lfs --version; then
+if ! command -v git-lfs; then
     git lfs track "*.exe"
 fi
 

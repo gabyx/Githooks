@@ -133,6 +133,21 @@ func Map(vs []string, f func(string) string) []string {
 // StringSet mimics a simple string set type.
 type StringSet map[string]bool
 
+// Make a new string set.
+func NewStringSet(capacity int) StringSet {
+	return make(StringSet, capacity)
+}
+
+// Make a new string set from a list.
+func NewStringSetFromList(s []string) StringSet {
+	r := NewStringSet(len(s))
+	for i := range s {
+		r[s[i]] = true
+	}
+
+	return r
+}
+
 // Insert adds `s` to the set.
 func (m *StringSet) Insert(s string) {
 	(*m)[s] = true

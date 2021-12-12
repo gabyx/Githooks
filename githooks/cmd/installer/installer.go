@@ -97,9 +97,16 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().String(
 		"template-dir", "",
 		"The preferred template directory to use.")
-	cmd.PersistentFlags().Bool(
-		"only-server-hooks", false,
-		"Only install and maintain server hooks.")
+	cmd.PersistentFlags().StringSlice(
+		"maintained-hooks", nil,
+		"A set of hook names which are maintained in the template directory.\n"+
+			"Any argument can be a hook name '<hookName>', 'all' or 'server'.\n"+
+			"An optional prefix '!' means subtraction from the current set.\n"+
+			"The initial value of the internally built set defaults\n"+
+			"to all hook names if 'all' or 'server' is not given as first argument:\n"+
+			"  - 'all' : All hooks supported by Githooks.\n"+
+			"  - 'server' : Only server hooks supported by Githooks.\n"+
+			"You can list them seperatly or comma-separated in one argument.")
 	cmd.PersistentFlags().Bool(
 		"use-core-hookspath", false,
 		"If the install mode 'core.hooksPath' should be used.")
@@ -129,9 +136,10 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"build-from-source", false,
 		"If the binaries are built from source instead of\n"+
 			"downloaded from the deploy url.")
-	cmd.PersistentFlags().StringArray(
+	cmd.PersistentFlags().StringSlice(
 		"build-tags", nil,
-		"Build tags for building from source (get extended with defaults).")
+		"Build tags for building from source (get extended with defaults).\n"+
+			"You can list them seperatly or comma-separated in one argument.")
 
 	cmd.PersistentFlags().Bool(
 		"use-pre-release", false,
@@ -150,7 +158,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
 	cm.AssertNoErrorPanic(
-		vi.BindPFlag("onlyServerHooks", cmd.PersistentFlags().Lookup("only-server-hooks")))
+		vi.BindPFlag("maintainedHooks", cmd.PersistentFlags().Lookup("maintained-hooks")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("useCoreHooksPath", cmd.PersistentFlags().Lookup("use-core-hookspath")))
 	cm.AssertNoErrorPanic(
@@ -194,6 +202,10 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 		"You cannot build binaries from source together with specifying\n",
 		"a deploy settings file or deploy api.")
 
+	var err error
+	args.MaintainedHooks, err = hooks.CheckHookNames(args.MaintainedHooks)
+	log.AssertNoErrorPanic(err,
+		"Maintained hooks are not valid.")
 }
 
 func setupSettings(
@@ -232,11 +244,15 @@ func setupSettings(
 	log.AssertNoErrorPanicF(err,
 		"Could not clean temporary directory in '%s'", installDir)
 
+	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(installDir))
+	log.AssertNoErrorPanicF(err, "Could not setup LFS hooks cache.")
+
 	return Settings{
 			GitX:             gitx,
 			InstallDir:       installDir,
 			CloneDir:         hooks.GetReleaseCloneDir(installDir),
 			TempDir:          tempDir,
+			LFSHooksCache:    lfsHooksCache,
 			InstalledGitDirs: make(InstallSet, 10)}, // nolint: gomnd
 		install.UISettings{PromptCtx: promptx}
 }
@@ -812,7 +828,8 @@ func setupHookTemplates(
 	hookTemplateDir string,
 	cloneDir string,
 	tempDir string,
-	onlyServerHooks bool,
+	maintainedHooks []string,
+	lfsHooksCache hooks.LFSHooksCache,
 	nonInteractive bool,
 	dryRun bool,
 	uiSettings *install.UISettings) {
@@ -826,30 +843,41 @@ func setupHookTemplates(
 	log.InfoF("Installing Git hook templates into '%s'.",
 		hookTemplateDir)
 
-	var hookNames []string
-	if onlyServerHooks {
-		hookNames = hooks.ManagedServerHookNames
-	} else {
-		hookNames = hooks.ManagedHookNames
-	}
-
 	log.InfoF("Saving Githooks run-wrapper to '%s' :", hookTemplateDir)
 
-	err := hooks.InstallRunWrappers(
+	var err error
+	if maintainedHooks == nil {
+		maintainedHooks, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
+		log.AssertNoError(err, "Could not get config.")
+	}
+
+	allHooks, err := hooks.UnwrapHookNames(maintainedHooks)
+	log.AssertNoErrorPanic(err, "Could not build maintained hook list.")
+
+	nLFSHooks, err := hooks.InstallRunWrappers(
 		hookTemplateDir,
-		hookNames,
+		allHooks,
 		func(dest string) {
 			log.InfoF(" %s '%s'", cm.ListItemLiteral, path.Base(dest))
 		},
 		install.GetHookDisableCallback(log, gitx, nonInteractive, uiSettings),
+		lfsHooksCache,
 		log)
-
 	log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookTemplateDir)
 
-	if onlyServerHooks {
-		err := git.Ctx().SetConfig(hooks.GitCKMaintainOnlyServerHooks, true, git.GlobalScope)
-		log.AssertNoErrorPanic(err, "Could not set Git config 'githooks.maintainOnlyServerHooks'.")
+	if nLFSHooks != 0 {
+		log.InfoF("Installed '%v' Githooks run-wrappers and '%v' missing LFS hooks into '%s'.",
+			len(allHooks), nLFSHooks, hookTemplateDir)
+	} else {
+		log.InfoF("Installed '%v' Githooks run-wrappers into '%s'.",
+			len(allHooks), hookTemplateDir)
 	}
+
+	// Set maintained hooks in global settings, such that
+	// local repository Githooks installs are in alignment
+	// to the setup template directory.
+	err = hooks.SetMaintainedHooks(gitx, maintainedHooks, git.GlobalScope)
+	log.AssertNoError(err, "Could not set git config.")
 }
 
 func installBinaries(
@@ -953,7 +981,7 @@ func setupAutomaticUpdate(
 func installIntoExistingRepos(
 	log cm.ILogContext,
 	gitx *git.Context,
-	tempDir string,
+	lfsHooksCache hooks.LFSHooksCache,
 	nonInteractive bool,
 	dryRun bool,
 	skipReadme bool,
@@ -972,7 +1000,7 @@ func installIntoExistingRepos(
 		func(gitDir string) {
 
 			if install.InstallIntoRepo(
-				log, gitx, gitDir,
+				log, gitx, gitDir, lfsHooksCache,
 				nonInteractive, dryRun,
 				skipReadme, uiSettings) {
 
@@ -986,7 +1014,7 @@ func installIntoExistingRepos(
 func installIntoRegisteredRepos(
 	log cm.ILogContext,
 	gitx *git.Context,
-	tempDir string,
+	lfsHooksCache hooks.LFSHooksCache,
 	nonInteractive bool,
 	dryRun bool,
 	skipReadme bool,
@@ -1012,7 +1040,7 @@ func installIntoRegisteredRepos(
 		uiSettings.PromptCtx,
 		func(gitDir string) {
 			if install.InstallIntoRepo(
-				log, gitx, gitDir,
+				log, gitx, gitDir, lfsHooksCache,
 				nonInteractive, dryRun,
 				skipReadme, uiSettings) {
 
@@ -1204,7 +1232,8 @@ func runUpdate(
 		settings.HookTemplateDir,
 		settings.CloneDir,
 		settings.TempDir,
-		args.OnlyServerHooks,
+		args.MaintainedHooks,
+		settings.LFSHooksCache,
 		args.NonInteractive,
 		args.DryRun,
 		uiSettings)
@@ -1219,7 +1248,7 @@ func runUpdate(
 		installIntoExistingRepos(
 			log,
 			gitx,
-			settings.TempDir,
+			settings.LFSHooksCache,
 			args.NonInteractive,
 			args.DryRun,
 			false,
@@ -1233,7 +1262,7 @@ func runUpdate(
 		installIntoRegisteredRepos(
 			log,
 			gitx,
-			settings.TempDir,
+			settings.LFSHooksCache,
 			args.NonInteractive,
 			args.DryRun,
 			args.InternalAutoUpdate, // skipReadme if auto-update.

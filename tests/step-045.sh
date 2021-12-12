@@ -73,7 +73,7 @@ if [ "$CURRENT" = "$AFTER" ] ||
     exit 1
 fi
 
-if ! echo "$OUT" | grep -E "installed into.*/002"; then
+if ! echo "$OUT" | grep -E "Installed.*into.*/002"; then
     echo "! Auto update should have installed into registered repo 2"
     echo "$OUT"
     exit 1

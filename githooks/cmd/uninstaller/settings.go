@@ -28,6 +28,6 @@ type Settings struct {
 	// Bool indicates if it is already registered.
 	UninstalledGitDirs UninstallSet
 
-	// LFSAvailable tells if 'git-lfs' is installed.
-	LFSAvailable bool
+	// LFS hooks cache if 'git-lfs' is installed.
+	LFSHooksCache hooks.LFSHooksCache
 }

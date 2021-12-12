@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 acceptAllTrustPrompts || exit 1
 
-if ! git-lfs --version; then
+if ! command -v git-lfs; then
     echo "git-lfs is not available"
     exit 249
 fi

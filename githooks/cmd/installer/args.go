@@ -17,7 +17,7 @@ type Arguments struct {
 
 	SkipInstallIntoExisting bool // Skip install into existing repositories.
 
-	OnlyServerHooks bool // Only maintain server hooks.
+	MaintainedHooks []string // Maintain hooks by Githooks.
 
 	UseCoreHooksPath bool // Use the `core.hooksPath` for the template dir.
 

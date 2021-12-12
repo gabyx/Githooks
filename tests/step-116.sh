@@ -113,6 +113,9 @@ if [ -f "$GH_INSTALL_BIN_DIR/runner" ] ||
     exit 1
 fi
 
+# Remove reinstalled LFS hooks.
+rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"* || exit 1
+
 # Reinstall everywhere
 echo "Y
 y

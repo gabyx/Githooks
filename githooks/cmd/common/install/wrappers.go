@@ -7,6 +7,7 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // InstallIntoRepo installs run-wrappers into a repositories
@@ -17,6 +18,7 @@ func InstallIntoRepo(
 	log cm.ILogContext,
 	gitx *git.Context,
 	repoGitDir string,
+	lfsHooksCache hooks.LFSHooksCache,
 	nonInteractive bool,
 	dryRun bool,
 	skipReadme bool,
@@ -28,14 +30,16 @@ func InstallIntoRepo(
 		log.AssertNoErrorPanic(err,
 			"Could not create hook directory in '%s'.", repoGitDir)
 	}
+	gitxR := git.CtxC(repoGitDir)
+	isBare := gitxR.IsBareRepo()
 
-	isBare := git.CtxC(repoGitDir).IsBareRepo()
-
-	var hookNames []string
+	hookNames, err := hooks.GetMaintainedHooks(gitxR, git.Traverse)
+	log.AssertNoErrorF(err, "Could not get maintained hooks.")
 	if isBare {
-		hookNames = hooks.ManagedServerHookNames
-	} else {
-		hookNames = hooks.ManagedHookNames
+		// Filter out all non-relevant hooks for bare repositories.
+		hookNames = strs.Filter(hookNames, func(s string) bool { return strs.Includes(hooks.ManagedServerHookNames, s) })
+		// LFS hooks also do not need to be reinstalled
+		lfsHooksCache = nil
 	}
 
 	if dryRun {
@@ -43,14 +47,22 @@ func InstallIntoRepo(
 			repoGitDir)
 	} else {
 
-		err := hooks.InstallRunWrappers(
+		nLFSHooks, err := hooks.InstallRunWrappers(
 			hookDir, hookNames,
 			nil,
 			GetHookDisableCallback(log, gitx, nonInteractive, uiSettings),
+			lfsHooksCache,
 			nil)
 
 		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookDir)
-		log.InfoF("Githooks run-wrappers installed into '%s'.", hookDir)
+
+		if nLFSHooks != 0 {
+			log.InfoF("Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks into '%s'.",
+				len(hookNames), nLFSHooks, hookDir)
+		} else {
+			log.InfoF("Installed '%v' Githooks run-wrapper(s) into '%s'",
+				len(hookNames), hookDir)
+		}
 	}
 
 	// Offer to setup the intro README if running in interactive mode
@@ -102,32 +114,21 @@ func unregisterRepo(log cm.ILogContext, gitDir string) {
 func UninstallFromRepo(
 	log cm.ILogContext,
 	gitDir string,
-	lfsAvailable bool,
+	lfsHooksCache hooks.LFSHooksCache,
 	cleanArtefacts bool) bool {
 
 	hookDir := path.Join(gitDir, "hooks")
 
+	var err error
+	var nLfsCount int
+
 	if cm.IsDirectory(hookDir) {
 
-		err := hooks.UninstallRunWrappers(hookDir, hooks.ManagedHookNames)
+		nLfsCount, err = hooks.UninstallRunWrappers(hookDir, lfsHooksCache)
 
 		log.AssertNoErrorF(err,
 			"Could not uninstall Githooks run-wrappers from\n'%s'.",
 			hookDir)
-
-		if err == nil {
-
-			if lfsAvailable {
-				err = hooks.InstallLFSHooks(gitDir)
-
-				log.AssertNoErrorF(err,
-					"Could not reinstall Git LFS hooks in\n"+
-						"'%[1]s'.\n"+
-						"Please try manually by invoking:\n"+
-						"  $ git -C '%[1]s' lfs install", gitDir)
-
-			}
-		}
 	}
 
 	// Always unregister repo.
@@ -138,7 +139,11 @@ func UninstallFromRepo(
 		cleanGitConfigInRepo(log, gitDir)
 	}
 
-	log.InfoF("Githooks uninstalled from '%s'.", gitDir)
+	if nLfsCount != 0 {
+		log.InfoF("Githooks uninstalled from '%s'.\nLFS hooks have been reinstalled.", gitDir)
+	} else {
+		log.InfoF("Githooks uninstalled from '%s'.", gitDir)
+	}
 
 	return true
 }

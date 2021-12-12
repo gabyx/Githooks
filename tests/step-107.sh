@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 acceptAllTrustPrompts || exit 1
 
 # make sure we don't have LFS installed
-if git-lfs --version; then
+if command -v git-lfs; then
     echo "git-lfs is available but we need it missing"
     exit 249
 fi
