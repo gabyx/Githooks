@@ -583,7 +583,7 @@ func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) bool {
 	}
 
 	switch {
-	case strs.IsEmpty(conf):
+	case strs.IsEmpty(conf) || conf == git.GitCVFalse:
 		return false
 	default:
 		return conf == git.GitCVTrue
