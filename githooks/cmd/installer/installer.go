@@ -845,12 +845,10 @@ func setupHookTemplates(
 
 	log.InfoF("Saving Githooks run-wrapper to '%s' :", hookTemplateDir)
 
-	// Set maintained hooks in global settings, such that
-	// local repository Githooks installs are in alignment
-	// to the setup template directory.
-	if maintainedHooks != nil {
-		err := hooks.SetMaintainedHooks(gitx, maintainedHooks, git.GlobalScope)
-		log.AssertNoError(err, "Could not set git config.")
+	var err error
+	if maintainedHooks == nil {
+		maintainedHooks, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
+		log.AssertNoError(err, "Could not get config.")
 	}
 
 	allHooks, err := hooks.UnwrapHookNames(maintainedHooks)
@@ -868,12 +866,18 @@ func setupHookTemplates(
 	log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookTemplateDir)
 
 	if nLFSHooks != 0 {
-		log.InfoF("Installed '%v' Githooks run-wrappers and '%v' missing LFS hooks.",
-			len(allHooks), nLFSHooks)
+		log.InfoF("Installed '%v' Githooks run-wrappers and '%v' missing LFS hooks into '%s'.",
+			len(allHooks), nLFSHooks, hookTemplateDir)
 	} else {
-		log.InfoF("Installed '%v' Githooks run-wrappers.",
-			len(allHooks))
+		log.InfoF("Installed '%v' Githooks run-wrappers into '%s'.",
+			len(allHooks), hookTemplateDir)
 	}
+
+	// Set maintained hooks in global settings, such that
+	// local repository Githooks installs are in alignment
+	// to the setup template directory.
+	err = hooks.SetMaintainedHooks(gitx, maintainedHooks, git.GlobalScope)
+	log.AssertNoError(err, "Could not set git config.")
 }
 
 func installBinaries(

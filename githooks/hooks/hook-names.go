@@ -121,6 +121,10 @@ func SetMaintainedHooks(
 
 // GetMaintainedHooksFromString gets all maintained hooks.
 func getMaintainedHooksFromString(maintainedHooks string) (hookNames []string, err error) {
+	if strs.IsEmpty(maintainedHooks) {
+		return ManagedHookNames, nil
+	}
+
 	hookNames = strings.Split(maintainedHooks, ",")
 	hookNames, err = CheckHookNames(hookNames)
 	hookNames, e := UnwrapHookNames(hookNames)

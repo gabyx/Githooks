@@ -7,6 +7,7 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 // InstallIntoRepo installs run-wrappers into a repositories
@@ -34,6 +35,12 @@ func InstallIntoRepo(
 
 	hookNames, err := hooks.GetMaintainedHooks(gitxR, git.Traverse)
 	log.AssertNoErrorF(err, "Could not get maintained hooks.")
+	if isBare {
+		// Filter out all non-relevant hooks for bare repositories.
+		hookNames = strs.Filter(hookNames, func(s string) bool { return strs.Includes(hooks.ManagedServerHookNames, s) })
+		// LFS hooks also do not need to be reinstalled
+		lfsHooksCache = nil
+	}
 
 	if dryRun {
 		log.InfoF("[dry run] Hooks would have been installed into\n'%s'.",
@@ -50,11 +57,11 @@ func InstallIntoRepo(
 		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookDir)
 
 		if nLFSHooks != 0 {
-			log.InfoF("Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks.",
-				len(hookNames), nLFSHooks)
+			log.InfoF("Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks into '%s'.",
+				len(hookNames), nLFSHooks, hookDir)
 		} else {
-			log.InfoF("Installed '%v' Githooks run-wrapper(s).",
-				len(hookNames))
+			log.InfoF("Installed '%v' Githooks run-wrapper(s) into '%s'",
+				len(hookNames), hookDir)
 		}
 	}
 

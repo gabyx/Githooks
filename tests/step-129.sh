@@ -6,6 +6,11 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+if ! command -v git-lfs; then
+    echo "git-lfs is not available"
+    exit 249
+fi
+
 function checkLFSHook() {
     local repo="$1"
     shift 1
@@ -75,12 +80,6 @@ function checkHooks() {
         }
 
 }
-
-# lfsAvailable="true"
-# if ! git-lfs --version; then
-#     echo "git-lfs is not available"
-#     lfsAvailable="false"
-# fi
 
 allLFSHooks=(
     "post-checkout"

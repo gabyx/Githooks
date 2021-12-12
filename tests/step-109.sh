@@ -6,12 +6,12 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
-
 if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
 fi
+
+acceptAllTrustPrompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test109/p001" && mkdir -p "$GH_TEST_TMP/test109/p002" && mkdir -p "$GH_TEST_TMP/test109/p003" || exit 1
 
@@ -25,7 +25,6 @@ fi
 
 mkdir -p ~/.githooks/templates/hooks
 git config --global init.templateDir ~/.githooks/templates
-templateDir=$(git config --global init.templateDir)
 
 # run the install, and select installing hooks into existing repos
 echo "n
@@ -69,25 +68,5 @@ $GH_TEST_TMP/test109
 if grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
     grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then
     echo "! Hooks were not uninstalled successfully"
-    exit 1
-fi
-
-# run the install, and select installing only server hooks into existing repos
-echo "n
-y
-$GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/cli" installer --stdin --only-server-hooks || exit 1
-
-# check if only server hooks are inside the template folder.
-for hook in pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc; do
-    if ! [ -f "$templateDir/hooks/$hook" ]; then
-        echo "! Server hooks were not installed successfully"
-        exit 1
-    fi
-done
-# shellcheck disable=SC2012
-count="$(find "$templateDir/hooks/" -type f | wc -l)"
-if [ "$count" != "8" ]; then
-    echo "! Expected only server hooks to be installed ($count)"
     exit 1
 fi

@@ -795,11 +795,10 @@ git config --global core.hooksPath "$(pwd)/hooks"
 ### Install on the Server
 
 On a server infrastructure where only _bare_ repositories are maintained, it is
-best to maintain only server hooks. This can be achieved by installing with the
-additional flag `--only-server-hooks` by:
+best to maintain only server hooks. This can be achieved by installing with:
 
 ```shell
-$ cli installer --only-server-hooks
+$ cli installer ---maintained-hooks "server"
 ```
 
 The global template directory then **only** contains the following run-wrappers
