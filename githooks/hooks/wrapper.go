@@ -359,7 +359,9 @@ func reinstallLFSHooks(
 
 			err = cm.CombineErrors(err, e)
 
-			lfsContent, e := os.ReadFile(src)
+			file, e := os.ReadFile(src)
+			lfsContent := "  | " + strings.ReplaceAll(string(file), "\n", "\n  | ")
+
 			err = cm.CombineErrors(err, e, cm.ErrorF("Cannot install LFS hook at '%s' because it already exists\n"+
 				"and contains no 'git lfs' statement.\n"+
 				"Either delete the hook and rerun the command or incorporate the following\n"+

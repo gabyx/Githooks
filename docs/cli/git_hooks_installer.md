@@ -14,40 +14,42 @@ git hooks installer [flags]
 ### Options
 
 ```
-      --log string                     Log file path (only for installer).
-      --dry-run                        Dry run the installation showing whats being done.
-      --non-interactive                Run the installation non-interactively
-                                       without showing prompts.
-      --skip-install-into-existing     Skip installation into existing repositories
-                                       defined by a search path.
-      --prefix string                  Githooks installation prefix such that
-                                       `<prefix>/.githooks` will be the installation directory.
-      --template-dir string            The preferred template directory to use.
-      --maintained-hooks stringArray   A set of hook names which are maintained
-                                       Any argument can be a hook name `<hookName>`, `all` or `server`.
-                                       An optional prefix '!' means subtraction from the current set.
-                                       The initial value of the internally built set defaults
-                                       to all hook names if `all` or `server` is not given as first argument:
-                                         - `all` : All hooks supported by Githooks.
-                                         - `server` : All server hooks supported by Githooks.
-      --use-core-hookspath             If the install mode `core.hooksPath` should be used.
-      --clone-url string               The clone url from which Githooks should clone
-                                       and install/update itself. Githooks tries to
-                                       auto-detect the deploy setting for downloading binaries.
-                                       You can however provide a deploy settings file yourself if
-                                       the auto-detection does not work (see `--deploy-settings`).
-      --clone-branch string            The clone branch from which Githooks should
-                                       clone and install/update itself.
-      --deploy-api string              The deploy api type (e.g. [`gitea`, `github`]) to use for updates
-                                       of the specified `clone-url` for helping the deploy settings
-                                       auto-detection. For Github urls, this is not needed.
-      --deploy-settings string         The deploy settings YAML file to use for updates of the specified
-                                       `--clone-url`. See the documentation for further details.
-      --build-from-source              If the binaries are built from source instead of
-                                       downloaded from the deploy url.
-      --build-tags stringArray         Build tags for building from source (get extended with defaults).
-      --use-pre-release                When fetching the latest installer, also consider pre-release versions.
-  -h, --help                           help for installer
+      --log string                   Log file path (only for installer).
+      --dry-run                      Dry run the installation showing whats being done.
+      --non-interactive              Run the installation non-interactively
+                                     without showing prompts.
+      --skip-install-into-existing   Skip installation into existing repositories
+                                     defined by a search path.
+      --prefix string                Githooks installation prefix such that
+                                     `<prefix>/.githooks` will be the installation directory.
+      --template-dir string          The preferred template directory to use.
+      --maintained-hooks strings     A set of hook names which are maintained in the template directory.
+                                     Any argument can be a hook name `<hookName>`, `all` or `server`.
+                                     An optional prefix '!' means subtraction from the current set.
+                                     The initial value of the internally built set defaults
+                                     to all hook names if `all` or `server` is not given as first argument:
+                                       - `all` : All hooks supported by Githooks.
+                                       - `server` : Only server hooks supported by Githooks.
+                                     You can list them seperatly or comma-separated in one argument.
+      --use-core-hookspath           If the install mode `core.hooksPath` should be used.
+      --clone-url string             The clone url from which Githooks should clone
+                                     and install/update itself. Githooks tries to
+                                     auto-detect the deploy setting for downloading binaries.
+                                     You can however provide a deploy settings file yourself if
+                                     the auto-detection does not work (see `--deploy-settings`).
+      --clone-branch string          The clone branch from which Githooks should
+                                     clone and install/update itself.
+      --deploy-api string            The deploy api type (e.g. [`gitea`, `github`]) to use for updates
+                                     of the specified `clone-url` for helping the deploy settings
+                                     auto-detection. For Github urls, this is not needed.
+      --deploy-settings string       The deploy settings YAML file to use for updates of the specified
+                                     `--clone-url`. See the documentation for further details.
+      --build-from-source            If the binaries are built from source instead of
+                                     downloaded from the deploy url.
+      --build-tags strings           Build tags for building from source (get extended with defaults).
+                                     You can list them seperatly or comma-separated in one argument.
+      --use-pre-release              When fetching the latest installer, also consider pre-release versions.
+  -h, --help                         help for installer
 ```
 
 ### SEE ALSO

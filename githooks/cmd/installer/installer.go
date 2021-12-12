@@ -97,15 +97,16 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().String(
 		"template-dir", "",
 		"The preferred template directory to use.")
-	cmd.PersistentFlags().StringArray(
+	cmd.PersistentFlags().StringSlice(
 		"maintained-hooks", nil,
-		"A set of hook names which are maintained\n"+
+		"A set of hook names which are maintained in the template directory.\n"+
 			"Any argument can be a hook name '<hookName>', 'all' or 'server'.\n"+
 			"An optional prefix '!' means subtraction from the current set.\n"+
 			"The initial value of the internally built set defaults\n"+
 			"to all hook names if 'all' or 'server' is not given as first argument:\n"+
 			"  - 'all' : All hooks supported by Githooks.\n"+
-			"  - 'server' : All server hooks supported by Githooks.")
+			"  - 'server' : Only server hooks supported by Githooks.\n"+
+			"You can list them seperatly or comma-separated in one argument.")
 	cmd.PersistentFlags().Bool(
 		"use-core-hookspath", false,
 		"If the install mode 'core.hooksPath' should be used.")
@@ -135,9 +136,10 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"build-from-source", false,
 		"If the binaries are built from source instead of\n"+
 			"downloaded from the deploy url.")
-	cmd.PersistentFlags().StringArray(
+	cmd.PersistentFlags().StringSlice(
 		"build-tags", nil,
-		"Build tags for building from source (get extended with defaults).")
+		"Build tags for building from source (get extended with defaults).\n"+
+			"You can list them seperatly or comma-separated in one argument.")
 
 	cmd.PersistentFlags().Bool(
 		"use-pre-release", false,
@@ -200,7 +202,9 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 		"You cannot build binaries from source together with specifying\n",
 		"a deploy settings file or deploy api.")
 
-	log.AssertNoErrorPanic(hooks.CheckHookNames(args.MaintainedHooks),
+	var err error
+	args.MaintainedHooks, err = hooks.CheckHookNames(args.MaintainedHooks)
+	log.AssertNoErrorPanic(err,
 		"Maintained hooks are not valid.")
 }
 
@@ -840,6 +844,14 @@ func setupHookTemplates(
 		hookTemplateDir)
 
 	log.InfoF("Saving Githooks run-wrapper to '%s' :", hookTemplateDir)
+
+	// Set maintained hooks in global settings, such that
+	// local repository Githooks installs are in alignment
+	// to the setup template directory.
+	if maintainedHooks != nil {
+		err := hooks.SetMaintainedHooks(gitx, maintainedHooks, git.GlobalScope)
+		log.AssertNoError(err, "Could not set git config.")
+	}
 
 	allHooks, err := hooks.UnwrapHookNames(maintainedHooks)
 	log.AssertNoErrorPanic(err, "Could not build maintained hook list.")

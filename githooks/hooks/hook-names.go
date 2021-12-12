@@ -14,18 +14,21 @@ const (
 )
 
 // Check hook names supporting also 'all', 'server' and negation prefix '!'.
-func CheckHookNames(hookNames []string) error {
+// Additionally sanitize the names.
+func CheckHookNames(hookNames []string) ([]string, error) {
+	hookNames = strs.Map(hookNames, strings.TrimSpace)
+
 	for _, h := range hookNames {
 		h := strings.TrimPrefix(h, "!")
 
 		if h != hookNameAll && h != hookNameServer && !strs.Includes(ManagedHookNames, h) {
-			return cm.ErrorF(
-				"Given value '%s' is not a hook name supported by Githooks\n"+
-					"nor 'all' or 'server'.", h)
+			return hookNames, cm.ErrorF(
+				"Given value '%s' in '%q' is not a hook name supported by Githooks\n"+
+					"nor its '%s' or '%s'. ", h, hookNames, hookNameAll, hookNameServer)
 		}
 	}
 
-	return nil
+	return hookNames, nil
 }
 
 // UnwrapHookNames returns a unique list of hook names built from the input.
@@ -116,6 +119,23 @@ func SetMaintainedHooks(
 	return
 }
 
+// GetMaintainedHooksFromString gets all maintained hooks.
+func getMaintainedHooksFromString(maintainedHooks string) (hookNames []string, err error) {
+	hookNames = strings.Split(maintainedHooks, ",")
+	hookNames, err = CheckHookNames(hookNames)
+	hookNames, e := UnwrapHookNames(hookNames)
+	err = cm.CombineErrors(err, e)
+
+	if err != nil {
+		err = cm.CombineErrors(err,
+			cm.ErrorF("Maintained hooks '%s' is not valid.", maintainedHooks))
+
+		return ManagedHookNames, err
+	}
+
+	return
+}
+
 // Get the maintained hooks from the Git config at scope `scope`.
 // If an error occurs, all Githooks supported hooks are returned by default.
 func GetMaintainedHooks(
@@ -133,26 +153,8 @@ func GetMaintainedHooks(
 		return ManagedHookNames, err
 	}
 
-	maintainedHooks := strings.Split(h, ",")
+	return getMaintainedHooksFromString(h)
 
-	for i := range maintainedHooks {
-		maintainedHooks[i] = strings.TrimSpace(maintainedHooks[i])
-	}
-
-	err = CheckHookNames(maintainedHooks)
-	hookNames, e := UnwrapHookNames(maintainedHooks)
-	err = cm.CombineErrors(err, e)
-
-	if err != nil {
-		err = cm.CombineErrors(err, cm.ErrorF("Maintained hooks in Git config '%s' is not valid.\n"+
-			"  cwd: '%s'\n"+
-			"-> Fallback to all supported hooks.",
-			GitCKMaintainedHooks, gitx.GetCwd()))
-
-		return ManagedHookNames, err
-	}
-
-	return
 }
 
 // Get all other hooks from `ManagedHookNames` which are not in `hookNames`.
