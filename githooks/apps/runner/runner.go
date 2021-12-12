@@ -855,7 +855,7 @@ func showTrustPrompt(
 			"(yes, all, no, disable)",
 			"y/a/n/d",
 			"Yes", "All", "No", "Disable")
-		log.AssertNoErrorPanic(err, "Could not get trust prompt answer.")
+		log.AssertNoError(err, "Could not get trust prompt answer.")
 
 		switch answer {
 		case "a":

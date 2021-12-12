@@ -576,7 +576,12 @@ func SetSkipNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, s
 
 // SkipNonExistingSharedHooks gets the settings if the hook runner should skip on non existing hooks.
 func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) bool {
-	conf := gitx.GetConfig(GitCKSkipNonExistingSharedHooks, scope)
+	var conf string
+	conf, set := os.LookupEnv("GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS")
+	if !set {
+		conf = gitx.GetConfig(GitCKSkipNonExistingSharedHooks, scope)
+	}
+
 	switch {
 	case strs.IsEmpty(conf):
 		return false

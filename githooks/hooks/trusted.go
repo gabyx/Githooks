@@ -65,9 +65,14 @@ func SetSkipUntrustedHooks(gitx *git.Context, enable bool, reset bool, scope git
 
 // SkipUntrustedHooks gets the settings if the hook runner should fail on active non-trusted hooks.
 func SkipUntrustedHooks(gitx *git.Context, scope git.ConfigScope) (enabled bool, isSet bool) {
-	conf := gitx.GetConfig(GitCKSkipUntrustedHooks, scope)
+	var conf string
+	conf, set := os.LookupEnv("GITHOOKS_SKIP_UNTRUSTED_HOOKS")
+	if !set {
+		conf = gitx.GetConfig(GitCKSkipUntrustedHooks, scope)
+	}
+
 	switch {
-	case strs.IsEmpty(conf):
+	case strs.IsEmpty(conf) || conf == git.GitCVFalse:
 		return
 	default:
 		return conf == git.GitCVTrue, true
