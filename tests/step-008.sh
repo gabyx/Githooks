@@ -8,7 +8,6 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 acceptAllTrustPrompts || exit 1
 
-echo "WHATS:::: "
 ls -al "$GH_TEST_GIT_CORE/templates"
 
 cd "$GH_TEST_GIT_CORE/templates/hooks" &&
