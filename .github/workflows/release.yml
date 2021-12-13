@@ -67,5 +67,6 @@ jobs:
           RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
           TRIGGER_TAG: ${{ steps.getTag.outputs.triggerTag }}
         run: |
-          git push origin "$RELEASE_TAG" "githooks/$RELEASE_TAG"
+          # go releaser already pushed release tag
+          git push origin "githooks/$RELEASE_TAG"
           git push -f origin ":$TRIGGER_TAG"
