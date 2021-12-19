@@ -313,6 +313,9 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 	k := "githooks.checksumCacheDir"
 	log.AssertNoErrorF(gitx.UnsetConfig(k, git.GlobalScope),
 		"Could not unset global Git config '%s'.", k)
+	k = "githooks.maintainOnlyServerHooks"
+	log.AssertNoErrorF(gitx.UnsetConfig(k, git.GlobalScope),
+		"Could not unset global Git config '%s'.", k)
 }
 
 func cleanRegister(log cm.ILogContext, installDir string) {

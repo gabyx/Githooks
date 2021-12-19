@@ -8,8 +8,6 @@ const (
 
 	GitCKDisable = "githooks.disable"
 
-	GitCKMaintainOnlyServerHooks = "githooks.maintainOnlyServerHooks" // deprecate
-
 	GitCKAutoUpdateEnabled        = "githooks.autoUpdateEnabled"
 	GitCKAutoUpdateCheckTimestamp = "githooks.autoUpdateCheckTimestamp"
 	GitCKAutoUpdateUsePrerelease  = "githooks.autoUpdateUsePrerelease"
@@ -61,7 +59,6 @@ func GetGlobalGitConfigKeys() []string {
 
 		GitCKDisable,
 
-		GitCKMaintainOnlyServerHooks, // deprecate
 		GitCKMaintainedHooks,
 		GitCKPreviousSearchDir,
 

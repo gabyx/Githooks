@@ -1111,8 +1111,7 @@ can then attach to the debug server with the debug configuration
 
 ### Todos:
 
-- Test: `githooks.disableSharedHooksUpdate`.
-- Finish deploy settings implementation for Gitea and sorts.
+- Finish deploy settings implementation for Gitea and others.
 
 ## Changelog
 

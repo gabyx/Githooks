@@ -1203,6 +1203,8 @@ func runUpdate(
 
 	log.InfoF("Running install to version '%s' ...", build.BuildVersion)
 
+	transformLegacyGitConfigSettings(log, gitx)
+
 	// Read registered file if existing.
 	// We ensured during load, that only existing Git directories are listed.
 	err := settings.RegisteredGitDirs.Load(settings.InstallDir, true, true)
@@ -1368,4 +1370,14 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 			" • %v warnings\n"+
 			"occurred!", logStats.ErrorCount(), logStats.WarningCount())
 	}
+}
+
+func transformLegacyGitConfigSettings(log cm.ILogContext, gitx *git.Context) {
+	useOnlyServerHooks := gitx.GetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
+	if useOnlyServerHooks == git.GitCVTrue {
+		err := hooks.SetMaintainedHooks(gitx, []string{"server"}, git.GlobalScope)
+		log.AssertNoError(err, "Could not set maintained hooks to 'server'.")
+	}
+
+	_ = git.Ctx().UnsetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
 }

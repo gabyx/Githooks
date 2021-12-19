@@ -109,11 +109,6 @@ func SetMaintainedHooks(
 		maintainedHooks = append(maintainedHooks, "all")
 	}
 
-	// Deprecation
-	if scope == git.GlobalScope {
-		_ = git.Ctx().UnsetConfig(GitCKMaintainOnlyServerHooks, scope)
-	}
-
 	err = git.Ctx().SetConfig(GitCKMaintainedHooks, strings.Join(maintainedHooks, ", "), scope)
 
 	if err != nil {
