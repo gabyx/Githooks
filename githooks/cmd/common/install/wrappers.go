@@ -19,6 +19,7 @@ func InstallIntoRepo(
 	gitx *git.Context,
 	repoGitDir string,
 	lfsHooksCache hooks.LFSHooksCache,
+	hookNames []string,
 	nonInteractive bool,
 	dryRun bool,
 	skipReadme bool,
@@ -33,8 +34,12 @@ func InstallIntoRepo(
 	gitxR := git.CtxC(repoGitDir)
 	isBare := gitxR.IsBareRepo()
 
-	hookNames, err := hooks.GetMaintainedHooks(gitxR, git.Traverse)
-	log.AssertNoErrorF(err, "Could not get maintained hooks.")
+	var err error
+	if hookNames == nil {
+		hookNames, err = hooks.GetMaintainedHooks(gitxR, git.Traverse)
+		log.AssertNoErrorF(err, "Could not get maintained hooks.")
+	}
+
 	if isBare {
 		// Filter out all non-relevant hooks for bare repositories.
 		hookNames = strs.Filter(hookNames, func(s string) bool { return strs.Includes(hooks.ManagedServerHookNames, s) })

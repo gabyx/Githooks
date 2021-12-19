@@ -33,7 +33,7 @@ func CheckHookNames(hookNames []string) ([]string, error) {
 
 // UnwrapHookNames returns a unique list of hook names built from the input.
 // Variable `hookNames` can contain hook names, 'server', 'all'
-// and negation prefix '!'.
+// and negation prefix '!'. This function alyways returns a non-nil list.
 func UnwrapHookNames(hookNames []string) ([]string, error) {
 
 	var err error
@@ -89,7 +89,12 @@ func UnwrapHookNames(hookNames []string) ([]string, error) {
 		}
 	}
 
-	return s.ToList(), err
+	l := s.ToList()
+	if l == nil {
+		return []string{}, err
+	}
+
+	return l, err
 }
 
 // Store the maintained hooks to the Git config at scope `scope`.
@@ -119,7 +124,7 @@ func SetMaintainedHooks(
 	return
 }
 
-// GetMaintainedHooksFromString gets all maintained hooks.
+// getMaintainedHooksFromString gets all maintained hooks.
 func getMaintainedHooksFromString(maintainedHooks string) (hookNames []string, err error) {
 	if strs.IsEmpty(maintainedHooks) {
 		return ManagedHookNames, nil

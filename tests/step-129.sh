@@ -133,8 +133,11 @@ maintainedHooksRef2=(
     "post-merge"
     "pre-push")
 
-git config githooks.maintainedHooks "$maintainedHooks2"
-"$GH_TEST_BIN/cli" install || exit 1
+"$GH_TEST_BIN/cli" install --maintained-hooks "$maintainedHooks2" || exit 1
+if [ "$(git config githooks.maintainedHooks)" != "!all, commit-msg" ]; then
+    echo "Maintained hooks is not set"
+    exit 1
+fi
 checkHooks "." "${maintainedHooksRef2[@]}"
 checkLFSHook "." "${allLFSHooks[@]}"
 
@@ -153,8 +156,7 @@ maintainedHooksRef3=(
     "pre-push")
 lfsHooks3=()
 
-git config githooks.maintainedHooks "$maintainedHooks3"
-"$GH_TEST_BIN/cli" install || exit 1
+"$GH_TEST_BIN/cli" install --maintained-hooks "$maintainedHooks3" || exit 1
 echo "Delete disabled LFS hooks."
 find .git/hooks -type f -name "*.disabled.*" -exec rm -f {} \; || exit 1
 grep -q "custom-to-survive" .git/hooks/commit-msg || {
