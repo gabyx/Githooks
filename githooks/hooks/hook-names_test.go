@@ -16,7 +16,11 @@ func isSame(t *testing.T, a []string, b []string) {
 
 func TestCheckHookNames(t *testing.T) {
 
-	h, err := getMaintainedHooksFromString("!all, pre-commit")
+	h, err := getMaintainedHooksFromString("!all")
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(h))
+
+	h, err = getMaintainedHooksFromString("!all, pre-commit")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(h))
 
@@ -37,6 +41,11 @@ func TestHookNameUnwrap(t *testing.T) {
 	h, err := UnwrapHookNames([]string{"!post-merge"})
 	isSame(t, res.ToList(), h)
 	assert.NoError(t, err)
+
+	h, err = UnwrapHookNames([]string{"!all"})
+	assert.NoError(t, err)
+	assert.NotNil(t, h)
+	assert.Equal(t, 0, len(h))
 
 	// All hooks minus 1.
 	h, err = UnwrapHookNames([]string{"all", "!post-merge"})

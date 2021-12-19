@@ -3,13 +3,14 @@ package install
 import (
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
 	inst "github.com/gabyx/githooks/githooks/cmd/common/install"
+	"github.com/gabyx/githooks/githooks/cmd/installer"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 
 	"github.com/spf13/cobra"
 )
 
-func runInstallIntoRepo(ctx *ccm.CmdContext, nonInteractive bool) {
+func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonInteractive bool) {
 	_, gitDir, _ := ccm.AssertRepoRoot(ctx)
 
 	// Check if useCoreHooksPath or core.hooksPath is set
@@ -31,7 +32,21 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, nonInteractive bool) {
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
 
-	inst.InstallIntoRepo(ctx.Log, ctx.GitX, gitDir, lfsHooksCache, nonInteractive, false, false, &uiSettings)
+	if maintainedHooks != nil {
+		maintainedHooks, err = hooks.CheckHookNames(maintainedHooks)
+		ctx.Log.AssertNoErrorPanic(err, "Maintained hooks are not valid.")
+
+		err = hooks.SetMaintainedHooks(ctx.GitX, maintainedHooks, git.LocalScope)
+		ctx.Log.AssertNoErrorPanic(err, "Could not set maintined hooks config value.")
+
+		maintainedHooks, err = hooks.UnwrapHookNames(maintainedHooks)
+		ctx.Log.AssertNoErrorPanic(err, "Maintained hooks are not valid.")
+	}
+
+	inst.InstallIntoRepo(
+		ctx.Log, ctx.GitX, gitDir,
+		lfsHooksCache, maintainedHooks,
+		nonInteractive, false, false, &uiSettings)
 }
 
 func runUninstallFromRepo(ctx *ccm.CmdContext) {
@@ -59,13 +74,14 @@ func runUninstall(ctx *ccm.CmdContext) {
 	runUninstallFromRepo(ctx)
 }
 
-func runInstall(ctx *ccm.CmdContext, nonInteractive bool) {
-	runInstallIntoRepo(ctx, nonInteractive)
+func runInstall(ctx *ccm.CmdContext, maintainedHooks []string, nonInteractive bool) {
+	runInstallIntoRepo(ctx, maintainedHooks, nonInteractive)
 }
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) []*cobra.Command {
 
+	var maintainedHooks *[]string
 	nonInteractive := false
 
 	installCmd := &cobra.Command{
@@ -74,11 +90,15 @@ func NewCmd(ctx *ccm.CmdContext) []*cobra.Command {
 		Long: `Installs the Githooks run-wrappers and Git config settings
 into the current repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runInstall(ctx, nonInteractive)
+			runInstall(ctx, *maintainedHooks, nonInteractive)
 		},
 	}
 
 	installCmd.Flags().BoolVar(&nonInteractive, "non-interactive", false, "Install non-interactively.")
+	maintainedHooks = installCmd.Flags().StringSlice(
+		"maintained-hooks", nil,
+		"A set of hook names which are maintained in this repository.\n"+
+			installer.MaintainedHooksDesc)
 
 	uninstallCmd := &cobra.Command{
 		Use:   "uninstall",

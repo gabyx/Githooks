@@ -63,6 +63,14 @@ func writeArgs(log cm.ILogContext, file string, args *Arguments) {
 	log.AssertNoErrorPanicF(err, "Could not write arguments to '%s'.", file)
 }
 
+var MaintainedHooksDesc = "Any argument can be a hook name '<hookName>', 'all' or 'server'.\n" +
+	"An optional prefix '!' means subtraction from the current set.\n" +
+	"The initial value of the internally built set defaults\n" +
+	"to all hook names if 'all' or 'server' is not given as first argument:\n" +
+	"  - 'all' : All hooks supported by Githooks.\n" +
+	"  - 'server' : Only server hooks supported by Githooks.\n" +
+	"You can list them seperatly or comma-separated in one argument."
+
 func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	// Internal commands
 	cmd.PersistentFlags().String("config", "",
@@ -100,13 +108,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().StringSlice(
 		"maintained-hooks", nil,
 		"A set of hook names which are maintained in the template directory.\n"+
-			"Any argument can be a hook name '<hookName>', 'all' or 'server'.\n"+
-			"An optional prefix '!' means subtraction from the current set.\n"+
-			"The initial value of the internally built set defaults\n"+
-			"to all hook names if 'all' or 'server' is not given as first argument:\n"+
-			"  - 'all' : All hooks supported by Githooks.\n"+
-			"  - 'server' : Only server hooks supported by Githooks.\n"+
-			"You can list them seperatly or comma-separated in one argument.")
+			MaintainedHooksDesc)
 	cmd.PersistentFlags().Bool(
 		"use-core-hookspath", false,
 		"If the install mode 'core.hooksPath' should be used.")
@@ -1000,7 +1002,7 @@ func installIntoExistingRepos(
 		func(gitDir string) {
 
 			if install.InstallIntoRepo(
-				log, gitx, gitDir, lfsHooksCache,
+				log, gitx, gitDir, lfsHooksCache, nil,
 				nonInteractive, dryRun,
 				skipReadme, uiSettings) {
 
@@ -1040,7 +1042,7 @@ func installIntoRegisteredRepos(
 		uiSettings.PromptCtx,
 		func(gitDir string) {
 			if install.InstallIntoRepo(
-				log, gitx, gitDir, lfsHooksCache,
+				log, gitx, gitDir, lfsHooksCache, nil,
 				nonInteractive, dryRun,
 				skipReadme, uiSettings) {
 
