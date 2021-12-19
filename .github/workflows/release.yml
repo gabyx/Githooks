@@ -37,17 +37,20 @@ jobs:
       - name: "Tag release commit"
         env:
           RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
+          TRIGGER_TAG: ${{ steps.getTag.outputs.triggerTag }}
         run: |
           git config user.name 'githooks-bot'
           git config user.email 'githooks-bot@users.noreply.github.com'
-          git tag "$RELEASE_TAG"
+
+          deref() { git for-each-ref "refs/tags/$TRIGGER_TAG" --format="%($1)" ; };
+          git tag "$RELEASE_TAG" -a -m "$(deref contents)"
           git tag "githooks/$RELEASE_TAG"
       - name: Safety Check
         env:
-          CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
+          RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
         run: |
           git fetch --depth 50 origin main
-          [ -n "$(git rev-list --first-parent --ancestry-path "$CURRENT_TAG^..origin/main")" ] || {
+          [ -n "$(git rev-list --first-parent --ancestry-path "$RELEASE_TAG^..origin/main")" ] || {
             echo "Tag is not reachable from main (--first-parent) !" >&2
             exit 1
           }
