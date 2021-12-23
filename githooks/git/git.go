@@ -16,7 +16,7 @@ type ConfigScope string
 const (
 	LocalScope  ConfigScope = "--local"
 	GlobalScope ConfigScope = "--global"
-	System      ConfigScope = "--system"
+	SystemScope ConfigScope = "--system"
 	Traverse    ConfigScope = ""
 	HEAD        string      = "HEAD"
 )

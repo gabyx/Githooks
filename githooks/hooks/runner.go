@@ -130,7 +130,7 @@ func getVarSubstitution(
 			case "git-g":
 				subs, exists = gitGet(match[4], git.GlobalScope)
 			case "git-s":
-				subs, exists = gitGet(match[4], git.System)
+				subs, exists = gitGet(match[4], git.SystemScope)
 			default:
 				cm.DebugAssert(false, "This should not happen.")
 			}
