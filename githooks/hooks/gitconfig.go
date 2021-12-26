@@ -1,5 +1,9 @@
 package hooks
 
+import (
+	"regexp"
+)
+
 // Git config keys for globals config.
 const (
 	GitCKInstallDir = "githooks.installDir"
@@ -109,4 +113,11 @@ func GetLocalGitConfigKeys() []string {
 		GitCKSkipUntrustedHooks,
 
 		GitCKRunnerIsNonInteractive}
+}
+
+var filterRegex = regexp.MustCompile(`^(githooks\.|alias.hooks|core.hook|init.template)`)
+
+// Filter for filtering the Git config cache.
+func FilterGitConfigCache(key string) bool {
+	return filterRegex.MatchString(key)
 }

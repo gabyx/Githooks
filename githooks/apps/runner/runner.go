@@ -141,7 +141,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	// Current git context, in current working dir.
 	gitx := git.NewCtx()
-	log.AssertNoErrorF(gitx.InitConfigCache(), "Could not init git config cache.")
+	log.AssertNoErrorF(gitx.InitConfigCache(hooks.FilterGitConfigCache),
+		"Could not init git config cache.")
 
 	gitDir, err := gitx.GetGitDirWorktree()
 	log.AssertNoErrorPanic(err, "Could not get git directory.")

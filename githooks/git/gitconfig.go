@@ -1,6 +1,8 @@
 package git
 
 const (
+	// If you add/remove settings here, you must edit `hooks.filterRegex`.
+
 	// GitCKInitTemplateDir is the Git template dir config key.
 	GitCKInitTemplateDir = "init.templateDir"
 

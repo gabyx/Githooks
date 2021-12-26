@@ -18,7 +18,7 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00local\x00a.c\nc1\x00\x00\x00\x00" +
 		"\x00global\x00a.a\na3"
 
-	c, err := parseConfig(s)
+	c, err := parseConfig(s, func(string) bool { return true })
 
 	local := c.scopes[0]
 	global := c.scopes[1]

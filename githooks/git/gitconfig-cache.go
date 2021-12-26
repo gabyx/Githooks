@@ -38,7 +38,7 @@ func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
 	}
 }
 
-func parseConfig(s string) (c ConfigCache, err error) {
+func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err error) {
 
 	c.scopes = [3]ConfigMap{
 		make(ConfigMap),
@@ -63,8 +63,8 @@ func parseConfig(s string) (c ConfigCache, err error) {
 	}
 
 	addEntry := func(scope ConfigScope, keyValue []string) {
-		cm.DebugAssert(len(keyValue) == 2) // nolint: gomnd
-		if len(keyValue) != 2 {            // nolint: gomnd
+		cm.DebugAssert(len(keyValue) == 2)                  // nolint: gomnd
+		if len(keyValue) != 2 || !filterFunc(keyValue[0]) { // nolint: gomnd
 			return
 		}
 
@@ -92,14 +92,14 @@ func parseConfig(s string) (c ConfigCache, err error) {
 	return
 }
 
-func NewConfigCache(gitx Context) (ConfigCache, error) {
+func NewConfigCache(gitx Context, filterFunc func(string) bool) (ConfigCache, error) {
 
 	conf, err := gitx.Get("config", "--includes", "--list", "--null", "--show-scope")
 	if err != nil {
 		return ConfigCache{}, nil
 	}
 
-	return parseConfig(conf)
+	return parseConfig(conf, filterFunc)
 }
 
 func (c *ConfigCache) SyncChangedValues() {}
