@@ -60,7 +60,7 @@ func fixFiles(files []string) {
 
 func main() {
 
-	root, err := git.Ctx().Get("rev-parse", "--show-toplevel")
+	root, err := git.NewCtx().Get("rev-parse", "--show-toplevel")
 	cm.AssertNoErrorPanic(err, "Could not root dir.")
 
 	docRoot := path.Join(root, "docs", "dialog")

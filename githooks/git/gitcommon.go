@@ -24,7 +24,7 @@ var lfsVersionRegex = regexp.MustCompile(`\d+\.\d+\.\d+`)
 
 // Get Git LFS version.
 func GetGitLFSVersion() (ver *version.Version, err error) {
-	res, err := Ctx().Get("lfs", "--version")
+	res, err := NewCtx().Get("lfs", "--version")
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func FindGitDirs(searchDir string) (all []string, err error) {
 		}
 
 		// gitDir is always an absolute path
-		gitDir, e := CtxC(dir).GetGitDirCommon()
+		gitDir, e := NewCtxAt(dir).GetGitDirCommon()
 
 		if adjustVolumeNameCase && len(gitDir) >= 2 {
 			gitDir = strings.ToUpper(gitDir[0:2]) + gitDir[2:]
@@ -204,7 +204,7 @@ func FindGitDirs(searchDir string) (all []string, err error) {
 
 		// Check if its really a git directory.
 		if e == nil &&
-			CtxC(gitDir).IsGitRepo() {
+			NewCtxAt(gitDir).IsGitRepo() {
 			repos.Insert(gitDir)
 		}
 	}
@@ -224,7 +224,7 @@ func Init(repoPath string, bare bool) error {
 	// We must not execute this clone command inside a Git repo  (e.g. A)
 	// due to `core.hooksPath=.git/hooks` which get applied to `A` -> Bug ?:
 	// https://stackoverflow.com/questions/67273420/why-does-git-execute-hooks-from-an-other-repository
-	ctx := CtxCSanitized(repoPath)
+	ctx := NewCtxSanitizedAt(repoPath)
 	if !cm.IsDirectory(ctx.GetCwd()) {
 		if e := os.MkdirAll(ctx.GetCwd(), cm.DefaultFileModeDirectory); e != nil {
 			return cm.ErrorF("Could not create working directory '%s'.", ctx.GetCwd())
@@ -263,7 +263,7 @@ func Clone(repoPath string, url string, branch string, depth int) error {
 	// We must not execute this clone command inside a Git repo  (e.g. A)
 	// due to `core.hooksPath=.git/hooks` which get applied to `A` -> Bug ?:
 	// https://stackoverflow.com/questions/67273420/why-does-git-execute-hooks-from-an-other-repository
-	ctx := CtxCSanitized(path.Dir(repoPath))
+	ctx := NewCtxSanitizedAt(path.Dir(repoPath))
 	if !cm.IsDirectory(ctx.GetCwd()) {
 		if e := os.MkdirAll(ctx.GetCwd(), cm.DefaultFileModeDirectory); e != nil {
 			return cm.ErrorF("Could not create working directory '%s'.", ctx.GetCwd())
@@ -338,7 +338,7 @@ func PullOrClone(
 	depth int,
 	repoCheck func(*Context) error) (isNewClone bool, err error) {
 
-	gitx := CtxCSanitized(repoPath)
+	gitx := NewCtxSanitizedAt(repoPath)
 	if gitx.IsGitRepo() {
 		isNewClone = false
 
@@ -380,7 +380,7 @@ func FetchOrClone(
 	tagPattern string,
 	repoCheck RepoCheck) (isNewClone bool, err error) {
 
-	gitx := CtxCSanitized(repoPath)
+	gitx := NewCtxSanitizedAt(repoPath)
 
 	if gitx.IsGitRepo() {
 		isNewClone = false

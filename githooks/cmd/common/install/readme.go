@@ -16,8 +16,8 @@ func setupReadme(
 	dryRun bool,
 	uiSettings *UISettings) {
 
-	mainWorktree, err := git.CtxC(repoGitDir).GetMainWorktree()
-	if err != nil || !git.CtxC(mainWorktree).IsGitRepo() {
+	mainWorktree, err := git.NewCtxAt(repoGitDir).GetMainWorktree()
+	if err != nil || !git.NewCtxAt(mainWorktree).IsGitRepo() {
 		log.WarnF("Main worktree could not be determined in:\n'%s'\n"+
 			"-> Skipping Readme setup.",
 			repoGitDir)

@@ -86,7 +86,7 @@ func GetBugReportingInfo() (info string) {
 	}()
 
 	// Check global Git config
-	info = git.Ctx().GetConfig(GitCKBugReportInfo, git.GlobalScope)
+	info = git.NewCtx().GetConfig(GitCKBugReportInfo, git.GlobalScope)
 
 	return
 }
@@ -206,7 +206,7 @@ func SetRunnerExecutableAlias(path string) error {
 		return cm.ErrorF("Runner executable '%s' does not exist.", path)
 	}
 
-	return git.Ctx().SetConfig(GitCKRunner, path, git.GlobalScope)
+	return git.NewCtx().SetConfig(GitCKRunner, path, git.GlobalScope)
 }
 
 // GetDialogExecutable gets the installed Githooks dialog executable.
@@ -225,7 +225,7 @@ func SetDialogExecutableConfig(path string) error {
 		return cm.ErrorF("Dialog executable '%s' does not exist.", path)
 	}
 
-	return git.Ctx().SetConfig(GitCKDialog, path, git.GlobalScope)
+	return git.NewCtx().SetConfig(GitCKDialog, path, git.GlobalScope)
 }
 
 // SetCLIExecutableAlias sets the global Githooks runner executable.
@@ -234,7 +234,7 @@ func SetCLIExecutableAlias(path string) error {
 		return cm.ErrorF("CLI executable '%s' does not exist.", path)
 	}
 
-	return git.Ctx().SetConfig(GitCKAliasHooks, strs.Fmt("!\"%s\"", path), git.GlobalScope)
+	return git.NewCtx().SetConfig(GitCKAliasHooks, strs.Fmt("!\"%s\"", path), git.GlobalScope)
 }
 
 // GetReleaseCloneDir get the release clone directory inside the install dir.

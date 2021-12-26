@@ -17,7 +17,7 @@ type CmdContext struct {
 }
 
 // NewCtx creates a new `CmdContext`.
-func NewCommandCtx(baseCmd string, cwd string, env []string) CmdContext {
+func NewCommandNewCtx(baseCmd string, cwd string, env []string) CmdContext {
 	return CmdContext{baseCmd: baseCmd, cwd: cwd, Env: env}
 }
 

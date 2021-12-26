@@ -432,7 +432,7 @@ func NewLFSHooksCache(tempDir string) (_ LFSHooksCache, err error) {
 }
 
 func gitLFSInstall(gitDir string) (err error) {
-	err = git.CtxC(gitDir).Check("lfs", "install")
+	err = git.NewCtxAt(gitDir).Check("lfs", "install")
 
 	if err != nil {
 		err = cm.CombineErrors(err, cm.ErrorF("Could not install Git LFS hooks in\n"+
@@ -464,7 +464,7 @@ func (l *lfsHooksCache) init() (err error) {
 	}
 
 	hooksDir := path.Join(l.repoDir, "hooks")
-	if !cm.IsDirectory(hooksDir) || !git.CtxC(l.repoDir).IsGitRepo() {
+	if !cm.IsDirectory(hooksDir) || !git.NewCtxAt(l.repoDir).IsGitRepo() {
 		reinit = true
 	}
 

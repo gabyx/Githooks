@@ -68,7 +68,7 @@ func GetHookRunCmd(
 		return nil, cm.ErrorF("Could not read runner config '%s'", hookPath)
 	}
 
-	subst := getVarSubstitution(os.LookupEnv, git.Ctx().LookupConfig)
+	subst := getVarSubstitution(os.LookupEnv, git.NewCtx().LookupConfig)
 
 	// Substitute variables in command.
 	var err error

@@ -137,7 +137,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	execx := cm.ExecContext{}
 
 	// Current git context, in current working dir.
-	gitx := git.Ctx()
+	gitx := git.NewCtx()
 
 	gitDir, err := gitx.GetGitDirWorktree()
 	cm.AssertNoErrorPanic(err, "Could not get git directory.")
@@ -675,7 +675,7 @@ func checkSharedHook(
 	// is the same as the specified
 	// Note: GIT_DIR might be set (?bug?) (actually the case for post-checkout hook)
 	if hook.IsCloned {
-		url := git.CtxCSanitized(hook.RepositoryDir).GetConfig(
+		url := git.NewCtxSanitizedAt(hook.RepositoryDir).GetConfig(
 			"remote.origin.url", git.LocalScope)
 
 		if url != hook.URL {

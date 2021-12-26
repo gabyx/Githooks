@@ -2,6 +2,7 @@ package git
 
 import (
 	"bufio"
+	"regexp"
 	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
@@ -119,11 +120,11 @@ func (c *ConfigCache) add(key string, value string, scope ConfigScope, changed b
 // Get all config values for key `key` in the cache.
 func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exists bool) {
 	if scope == Traverse {
-		val, exists = c.GetAll(key, LocalScope)
+		val, exists = c.GetAll(key, SystemScope) // This order is how Git reports it.
 		if !exists {
 			val, exists = c.GetAll(key, GlobalScope)
 			if !exists {
-				val, exists = c.GetAll(key, SystemScope)
+				val, exists = c.GetAll(key, LocalScope)
 			}
 		}
 
@@ -135,6 +136,28 @@ func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exist
 	if inMap && v.values != nil {
 		val = append(val, v.values...) // dont return reference to internal slice.
 		exists = true
+	}
+
+	return
+}
+
+// Get all config values for regex key `key` in the cache.
+func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals []KeyValue) {
+	if scope == Traverse {
+		vals = append(vals, c.GetAllRegex(key, SystemScope)...)
+		vals = append(vals, c.GetAllRegex(key, GlobalScope)...)
+		vals = append(vals, c.GetAllRegex(key, LocalScope)...)
+
+		return
+	}
+
+	m := c.getScopeMap(scope)
+	for k, v := range m {
+		if key.MatchString(k) {
+			for i := range v.values {
+				vals = append(vals, KeyValue{k, v.values[i]})
+			}
+		}
 	}
 
 	return
@@ -174,7 +197,7 @@ func (c *ConfigCache) Set(key string, value string, scope ConfigScope) (added bo
 	cm.PanicIfF(inMap && len(val.values) > 1,
 		"Cannot overwrite multiple values in '%v'.", key)
 
-	if !inMap || val.values == nil {
+	if !inMap || len(val.values) == 0 {
 		c.add(key, value, scope, true)
 		added = true
 	} else if val.values[0] != value {
@@ -202,7 +225,7 @@ func (c *ConfigCache) Unset(key string, scope ConfigScope) bool {
 	m := c.getScopeMap(scope)
 
 	val, exists := m[key]
-	if !exists || val.values == nil {
+	if !exists || len(val.values) == 0 {
 		return false
 	}
 

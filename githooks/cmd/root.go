@@ -36,7 +36,7 @@ func NewSettings(
 	var err error
 
 	cwd, err := os.Getwd()
-	gitx := git.CtxC(cwd)
+	gitx := git.NewCtxAt(cwd)
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	installDir := inst.LoadInstallDir(log, gitx)

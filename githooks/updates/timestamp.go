@@ -13,13 +13,13 @@ import (
 
 // RecordUpdateCheckTimestamp records the current update check time.
 func RecordUpdateCheckTimestamp() error {
-	return git.Ctx().SetConfig(hooks.GitCKAutoUpdateCheckTimestamp,
+	return git.NewCtx().SetConfig(hooks.GitCKAutoUpdateCheckTimestamp,
 		fmt.Sprintf("%v", time.Now().Unix()), git.GlobalScope)
 }
 
 // ResetUpdateCheckTimestamp resets the update check time.
 func ResetUpdateCheckTimestamp() error {
-	return git.Ctx().UnsetConfig(hooks.GitCKAutoUpdateCheckTimestamp, git.GlobalScope)
+	return git.NewCtx().UnsetConfig(hooks.GitCKAutoUpdateCheckTimestamp, git.GlobalScope)
 }
 
 // GetUpdateCheckTimestamp gets the update check time.

@@ -8,7 +8,7 @@ import (
 // SetAutomaticUpdateCheckSettings set the automatic update settings.
 func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
 	opt := hooks.GitCKAutoUpdateEnabled
-	gitx := git.Ctx()
+	gitx := git.NewCtx()
 
 	switch {
 	case reset:
