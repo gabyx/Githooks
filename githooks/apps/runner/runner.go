@@ -138,6 +138,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	// Current git context, in current working dir.
 	gitx := git.NewCtx()
+	// gitx.InitConfigCache()
 
 	gitDir, err := gitx.GetGitDirWorktree()
 	cm.AssertNoErrorPanic(err, "Could not get git directory.")
