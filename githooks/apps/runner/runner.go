@@ -122,8 +122,11 @@ func createLog() {
 }
 
 func logInvocation(s *HookSettings) {
-	if strs.IsNotEmpty(os.Getenv("GITHOOKS_RUNNER_TRACE")) {
+	t := os.Getenv("GITHOOKS_RUNNER_TRACE")
+	if strs.IsNotEmpty(t) {
 		log.InfoF("Running hooks for: '%s' %q", s.HookName, s.Args)
+	} else if t == "1" || cm.IsDebug {
+		log.Info(s.toString())
 	}
 }
 
@@ -184,7 +187,6 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive}
 
-	log.DebugF(s.toString())
 	logInvocation(&s)
 
 	return s, UISettings{AcceptAllChanges: false, PromptCtx: promptx}
