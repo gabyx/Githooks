@@ -10,7 +10,7 @@ import (
 )
 
 type ConfigEntry struct {
-	key     string
+	name    string
 	values  []string
 	changed bool
 }
@@ -68,7 +68,7 @@ func parseConfig(s string) (c ConfigCache, err error) {
 			return
 		}
 
-		c.add(keyValue[0], keyValue[1], scope, false)
+		c.add(keyValue[0], keyValue[0], keyValue[1], scope, false)
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(s))
@@ -104,21 +104,9 @@ func NewConfigCache(gitx Context) (ConfigCache, error) {
 
 func (c *ConfigCache) SyncChangedValues() {}
 
-func (c *ConfigCache) add(key string, value string, scope ConfigScope, changed bool) {
-	m := c.getScopeMap(scope)
-
-	val, exists := m[key]
-	if !exists {
-		val = &ConfigEntry{key: key}
-		m[key] = val
-	}
-
-	val.values = append(val.values, value)
-	val.changed = changed
-}
-
 // Get all config values for key `key` in the cache.
-func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exists bool) {
+func (c *ConfigCache) getAll(key string, scope ConfigScope) (val []string, exists bool) {
+
 	if scope == Traverse {
 		val, exists = c.GetAll(key, SystemScope) // This order is how Git reports it.
 		if !exists {
@@ -139,6 +127,11 @@ func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exist
 	}
 
 	return
+}
+
+// Get all config values for key `key` in the cache.
+func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exists bool) {
+	return c.getAll(strings.ToLower(key), scope)
 }
 
 // Get all config values for regex key `key` in the cache.
@@ -164,7 +157,7 @@ func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals [
 }
 
 // Get a config value for key `key` in the cache.
-func (c *ConfigCache) Get(key string, scope ConfigScope) (val string, exists bool) {
+func (c *ConfigCache) get(key string, scope ConfigScope) (val string, exists bool) {
 	if scope == Traverse {
 		val, exists = c.Get(key, LocalScope)
 		if !exists {
@@ -189,19 +182,41 @@ func (c *ConfigCache) Get(key string, scope ConfigScope) (val string, exists boo
 	return
 }
 
+// Get a config value for key `key` in the cache.
+func (c *ConfigCache) Get(key string, scope ConfigScope) (val string, exists bool) {
+	return c.get(strings.ToLower(key), scope)
+}
+
+func (c *ConfigCache) add(key string, name string, value string, scope ConfigScope, changed bool) {
+	m := c.getScopeMap(scope)
+
+	val, exists := m[key]
+	if !exists {
+		val = &ConfigEntry{name: name}
+		m[key] = val
+	}
+
+	val.values = append(val.values, value)
+	val.changed = changed
+}
+
 // Set sets a config value `value` for `key` in the cache.
 func (c *ConfigCache) Set(key string, value string, scope ConfigScope) (added bool) {
 	m := c.getScopeMap(scope)
 
-	val, inMap := m[key]
+	k := strings.ToLower(key)
+	val, inMap := m[k]
 	cm.PanicIfF(inMap && len(val.values) > 1,
 		"Cannot overwrite multiple values in '%v'.", key)
 
 	if !inMap || len(val.values) == 0 {
-		c.add(key, value, scope, true)
+		c.add(k, key, value, scope, true)
 		added = true
 	} else if val.values[0] != value {
 		val.values[0] = value
+		// Try to set the name to the upper case
+		// version for better readibility
+		val.name = key
 		val.changed = true
 	}
 
@@ -217,14 +232,14 @@ func (c *ConfigCache) IsSet(key string, scope ConfigScope) (exists bool) {
 
 // Add a config value `value` to a `key` in the cache.
 func (c *ConfigCache) Add(key string, value string, scope ConfigScope) {
-	c.add(key, value, scope, true)
+	c.add(strings.ToLower(key), key, value, scope, true)
 }
 
 // Unset unsets all config values for `key` is set in the cache.
 func (c *ConfigCache) Unset(key string, scope ConfigScope) bool {
 	m := c.getScopeMap(scope)
 
-	val, exists := m[key]
+	val, exists := m[strings.ToLower(key)]
 	if !exists || len(val.values) == 0 {
 		return false
 	}

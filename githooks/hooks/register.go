@@ -48,10 +48,8 @@ func UnmarkRepoRegistered(gitx *git.Context) error {
 func (r *RegisterRepos) Load(installDir string, filterExisting bool, filterGitDirs bool) (err error) {
 
 	file := GetRegisterFile(installDir)
-	exists, e := cm.IsPathExisting(file)
-	err = cm.CombineErrors(err, e)
 
-	if exists {
+	if cm.IsFile(file) {
 		err = cm.CombineErrors(err, cm.LoadYAML(file, r))
 	}
 

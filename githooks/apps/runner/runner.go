@@ -124,9 +124,9 @@ func createLog() {
 func logInvocation(s *HookSettings) {
 	t := os.Getenv("GITHOOKS_RUNNER_TRACE")
 	if strs.IsNotEmpty(t) {
-		log.InfoF("Running hooks for: '%s' %q", s.HookName, s.Args)
+		log.DebugF("Running hooks for: '%s' %q", s.HookName, s.Args)
 	} else if t == "1" || cm.IsDebug {
-		log.Info(s.toString())
+		log.DebugF("Settings:\n%s", s.toString())
 	}
 }
 
@@ -141,10 +141,10 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	// Current git context, in current working dir.
 	gitx := git.NewCtx()
-	// gitx.InitConfigCache()
+	log.AssertNoErrorF(gitx.InitConfigCache(), "Could not init git config cache.")
 
 	gitDir, err := gitx.GetGitDirWorktree()
-	cm.AssertNoErrorPanic(err, "Could not get git directory.")
+	log.AssertNoErrorPanic(err, "Could not get git directory.")
 
 	err = hooks.DeleteHookDirTemp(path.Join(gitDir, "hooks"))
 	log.AssertNoErrorF(err, "Could not clean temporary directory in '%s/hooks'.", gitDir)

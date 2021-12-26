@@ -56,6 +56,7 @@ func NewCtxSanitized() *Context {
 // SetConfigCache sets the Git config cache to use.
 func (c *Context) InitConfigCache() (err error) {
 	cache, err := NewConfigCache(*c)
+
 	c.cache = &cache
 
 	return
