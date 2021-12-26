@@ -93,6 +93,8 @@ fi
 echo "Test repo: '$GH_TEST_REPO'"
 echo "Tests dir: '$GH_TESTS'"
 
+startT=$(date +%s)
+
 for STEP in "$GH_TESTS"/step-*.sh; do
     STEP_NAME=$(basename "$STEP" | sed 's/.sh$//')
     STEP_DESC=$(grep -m 1 -A 1 "Test:" "$STEP" | tail -1 | sed 's/#\s*//')
@@ -152,7 +154,11 @@ for STEP in "$GH_TESTS"/step-*.sh; do
 
 done
 
+endT=$(date +%s)
+elapsed=$((endT - startT))
+
 echo "$TEST_RUNS tests run: $FAILED failed and $SKIPPED skipped"
+echo "Run time: $elapsed seconds"
 echo
 
 if [ -n "$FAILED_TEST_LIST" ]; then
