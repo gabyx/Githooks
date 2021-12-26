@@ -107,19 +107,24 @@ func (c *Context) getConfigWithArgs(key string, scope ConfigScope, args ...strin
 
 // GetConfigAll gets a all Git configuration values for key `key`.
 func (c *Context) GetConfigAll(key string, scope ConfigScope) []string {
+	s := c.getConfigWithArgs(key, scope, "--get-all")
+	if strs.IsEmpty(s) {
+		return nil
+	}
+
 	return strs.Filter(
-		strs.SplitLines(c.getConfigWithArgs(key, scope, "--get-all")),
+		strs.SplitLines(s),
 		strs.IsNotEmpty)
 }
 
-// GetConfigAllU gets a all Git configuration values unsplitted for key `key`.
-func (c *Context) GetConfigAllU(key string, scope ConfigScope) string {
-	return c.getConfigWithArgs(key, scope, "--get-all")
+type KeyValue struct {
+	Key   string
+	Value string
 }
 
 // GetConfigRegex gets all Git configuration values for regex `regex`.
 // Returns a list of pairs.
-func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]string) {
+func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res []KeyValue) {
 	configs, err := c.Get("config", "--includes", string(scope), "--get-regexp", regex)
 
 	if err != nil {
@@ -129,7 +134,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 	list := strs.SplitLines(configs)
 	sort.Strings(list)
 
-	res = make([][]string, 0, len(list))
+	res = make([]KeyValue, 0, len(list))
 
 	for i := range list {
 		if strs.IsEmpty(list[i]) {
@@ -143,7 +148,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 			keyValue = append(keyValue, "")
 		}
 
-		res = append(res, keyValue)
+		res = append(res, KeyValue{keyValue[0], keyValue[1]})
 	}
 
 	return

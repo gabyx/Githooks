@@ -31,7 +31,7 @@ func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
 	case LocalScope:
 		return c.scopes[0]
 	default:
-		cm.DebugAssertF(false, "Wrong scope '%s'", scope)
+		cm.PanicF("Wrong scope '%s'", scope)
 
 		return nil
 	}
@@ -93,13 +93,15 @@ func parseConfig(s string) (c ConfigCache, err error) {
 
 func NewConfigCache(gitx Context) (ConfigCache, error) {
 
-	conf, err := gitx.Get("config", "--list", "--null", "--show-scope")
+	conf, err := gitx.Get("config", "--includes", "--list", "--null", "--show-scope")
 	if err != nil {
 		return ConfigCache{}, nil
 	}
 
 	return parseConfig(conf)
 }
+
+func (c *ConfigCache) SyncChangedValues() {}
 
 func (c *ConfigCache) add(key string, value string, scope ConfigScope, changed bool) {
 	m := c.getScopeMap(scope)
@@ -114,22 +116,31 @@ func (c *ConfigCache) add(key string, value string, scope ConfigScope, changed b
 	val.changed = changed
 }
 
-func (c *ConfigCache) set(key string, value string, scope ConfigScope, changed bool) error {
-	m := c.getScopeMap(scope)
-
-	val, exists := m[key]
-	if exists {
-		if len(val.values) > 1 {
-			return cm.ErrorF("Cannot overwrite multiple values in '%v'.", key)
+// Get all config values for key `key` in the cache.
+func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exists bool) {
+	if scope == Traverse {
+		val, exists = c.GetAll(key, LocalScope)
+		if !exists {
+			val, exists = c.GetAll(key, GlobalScope)
+			if !exists {
+				val, exists = c.GetAll(key, SystemScope)
+			}
 		}
+
+		return
 	}
 
-	c.add(key, value, scope, changed)
+	m := c.getScopeMap(scope)
+	v, inMap := m[key]
+	if inMap && v.values != nil {
+		val = append(val, v.values...) // dont return reference to internal slice.
+		exists = true
+	}
 
-	return nil
+	return
 }
 
-// Get a config value in the cache.
+// Get a config value for key `key` in the cache.
 func (c *ConfigCache) Get(key string, scope ConfigScope) (val string, exists bool) {
 	if scope == Traverse {
 		val, exists = c.Get(key, LocalScope)
@@ -144,8 +155,8 @@ func (c *ConfigCache) Get(key string, scope ConfigScope) (val string, exists boo
 	}
 
 	m := c.getScopeMap(scope)
-	v, exists := m[key]
-	if exists {
+	v, inMap := m[key]
+	if inMap && v.values != nil {
 		// Get always the last value defined.
 		// Git config behavior for multiple values for one key.
 		val = v.values[len(v.values)-1]
@@ -155,12 +166,48 @@ func (c *ConfigCache) Get(key string, scope ConfigScope) (val string, exists boo
 	return
 }
 
-// Set a config value `value` for `key` in the cache.
-func (c *ConfigCache) Set(key string, value string, scope ConfigScope) error {
-	return c.set(key, value, scope, true)
+// Set sets a config value `value` for `key` in the cache.
+func (c *ConfigCache) Set(key string, value string, scope ConfigScope) (added bool) {
+	m := c.getScopeMap(scope)
+
+	val, inMap := m[key]
+	cm.PanicIfF(inMap && len(val.values) > 1,
+		"Cannot overwrite multiple values in '%v'.", key)
+
+	if !inMap || val.values == nil {
+		c.add(key, value, scope, true)
+		added = true
+	} else if val.values[0] != value {
+		val.values[0] = value
+		val.changed = true
+	}
+
+	return
 }
 
-// ADd a config value `value` to a `key` in the cache.
+// IsSet tells if a config value for `key` is set in the cache.
+func (c *ConfigCache) IsSet(key string, scope ConfigScope) (exists bool) {
+	_, exists = c.Get(key, scope)
+
+	return
+}
+
+// Add a config value `value` to a `key` in the cache.
 func (c *ConfigCache) Add(key string, value string, scope ConfigScope) {
 	c.add(key, value, scope, true)
+}
+
+// Unset unsets all config values for `key` is set in the cache.
+func (c *ConfigCache) Unset(key string, scope ConfigScope) bool {
+	m := c.getScopeMap(scope)
+
+	val, exists := m[key]
+	if !exists || val.values == nil {
+		return false
+	}
+
+	val.changed = true
+	val.values = nil
+
+	return true
 }

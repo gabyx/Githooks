@@ -280,11 +280,11 @@ func (c *sharedHookConfig) RemoveURL(url string) (removed int) {
 
 func loadConfigSharedHooks(gitx *git.Context, scope git.ConfigScope) sharedHookConfig {
 	config := createSharedHookConfig()
-	data := gitx.GetConfigAllU(GitCKShared, scope)
+	data := gitx.GetConfigAll(GitCKShared, scope)
 
-	if strs.IsNotEmpty(data) {
+	if data != nil {
 		config = createSharedHookConfig()
-		config.Urls = strs.MakeUnique(strs.SplitLines(data))
+		config.Urls = strs.MakeUnique(data)
 	}
 
 	return config

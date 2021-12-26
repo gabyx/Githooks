@@ -47,6 +47,14 @@ func TestGitConfigCache(t *testing.T) {
 	_, exists := c.Get("a.aa", GlobalScope)
 	assert.False(t, exists)
 
+	// Set
+	c.Set("s.s", "upsi", LocalScope)
+	c.Set("s.s", "upsi", LocalScope)
+	v, exists := c.GetAll("s.s", LocalScope)
+	assert.True(t, exists)
+	assert.Equal(t, 1, len(v))
+
+	// Add
 	c.Add("a.aa", "upsi", GlobalScope)
 	val, _ = c.Get("a.aa", GlobalScope)
 	assert.Equal(t, "upsi", val)
@@ -55,7 +63,16 @@ func TestGitConfigCache(t *testing.T) {
 	val, _ = c.Get("a.aa", GlobalScope)
 	assert.Equal(t, "upsi2", val)
 
-	e := c.Set("a.aa", "upsi2", GlobalScope)
-	assert.NotNil(t, e)
+	assert.Panics(t, func() { c.Set("a.aa", "upsi2", GlobalScope) })
+	assert.False(t, c.IsSet("a.aa", SystemScope))
+	assert.False(t, c.IsSet("a.aa", LocalScope))
+	assert.True(t, c.IsSet("a.aa", GlobalScope))
+	assert.True(t, c.IsSet("a.aa", Traverse))
 
+	assert.Panics(t, func() { c.Unset("a.aa", Traverse) })
+	assert.False(t, c.Unset("a.aa", LocalScope))
+	c.Add("a.aa", "upsi2", LocalScope)
+	assert.True(t, c.Unset("a.aa", GlobalScope))
+	assert.False(t, c.IsSet("a.aa", GlobalScope))
+	assert.True(t, c.IsSet("a.aa", Traverse))
 }
