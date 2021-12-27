@@ -35,7 +35,7 @@ func InstallIntoRepo(
 	isBare := gitxR.IsBareRepo()
 
 	var err error
-	if hookNames == nil {
+	if len(hookNames) == 0 {
 		hookNames, err = hooks.GetMaintainedHooks(gitxR, git.Traverse)
 		log.AssertNoErrorF(err, "Could not get maintained hooks.")
 	}

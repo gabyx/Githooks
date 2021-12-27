@@ -9,6 +9,8 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+var commandScope = ConfigScope("--command")
+
 type ConfigEntry struct {
 	name    string
 	values  []string
@@ -19,17 +21,19 @@ type ConfigMap map[string]*ConfigEntry
 
 // GitConfigCache for faster read access.
 type ConfigCache struct {
-	scopes [3]ConfigMap
+	scopes [4]ConfigMap
 }
 
 func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
 
 	switch scope {
 	case SystemScope:
-		return c.scopes[2]
+		return c.scopes[3]
 	case GlobalScope:
-		return c.scopes[1]
+		return c.scopes[2]
 	case LocalScope:
+		return c.scopes[1]
+	case commandScope:
 		return c.scopes[0]
 	default:
 		cm.PanicF("Wrong scope '%s'", scope)
@@ -40,7 +44,8 @@ func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
 
 func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err error) {
 
-	c.scopes = [3]ConfigMap{
+	c.scopes = [4]ConfigMap{
+		make(ConfigMap),
 		make(ConfigMap),
 		make(ConfigMap),
 		make(ConfigMap)}
@@ -114,6 +119,9 @@ func (c *ConfigCache) getAll(key string, scope ConfigScope) (val []string, exist
 			val, exists = c.GetAll(key, GlobalScope)
 			if !exists {
 				val, exists = c.GetAll(key, LocalScope)
+				if !exists {
+					val, exists = c.GetAll(key, commandScope)
+				}
 			}
 		}
 
@@ -141,6 +149,7 @@ func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals [
 		vals = append(vals, c.GetAllRegex(key, SystemScope)...)
 		vals = append(vals, c.GetAllRegex(key, GlobalScope)...)
 		vals = append(vals, c.GetAllRegex(key, LocalScope)...)
+		vals = append(vals, c.GetAllRegex(key, commandScope)...)
 
 		return
 	}
@@ -160,11 +169,14 @@ func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals [
 // Get a config value for key `key` in the cache.
 func (c *ConfigCache) get(key string, scope ConfigScope) (val string, exists bool) {
 	if scope == Traverse {
-		val, exists = c.Get(key, LocalScope)
+		val, exists = c.Get(key, commandScope)
 		if !exists {
-			val, exists = c.Get(key, GlobalScope)
+			val, exists = c.Get(key, LocalScope)
 			if !exists {
-				val, exists = c.Get(key, SystemScope)
+				val, exists = c.Get(key, GlobalScope)
+				if !exists {
+					val, exists = c.Get(key, SystemScope)
+				}
 			}
 		}
 
