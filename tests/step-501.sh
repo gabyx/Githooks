@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 acceptAllTrustPrompts || exit 1
 
-git -C "$GH_TEST_REPO" reset --hard v2.0.0 >/dev/null 2>&1 || exit 1
+git -C "$GH_TEST_REPO" reset --hard v2.1.0 >/dev/null 2>&1 || exit 1
 
 # run the default install
 "$GH_TEST_BIN/cli" installer &>/dev/null || exit 1

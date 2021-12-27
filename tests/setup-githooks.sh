@@ -28,16 +28,16 @@ echo "Make test Git repo to clone from ..." &&
 cd "$GH_TEST_REPO/githooks" &&
     git checkout -b "test-download" &&
     git commit -a --allow-empty \
-        -m "Build version 2.0.0 for download test over Github" >/dev/null 2>&1 &&
-    git tag "v2.0.0" &&
+        -m "Build version 2.1.0 for download test over Github" >/dev/null 2>&1 &&
+    git tag "v2.1.0" &&
     ./scripts/clean.sh &&
     ./scripts/build.sh "${buildAddArgs[@]}" --prod --benchmark &&
     ./bin/cli "${cliAddArgs[@]}" --version || exit 1
-echo "Commit build v2.0.0 to repo (for test download) ..." &&
+echo "Commit build v2.1.0 to repo (for test download) ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
-    git commit -a --allow-empty -m "Version 2.0.0" >/dev/null 2>&1 &&
-    git tag -f "v2.0.0" || exit 1
+    git commit -a --allow-empty -m "Version 2.1.0" >/dev/null 2>&1 &&
+    git tag -f "v2.1.0" || exit 1
 
 # Setup server repository from which we install updates
 # branch: main
