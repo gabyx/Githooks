@@ -6,6 +6,11 @@ TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+if [ -n "$GH_COVERAGE_DIR" ]; then
+    echo "Benchmark not for coverage."
+    exit 249
+fi
+
 acceptAllTrustPrompts || exit 1
 
 git -C "$GH_TEST_REPO" reset --hard v2.1.0 >/dev/null 2>&1 || exit 1
@@ -34,11 +39,11 @@ function average() {
     input=$(cat | grep "execution time:" | sed -E "s/.*'(.*)ms.*/\1/g")
 
     while read -r val; do
-        total=$(echo "$total+$val" | bc)
+        total=$((total + val))
         ((count++))
     done <<<"$input"
 
-    time=$(echo "scale=4; $total / $count" | bc)
+    time=$((total / count))
 
     echo "execution time: '$time""ms'"
 }
