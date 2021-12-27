@@ -62,7 +62,7 @@ func findGoExec(cwd string) (cm.CmdContext, error) {
 	// Check from config.
 	goExec := git.NewCtx().GetConfig(hooks.GitCKGoExecutable, git.GlobalScope)
 	if strs.IsNotEmpty(goExec) && cm.IsFile(goExec) {
-		gox = cm.NewCommandNewCtx(goExec, cwd, nil)
+		gox = cm.NewCommandCtx(goExec, cwd, nil)
 
 		e := check(gox)
 		if e == nil {
@@ -72,7 +72,7 @@ func findGoExec(cwd string) (cm.CmdContext, error) {
 	}
 
 	// Check globally in path.
-	gox = cm.NewCommandNewCtx("go", cwd, nil)
+	gox = cm.NewCommandCtx("go", cwd, nil)
 	e := check(gox)
 	if e == nil {
 		return gox, nil
