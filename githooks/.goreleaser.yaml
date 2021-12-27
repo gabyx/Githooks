@@ -74,8 +74,8 @@ changelog:
     # Commit messages matching the regexp listed here will be removed from
     # the changelog
     exclude:
-      - '^[np]'
-      - '^[docs]'
+      - '^\[np\]'
+      - '^\[docs\]'
 signs:
   - artifacts: checksum
     cmd: gpg
