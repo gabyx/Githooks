@@ -86,7 +86,7 @@ release:
   github:
     owner: gabyx
     name: githooks
-
+  prerelease: auto
 # Use these values for you own gitea instance...
 # gitea_urls:
 #   api: "https://git.company.com/api/v1"
