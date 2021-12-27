@@ -76,8 +76,7 @@ const EnvVariableArch = "GITHOOKS_ARCH"
 const EnvVariableStagedFiles = "STAGED_FILES"
 
 // GetBugReportingInfo gets the default bug reporting url. Argument 'repoPath' can be empty.
-func GetBugReportingInfo(repoPath string) (info string, err error) {
-	var exists bool
+func GetBugReportingInfo() (info string) {
 
 	// Set default if needed
 	defer func() {
@@ -85,19 +84,6 @@ func GetBugReportingInfo(repoPath string) (info string, err error) {
 			info = strs.Fmt("-> Report this bug to: '%s'", DefaultBugReportingURL)
 		}
 	}()
-
-	// Check in the repo if possible
-	if !strs.IsEmpty(repoPath) {
-		file := path.Join(GetGithooksDir(repoPath), ".bug-report")
-		exists, err = cm.IsPathExisting(file)
-
-		if exists {
-			data, err := os.ReadFile(file)
-			if err == nil {
-				info = string(data)
-			}
-		}
-	}
 
 	// Check global Git config
 	info = git.Ctx().GetConfig(GitCKBugReportInfo, git.GlobalScope)

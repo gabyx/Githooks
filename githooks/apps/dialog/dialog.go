@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"os/signal"
-	"path/filepath"
 
 	"github.com/gabyx/githooks/githooks/apps/dialog/cmd"
 	dcm "github.com/gabyx/githooks/githooks/apps/dialog/cmd/common"
@@ -29,10 +28,6 @@ func mainRun() (exitCode int) {
 	}()
 	// ===============================================================
 
-	cwd, err := os.Getwd()
-	cm.AssertNoErrorPanic(err, "Could not get current working dir.")
-	cwd = filepath.ToSlash(cwd)
-
 	// We only log to stderr, because we need stdout for the output.
 	log, err := cm.CreateLogContext(true)
 	cm.AssertOrPanic(err == nil, "Could not create log")
@@ -40,7 +35,7 @@ func mainRun() (exitCode int) {
 	// Handle all panics and report the error
 	defer func() {
 		r := recover()
-		if cm.HandleCLIErrors(r, cwd, log, hooks.GetBugReportingInfo) {
+		if cm.HandleCLIErrors(r, log, hooks.GetBugReportingInfo) {
 			exitCode = 111
 		}
 	}()
