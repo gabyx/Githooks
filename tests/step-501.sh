@@ -41,8 +41,8 @@ function average() {
     # Skip the first 3 runs, because it contains registration etc...
     input=$(cat | grep "execution time:" | sed -E "s/.*'(.*)ms.*/\1/g" | sed -n '3d;p')
 
-    while IFS= read -r val; do
-        total=$(calc "$total" + "$val")
+    while read -r val; do
+        total=$(calc "$total + $val")
         ((count++))
     done <<<"$input"
 
