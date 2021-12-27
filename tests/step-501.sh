@@ -51,6 +51,6 @@ function average() {
     echo "execution time: '$time""ms'"
 }
 
-echo "Runtime average (no load): $(runCommits | average)"
+echo "Runtime average (commit, no load): $(runCommits | average)"
 
 exit 250
