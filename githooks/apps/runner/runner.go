@@ -39,8 +39,8 @@ func mainRun() (exitCode int) {
 	if cm.IsBenchmark {
 		startTime := cm.GetStartTime()
 		defer func() {
-			log.InfoF("Runner execution time: '%v'.",
-				cm.GetDuration(startTime))
+			log.InfoF("Runner execution time: '%v' ms.",
+				float64(cm.GetDuration(startTime))/float64(time.Millisecond))
 		}()
 	}
 
