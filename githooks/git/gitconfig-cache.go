@@ -63,8 +63,9 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 	}
 
 	addEntry := func(scope ConfigScope, keyValue []string) {
-		cm.DebugAssert(len(keyValue) == 2)                  // nolint: gomnd
-		if len(keyValue) != 2 || !filterFunc(keyValue[0]) { // nolint: gomnd
+		cm.DebugAssert(len(keyValue) == 2) // nolint: gomnd
+		if len(keyValue) != 2 ||
+			(filterFunc != nil && !filterFunc(keyValue[0])) { // nolint: gomnd
 			return
 		}
 

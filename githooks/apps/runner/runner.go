@@ -141,7 +141,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	// Current git context, in current working dir.
 	gitx := git.NewCtx()
-	log.AssertNoErrorF(gitx.InitConfigCache(hooks.FilterGitConfigCache),
+	log.AssertNoErrorF(gitx.InitConfigCache(nil),
 		"Could not init git config cache.")
 
 	gitDir, err := gitx.GetGitDirWorktree()
@@ -449,6 +449,7 @@ func executeOldHook(
 	}
 
 	hooks, _, err := hooks.GetAllHooksIn(
+		settings.GitX,
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace,
 		isIgnored, isTrusted, true, false)
@@ -750,6 +751,7 @@ func getHooksIn(
 	}
 
 	allHooks, maxBatches, err := hooks.GetAllHooksIn(
+		settings.GitX,
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace,
 		isIgnored, isTrusted, true, true)
