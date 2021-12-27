@@ -120,35 +120,36 @@ func SetMaintainedHooks(
 }
 
 // getMaintainedHooksFromString gets all maintained hooks.
-func getMaintainedHooksFromString(maintainedHooks string) (hookNames []string, err error) {
-	if strs.IsEmpty(maintainedHooks) {
-		return ManagedHookNames, nil
-	}
+func getMaintainedHooksFromString(maintainedHooks string) (hookNamesUnwrapped []string,
+	maintHooks []string, err error) {
 
-	hookNames = strings.Split(maintainedHooks, ",")
-	hookNames, err = CheckHookNames(hookNames)
-	hookNames, e := UnwrapHookNames(hookNames)
-	err = cm.CombineErrors(err, e)
+	if strs.IsNotEmpty(maintainedHooks) {
+		maintHooks = strings.Split(maintainedHooks, ",")
+		maintHooks, err = CheckHookNames(maintHooks)
 
-	if err != nil {
+		var e error
+		hookNamesUnwrapped, e = UnwrapHookNames(maintHooks)
+		err = cm.CombineErrors(err, e)
+
+		if err == nil {
+			return
+		}
+
 		err = cm.CombineErrors(err,
 			cm.ErrorF("Maintained hooks '%s' is not valid. Fallback to all hooks.", maintainedHooks))
-
-		return ManagedHookNames, err
 	}
 
-	return
+	return ManagedHookNames, []string{"all"}, err
 }
 
 // Get the maintained hooks from the Git config at scope `scope`.
 // If an error occurs, all Githooks supported hooks are returned by default.
 func GetMaintainedHooks(
 	gitx *git.Context,
-	scope git.ConfigScope) (hookNames []string, err error) {
+	scope git.ConfigScope) (hookNames []string, maintainedHooks []string, err error) {
 	h := git.NewCtx().GetConfig(GitCKMaintainedHooks, scope)
 
 	return getMaintainedHooksFromString(h)
-
 }
 
 // Get all other hooks from `ManagedHookNames` which are not in `hookNames`.

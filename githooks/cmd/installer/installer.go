@@ -845,17 +845,18 @@ func setupHookTemplates(
 	log.InfoF("Saving Githooks run-wrapper to '%s' :", hookTemplateDir)
 
 	var err error
+	var hookNames []string
 	if len(maintainedHooks) == 0 {
-		maintainedHooks, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
-		log.AssertNoError(err, "Could not get config.")
+		hookNames, maintainedHooks, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
+		log.AssertNoError(err, "Could not get maintained hooks config.")
+	} else {
+		hookNames, err = hooks.UnwrapHookNames(maintainedHooks)
+		log.AssertNoErrorPanic(err, "Could not build maintained hook list.")
 	}
-
-	allHooks, err := hooks.UnwrapHookNames(maintainedHooks)
-	log.AssertNoErrorPanic(err, "Could not build maintained hook list.")
 
 	nLFSHooks, err := hooks.InstallRunWrappers(
 		hookTemplateDir,
-		allHooks,
+		hookNames,
 		func(dest string) {
 			log.InfoF(" %s '%s'", cm.ListItemLiteral, path.Base(dest))
 		},
@@ -866,10 +867,10 @@ func setupHookTemplates(
 
 	if nLFSHooks != 0 {
 		log.InfoF("Installed '%v' Githooks run-wrappers and '%v' missing LFS hooks into '%s'.",
-			len(allHooks), nLFSHooks, hookTemplateDir)
+			len(hookNames), nLFSHooks, hookTemplateDir)
 	} else {
 		log.InfoF("Installed '%v' Githooks run-wrappers into '%s'.",
-			len(allHooks), hookTemplateDir)
+			len(hookNames), hookTemplateDir)
 	}
 
 	// Set maintained hooks in global settings, such that
