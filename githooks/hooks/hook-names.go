@@ -132,7 +132,7 @@ func getMaintainedHooksFromString(maintainedHooks string) (hookNames []string, e
 
 	if err != nil {
 		err = cm.CombineErrors(err,
-			cm.ErrorF("Maintained hooks '%s' is not valid.", maintainedHooks))
+			cm.ErrorF("Maintained hooks '%s' is not valid. Fallback to all hooks.", maintainedHooks))
 
 		return ManagedHookNames, err
 	}
@@ -145,17 +145,7 @@ func getMaintainedHooksFromString(maintainedHooks string) (hookNames []string, e
 func GetMaintainedHooks(
 	gitx *git.Context,
 	scope git.ConfigScope) (hookNames []string, err error) {
-
 	h := git.NewCtx().GetConfig(GitCKMaintainedHooks, scope)
-
-	if err != nil {
-		err = cm.CombineErrors(err, cm.ErrorF("Could not read maintained hooks from Git config '%s'.\n"+
-			"  cwd: '%s'\n"+
-			"-> Fallback to all supported hooks.",
-			GitCKMaintainedHooks, gitx.GetCwd()))
-
-		return ManagedHookNames, err
-	}
 
 	return getMaintainedHooksFromString(h)
 

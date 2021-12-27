@@ -842,13 +842,10 @@ func setupHookTemplates(
 		return // nolint:nlreturn
 	}
 
-	log.InfoF("Installing Git hook templates into '%s'.",
-		hookTemplateDir)
-
 	log.InfoF("Saving Githooks run-wrapper to '%s' :", hookTemplateDir)
 
 	var err error
-	if maintainedHooks == nil {
+	if len(maintainedHooks) == 0 {
 		maintainedHooks, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
 		log.AssertNoError(err, "Could not get config.")
 	}

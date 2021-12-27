@@ -328,7 +328,7 @@ func reinstallLFSHooks(
 	hookNames []string,
 	lfsHooksCache LFSHooksCache) (count int, err error) {
 
-	if hookNames == nil {
+	if len(hookNames) == 0 {
 		return
 	}
 

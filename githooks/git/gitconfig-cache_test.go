@@ -16,15 +16,18 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00local\x00a.a\na2" +
 		"\x00local\x00a.b\na3.1\na3.2\na3.3" +
 		"\x00local\x00a.c\nc1\x00\x00\x00\x00" +
-		"\x00global\x00a.a\na3"
+		"\x00global\x00a.a\na3" +
+		"\x00command\x00t.t\na3"
 
 	c, err := parseConfig(s, func(string) bool { return true })
 
-	local := c.scopes[0]
-	global := c.scopes[1]
-	system := c.scopes[2]
+	command := c.scopes[0]
+	local := c.scopes[1]
+	global := c.scopes[2]
+	system := c.scopes[3]
 
 	assert.Nil(t, err)
+	assert.Equal(t, 1, len(command))
 	assert.Equal(t, 1, len(system))
 	assert.Equal(t, 2, len(global))
 	assert.Equal(t, 3, len(local))
