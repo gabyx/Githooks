@@ -34,12 +34,16 @@ function runCommits() {
 function calc() { awk "BEGIN{print $*}"; }
 
 function average() {
+    local skip="$1"
     local count=0
     local total=0
 
     local input
-    # Skip the first 3 runs, because it contains registration etc...
-    input=$(cat | grep "execution time:" | sed -E "s/.*([0-9.]+).*/\1/g" | sed -n '3d;p')
+    input=$(cat | grep "execution time:" | sed -E "s/.*'([0-9\.]+)'.*/\1/g")
+    # echo "$input"
+
+    # Skip the first `$skip` runs, because it contains registration etc...
+    [ -n "$skip" ] && input=$(echo "$input" | sed -n "1,$skip""d;p")
 
     while IFS= read -r val; do
         total=$(calc "$total" + "$val")
@@ -48,9 +52,9 @@ function average() {
 
     time=$(calc "$total" / "$count")
 
-    echo "execution time: '$time""ms'"
+    echo "execution time: '$time' ms."
 }
 
-echo "Runtime average (no load): $(runCommits | average)"
+echo "Runtime average (no load): $(runCommits | average 3)"
 
 exit 250
