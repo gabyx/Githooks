@@ -109,7 +109,7 @@ func SetMaintainedHooks(
 		maintainedHooks = append(maintainedHooks, "all")
 	}
 
-	err = git.Ctx().SetConfig(GitCKMaintainedHooks, strings.Join(maintainedHooks, ", "), scope)
+	err = git.NewCtx().SetConfig(GitCKMaintainedHooks, strings.Join(maintainedHooks, ", "), scope)
 
 	if err != nil {
 		err = cm.CombineErrors(err, cm.ErrorF("Could not set Git config '%s'.",
@@ -146,7 +146,7 @@ func GetMaintainedHooks(
 	gitx *git.Context,
 	scope git.ConfigScope) (hookNames []string, err error) {
 
-	h := git.Ctx().GetConfig(GitCKMaintainedHooks, scope)
+	h := git.NewCtx().GetConfig(GitCKMaintainedHooks, scope)
 
 	if err != nil {
 		err = cm.CombineErrors(err, cm.ErrorF("Could not read maintained hooks from Git config '%s'.\n"+

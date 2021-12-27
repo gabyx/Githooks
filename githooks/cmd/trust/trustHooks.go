@@ -7,6 +7,7 @@ import (
 	"github.com/gabyx/githooks/githooks/cmd/ignore"
 	"github.com/gabyx/githooks/githooks/cmd/list"
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 
 	"github.com/spf13/cobra"
@@ -23,23 +24,26 @@ func getAllHooks(
 
 	allHooks = make([]hooks.Hook, 0, 10+2*shared.GetCount()) // nolint: gomnd
 
+	gitx := git.NewCtxAt(repoDir)
+
 	for _, hookName := range hookNames {
 
 		// List replaced hooks (normally only one)
 		replacedHooks := list.GetAllHooksIn(
-			log, repoDir, path.Join(gitDir, "hooks"), hookName,
+			log, gitx, repoDir, path.Join(gitDir, "hooks"), hookName,
 			hooks.NamespaceReplacedHook, state, false, true)
 		allHooks = append(allHooks, replacedHooks...)
 
 		// List repository hooks
-		repoHooks := list.GetAllHooksIn(log, repoDir, repoHooksDir, hookName,
+		repoHooks := list.GetAllHooksIn(log, gitx, repoDir, repoHooksDir, hookName,
 			hooks.NamespaceRepositoryHook, state, false, false)
 		allHooks = append(allHooks, repoHooks...)
 
 		// List all shared hooks
 		sharedCount := 0
 		for idx, sharedRepos := range shared {
-			coll, count := list.GetAllHooksInShared(log, hookName, state, sharedRepos, hooks.SharedHookType(idx))
+			coll, count := list.GetAllHooksInShared(log, gitx,
+				hookName, state, sharedRepos, hooks.SharedHookType(idx))
 			sharedCount += count
 
 			for i := range coll {

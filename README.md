@@ -611,7 +611,7 @@ not globally be defined.
 | `GITHOOKS_OS` (defined)                        | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
 | `GITHOOKS_ARCH` (defined)                      | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
 | `GITHOOKS_DISABLE`                             | If defined, disables running hooks run by Githooks,<br>except `git lfs` and the replaced old hooks.                       |
-| `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution.                                                         |
+| `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution. A value of `1` enables more output.                     |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
 | `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).           |
 
@@ -728,8 +728,8 @@ cli installer \
 
 This will only support the mentioned hooks in the template directory (e.g. for
 new clones). You can still overwrite selectively for a repository by
-[installing another set of hooks](#installing-or-removing-run-wrappers).
-Missing Git LFS hooks will always be placed if necessary.
+[installing another set of hooks](#installing-or-removing-run-wrappers). Missing
+Git LFS hooks will always be placed if necessary.
 
 If you want, you can try out what the script would do first, without changing
 anything by using:

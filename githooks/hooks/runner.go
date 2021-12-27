@@ -48,6 +48,7 @@ func loadRunnerConfig(hookPath string) (data runnerConfigFile, err error) {
 // Any command in a runner config YAML with path separators will
 // be made absolute to `rootDir`.
 func GetHookRunCmd(
+	gitx *git.Context,
 	hookPath string,
 	parseRunnerConfig bool,
 	rootDir string) (cm.IExecutable, error) {
@@ -68,7 +69,7 @@ func GetHookRunCmd(
 		return nil, cm.ErrorF("Could not read runner config '%s'", hookPath)
 	}
 
-	subst := getVarSubstitution(os.LookupEnv, git.Ctx().LookupConfig)
+	subst := getVarSubstitution(os.LookupEnv, gitx.LookupConfig)
 
 	// Substitute variables in command.
 	var err error
@@ -130,7 +131,7 @@ func getVarSubstitution(
 			case "git-g":
 				subs, exists = gitGet(match[4], git.GlobalScope)
 			case "git-s":
-				subs, exists = gitGet(match[4], git.System)
+				subs, exists = gitGet(match[4], git.SystemScope)
 			default:
 				cm.DebugAssert(false, "This should not happen.")
 			}

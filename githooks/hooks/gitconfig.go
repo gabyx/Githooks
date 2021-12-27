@@ -110,3 +110,11 @@ func GetLocalGitConfigKeys() []string {
 
 		GitCKRunnerIsNonInteractive}
 }
+
+// var filterRegex = regexp.MustCompile(`^(githooks\.|alias.hooks|core.hook|init.template)`)
+
+// FilterGitConfigCache filters  for filtering the Git config cache.
+func FilterGitConfigCache(key string) bool {
+	return true
+	// Cannot filter, because `hooks.runner` needs all variables due to replacements.`
+}

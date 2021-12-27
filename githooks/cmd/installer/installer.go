@@ -282,7 +282,7 @@ func buildFromSource(
 
 	// Checkout the remote commit sha
 	log.InfoF("Checkout out commit '%s'", commitSHA[0:6])
-	gitx := git.CtxC(tempDir)
+	gitx := git.NewCtxAt(tempDir)
 	err = gitx.Check("checkout",
 		"-b", "update-to-"+commitSHA[0:6],
 		commitSHA)
@@ -1059,7 +1059,7 @@ func setupSharedRepositories(
 	dryRun bool,
 	uiSettings *install.UISettings) {
 
-	gitx := git.Ctx()
+	gitx := git.NewCtx()
 	sharedRepos := gitx.GetConfigAll(hooks.GitCKShared, git.GlobalScope)
 
 	var question string
@@ -1146,7 +1146,7 @@ func storeSettings(log cm.ILogContext, settings *Settings, uiSettings *install.U
 	// Store cached UI values back.
 
 	if strs.IsNotEmpty(uiSettings.DeleteDetectedLFSHooks) {
-		err := git.Ctx().SetConfig(
+		err := git.NewCtx().SetConfig(
 			hooks.GitCKDeleteDetectedLFSHooksAnswer, uiSettings.DeleteDetectedLFSHooks, git.GlobalScope)
 		log.AssertNoError(err, "Could not store config '%v'.", uiSettings.DeleteDetectedLFSHooks)
 	}
@@ -1159,7 +1159,7 @@ func storeSettings(log cm.ILogContext, settings *Settings, uiSettings *install.U
 	if err != nil {
 		for _, gitDir := range settings.InstalledGitDirs.ToList() {
 			// For each installedGitDir entry, mark the repository as registered.
-			err := hooks.MarkRepoRegistered(git.CtxC(gitDir))
+			err := hooks.MarkRepoRegistered(git.NewCtxAt(gitDir))
 			log.AssertNoErrorF(err, "Could not mark Git directory '%s' as registered.", gitDir)
 		}
 	}
@@ -1379,5 +1379,5 @@ func transformLegacyGitConfigSettings(log cm.ILogContext, gitx *git.Context) {
 		log.AssertNoError(err, "Could not set maintained hooks to 'server'.")
 	}
 
-	_ = git.Ctx().UnsetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
+	_ = git.NewCtx().UnsetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
 }

@@ -212,7 +212,7 @@ func parseSharedURL(installDir string, url string) (h SharedRepo, err error) {
 
 		h.IsLocal = true
 
-		if !git.CtxC(url).IsBareRepo() {
+		if !git.NewCtxAt(url).IsBareRepo() {
 			// We have a local path to a non-bare repo
 			h.IsCloned = false
 			h.RepositoryDir = url
@@ -280,11 +280,11 @@ func (c *sharedHookConfig) RemoveURL(url string) (removed int) {
 
 func loadConfigSharedHooks(gitx *git.Context, scope git.ConfigScope) sharedHookConfig {
 	config := createSharedHookConfig()
-	data := gitx.GetConfigAllU(GitCKShared, scope)
+	data := gitx.GetConfigAll(GitCKShared, scope)
 
-	if strs.IsNotEmpty(data) {
+	if data != nil {
 		config = createSharedHookConfig()
-		config.Urls = strs.MakeUnique(strs.SplitLines(data))
+		config.Urls = strs.MakeUnique(data)
 	}
 
 	return config
@@ -534,7 +534,7 @@ func ClearLocalSharedHooks(gitx *git.Context) error {
 
 // ClearGlobalSharedHooks clears the shared hook list in the global Git config.
 func ClearGlobalSharedHooks() error {
-	return git.Ctx().UnsetConfig(GitCKShared, git.GlobalScope)
+	return git.NewCtx().UnsetConfig(GitCKShared, git.GlobalScope)
 }
 
 // GetSharedHookTypeString translates the shared type enum to a string.
@@ -557,7 +557,7 @@ func GetSharedHookTypeString(sharedType SharedHookType) string {
 // contains the same remote URL as the requested.
 func (s *SharedRepo) IsCloneValid() bool {
 	if s.IsCloned {
-		return git.CtxC(s.RepositoryDir).GetConfig("remote.origin.url", git.LocalScope) == s.URL
+		return git.NewCtxAt(s.RepositoryDir).GetConfig("remote.origin.url", git.LocalScope) == s.URL
 	}
 	cm.DebugAssert(false)
 

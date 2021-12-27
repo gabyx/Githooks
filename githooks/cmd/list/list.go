@@ -183,20 +183,25 @@ func listHooksForName(
 	withBatchName bool) (string, int) {
 
 	// List replaced hooks (normally only one)
+	gitx := git.NewCtxAt(repoDir)
 	replacedHooks := GetAllHooksIn(
-		log, repoDir, path.Join(gitDir, "hooks"), hookName,
+		log, gitx,
+		repoDir, path.Join(gitDir, "hooks"), hookName,
 		hooks.NamespaceReplacedHook, state, false, true)
 
 	// List repository hooks
 	repoHooks := GetAllHooksIn(
-		log, repoDir, repoHooksDir, hookName,
+		log, gitx,
+		repoDir, repoHooksDir, hookName,
 		hooks.NamespaceRepositoryHook, state, false, false)
 
 	// List all shared hooks
 	sharedCount := 0
 	all := make([]SharedHooks, 0, shared.GetCount())
 	for idx, sharedRepos := range shared {
-		coll, count := GetAllHooksInShared(log, hookName, state, sharedRepos, hooks.SharedHookType(idx))
+		coll, count := GetAllHooksInShared(
+			log, gitx,
+			hookName, state, sharedRepos, hooks.SharedHookType(idx))
 		sharedCount += count
 		all = append(all, coll...)
 	}
@@ -260,6 +265,7 @@ type SharedHooks struct {
 // GetAllHooksInShared gets all hooks in shared repositories.
 func GetAllHooksInShared(
 	log cm.ILogContext,
+	gitx *git.Context,
 	hookName string,
 	state *ListingState,
 	sharedRepos []hooks.SharedRepo,
@@ -275,15 +281,15 @@ func GetAllHooksInShared(
 		var allHooks []hooks.Hook
 
 		if dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(dir) {
-			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir,
+			allHooks = GetAllHooksIn(log, gitx, shRepo.RepositoryDir,
 				dir, hookName, hookNamespace, state, true, false)
 
 		} else if dir := hooks.GetGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(dir) {
-			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir,
+			allHooks = GetAllHooksIn(log, gitx, shRepo.RepositoryDir,
 				dir, hookName, hookNamespace, state, true, false)
 
 		} else {
-			allHooks = GetAllHooksIn(log, shRepo.RepositoryDir,
+			allHooks = GetAllHooksIn(log, gitx, shRepo.RepositoryDir,
 				shRepo.RepositoryDir, hookName, hookNamespace, state, true, false)
 		}
 
@@ -303,6 +309,7 @@ func GetAllHooksInShared(
 // GetAllHooksIn gets all hooks in a hooks directory.
 func GetAllHooksIn(
 	log cm.ILogContext,
+	gitx *git.Context,
 	rootDir string,
 	hooksDir string,
 	hookName string,
@@ -360,6 +367,7 @@ func GetAllHooksIn(
 	}
 
 	allHooks, _, err := hooks.GetAllHooksIn(
+		gitx,
 		rootDir, hooksDir,
 		hookName, hookNamespace,
 		isIgnored, isTrusted, false,

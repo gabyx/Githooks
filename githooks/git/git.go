@@ -2,6 +2,7 @@ package git
 
 import (
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -16,7 +17,7 @@ type ConfigScope string
 const (
 	LocalScope  ConfigScope = "--local"
 	GlobalScope ConfigScope = "--global"
-	System      ConfigScope = "--system"
+	SystemScope ConfigScope = "--system"
 	Traverse    ConfigScope = ""
 	HEAD        string      = "HEAD"
 )
@@ -24,67 +25,86 @@ const (
 // Context defines the context to execute it commands.
 type Context struct {
 	cm.CmdContext
+
+	cache *ConfigCache
 }
 
-// CtxC creates a git command execution context with
+// NewCtxAt creates a git command execution context with
 // working dir `cwd`.
-func CtxC(cwd string) *Context {
-	return &Context{cm.NewCommandCtx("git", cwd, nil)}
+func NewCtxAt(cwd string) *Context {
+	return &Context{cm.NewCommandCtx("git", cwd, nil), nil}
 }
 
-// CtxCSanitized creates a git command execution context with
+// NewCtxSanitizedAt creates a git command execution context with
 // working dir `cwd` and sanitized environement.
-func CtxCSanitized(cwd string) *Context {
-	return &Context{cm.NewCommandCtx("git", cwd, SanitizeEnv(os.Environ()))}
+func NewCtxSanitizedAt(cwd string) *Context {
+	return &Context{cm.NewCommandCtx("git", cwd, SanitizeEnv(os.Environ())), nil}
 }
 
-// Ctx creates a git command execution context
+// NewCtx creates a git command execution context
 // with current working dir.
-func Ctx() *Context {
-	return CtxC("")
+func NewCtx() *Context {
+	return NewCtxAt("")
 }
 
-// CtxSanitized creates a git command execution context
+// NewCtxSanitized creates a git command execution context
 // with current working dir and sanitized environement.
-func CtxSanitized() *Context {
-	return CtxCSanitized("")
+func NewCtxSanitized() *Context {
+	return NewCtxSanitizedAt("")
+}
+
+// SetConfigCache sets the Git config cache to use.
+func (c *Context) InitConfigCache(filter func(string) bool) (err error) {
+	cache, err := NewConfigCache(*c, filter)
+
+	c.cache = &cache
+
+	return
 }
 
 // GetConfig gets a Git configuration value for key `key`.
-func (c *Context) GetConfig(key string, scope ConfigScope) string {
-	var out string
+func (c *Context) GetConfig(key string, scope ConfigScope) (val string) {
 	var err error
 
+	if c.cache != nil {
+		val, _ = c.cache.Get(key, scope)
+
+		return
+	}
+
 	if scope != Traverse {
-		out, err = c.Get("config", "--includes", string(scope), key)
+		val, err = c.Get("config", "--includes", string(scope), key)
 	} else {
-		out, err = c.Get("config", "--includes", key)
+		val, err = c.Get("config", "--includes", key)
 	}
 
-	if err == nil {
-		return out
+	if err != nil {
+		return ""
 	}
 
-	return ""
+	return
 }
 
 // LookupConfig gets a Git configuration value and
 // reports if it exists or not.
-func (c *Context) LookupConfig(key string, scope ConfigScope) (string, bool) {
-	var out string
+func (c *Context) LookupConfig(key string, scope ConfigScope) (val string, exists bool) {
 	var err error
 
+	if c.cache != nil {
+		return c.cache.Get(key, scope)
+	}
+
 	if scope != Traverse {
-		out, err = c.Get("config", "--includes", string(scope), key)
+		val, err = c.Get("config", "--includes", string(scope), key)
 	} else {
-		out, err = c.Get("config", "--includes", key)
+		val, err = c.Get("config", "--includes", key)
 	}
 
-	if err == nil {
-		return out, true
+	if err != nil {
+		return "", false
 	}
 
-	return "", false
+	return val, true
 }
 
 // getConfigWithArgs gets a Git configuration values for key `key`.
@@ -107,19 +127,34 @@ func (c *Context) getConfigWithArgs(key string, scope ConfigScope, args ...strin
 
 // GetConfigAll gets a all Git configuration values for key `key`.
 func (c *Context) GetConfigAll(key string, scope ConfigScope) []string {
+	if c.cache != nil {
+		vals, _ := c.cache.GetAll(key, scope)
+
+		return vals
+	}
+
+	s := c.getConfigWithArgs(key, scope, "--get-all")
+	if strs.IsEmpty(s) {
+		return nil
+	}
+
 	return strs.Filter(
-		strs.SplitLines(c.getConfigWithArgs(key, scope, "--get-all")),
+		strs.SplitLines(s),
 		strs.IsNotEmpty)
 }
 
-// GetConfigAllU gets a all Git configuration values unsplitted for key `key`.
-func (c *Context) GetConfigAllU(key string, scope ConfigScope) string {
-	return c.getConfigWithArgs(key, scope, "--get-all")
+type KeyValue struct {
+	Key   string
+	Value string
 }
 
 // GetConfigRegex gets all Git configuration values for regex `regex`.
 // Returns a list of pairs.
-func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]string) {
+func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res []KeyValue) {
+	if c.cache != nil {
+		return c.cache.GetAllRegex(regexp.MustCompile(regex), scope)
+	}
+
 	configs, err := c.Get("config", "--includes", string(scope), "--get-regexp", regex)
 
 	if err != nil {
@@ -129,7 +164,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 	list := strs.SplitLines(configs)
 	sort.Strings(list)
 
-	res = make([][]string, 0, len(list))
+	res = make([]KeyValue, 0, len(list))
 
 	for i := range list {
 		if strs.IsEmpty(list[i]) {
@@ -143,7 +178,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 			keyValue = append(keyValue, "")
 		}
 
-		res = append(res, keyValue)
+		res = append(res, KeyValue{keyValue[0], keyValue[1]})
 	}
 
 	return
@@ -151,20 +186,34 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res [][]strin
 
 // SetConfig sets a Git configuration values with key `key`.
 func (c *Context) SetConfig(key string, value interface{}, scope ConfigScope) error {
-	cm.DebugAssert(scope != Traverse, "Wrong input.")
+	cm.DebugAssert(scope != Traverse, "Wrong scope.")
 
-	return c.Check("config", string(scope), key, strs.Fmt("%v", value))
+	s := strs.Fmt("%v", value)
+	if c.cache != nil {
+		c.cache.Set(key, s, scope)
+	}
+
+	return c.Check("config", string(scope), key, s)
 }
 
 // AddConfig adds a Git configuration values with key `key`.
 func (c *Context) AddConfig(key string, value interface{}, scope ConfigScope) error {
-	cm.DebugAssert(scope != Traverse, "Wrong input.")
+	cm.DebugAssert(scope != Traverse, "Wrong scope.")
 
-	return c.Check("config", "--add", string(scope), key, strs.Fmt("%v", value))
+	s := strs.Fmt("%v", value)
+	if c.cache != nil {
+		c.cache.Add(key, s, scope)
+	}
+
+	return c.Check("config", "--add", string(scope), key, s)
 }
 
 // UnsetConfig unsets all Git configuration values with key `key`.
 func (c *Context) UnsetConfig(key string, scope ConfigScope) (err error) {
+	if c.cache != nil {
+		c.cache.Unset(key, scope)
+	}
+
 	var exitC int
 
 	if scope != Traverse {
@@ -181,8 +230,12 @@ func (c *Context) UnsetConfig(key string, scope ConfigScope) (err error) {
 	return cm.CombineErrors(err, cm.ErrorF("Exit code: '%v'", exitC))
 }
 
-// IsConfigSet tells if a git config is set.
+// IsConfigSet tells if a git config with `key` is set.
 func (c *Context) IsConfigSet(key string, scope ConfigScope) bool {
+	if c.cache != nil {
+		return c.cache.IsSet(key, scope)
+	}
+
 	var err error
 	if scope != Traverse {
 		err = c.Check("config", string(scope), key)

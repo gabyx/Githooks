@@ -49,7 +49,7 @@ func GetCloneURL(gitx *git.Context) (url string, branch string) {
 func SetCloneURL(url string, branch string) (err error) {
 	cm.DebugAssertF(strs.IsNotEmpty(url), "Wrong input")
 
-	err = git.Ctx().SetConfig(hooks.GitCKCloneURL, url, git.GlobalScope)
+	err = git.NewCtx().SetConfig(hooks.GitCKCloneURL, url, git.GlobalScope)
 	if err != nil || strs.IsEmpty(branch) {
 		return
 	}
@@ -61,12 +61,12 @@ func SetCloneURL(url string, branch string) (err error) {
 func SetCloneBranch(branch string) error {
 	cm.DebugAssertF(strs.IsNotEmpty(branch), "Wrong input")
 
-	return git.Ctx().SetConfig(hooks.GitCKCloneBranch, branch, git.GlobalScope)
+	return git.NewCtx().SetConfig(hooks.GitCKCloneBranch, branch, git.GlobalScope)
 }
 
 // ResetCloneBranch resets the Githooks clone branch.
 func ResetCloneBranch() error {
-	return git.Ctx().UnsetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
+	return git.NewCtx().UnsetConfig(hooks.GitCKCloneBranch, git.GlobalScope)
 }
 
 var updateInfoTrailerRe = regexp.MustCompile(`(?m)^Update-Info: *(.*)`)
@@ -209,7 +209,7 @@ func FetchUpdates(
 		return reclone, nil
 	}
 
-	cURL, cBranch := GetCloneURL(git.CtxSanitized())
+	cURL, cBranch := GetCloneURL(git.NewCtxSanitized())
 
 	// Fallback for url
 	if strs.IsEmpty(url) {
@@ -236,7 +236,7 @@ func FetchUpdates(
 		return
 	}
 
-	gitx := git.CtxCSanitized(cloneDir)
+	gitx := git.NewCtxSanitizedAt(cloneDir)
 
 	// If branch was empty (default branch), determine it now.
 	if strs.IsEmpty(branch) {
@@ -300,7 +300,7 @@ func FetchUpdates(
 // GetStatus returns the status of the release clone.
 func GetStatus(cloneDir string, checkRemote, skipPrerelease bool) (status ReleaseStatus, err error) {
 
-	gitx := git.CtxCSanitized(cloneDir)
+	gitx := git.NewCtxSanitizedAt(cloneDir)
 
 	var url, branch string
 	url, branch, err = gitx.GetRemoteURLAndBranch(DefaultRemote)
@@ -409,7 +409,7 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 		return //nolint: nlreturn
 	}
 
-	gitx := git.CtxCSanitized(cloneDir)
+	gitx := git.NewCtxSanitizedAt(cloneDir)
 
 	// Get configured branches...
 	_, branch := GetCloneURL(gitx)

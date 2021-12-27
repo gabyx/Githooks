@@ -156,7 +156,7 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 
 		maxLength := 0
 		for i := range pairs {
-			maxLength = math.MaxInt(maxLength, len(pairs[i][0])+2) // nolint: gomnd
+			maxLength = math.MaxInt(maxLength, len(pairs[i].Key)+2) // nolint: gomnd
 		}
 		keyFmt := strs.Fmt("%%-%vs", maxLength)
 
@@ -169,8 +169,8 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 		cm.AssertNoErrorPanic(err, "Could not write message.")
 
 		for i := range pairs {
-			key := strs.Fmt("'%s'", pairs[i][0])
-			_, err = strs.FmtW(&sb, "\n%s "+keyFmt+" : '%s'", cm.ListItemLiteral, key, pairs[i][1])
+			key := strs.Fmt("'%s'", pairs[i].Key)
+			_, err = strs.FmtW(&sb, "\n%s "+keyFmt+" : '%s'", cm.ListItemLiteral, key, pairs[i].Value)
 			cm.AssertNoErrorPanic(err, "Could not write message.")
 		}
 

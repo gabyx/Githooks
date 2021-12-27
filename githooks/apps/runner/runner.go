@@ -39,8 +39,8 @@ func mainRun() (exitCode int) {
 	if cm.IsBenchmark {
 		startTime := cm.GetStartTime()
 		defer func() {
-			log.InfoF("Runner execution time: '%v'.",
-				cm.GetDuration(startTime))
+			log.InfoF("Runner execution time: '%v' ms.",
+				float64(cm.GetDuration(startTime))/float64(time.Millisecond))
 		}()
 	}
 
@@ -122,8 +122,11 @@ func createLog() {
 }
 
 func logInvocation(s *HookSettings) {
-	if strs.IsNotEmpty(os.Getenv("GITHOOKS_RUNNER_TRACE")) {
-		log.InfoF("Running hooks for: '%s' %q", s.HookName, s.Args)
+	t := os.Getenv("GITHOOKS_RUNNER_TRACE")
+	if strs.IsNotEmpty(t) {
+		log.DebugF("Running hooks for: '%s' %q", s.HookName, s.Args)
+	} else if t == "1" || cm.IsDebug {
+		log.DebugF("Settings:\n%s", s.toString())
 	}
 }
 
@@ -137,10 +140,12 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	execx := cm.ExecContext{}
 
 	// Current git context, in current working dir.
-	gitx := git.Ctx()
+	gitx := git.NewCtx()
+	log.AssertNoErrorF(gitx.InitConfigCache(nil),
+		"Could not init git config cache.")
 
 	gitDir, err := gitx.GetGitDirWorktree()
-	cm.AssertNoErrorPanic(err, "Could not get git directory.")
+	log.AssertNoErrorPanic(err, "Could not get git directory.")
 
 	err = hooks.DeleteHookDirTemp(path.Join(gitDir, "hooks"))
 	log.AssertNoErrorF(err, "Could not clean temporary directory in '%s/hooks'.", gitDir)
@@ -183,7 +188,6 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive}
 
-	log.DebugF(s.toString())
 	logInvocation(&s)
 
 	return s, UISettings{AcceptAllChanges: false, PromptCtx: promptx}
@@ -445,6 +449,7 @@ func executeOldHook(
 	}
 
 	hooks, _, err := hooks.GetAllHooksIn(
+		settings.GitX,
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace,
 		isIgnored, isTrusted, true, false)
@@ -675,7 +680,7 @@ func checkSharedHook(
 	// is the same as the specified
 	// Note: GIT_DIR might be set (?bug?) (actually the case for post-checkout hook)
 	if hook.IsCloned {
-		url := git.CtxCSanitized(hook.RepositoryDir).GetConfig(
+		url := git.NewCtxSanitizedAt(hook.RepositoryDir).GetConfig(
 			"remote.origin.url", git.LocalScope)
 
 		if url != hook.URL {
@@ -746,6 +751,7 @@ func getHooksIn(
 	}
 
 	allHooks, maxBatches, err := hooks.GetAllHooksIn(
+		settings.GitX,
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace,
 		isIgnored, isTrusted, true, true)

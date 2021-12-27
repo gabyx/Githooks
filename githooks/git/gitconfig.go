@@ -1,6 +1,8 @@
 package git
 
 const (
+	// If you add/remove settings here, you must edit `hooks.filterRegex`.
+
 	// GitCKInitTemplateDir is the Git template dir config key.
 	GitCKInitTemplateDir = "init.templateDir"
 
@@ -12,20 +14,3 @@ const (
 	// GitCVFalse is the boolean `false` Git config value.
 	GitCVFalse = "false"
 )
-
-// type GitConfigValue {
-// 	key string
-// 	value string
-// 	changed bool
-// }
-
-// // GitConfigCache for faster read access.
-// type GitConfigCache struct {
-// 	local  map[string]GitConfigValue
-// 	global map[string]GitConfigValue
-// 	system map[string]GitConfigValue
-// }
-
-// func NewGitConfigCache() *GitConfigCache {
-// 	CtxSanitized()
-// }

@@ -31,7 +31,7 @@ func InstallIntoRepo(
 		log.AssertNoErrorPanic(err,
 			"Could not create hook directory in '%s'.", repoGitDir)
 	}
-	gitxR := git.CtxC(repoGitDir)
+	gitxR := git.NewCtxAt(repoGitDir)
 	isBare := gitxR.IsBareRepo()
 
 	var err error
@@ -97,7 +97,7 @@ func cleanArtefactsInRepo(log cm.ILogContext, gitDir string) {
 }
 
 func cleanGitConfigInRepo(log cm.ILogContext, gitDir string) {
-	gitx := git.CtxC(gitDir)
+	gitx := git.NewCtxAt(gitDir)
 
 	for _, k := range hooks.GetLocalGitConfigKeys() {
 
@@ -108,7 +108,7 @@ func cleanGitConfigInRepo(log cm.ILogContext, gitDir string) {
 }
 
 func unregisterRepo(log cm.ILogContext, gitDir string) {
-	gitx := git.CtxC(gitDir)
+	gitx := git.NewCtxAt(gitDir)
 
 	log.AssertNoErrorF(hooks.UnmarkRepoRegistered(gitx),
 		"Could not unregister Git repo '%s'.", gitDir)
