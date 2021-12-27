@@ -4,7 +4,7 @@
 
 Pull request [#35](https://github.com/gabyx/Githooks/pull/35) introduces a breaking change in the
 definition of a hook's *namespace path*.
-The original definition is not explicit enought which poses problems for properly distinguishing
+The original definition is not explicit enough which poses problems for properly distinguishing
 patterns which contain a namespace from ones which don't.
 
 The following changes are made:
