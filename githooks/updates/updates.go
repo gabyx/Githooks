@@ -253,7 +253,7 @@ func FetchUpdates(
 	if isNewClone {
 		// On a new clone we reset local branch
 		// to the matching current release tag descending from HEAD.
-		// Remote stays and might trigger a direct update).
+		// Remote stays and might trigger a direct update.
 
 		// Check if current tag is reachable from HEAD.
 		reachable, e := git.IsRefReachable(gitx, "HEAD", tag)
