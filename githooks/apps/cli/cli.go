@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"os/signal"
-	"path/filepath"
 
 	"github.com/gabyx/githooks/githooks/cmd"
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
@@ -12,9 +11,6 @@ import (
 )
 
 func mainRun() (exitCode int) {
-	cwd, err := os.Getwd()
-	cm.AssertNoErrorPanic(err, "Could not get current working dir.")
-	cwd = filepath.ToSlash(cwd)
 
 	log, err := cm.CreateLogContext(false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
@@ -24,6 +20,14 @@ func mainRun() (exitCode int) {
 	wrapPanicExitCode := func() {
 		panicExitCode = 111
 	}
+
+	// Handle all panics and report the error
+	defer func() {
+		r := recover()
+		if cm.HandleCLIErrors(r, log, hooks.GetBugReportingInfo) {
+			exitCode = panicExitCode
+		}
+	}()
 
 	// Install signal handling
 	var cleanUpX cm.InterruptContext
@@ -37,14 +41,6 @@ func mainRun() (exitCode int) {
 		<-c
 		cleanUpX.RunHandlers()
 		os.Exit(1) // Return 1 := canceled always...
-	}()
-
-	// Handle all panics and report the error
-	defer func() {
-		r := recover()
-		if cm.HandleCLIErrors(r, cwd, log, hooks.GetBugReportingInfo) {
-			exitCode = panicExitCode
-		}
 	}()
 
 	err = cmd.Run(log, log, wrapPanicExitCode, &cleanUpX)

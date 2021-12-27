@@ -36,24 +36,25 @@ func mainRun() (exitCode int) {
 
 	log.DebugF("Githooks Runner [version: %s]", build.BuildVersion)
 
-	startTime := cm.GetStartTime()
-
-	defer func() {
-		log.DebugF("Runner execution time: '%v'.",
-			cm.GetDuration(startTime))
-	}()
-
-	cwd, err := os.Getwd()
-	cm.AssertNoErrorPanic(err, "Could not get current working dir.")
-	cwd = filepath.ToSlash(cwd)
+	if cm.IsBenchmark {
+		startTime := cm.GetStartTime()
+		defer func() {
+			log.InfoF("Runner execution time: '%v'.",
+				cm.GetDuration(startTime))
+		}()
+	}
 
 	// Handle all panics and report the error
 	defer func() {
 		r := recover()
-		if cm.HandleCLIErrors(r, cwd, log, hooks.GetBugReportingInfo) {
+		if cm.HandleCLIErrors(r, log, hooks.GetBugReportingInfo) {
 			exitCode = 1
 		}
 	}()
+
+	cwd, err := os.Getwd()
+	log.AssertNoErrorPanic(err, "Could not get current working dir.")
+	cwd = filepath.ToSlash(cwd)
 
 	settings, uiSettings := setupSettings(cwd)
 	assertRegistered(settings.GitX, settings.InstallDir)

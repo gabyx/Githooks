@@ -115,7 +115,9 @@ for STEP in "$GH_TESTS"/step-*.sh; do
         REASON=$(echo "$TEST_OUTPUT" | tail -1)
         echo "  x  $STEP has been skipped, reason: $REASON"
         SKIPPED=$((SKIPPED + 1))
-
+    elif [ $TEST_RESULT -eq 250 ]; then
+        echo -e "  >  $STEP is benchmark:\n $TEST_OUTPUT"
+        SKIPPED=$((SKIPPED + 1))
     elif [ $TEST_RESULT -ne 0 ]; then
         FAILURE=$(echo "$TEST_OUTPUT" | tail -1)
         echo "! $STEP has failed with code $TEST_RESULT ($FAILURE), output:" >&2
