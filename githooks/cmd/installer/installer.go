@@ -282,7 +282,7 @@ func buildFromSource(
 
 	// Checkout the remote commit sha
 	log.InfoF("Checkout out commit '%s'", commitSHA[0:6])
-	gitx := git.NewCtxAt(tempDir)
+	gitx := git.NewCtxSanitizedAt(tempDir)
 	err = gitx.Check("checkout",
 		"-b", "update-to-"+commitSHA[0:6],
 		commitSHA)

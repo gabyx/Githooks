@@ -46,8 +46,13 @@ func (c *CmdContext) Get(args ...string) (string, error) {
 	stdout, err := cmd.Output()
 
 	if err != nil {
+		var errS string
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errS = string(exitErr.Stderr)
+		}
 		err = CombineErrors(
-			ErrorF("Command failed: '%s %q'.", c.baseCmd, args), err)
+			ErrorF("Command failed: '%s %q' [cwd: '%s', env: %q, err: '%s'].",
+				c.baseCmd, args, cmd.Dir, cmd.Env, errS), err)
 	}
 
 	return strings.TrimSpace(string(stdout)), err
@@ -62,27 +67,38 @@ func (c *CmdContext) GetCombined(args ...string) (string, error) {
 	stdout, err := cmd.CombinedOutput()
 
 	if err != nil {
+		var errS string
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errS = string(exitErr.Stderr)
+		}
 		err = CombineErrors(
-			ErrorF("Command failed: '%s %q'.", c.baseCmd, args), err)
+			ErrorF("Command failed: '%s %q' [cwd: '%s', env: %q, err: '%s'].",
+				c.baseCmd, args, cmd.Dir, cmd.Env, errS), err)
 	}
 
 	return strings.TrimSpace(string(stdout)), err
 }
 
 // Check checks if a command executed successfully.
-func (c *CmdContext) Check(args ...string) error {
+func (c *CmdContext) Check(args ...string) (err error) {
 	cmd := exec.Command(c.baseCmd, args...)
 	cmd.Dir = c.cwd
 	cmd.Env = c.Env
 
-	err := cmd.Run()
+	err = cmd.Run()
 
 	if err != nil {
-		return CombineErrors(
-			ErrorF("Command failed: '%s %q'.", c.baseCmd, args), err)
+		var errS string
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errS = string(exitErr.Stderr)
+		}
+
+		err = CombineErrors(
+			ErrorF("Command failed: '%s %q' [cwd: '%s', env: %q, err: '%s'].",
+				c.baseCmd, args, cmd.Dir, cmd.Env, errS), err)
 	}
 
-	return nil
+	return
 }
 
 // GetExitCode get the exit code of the command.
@@ -102,11 +118,12 @@ func (c *CmdContext) GetExitCode(args ...string) (int, error) {
 	}
 
 	return -1, CombineErrors(
-		ErrorF("Could get exit status of '%s %s'.", c.baseCmd, args), err)
+		ErrorF("Could get exit status of '%s %q' [cwd: '%s', env: %q].",
+			c.baseCmd, args, cmd.Dir, cmd.Env), err)
 }
 
 // CheckPiped checks if a command executed successfully.
-func (c *CmdContext) CheckPiped(args ...string) error {
+func (c *CmdContext) CheckPiped(args ...string) (err error) {
 	cmd := exec.Command(c.baseCmd, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -114,12 +131,18 @@ func (c *CmdContext) CheckPiped(args ...string) error {
 	cmd.Dir = c.cwd
 	cmd.Env = c.Env
 
-	err := cmd.Run()
+	err = cmd.Run()
 
 	if err != nil {
-		return CombineErrors(
-			ErrorF("Command failed: '%s %q'.", c.baseCmd, args), err)
+		var errS string
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errS = string(exitErr.Stderr)
+		}
+
+		err = CombineErrors(
+			ErrorF("Command failed: '%s %q' [cwd: '%s', env: %q, err: '%s'].",
+				c.baseCmd, args, cmd.Dir, cmd.Env, errS), err)
 	}
 
-	return nil
+	return
 }
