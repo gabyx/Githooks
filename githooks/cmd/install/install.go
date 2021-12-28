@@ -47,6 +47,12 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 		ctx.Log, ctx.GitX, gitDir,
 		lfsHooksCache, maintainedHooks,
 		nonInteractive, false, false, &uiSettings)
+
+	err = hooks.RegisterRepo(gitDir, ctx.InstallDir, false, false)
+	ctx.Log.AssertNoError(err, "Could not register repository '%s'.", gitDir)
+	err = hooks.MarkRepoRegistered(ctx.GitX)
+	ctx.Log.AssertNoError(err, "Could not mark repository '%s' as registered.", gitDir)
+
 }
 
 func runUninstallFromRepo(ctx *ccm.CmdContext) {
