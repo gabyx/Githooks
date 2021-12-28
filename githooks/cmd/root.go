@@ -38,8 +38,8 @@ func NewSettings(
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
 	// Since this CLI is executed over `git ...` it sets
-	// environement variables we are not interested in when running this executable.
-	log.AssertNoError(git.SanitizeOsEnv(), "Could not sanitize OS environement.")
+	// environment variables we are not interested in when running this executable.
+	log.AssertNoError(git.SanitizeOsEnv(), "Could not sanitize OS environment.")
 	gitx := git.NewCtx()
 
 	installDir := inst.LoadInstallDir(log, gitx)
