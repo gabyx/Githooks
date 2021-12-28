@@ -121,6 +121,11 @@ mkdir -p "$GH_TEST_TMP/test129" &&
     git init &&
     cd "$GH_TEST_TMP/test129" || exit 1
 
+if [ -n "$(git config githooks.registered)" ]; then
+    echo "Repository should not be registered."
+    exit 1
+fi
+
 checkHooks "." "${maintainedHooksRef1[@]}"
 checkLFSHook "." "${lfsHooks1[@]}"
 
@@ -138,6 +143,12 @@ if [ "$(git config githooks.maintainedHooks)" != "!all, commit-msg" ]; then
     echo "Maintained hooks is not set"
     exit 1
 fi
+
+if [ "$(git config githooks.registered)" != "true" ]; then
+    echo "Repository should be registered."
+    exit 1
+fi
+
 checkHooks "." "${maintainedHooksRef2[@]}"
 checkLFSHook "." "${allLFSHooks[@]}"
 
