@@ -254,3 +254,12 @@ func SanitizeEnv(env []string) []string {
 			!strings.Contains(s, "GIT_WORK_TREE")
 	})
 }
+
+// SanitizeOsEnv santizes the process environement from unwanted Git (possibly leaking)
+// Git variables which might interfere with certain buggy Git commands.
+func SanitizeOsEnv() error {
+	err := os.Unsetenv("GIT_DIR")
+	err = cm.CombineErrors(err, os.Unsetenv("GIT_WORK_TREE"))
+
+	return err
+}

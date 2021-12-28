@@ -37,7 +37,7 @@ func GetBuildVersion() *version.Version {
 
 func main() {
 
-	gitx := git.NewCtx()
+	gitx := git.NewCtxSanitized()
 
 	root, err := gitx.Get("rev-parse", "--show-toplevel")
 	cm.AssertNoErrorPanicF(err, "Could not root dir.")
