@@ -33,7 +33,7 @@ repositories.
 - Running shared hooks from other Git repositories (with auto-update).
 - Git LFS support.
 - Command line interface.
-- Fast execution due to compiled Go executable.
+- Fast execution due to compiled executable. (even **2-3x faster with `v2.1.1`**)
 - Fast parallel execution over threadpool.
 - Ignoring non-shared and shared hooks with patterns.
 - Automatic Githooks updates: Fully configurable for your own company by
