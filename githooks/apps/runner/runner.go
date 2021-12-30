@@ -318,7 +318,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	var usePreRelease bool
 	if settings.GitX.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue {
 		usePreRelease = true
-		opts = append(opts, "--use-prerelease")
+		opts = append(opts, "--use-pre-release")
 	}
 
 	updateAvailable, accepted, err := updates.RunUpdate(
