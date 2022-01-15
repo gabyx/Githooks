@@ -143,3 +143,9 @@ func centerAndSetSize(dlg *walk.Dialog, size walk.Size) {
 		centerOnScreen(dlg)
 	})
 }
+
+func forceTopMost(dlg *walk.Dialog) {
+	win.SetWindowPos(dlg.Handle(),
+		win.HWND_TOPMOST, 0, 0, 0, 0,
+		win.SWP_NOACTIVATE|win.SWP_NOMOVE|win.SWP_NOSIZE)
+}

@@ -22,6 +22,7 @@ func showEntryDialog(
 	opts.WindowIcon = settings.InfoIcon
 	opts.Icon = settings.InfoIcon
 	opts.Width = 400
+	opts.ForceTopMost = true // only for Windows this is crucial, such that it does not get ignored.
 
 	res, err := gui.ShowEntry(nil, &opts) // nolint
 
@@ -54,6 +55,7 @@ func showOptionsDialog(
 	opts.Style = settings.OptionsStyleButtons
 	opts.WindowIcon = settings.QuestionIcon
 	opts.Width = 400
+	opts.ForceTopMost = true // only for Windows this is crucial, such that it does not get ignored.
 
 	if defaultOptionIdx >= 0 {
 		opts.DefaultOptions = []uint{uint(defaultOptionIdx)}
@@ -153,6 +155,7 @@ func showMessageGUI(
 	opts := settings.Message{}
 	opts.Title = title
 	opts.Text = message
+	opts.ForceTopMost = true // only for Windows this is crucial, such that it does not get ignored.
 
 	if asError {
 		opts.WindowIcon = settings.InfoIcon

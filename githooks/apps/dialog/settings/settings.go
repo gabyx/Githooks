@@ -56,6 +56,8 @@ type Message struct {
 
 	Style MessageStyle
 	Icon  DialogIcon
+
+	ForceTopMost bool // Forces the window to be always on top. Only on Windows supported.
 }
 
 // OptionsStyle is the style with which the list dialog is rendered.
@@ -82,6 +84,8 @@ type Options struct {
 
 	Style             OptionsStyle
 	MultipleSelection bool
+
+	ForceTopMost bool // Forces the window to be always on top. Only on Windows supported.
 }
 
 // Entry are options for the entry dialog.
@@ -94,6 +98,8 @@ type Entry struct {
 	HideDefaultEntry bool
 
 	Icon DialogIcon // Only on macOS supported.
+
+	ForceTopMost bool // Forces the window to be always on top. Only on Windows supported.
 }
 
 // Notification are options for the notification.
