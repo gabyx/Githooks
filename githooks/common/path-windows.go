@@ -47,7 +47,7 @@ func IsExecutable(path string) bool {
 
 	_, _, e := syscall.Syscall(
 		procGetBinaryTypeW.Addr(),
-		2,
+		2, //nolint: gomnd
 		uintptr(unsafe.Pointer(pPath)),
 		uintptr(unsafe.Pointer(&t)),
 		0)

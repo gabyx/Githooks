@@ -180,6 +180,9 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 	})
 
 	centerAndSetSize(app.Dialog, size)
+	if opts.ForceTopMost {
+		forceTopMost(app.Dialog)
+	}
 
 	if ctx != nil {
 		watchTimeout(ctx, app.Dialog)

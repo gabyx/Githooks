@@ -161,6 +161,10 @@ func ShowEntry(ctx context.Context, entry *sets.Entry) (r res.Entry, err error) 
 
 	centerAndSetSize(app.Dialog, size)
 
+	if entry.ForceTopMost {
+		forceTopMost(app.Dialog)
+	}
+
 	if ctx != nil {
 		watchTimeout(ctx, app.Dialog)
 	}

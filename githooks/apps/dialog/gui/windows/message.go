@@ -170,6 +170,9 @@ func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err err
 	}
 
 	centerAndSetSize(app.Dialog, size)
+	if msg.ForceTopMost {
+		forceTopMost(app.Dialog)
+	}
 
 	if ctx != nil {
 		watchTimeout(ctx, app.Dialog)
