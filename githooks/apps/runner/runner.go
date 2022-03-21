@@ -81,7 +81,8 @@ func mainRun() (exitCode int) {
 
 	defer storePendingData(&settings, &uiSettings, &ignores, &checksums)
 
-	if hooks.IsGithooksDisabled(settings.GitX, true) {
+	if settings.Disabled {
+		// Githooks is disabled, run minimal stuff.
 		executeLFSHooks(&settings)
 		executeOldHook(&settings, &uiSettings, &ignores, &checksums)
 
@@ -160,12 +161,13 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	promptx, err := prompt.CreateContext(log, true, false)
 	log.DebugIfF(err != nil, "Prompt setup failed -> using fallback.")
 
+	isGithooksDisabled := hooks.IsGithooksDisabled(gitx, true)
 	nonInteractive := hooks.IsRunnerNonInteractive(gitx, git.Traverse)
 	skipNonExistingSharedHooks := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
 	skipUntrustedHooks, _ := hooks.SkipUntrustedHooks(gitx, git.Traverse)
 
 	isTrusted, hasTrustFile, trustAllSet := hooks.IsRepoTrusted(gitx, repoPath)
-	if !isTrusted && hasTrustFile && !trustAllSet && !nonInteractive {
+	if !isTrusted && hasTrustFile && !trustAllSet && !nonInteractive && !isGithooksDisabled {
 		isTrusted = showTrustRepoPrompt(gitx, promptx)
 	}
 
@@ -186,7 +188,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
 		SkipUntrustedHooks:         skipUntrustedHooks,
-		NonInteractive:             nonInteractive}
+		NonInteractive:             nonInteractive,
+		Disabled:                   isGithooksDisabled}
 
 	logInvocation(&s)
 

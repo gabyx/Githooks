@@ -25,6 +25,7 @@ type HookSettings struct {
 	SkipNonExistingSharedHooks bool // If Githooks should skip non-existing shared hooks.
 	SkipUntrustedHooks         bool // If Githooks should skip active untrusted hooks.
 	NonInteractive             bool // If all non-fatal prompts should be default answered.
+	Disabled                   bool // If Githooks has been disabled.
 }
 
 func (s HookSettings) toString() string {
