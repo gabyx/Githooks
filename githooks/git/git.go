@@ -54,12 +54,16 @@ func NewCtxSanitized() *Context {
 }
 
 // SetConfigCache sets the Git config cache to use.
-func (c *Context) InitConfigCache(filter func(string) bool) (err error) {
+func (c *Context) InitConfigCache(filter func(string) bool) error {
 	cache, err := NewConfigCache(*c, filter)
+
+	if err != nil {
+		return err
+	}
 
 	c.cache = &cache
 
-	return
+	return nil
 }
 
 // GetConfig gets a Git configuration value for key `key`.

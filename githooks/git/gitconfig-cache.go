@@ -102,7 +102,7 @@ func NewConfigCache(gitx Context, filterFunc func(string) bool) (ConfigCache, er
 
 	conf, err := gitx.Get("config", "--includes", "--list", "--null", "--show-scope")
 	if err != nil {
-		return ConfigCache{}, nil
+		return ConfigCache{}, err
 	}
 
 	return parseConfig(conf, filterFunc)
