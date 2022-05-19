@@ -27,6 +27,8 @@ ENV GH_COVERAGE_DIR="/cover"
 
 # Coveralls env. vars for upload.
 ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
+
+RUN git config --global safe.directory /githooks
 EOF
 
 if echo "$IMAGE_TYPE" | grep -q "\-user"; then
