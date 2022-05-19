@@ -19,8 +19,7 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00local\x00a.c\nc1\x00\x00\x00\x00" +
 		"\x00global\x00a.a\na3" +
 		"\x00worktree\x00t.t\na2" +
-		"\x00command\x00t.t\na3" +
-		"\x00unknown\x00t.t\na3"
+		"\x00command\x00t.t\na3"
 
 	c, err := parseConfig(s, func(string) bool { return true })
 
