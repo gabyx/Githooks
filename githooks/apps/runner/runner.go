@@ -168,7 +168,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	isTrusted, hasTrustFile, trustAllSet := hooks.IsRepoTrusted(gitx, repoPath)
 	if !isTrusted && hasTrustFile && !trustAllSet && !nonInteractive && !isGithooksDisabled {
-		isTrusted = showTrustRepoPrompt(gitx, promptx)
+		isTrusted = showTrustRepoPrompt(gitx, promptx, repoPath)
 	}
 
 	s := HookSettings{
@@ -251,10 +251,12 @@ func assertRegistered(gitx *git.Context, installDir string) {
 	}
 }
 
-func showTrustRepoPrompt(gitx *git.Context, promptx prompt.IContext) (isTrusted bool) {
-	question := "This repository wants you to trust all current and\n" +
-		"future hooks without prompting.\n" +
-		"Do you want to allow running every current and future hooks?"
+func showTrustRepoPrompt(gitx *git.Context, promptx prompt.IContext, repoPath string) (isTrusted bool) {
+	question := strs.Fmt(
+		`This repository '%s'
+wants you to trust all current and
+future hooks without prompting.
+Do you want to allow running every current and future hooks?`, repoPath)
 
 	var answer string
 	answer, err := promptx.ShowOptions(question, "(yes, no)", "y/n", "Yes", "No")
