@@ -22,7 +22,7 @@ func (p Context) ShowOptions(text string,
 
 	// We need a copy to change the context.
 
-	if strings.Contains(text, "This repository wants you to trust all current") {
+	if strings.Contains(text, "wants you to trust all current") {
 		answer, defined := os.LookupEnv("TRUST_ALL_HOOKS")
 		if defined {
 			p.termIn = strings.NewReader(strings.ToLower(answer) + "\n")

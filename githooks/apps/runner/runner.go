@@ -254,8 +254,7 @@ func assertRegistered(gitx *git.Context, installDir string) {
 func showTrustRepoPrompt(gitx *git.Context, promptx prompt.IContext, repoPath string) (isTrusted bool) {
 	question := strs.Fmt(
 		`This repository '%s'
-wants you to trust all current and
-future hooks without prompting.
+wants you to trust all current and future hooks without prompting.
 Do you want to allow running every current and future hooks?`, repoPath)
 
 	var answer string
