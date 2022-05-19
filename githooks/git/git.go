@@ -10,16 +10,8 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-// ConfigScope Defines the scope of a config file, such as local, global or system.
-type ConfigScope string
-
-// Available ConfigScope's.
 const (
-	LocalScope  ConfigScope = "--local"
-	GlobalScope ConfigScope = "--global"
-	SystemScope ConfigScope = "--system"
-	Traverse    ConfigScope = ""
-	HEAD        string      = "HEAD"
+	HEAD string = "HEAD"
 )
 
 // Context defines the context to execute it commands.
@@ -77,7 +69,7 @@ func (c *Context) GetConfig(key string, scope ConfigScope) (val string) {
 	}
 
 	if scope != Traverse {
-		val, err = c.Get("config", "--includes", string(scope), key)
+		val, err = c.Get("config", "--includes", toConfigArg(scope), key)
 	} else {
 		val, err = c.Get("config", "--includes", key)
 	}
@@ -99,7 +91,7 @@ func (c *Context) LookupConfig(key string, scope ConfigScope) (val string, exist
 	}
 
 	if scope != Traverse {
-		val, err = c.Get("config", "--includes", string(scope), key)
+		val, err = c.Get("config", "--includes", toConfigArg(scope), key)
 	} else {
 		val, err = c.Get("config", "--includes", key)
 	}
@@ -117,7 +109,7 @@ func (c *Context) getConfigWithArgs(key string, scope ConfigScope, args ...strin
 	var err error
 
 	if scope != Traverse {
-		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), string(scope), key)...)
+		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), toConfigArg(scope), key)...)
 	} else {
 		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), key)...)
 	}
@@ -159,7 +151,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res []KeyValu
 		return c.cache.GetAllRegex(regexp.MustCompile(regex), scope)
 	}
 
-	configs, err := c.Get("config", "--includes", string(scope), "--get-regexp", regex)
+	configs, err := c.Get("config", "--includes", toConfigArg(scope), "--get-regexp", regex)
 
 	if err != nil {
 		return
@@ -197,7 +189,7 @@ func (c *Context) SetConfig(key string, value interface{}, scope ConfigScope) er
 		c.cache.Set(key, s, scope)
 	}
 
-	return c.Check("config", string(scope), key, s)
+	return c.Check("config", toConfigArg(scope), key, s)
 }
 
 // AddConfig adds a Git configuration values with key `key`.
@@ -209,7 +201,7 @@ func (c *Context) AddConfig(key string, value interface{}, scope ConfigScope) er
 		c.cache.Add(key, s, scope)
 	}
 
-	return c.Check("config", "--add", string(scope), key, s)
+	return c.Check("config", "--add", toConfigArg(scope), key, s)
 }
 
 // UnsetConfig unsets all Git configuration values with key `key`.
@@ -221,7 +213,7 @@ func (c *Context) UnsetConfig(key string, scope ConfigScope) (err error) {
 	var exitC int
 
 	if scope != Traverse {
-		exitC, err = c.GetExitCode("config", "--unset-all", string(scope), key)
+		exitC, err = c.GetExitCode("config", "--unset-all", toConfigArg(scope), key)
 	} else {
 		exitC, err = c.GetExitCode("config", "--unset-all", key)
 	}
@@ -242,7 +234,7 @@ func (c *Context) IsConfigSet(key string, scope ConfigScope) bool {
 
 	var err error
 	if scope != Traverse {
-		err = c.Check("config", string(scope), key)
+		err = c.Check("config", toConfigArg(scope), key)
 	} else {
 		err = c.Check("config", key)
 	}

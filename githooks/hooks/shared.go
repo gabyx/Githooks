@@ -299,7 +299,7 @@ func saveConfigSharedHooks(gitx *git.Context, scope git.ConfigScope, config *sha
 	for _, url := range config.Urls {
 		if e := gitx.AddConfig(GitCKShared, url, scope); e != nil {
 			return cm.CombineErrors(e,
-				cm.ErrorF("Could not add back all %s shared repository urls: '%q'", scope, config.Urls))
+				cm.ErrorF("Could not add back all %s shared repository urls: '%q'", git.ToConfigName(scope), config.Urls))
 		}
 	}
 
