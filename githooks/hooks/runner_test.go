@@ -14,9 +14,11 @@ func getGitConfig(key string, scope git.ConfigScope) (string, bool) {
 		return "", false
 	}
 
-	s := "--" + git.ToConfigName(scope)
+	s := ""
 	if scope == git.Traverse {
 		s = "--traverse"
+	} else {
+		s = "--" + git.ToConfigName(scope)
 	}
 
 	return key + s, true

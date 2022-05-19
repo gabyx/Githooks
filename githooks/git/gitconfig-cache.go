@@ -58,13 +58,15 @@ func toMapIdx(scope string) ConfigScope {
 	case "command":
 		return commandScope
 	default:
-		cm.PanicF("Wrong config scope '%s'.", scope)
-
 		return -1
 	}
 }
 
 func toConfigArg(scope ConfigScope) string {
+	if scope == Traverse {
+		return ""
+	}
+
 	return "--" + ToConfigName(scope)
 }
 
