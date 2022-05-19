@@ -58,6 +58,8 @@ func toMapIdx(scope string) ConfigScope {
 	case "command":
 		return commandScope
 	default:
+		cm.PanicF("Wrong config scope '%s'.", scope)
+
 		return -1
 	}
 }
@@ -225,9 +227,11 @@ func (c *ConfigCache) get(key string, scope ConfigScope) (val string, exists boo
 		for i := 0; i < len(c.scopes); i++ {
 			val, exists = c.get(key, ConfigScope(i)) // This order is how Git config takes precedence over others.
 			if exists {
-				return
+				break
 			}
 		}
+
+		return
 	}
 
 	m := c.getScopeMap(scope)
