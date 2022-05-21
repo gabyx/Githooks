@@ -7,6 +7,8 @@ RUN apk add bash jq
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/c/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.35.2
 
+# Git refuses to do stuff in this mounted directory.
+RUN git config --global safe.directory /githooks
 EOF
 
 if ! docker run --rm -it \

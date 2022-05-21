@@ -9,7 +9,20 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-var commandScope = ConfigScope("--command")
+// ConfigScope Defines the scope of a config file, such as local, global or system.
+type ConfigScope int
+
+// Available ConfigScope's.
+const (
+	commandScope  ConfigScope = 0
+	worktreeScope ConfigScope = 1
+
+	LocalScope  ConfigScope = 2
+	GlobalScope ConfigScope = 3
+	SystemScope ConfigScope = 4
+
+	Traverse ConfigScope = -1
+)
 
 type ConfigEntry struct {
 	name    string
@@ -17,34 +30,70 @@ type ConfigEntry struct {
 	changed bool
 }
 
+// ConfigMap holds all configs Git reads.
 type ConfigMap map[string]*ConfigEntry
 
 // GitConfigCache for faster read access.
 type ConfigCache struct {
-	scopes [4]ConfigMap
+	scopes [5]ConfigMap
 }
 
 func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
+	cm.DebugAssertF(int(scope) < len(c.scopes), "Wrong scope '%s'", scope)
+
+	return c.scopes[int(scope)]
+}
+
+func toMapIdx(scope string) ConfigScope {
+
+	switch scope {
+	case "system":
+		return SystemScope
+	case "global":
+		return GlobalScope
+	case "local":
+		return LocalScope
+	case "worktree":
+		return worktreeScope
+	case "command":
+		return commandScope
+	default:
+		return -1
+	}
+}
+
+func toConfigArg(scope ConfigScope) string {
+	if scope == Traverse {
+		return ""
+	}
+
+	return "--" + ToConfigName(scope)
+}
+
+func ToConfigName(scope ConfigScope) string {
 
 	switch scope {
 	case SystemScope:
-		return c.scopes[3]
+		return "system"
 	case GlobalScope:
-		return c.scopes[2]
+		return "global"
 	case LocalScope:
-		return c.scopes[1]
+		return "local"
+	case worktreeScope:
+		return "worktree"
 	case commandScope:
-		return c.scopes[0]
+		return "command"
 	default:
-		cm.PanicF("Wrong scope '%s'", scope)
+		cm.PanicF("Wrong scope '%v'", scope)
 
-		return nil
+		return ""
 	}
 }
 
 func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err error) {
 
-	c.scopes = [4]ConfigMap{
+	c.scopes = [5]ConfigMap{
+		make(ConfigMap),
 		make(ConfigMap),
 		make(ConfigMap),
 		make(ConfigMap),
@@ -81,18 +130,32 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 	scanner.Split(onNullTerminator)
 
 	// Scan.
+	i := -1
+	var txt string
 	var scope string
-	i := 0
 	for scanner.Scan() {
-		if i%2 == 0 {
-			scope = scanner.Text()
-			if strs.IsNotEmpty(s) {
-				scope = "--" + scope
-			}
-		} else {
-			addEntry(ConfigScope(scope), strings.SplitN(scanner.Text(), "\n", 2)) // nolint: gomnd
-		}
 		i++
+
+		txt = scanner.Text()
+
+		if i%2 == 0 {
+			scope = txt
+		} else {
+			if strs.IsEmpty(scope) { // Can happen, but shouldn't...
+				continue
+			}
+
+			idx := toMapIdx(scope)
+			if idx < 0 {
+				err = cm.Error("Wrong Git config scope '%v' for value '%s'", scope, txt)
+
+				return
+			}
+
+			addEntry(
+				idx,
+				strings.SplitN(txt, "\n", 2)) // nolint: gomnd
+		}
 	}
 
 	return
@@ -114,16 +177,11 @@ func (c *ConfigCache) SyncChangedValues() {}
 func (c *ConfigCache) getAll(key string, scope ConfigScope) (val []string, exists bool) {
 
 	if scope == Traverse {
-		val, exists = c.GetAll(key, SystemScope) // This order is how Git reports it.
-		if !exists {
-			val, exists = c.GetAll(key, GlobalScope)
-			if !exists {
-				val, exists = c.GetAll(key, LocalScope)
-				if !exists {
-					val, exists = c.GetAll(key, commandScope)
-				}
-			}
+		for i := len(c.scopes) - 1; i >= 0; i-- {
+			res, _ := c.getAll(key, ConfigScope(i)) // This order is how Git config reports it.
+			val = append(val, res...)
 		}
+		exists = len(val) != 0
 
 		return
 	}
@@ -146,10 +204,9 @@ func (c *ConfigCache) GetAll(key string, scope ConfigScope) (val []string, exist
 // Get all config values for regex key `key` in the cache.
 func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals []KeyValue) {
 	if scope == Traverse {
-		vals = append(vals, c.GetAllRegex(key, SystemScope)...)
-		vals = append(vals, c.GetAllRegex(key, GlobalScope)...)
-		vals = append(vals, c.GetAllRegex(key, LocalScope)...)
-		vals = append(vals, c.GetAllRegex(key, commandScope)...)
+		for i := len(c.scopes) - 1; i >= 0; i-- {
+			vals = append(vals, c.GetAllRegex(key, ConfigScope(i))...)
+		}
 
 		return
 	}
@@ -169,14 +226,10 @@ func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals [
 // Get a config value for key `key` in the cache.
 func (c *ConfigCache) get(key string, scope ConfigScope) (val string, exists bool) {
 	if scope == Traverse {
-		val, exists = c.Get(key, commandScope)
-		if !exists {
-			val, exists = c.Get(key, LocalScope)
-			if !exists {
-				val, exists = c.Get(key, GlobalScope)
-				if !exists {
-					val, exists = c.Get(key, SystemScope)
-				}
+		for i := 0; i < len(c.scopes); i++ {
+			val, exists = c.get(key, ConfigScope(i)) // This order is how Git config takes precedence over others.
+			if exists {
+				break
 			}
 		}
 

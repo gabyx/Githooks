@@ -1,6 +1,7 @@
 package git
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,20 +18,23 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00local\x00a.b\na3.1\na3.2\na3.3" +
 		"\x00local\x00a.c\nc1\x00\x00\x00\x00" +
 		"\x00global\x00a.a\na3" +
+		"\x00worktree\x00t.t\na2" +
 		"\x00command\x00t.t\na3"
 
 	c, err := parseConfig(s, func(string) bool { return true })
 
 	command := c.scopes[0]
-	local := c.scopes[1]
-	global := c.scopes[2]
-	system := c.scopes[3]
+	worktree := c.scopes[1]
+	local := c.scopes[2]
+	global := c.scopes[3]
+	system := c.scopes[4]
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(command))
 	assert.Equal(t, 1, len(system))
 	assert.Equal(t, 2, len(global))
 	assert.Equal(t, 3, len(local))
+	assert.Equal(t, 1, len(worktree))
 
 	assert.Equal(t, "bla", system["a.a"].values[0])
 
@@ -78,4 +82,16 @@ func TestGitConfigCache(t *testing.T) {
 	assert.True(t, c.Unset("a.aa", GlobalScope))
 	assert.False(t, c.IsSet("a.aa", GlobalScope))
 	assert.True(t, c.IsSet("a.aa", Traverse))
+
+	v, exists = c.GetAll("t.t", Traverse)
+	assert.True(t, exists)
+	assert.Equal(t, 2, len(v))
+	assert.Equal(t, []string{"a2", "a3"}, v)
+
+	kv := c.GetAllRegex(regexp.MustCompile("t.*"), Traverse)
+	assert.True(t, exists)
+	assert.Equal(t, 2, len(v))
+	assert.Equal(t, []KeyValue{
+		{Key: "t.t", Value: "a2"},
+		{Key: "t.t", Value: "a3"}}, kv)
 }
