@@ -147,7 +147,7 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 
 			idx := toMapIdx(scope)
 			if idx < 0 {
-				err = cm.Error("Wrong Git config scope '%v' for value '%s'", scope, txt)
+				err = cm.ErrorF("Wrong Git config scope '%v' for value '%s'", scope, txt)
 
 				return
 			}
