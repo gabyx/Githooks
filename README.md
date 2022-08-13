@@ -613,8 +613,8 @@ not globally be defined.
 | `GITHOOKS_OS` (defined)                        | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                                                  |
 | `GITHOOKS_ARCH` (defined)                      | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                                               |
 | `GITHOOKS_DISABLE`                             | If defined, disables running hooks run by Githooks,<br>except `git lfs` and the replaced old hooks. A value of `0`,`false`,`off` re-enables them. |
-| `GITHOOKS_LOG_DEBUG`                           | A value of `0` or `1` disables or enables debug logging for all Githooks executables.                                                             |
-| `GITHOOKS_RUNNER_TRACE`                        | A value of `0` or `1` disables or enables execution tracing during <br>Githooks runner execution.                                                 |
+| `GITHOOKS_LOG_DEBUG`                           | A value of `1` enables debug logging for all Githooks executables.                                                             |
+| `GITHOOKS_RUNNER_TRACE`                        | A value of `1` enables execution tracing during <br>Githooks runner execution.                                                 |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks).                         |
 | `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).                                   |
 
