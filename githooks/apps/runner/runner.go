@@ -123,10 +123,8 @@ func createLog() {
 }
 
 func logInvocation(s *HookSettings) {
-	t := os.Getenv("GITHOOKS_RUNNER_TRACE")
-	if strs.IsNotEmpty(t) {
-		log.DebugF("Running hooks for: '%s' %q", s.HookName, s.Args)
-	} else if t == "1" || cm.IsDebug {
+	if os.Getenv("GITHOOKS_RUNNER_TRACE") == "1" {
+		log.InfoF("Running hooks for: '%s' %q", s.HookName, s.Args)
 		log.DebugF("Settings:\n%s", s.toString())
 	}
 }

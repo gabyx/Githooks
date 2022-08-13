@@ -135,6 +135,8 @@ type LogContext struct {
 	doTrackStats bool
 	nWarnings    int
 	nErrors      int
+
+	debugLog bool
 }
 
 // NewColoredPromptWriter returns a colored prompt writer.
@@ -180,6 +182,8 @@ func CreateLogContext(onlyStderr bool) (*LogContext, error) {
 
 	l.setupWriters()
 	l.doTrackStats = true
+
+	l.debugLog = DebugLog || os.Getenv("GITHOOKS_LOG_DEBUG") == "1"
 
 	return &l, nil
 }
@@ -235,14 +239,14 @@ func (c *LogContext) IsErrorATerminal() bool {
 
 // Debug logs a debug message.
 func (c *LogContext) Debug(lines ...string) {
-	if DebugLog {
+	if c.debugLog {
 		fmt.Fprint(c.debug, FormatMessage(debugSuffix, indent, lines...), "\n")
 	}
 }
 
 // DebugF logs a debug message.
 func (c *LogContext) DebugF(format string, args ...interface{}) {
-	if DebugLog {
+	if c.debugLog {
 		fmt.Fprint(c.debug, FormatMessageF(debugSuffix, indent, format, args...), "\n")
 	}
 }
