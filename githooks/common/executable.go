@@ -8,6 +8,7 @@ type IExecutable interface {
 	GetArgs(args ...string) []string
 
 	GetString() string
+	GetEnvironment() []string
 }
 
 // Executable contains the data to a script/executable file.
@@ -17,6 +18,7 @@ type Executable struct {
 
 	// Arguments to the hook script/executable.
 	Args []string
+	Env  []string
 }
 
 // GetCommand gets the first command.
@@ -32,4 +34,9 @@ func (e *Executable) GetArgs(args ...string) []string {
 // GetString gets all args.
 func (e *Executable) GetString() string {
 	return strs.Fmt("%s %q", e.Cmd, e.Args)
+}
+
+// GetString gets all args.
+func (e *Executable) GetEnvironment() []string {
+	return e.Env
 }

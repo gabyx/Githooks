@@ -16,10 +16,10 @@ import (
 
 // The data for the runner config file.
 type runnerConfigFile struct {
-	Cmd  string   `yaml:"cmd"`
-	Args []string `yaml:"args"`
-
-	Version int `yaml:"version"`
+	Cmd     string   `yaml:"cmd"`
+	Args    []string `yaml:"args"`
+	Env     []string `yaml:"env"`
+	Version int      `yaml:"version"`
 }
 
 // The current runner config gile version.
@@ -71,14 +71,23 @@ func GetHookRunCmd(
 
 	subst := getVarSubstitution(os.LookupEnv, gitx.LookupConfig)
 
-	// Substitute variables in command.
+	// Substitute variable in env values.
 	var err error
+	for i := range config.Env {
+		if config.Env[i], err = subst(config.Env[i]); err != nil {
+			return nil, cm.CombineErrors(err,
+				cm.ErrorF("Error in hook run config '%s'.", hookPath))
+		}
+	}
+
+	// Substitute variables in command.
 	if exec.Cmd, err = subst(config.Cmd); err != nil {
 		return nil, cm.CombineErrors(err,
 			cm.ErrorF("Error in hook run config '%s'.", hookPath))
 	}
 
 	exec.Args = config.Args
+	exec.Env = config.Env
 
 	// Substitute variables in arguments.
 	for i := range exec.Args {
