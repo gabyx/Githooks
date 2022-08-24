@@ -36,8 +36,8 @@ func main() {
     fmt.Printf("Hello\n")
     fmt.Printf("File:%s\n", os.Args[1])
     fmt.Printf("Args:%s\n", strings.Join(os.Args[2:], ","))
-    fmt.Printf("Env:", os.Getenv("MY_ENV_VAR_A"))
-    fmt.Printf("Env:", os.Getenv("MY_ENV_VAR_B"))
+    fmt.Printf("Env:%s\n", os.Getenv("MY_ENV_VAR_A"))
+    fmt.Printf("Env:%s\n", os.Getenv("MY_ENV_VAR_B"))
 }
 EOF
 
