@@ -53,5 +53,10 @@
     ],
     "go.lintTool": "golangci-lint",
     "go.buildFlags": ["-tags", "debug"],
-    "go.trace.server": "messages"
+    "go.trace.server": "messages",
+    "cSpell.words": [
+        "gomnd",
+        "nolint",
+        "threadpool"
+    ]
 }

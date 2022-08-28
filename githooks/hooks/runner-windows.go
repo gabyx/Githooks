@@ -11,6 +11,7 @@ import (
 // is wrapped over the shell with `-c "..."`.
 type shellWrappedExecutable struct {
 	Cmd string
+	Env []string
 }
 
 // GetCommand gets the first command.
@@ -37,7 +38,7 @@ func (e *shellWrappedExecutable) GetString() string {
 
 // GetEnvironment returns all env. variables.
 func (e *shellWrappedExecutable) GetEnvironment() []string {
-	return nil
+	return envs
 }
 
 // GetDefaultRunner gets the default hook runner.
@@ -50,6 +51,6 @@ func (e *shellWrappedExecutable) GetEnvironment() []string {
 // This starts the shell and reads the shebang line on Windows.
 // We assume here that a shell like git-bash.exe from https://gitforwindows.org/
 // is installed where the `sh` is in the PATH when executing this hook over git.
-func GetDefaultRunner(hookPath string) cm.IExecutable {
-	return &shellWrappedExecutable{Cmd: hookPath}
+func GetDefaultRunner(hookPath string, envs []string) cm.IExecutable {
+	return &shellWrappedExecutable{Cmd: hookPath, Env: envs}
 }

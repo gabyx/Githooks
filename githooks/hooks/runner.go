@@ -51,7 +51,8 @@ func GetHookRunCmd(
 	gitx *git.Context,
 	hookPath string,
 	parseRunnerConfig bool,
-	rootDir string) (cm.IExecutable, error) {
+	rootDir string,
+	envs []string) (cm.IExecutable, error) {
 
 	exec := cm.Executable{Cmd: hookPath}
 
@@ -61,7 +62,7 @@ func GetHookRunCmd(
 
 	if !parseRunnerConfig || path.Ext(hookPath) != ".yaml" {
 		// Dont parse run config or not existing -> get the default runner.
-		return GetDefaultRunner(hookPath), nil
+		return GetDefaultRunner(hookPath, envs), nil
 	}
 
 	config, e := loadRunnerConfig(hookPath)
@@ -87,7 +88,8 @@ func GetHookRunCmd(
 	}
 
 	exec.Args = config.Args
-	exec.Env = config.Env
+	exec.Env = append(exec.Env, config.Env...)
+	exec.Env = append(exec.Env, envs...)
 
 	// Substitute variables in arguments.
 	for i := range exec.Args {

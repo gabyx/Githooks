@@ -455,7 +455,7 @@ func executeOldHook(
 	hooks, _, err := hooks.GetAllHooksIn(
 		settings.GitX,
 		settings.RepositoryDir,
-		settings.HookDir, hookName, hookNamespace,
+		settings.HookDir, hookName, hookNamespace, nil,
 		isIgnored, isTrusted, true, false)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
@@ -496,19 +496,26 @@ func collectHooks(
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) (h hooks.Hooks) {
 
+	// Load common env. file if existing.
+	namespaceEnvs, err := hooks.LoadNamespaceEnvs(settings.RepositoryHooksDir)
+	cm.AssertNoErrorPanic(err, "Could not load env. file")
+
 	// Local hooks in repository
 	// No parsing of local includes because already happened.
 	h.LocalHooks = getHooksIn(
 		settings, uiSettings, settings.RepositoryDir, settings.RepositoryHooksDir,
-		false, settings.HookNamespace, false, ignores, checksums)
+		false, settings.HookNamespace, namespaceEnvs, false, ignores, checksums)
 
 	// All shared hooks
 	var allAddedShared = make([]string, 0)
-	h.RepoSharedHooks = getRepoSharedHooks(settings, uiSettings, ignores, checksums, &allAddedShared)
+	h.RepoSharedHooks = getRepoSharedHooks(
+		settings, uiSettings,
+		namespaceEnvs, ignores, checksums, &allAddedShared)
 
 	h.LocalSharedHooks = getConfigSharedHooks(
 		settings,
 		uiSettings,
+		namespaceEnvs,
 		ignores,
 		checksums,
 		&allAddedShared,
@@ -517,6 +524,7 @@ func collectHooks(
 	h.GlobalSharedHooks = getConfigSharedHooks(
 		settings,
 		uiSettings,
+		namespaceEnvs,
 		ignores,
 		checksums,
 		&allAddedShared,
@@ -549,11 +557,13 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 func getRepoSharedHooks(
 	settings *HookSettings,
 	uiSettings *UISettings,
+	namespaceEnvs hooks.NamespaceEnvs,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore,
 	allAddedHooks *[]string) (hs hooks.HookPrioList) {
 
-	shared, err := hooks.LoadRepoSharedHooks(settings.InstallDir, settings.RepositoryDir)
+	shared, err :=
+		hooks.LoadRepoSharedHooks(settings.InstallDir, settings.RepositoryDir)
 
 	if err != nil {
 		log.ErrorOrPanicF(!settings.SkipNonExistingSharedHooks, err,
@@ -568,7 +578,11 @@ func getRepoSharedHooks(
 		shRepo := &shared[i]
 
 		if checkSharedHook(settings, shRepo, allAddedHooks, hooks.SharedHookTypeV.Repo) {
-			hs = append(hs, getHooksInShared(settings, uiSettings, shRepo, ignores, checksums)...)
+			hs = append(hs,
+				getHooksInShared(
+					settings, uiSettings,
+					namespaceEnvs,
+					shRepo, ignores, checksums)...)
 			*allAddedHooks = append(*allAddedHooks, shRepo.RepositoryDir)
 		}
 	}
@@ -579,6 +593,7 @@ func getRepoSharedHooks(
 func getConfigSharedHooks(
 	settings *HookSettings,
 	uiSettings *UISettings,
+	namespaceEnvs hooks.NamespaceEnvs,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore,
 	allAddedHooks *[]string,
@@ -609,7 +624,10 @@ func getConfigSharedHooks(
 		shRepo := &shared[i]
 
 		if checkSharedHook(settings, shRepo, allAddedHooks, sharedType) {
-			hs = append(hs, getHooksInShared(settings, uiSettings, shRepo, ignores, checksums)...)
+			hs = append(hs, getHooksInShared(
+				settings, uiSettings,
+				namespaceEnvs, shRepo, ignores, checksums)...)
+
 			*allAddedHooks = append(*allAddedHooks, shRepo.RepositoryDir)
 		}
 	}
@@ -715,6 +733,7 @@ func getHooksIn(
 	hooksDir string,
 	addInternalIgnores bool,
 	hookNamespace string,
+	namespaceEnvs hooks.NamespaceEnvs,
 	readNamespace bool,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) (batches hooks.HookPrioList) {
@@ -757,7 +776,7 @@ func getHooksIn(
 	allHooks, maxBatches, err := hooks.GetAllHooksIn(
 		settings.GitX,
 		rootDir,
-		hooksDir, settings.HookName, hookNamespace,
+		hooksDir, settings.HookName, hookNamespace, namespaceEnvs.Get(hookNamespace),
 		isIgnored, isTrusted, true, true)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
@@ -816,6 +835,7 @@ func getHooksIn(
 
 func getHooksInShared(settings *HookSettings,
 	uiSettings *UISettings,
+	namespaceEnvs hooks.NamespaceEnvs,
 	shRepo *hooks.SharedRepo,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) hooks.HookPrioList {
@@ -824,8 +844,10 @@ func getHooksInShared(settings *HookSettings,
 
 	dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir)
 
-	return getHooksIn(settings, uiSettings,
-		shRepo.RepositoryDir, dir, true, hookNamespace, true, ignores, checksums)
+	return getHooksIn(
+		settings, uiSettings,
+		shRepo.RepositoryDir, dir, true, hookNamespace,
+		namespaceEnvs, true, ignores, checksums)
 }
 
 func logBatches(title string, hooks hooks.HookPrioList) {
@@ -946,28 +968,28 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.DebugIf(len(hs.LocalHooks) != 0, "Launching local hooks ...")
 	results, err = hooks.ExecuteHooksParallel(
-		pool, &settings.ExecX, &hs.LocalHooks,
+		pool, &settings.ExecX, hs.LocalHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Local hook execution failed.")
 
 	log.DebugIf(len(hs.RepoSharedHooks) != 0, "Launching repository shared hooks ...")
 	results, err = hooks.ExecuteHooksParallel(
-		pool, &settings.ExecX, &hs.RepoSharedHooks,
+		pool, &settings.ExecX, hs.RepoSharedHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Shared repository hook execution failed.")
 
 	log.DebugIf(len(hs.LocalSharedHooks) != 0, "Launching local shared hooks ...")
 	results, err = hooks.ExecuteHooksParallel(
-		pool, &settings.ExecX, &hs.LocalSharedHooks,
+		pool, &settings.ExecX, hs.LocalSharedHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Local shared hook execution failed.")
 
 	log.DebugIf(len(hs.GlobalSharedHooks) != 0, "Launching global shared hooks ...")
 	_, err = hooks.ExecuteHooksParallel(
-		pool, &settings.ExecX, &hs.GlobalSharedHooks,
+		pool, &settings.ExecX, hs.GlobalSharedHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Gobal shared hook execution failed.")

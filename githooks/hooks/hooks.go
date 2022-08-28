@@ -22,13 +22,16 @@ type Hook struct {
 	// The path to the file which configured this executable.
 	Path string
 
+	// The namespace of the hook.
+	Namespace string
+
 	// The namespaced path of the hook `<namespace>/<relPath>`.
 	NamespacePath string
 
 	// If the hook is not ignored by any ignore patterns.
 	// Has priority 1 for execution determination.
 	Active bool
-	// If the hook is trusted by means of the chechsum store.
+	// If the hook is trusted by means of the checksum store.
 	// Has priority 2 for execution determination.
 	Trusted bool
 
@@ -45,12 +48,17 @@ type Hook struct {
 type HookPrioList [][]Hook
 
 // Hooks is a collection of all executable hooks.
-// Json serialization is only for debug pruposes.
+// Json serialization is only for debugging purposes.
 type Hooks struct {
-	LocalHooks        HookPrioList
+	// All local hooks.
+	LocalHooks HookPrioList
+
+	// All shared hooks.
 	RepoSharedHooks   HookPrioList
 	LocalSharedHooks  HookPrioList
 	GlobalSharedHooks HookPrioList
+
+	NamespaceEnvs NamespaceEnvs // Environment variables for shared hook namespaces.
 }
 
 // HookResult is the data assembly of the output of an executed hook.
@@ -135,6 +143,7 @@ func GetAllHooksIn(
 	hooksDir string,
 	hookName string,
 	hookNamespace string,
+	hookNamespaceEnvs []string,
 	isIgnored IgnoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
@@ -162,7 +171,7 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			runCmd, err = GetHookRunCmd(gitx, hookPath, parseRunnerConfig, rootDir)
+			runCmd, err = GetHookRunCmd(gitx, hookPath, parseRunnerConfig, rootDir, hookNamespaceEnvs)
 			if err != nil {
 				return cm.CombineErrors(err,
 					cm.ErrorF("Could not detect runner for hook\n'%s'", hookPath))
@@ -173,6 +182,7 @@ func GetAllHooksIn(
 			Hook{
 				IExecutable:   runCmd,
 				Path:          hookPath,
+				Namespace:     hookNamespace,
 				NamespacePath: namespacedPath,
 				Active:        !ignored,
 				Trusted:       trusted,
@@ -279,14 +289,14 @@ func GetAllHooksIn(
 func ExecuteHooksParallel(
 	pool *thx.ThreadPool,
 	exec cm.IExecContext,
-	hs *HookPrioList,
+	hs HookPrioList,
 	res []HookResult,
 	outputCallback func(res ...HookResult),
 	args ...string) ([]HookResult, error) {
 
 	// Count number of results we need
 	nResults := 0
-	for _, hooksGroup := range *hs {
+	for _, hooksGroup := range hs {
 		nResults += len(hooksGroup)
 	}
 
@@ -311,7 +321,7 @@ func ExecuteHooksParallel(
 	}
 
 	currIdx := 0
-	for _, hooksGroup := range *hs {
+	for _, hooksGroup := range hs {
 		nHooks := len(hooksGroup)
 
 		if nHooks == 0 {
