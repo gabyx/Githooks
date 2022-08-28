@@ -38,7 +38,7 @@ func (e *shellWrappedExecutable) GetString() string {
 
 // GetEnvironment returns all env. variables.
 func (e *shellWrappedExecutable) GetEnvironment() []string {
-	return envs
+	return e.Env
 }
 
 // GetDefaultRunner gets the default hook runner.
