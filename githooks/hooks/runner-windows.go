@@ -35,6 +35,11 @@ func (e *shellWrappedExecutable) GetString() string {
 	return strs.Fmt("%s %q", e.Cmd, e.GetArgs())
 }
 
+// GetEnvironment returns all env. variables.
+func (e *shellWrappedExecutable) GetEnvironment() []string {
+	return nil
+}
+
 // GetDefaultRunner gets the default hook runner.
 // Because you cannot set a hook as executable on Windows and
 // there is no notion of a shebang in such an executable hook file
