@@ -89,7 +89,7 @@ func mainRun() (exitCode int) {
 		return
 	}
 
-	exportGeneralEnvVars()
+	exportGeneralVars(&settings)
 	exportStagedFiles(&settings)
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
@@ -138,7 +138,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		"No arguments given! -> Abort")
 
 	// General execution context, in currenct working dir.
-	execx := cm.ExecContext{}
+	execx := cm.ExecContext{Env: os.Environ()}
 
 	// Current git context, in current working dir.
 	gitx := git.NewCtx()
@@ -276,9 +276,14 @@ Do you want to allow running every current and future hooks?`, repoPath)
 	return
 }
 
-func exportGeneralEnvVars() {
+func exportGeneralVars(settings *HookSettings) {
+	// Here set into global env, for simple env replacement in run command.
 	os.Setenv(hooks.EnvVariableOs, runtime.GOOS)
 	os.Setenv(hooks.EnvVariableArch, runtime.GOARCH)
+
+	settings.ExecX.Env = append(settings.ExecX.Env,
+		strs.Fmt("%s=%s", hooks.EnvVariableOs, runtime.GOOS),
+		strs.Fmt("%s=%s", hooks.EnvVariableArch, runtime.GOARCH))
 }
 
 func exportStagedFiles(settings *HookSettings) {
@@ -303,6 +308,8 @@ func exportStagedFiles(settings *HookSettings) {
 				"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
 
 			os.Setenv(hooks.EnvVariableStagedFiles, files)
+			settings.ExecX.Env = append(settings.ExecX.Env,
+				strs.Fmt("%s=%s", hooks.EnvVariableStagedFiles, files))
 		}
 
 	}

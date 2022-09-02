@@ -17,7 +17,7 @@ func (e NamespaceEnvs) Get(namespace string) []string {
 	return nil
 }
 
-// The `envs.yaml` config which defines per-namespace
+// The `.envs.yaml` config which defines per-namespace
 // environment variables for executing hooks in certain namespaces.
 type namespaceEnvsConfig struct {
 	NamespaceEnvs NamespaceEnvs `yaml:"envs"`
@@ -34,7 +34,7 @@ func createNamespaceEnvsConfig() namespaceEnvsConfig {
 }
 
 func GetEnvFile(repoHooksDir string) string {
-	return path.Join(repoHooksDir, "envs.yaml")
+	return path.Join(repoHooksDir, ".envs.yaml")
 }
 
 // LoadNamespaceEnvs loads the envs config file in the repository if existing.
