@@ -34,7 +34,7 @@ version: 1
 
 ## Hook Run Configuration `<hookName>.yaml`
 
-Variable `hookName` refers top one of the supported [Git hooks](/Readme.md).
+Variable `hookName` refers top one of the supported [Git hooks](/README.md).
 
 ### Version 1
 
@@ -45,4 +45,19 @@ args:
     - "--faster"
     - "--proper"
 version: 1
+```
+
+### Version 2
+
+- Added environment variables `env`.
+
+```yaml
+cmd: "/var/etc/lib/crazy/command"
+args:
+    - "--do-it"
+    - "--faster"
+    - "--proper"
+env:
+    - USE_CUSTOM=1
+version: 2
 ```

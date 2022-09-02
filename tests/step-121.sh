@@ -36,6 +36,8 @@ func main() {
     fmt.Printf("Hello\n")
     fmt.Printf("File:%s\n", os.Args[1])
     fmt.Printf("Args:%s\n", strings.Join(os.Args[2:], ","))
+    fmt.Printf("Env:%s\n", os.Getenv("MY_ENV_VAR_A"))
+    fmt.Printf("Env:%s\n", os.Getenv("MY_ENV_VAR_B"))
 }
 EOF
 
@@ -57,6 +59,9 @@ args:
     - "${git:githooks.monkey}"
     - "${git-g:githooks.monkey}"
     - "${git-s:githooks.monkey}"
+env:
+    - "MY_ENV_VAR_A=${env:MONKEY}-A"
+    - "MY_ENV_VAR_B=${env:MONKEY}-B"
 version: 1
 EOF
 
@@ -66,7 +71,9 @@ OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Hello" ||
     ! echo "$OUT" | grep "my-file.py" ||
-    ! echo "$OUT" | grep "Args:mon key,\${env:MONKEY},git-monkey-global,git-monkey-global,$SYSTEM_VALUE"; then
+    ! echo "$OUT" | grep "Args:mon key,\${env:MONKEY},git-monkey-global,git-monkey-global,$SYSTEM_VALUE" ||
+    ! echo "$OUT" | grep "Env:mon key-A" ||
+    ! echo "$OUT" | grep "Env:mon key-B"; then
     echo "! Expected hook with runner command to be executed."
     echo "$OUT"
     exit 6
