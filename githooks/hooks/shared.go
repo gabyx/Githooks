@@ -73,11 +73,12 @@ func GetSharedRepoTagNames() []string {
 type sharedHookConfig struct {
 	// Urls for shared repositories.
 	Urls []string `yaml:"urls"`
-
 	// The version of the file.
 	Version int `yaml:"version"`
 }
 
+// Version for sharedHookConfig.
+// Version 1: Initial.
 const sharedHookConfigVersion int = 1
 
 func createSharedHookConfig() sharedHookConfig {
@@ -89,6 +90,11 @@ func loadRepoSharedHooks(file string) (config sharedHookConfig, err error) {
 
 	if cm.IsFile(file) {
 		err = cm.LoadYAML(file, &config)
+		if err != nil {
+			err = cm.CombineErrors(err, cm.ErrorF("Could not load file '%s'", file))
+
+			return
+		}
 
 		if config.Version == 0 {
 			err = cm.ErrorF("Version '%v' needs to be greater than 0.", config.Version)
@@ -99,7 +105,7 @@ func loadRepoSharedHooks(file string) (config sharedHookConfig, err error) {
 
 	config.Urls = strs.MakeUnique(config.Urls)
 
-	return config, err
+	return config, nil
 }
 
 func saveRepoSharedHooks(file string, config *sharedHookConfig) error {

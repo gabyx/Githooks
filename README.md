@@ -33,7 +33,8 @@ repositories.
 - Running shared hooks from other Git repositories (with auto-update).
 - Git LFS support.
 - Command line interface.
-- Fast execution due to compiled executable. (even **2-3x faster with `v2.1.1`**)
+- Fast execution due to compiled executable. (even **2-3x faster with
+  `v2.1.1`**)
 - Fast parallel execution over threadpool.
 - Ignoring non-shared and shared hooks with patterns.
 - Automatic Githooks updates: Fully configurable for your own company by
@@ -64,6 +65,7 @@ repositories.
 - [Trusting Hooks](#trusting-hooks)
 - [Disabling Githooks](#disabling-githooks)
 - [Environment Variables](#environment-variables)
+- [Arguments to Shared Hooks](#arguments-to-shared-hooks)
 - [Log & Traces](#log--traces)
 - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
 - [User Prompts](#user-prompts)
@@ -127,6 +129,7 @@ Take this snippet of a Git repository layout as an example:
 │    ├── ...
 │    ├── .ignore.yaml         # Main ignores.
 │    ├── .shared.yaml         # Shared hook configuration.
+│    ├── .envs.yaml           # Environment variables passed to shared hooks.
 │    └── .lfs-required        # LFS is required.
 └── ...
 ```
@@ -615,6 +618,28 @@ not globally be defined.
 | `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution. A value of `1` enables more output.                     |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
 | `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).           |
+
+## Arguments to Shared Hooks
+
+You can pass arguments to shared hooks currently by specifying a
+[`.githooks/.envs.yaml`](#yaml-specifications) file which will export
+environment variables when running the shared hooks selected by its
+[namespace](#shared-repository-namespace):
+
+```yaml
+envs:
+  mystuff:
+    # All these variables are exported
+    # for shared hook namespace `mystuff`.
+    - "MYSTUFF_CHECK_DEAD_CODE=1"
+    - "MYSTUFF_STAGE_ON_FORMAT=1"
+
+  sharedA:
+    # All these variables are exported
+    # for shared hook namespace `sharedA`.
+    - "SHAREDA_ABC=1"
+    - "SHAREDA_TWEET=1"
+```
 
 ## Log & Traces
 

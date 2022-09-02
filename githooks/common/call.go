@@ -77,7 +77,8 @@ func GetOutputFromExecutable(
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
-	cmd.Env = append(ctx.GetEnv(), exe.GetEnvironment()...)
+	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
+	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
 
 	if pipeSetup != nil {
 		cmd.Stdin, _, _ = pipeSetup()
@@ -102,7 +103,8 @@ func GetCombinedOutputFromExecutable(
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
-	cmd.Env = append(ctx.GetEnv(), exe.GetEnvironment()...)
+	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
+	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
 
 	if pipeSetup != nil {
 		cmd.Stdin, _, _ = pipeSetup()
@@ -139,7 +141,8 @@ func GetOutputFromExecutableSep(
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
-	cmd.Env = append(ctx.GetEnv(), exe.GetEnvironment()...)
+	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
+	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
 
 	if pipeSetup != nil {
 		cmd.Stdin, _, _ = pipeSetup()
@@ -169,7 +172,8 @@ func RunExecutable(
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
-	cmd.Env = append(ctx.GetEnv(), exe.GetEnvironment()...)
+	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
+	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
 
 	if pipeSetup != nil {
 		cmd.Stdin, cmd.Stdout, cmd.Stderr = pipeSetup()

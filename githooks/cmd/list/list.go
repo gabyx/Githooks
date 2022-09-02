@@ -370,6 +370,7 @@ func GetAllHooksIn(
 		gitx,
 		rootDir, hooksDir,
 		hookName, hookNamespace,
+		nil,
 		isIgnored, isTrusted, false,
 		!isReplacedHook)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
