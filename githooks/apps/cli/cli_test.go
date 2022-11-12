@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/gabyx/githooks/githooks/apps/coverage"
+	cm "github.com/gabyx/githooks/githooks/common"
 
 	"testing"
 )
@@ -14,7 +15,10 @@ func TestCoverage(t *testing.T) {
 		// fmt.Printf("Forward args: %q\n", os.Args)
 
 		// Run the main binary...
-		if mainRun() != 0 {
+		cleanUpX := cm.InterruptHandler
+		exitCode = mainRun(cleanUpX)
+		cleanUpX.RunHandlers()
+		if exitCode != 0 {
 			t.Fatal()
 		}
 	}

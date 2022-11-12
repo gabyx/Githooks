@@ -8,7 +8,7 @@ RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/
 RUN apk add bash jq curl
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --global protocol.file.allow always
+RUN git config --system protocol.file.allow always
 
 RUN mkdir -p "/root/whitespace folder"
 ENV HOME="/root/whitespace folder"

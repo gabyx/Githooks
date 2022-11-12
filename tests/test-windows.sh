@@ -12,7 +12,7 @@ RUN choco install -y jq
 RUN choco install -y curl
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --global protocol.file.allow always
+RUN git config --system protocol.file.allow always
 
 # ideally, this would be C:\go to match Linux a bit closer, but C:\go is the recommended install path for Go itself on Windows
 ENV GOPATH C:\\gopath

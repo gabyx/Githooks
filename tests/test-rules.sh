@@ -8,7 +8,7 @@ RUN apk add bash jq
 RUN git config --global safe.directory /data
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --global protocol.file.allow always
+RUN git config --system protocol.file.allow always
 
 RUN curl -fsSL https://github.com/mvdan/sh/releases/download/v3.1.1/shfmt_v3.1.1_linux_amd64 -o /usr/local/bin/shfmt \
     && chmod +x /usr/local/bin/shfmt \

@@ -1317,7 +1317,7 @@ func addInstallerLog(path string, log cm.ILogContext) (isDefault bool, resPath s
 func assertOneInstallerRunning(log cm.ILogContext, interruptCtx *cm.InterruptContext) {
 	lockFile := path.Join(os.TempDir(), "githooks-installer-lock")
 	if exists, _ := cm.IsPathExisting(lockFile); exists {
-		log.PanicF("Only one Githooks installer can run at the same time"+
+		log.PanicF("Only one Githooks installer can run at the same time. "+
 			"Maybe delete the lock file '%v", lockFile)
 	}
 

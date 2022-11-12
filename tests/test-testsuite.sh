@@ -6,7 +6,7 @@ RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux
 RUN apk add bash jq
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --global protocol.file.allow always
+RUN git config --system protocol.file.allow always
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/c/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.35.2
 
