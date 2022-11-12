@@ -1340,8 +1340,8 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	initArgs(log, &args, vi)
 	validateArgs(log, cmd, &args)
 
-	isDefault := false
-	isDefault, args.Log = addInstallerLog(args.Log, log)
+	isDefaultLog := false
+	isDefaultLog, args.Log = addInstallerLog(args.Log, log)
 
 	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
 	dt := time.Now()
@@ -1356,7 +1356,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 			}
 
 			if RemoveInstallerLogOnSuccess && logStats.ErrorCount() == 0 &&
-				isDefault && !args.InternalPostDispatch {
+				isDefaultLog && !args.InternalPostDispatch {
 				log.RemoveFileWriter()
 				_ = os.Remove(args.Log)
 			}
