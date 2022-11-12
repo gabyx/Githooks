@@ -36,8 +36,8 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 		Long: "Githooks installer application\n" +
 			"See further information at https://github.com/gabyx/githooks/blob/main/README.md",
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
-		Run: func(cmd *cobra.Command, _ []string) {
-			runInstall(cmd, ctx, vi)
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return runInstall(cmd, ctx, vi)
 		}}
 
 	defineArguments(cmd, vi)
@@ -375,15 +375,17 @@ func getDeploySettings(
 	return deploySettings
 }
 
-func prepareDispatch(
+func runInstallDispatched(
 	log cm.ILogContext,
 	gitx *git.Context,
 	settings *Settings,
-	args *Arguments,
+	args Arguments,
 	cleanUpX *cm.InterruptContext) (bool, error) {
 
 	var status updates.ReleaseStatus
 	var err error
+
+	log.Info("Running dispatched installer.")
 
 	if args.InternalAutoUpdate {
 		log.Info("Executing auto update...")
@@ -411,9 +413,7 @@ func prepareDispatch(
 		log.DebugF("Status: %v", status)
 	}
 
-	updateAvailable := status.LocalCommitSHA != status.RemoteCommitSHA
-
-	cm.PanicIfF(args.InternalAutoUpdate && !updateAvailable,
+	cm.PanicIfF(args.InternalAutoUpdate && !status.IsUpdateAvailable,
 		"An autoupdate should only be triggered when and update is found.")
 
 	installer := hooks.GetInstallerExecutable(settings.InstallDir)
@@ -423,9 +423,12 @@ func prepareDispatch(
 	// or the installer is missing.
 	binaries := updates.Binaries{}
 
-	if updateAvailable || !haveInstaller {
+	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
+	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
 
-		log.Info("Getting Githooks binaries...")
+	if status.IsUpdateAvailable || !haveInstaller {
+
+		log.Info("Getting Githooks binaries ...")
 
 		tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
 		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
@@ -459,7 +462,7 @@ func prepareDispatch(
 
 			log.InfoF("Download '%s' from deploy source...", tag)
 
-			deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, args)
+			deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
 			binaries = downloadBinaries(log, deploySettings, tempDir, tag)
 		}
 
@@ -467,9 +470,10 @@ func prepareDispatch(
 	}
 
 	// Set variables for further update procedure...
+	// Note: `args` is passed by value.
 	args.InternalPostDispatch = true
 	args.InternalBinaries = binaries.All
-	if updateAvailable {
+	if status.IsUpdateAvailable {
 		args.InternalUpdateFromVersion = build.BuildVersion
 		args.InternalUpdateTo = status.UpdateCommitSHA
 	}
@@ -480,7 +484,7 @@ func prepareDispatch(
 
 	log.PanicIfF(!cm.IsFile(installer.Cmd), "Githooks executable '%s' is not existing.", installer)
 
-	return true, runInstaller(log, &installer, args)
+	return true, runInstaller(log, &installer, &args)
 }
 
 func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) error {
@@ -1287,28 +1291,47 @@ func runUpdate(
 	}
 }
 
-func addInstallerLog(path string, log cm.ILogContext) string {
+func addInstallerLog(path string, log cm.ILogContext) (isDefault bool, resPath string) {
 	var err error
 	var file *os.File
 
 	if strs.IsEmpty(path) {
 		file, err = os.CreateTemp("", "githooks-installer-*.log")
 		log.AssertNoErrorF(err, "Failed to create installer log at '%v'", path)
+		isDefault = true
 	} else {
 		file, err = os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_APPEND, cm.DefaultFileModeFile)
 		log.AssertNoErrorF(err, "Failed to append to installer log at '%v'", path)
 	}
 
 	if err != nil {
-		return ""
+		return
 	}
 
 	log.AddFileWriter(file)
+	resPath = file.Name()
 
-	return file.Name()
+	return
 }
 
-func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
+func assertOneInstallerRunning(log cm.ILogContext, interruptCtx *cm.InterruptContext) {
+	lockFile := path.Join(os.TempDir(), "githooks-installer-lock")
+	if exists, _ := cm.IsPathExisting(lockFile); exists {
+		log.PanicF("Only one Githooks installer can run at the same time"+
+			"Maybe delete the lock file '%v", lockFile)
+	}
+
+	_, err := os.Create(lockFile)
+	log.AssertNoErrorPanic(err, "Could not create lockfile '%v'.", lockFile)
+
+	// Remove the lock on any exit.
+	deleteLock := func() {
+		_ = os.Remove(lockFile)
+	}
+	interruptCtx.AddHandler(deleteLock)
+}
+
+func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error {
 
 	args := Arguments{}
 	log := ctx.Log
@@ -1317,7 +1340,9 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	initArgs(log, &args, vi)
 	validateArgs(log, cmd, &args)
 
-	args.Log = addInstallerLog(args.Log, log)
+	isDefault := false
+	isDefault, args.Log = addInstallerLog(args.Log, log)
+
 	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
 	dt := time.Now()
 	log.InfoF("Started at: %s", dt.String())
@@ -1329,16 +1354,19 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 			if r := recover(); r != nil {
 				panic(r)
 			}
-			log.RemoveFileWriter()
-			if RemoveInstallerLogOnSuccess && !args.InternalPostDispatch &&
-				logStats.ErrorCount() == 0 {
+			log.InfoF("Test remove log file %v, %v, %v !!!!",
+				RemoveInstallerLogOnSuccess, args.InternalPostDispatch, logStats.ErrorCount())
+
+			if RemoveInstallerLogOnSuccess && logStats.ErrorCount() == 0 &&
+				isDefault && !args.InternalPostDispatch {
+				log.InfoF("Removing log now.")
+				log.RemoveFileWriter()
 				_ = os.Remove(args.Log)
 			}
 		}()
 	}
 
-	log.InfoF("Logfile: '%s'", args.Log)
-
+	log.InfoF("Log file: '%s'", args.Log)
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
 
 	log.DebugF("Arguments: %+v", args)
@@ -1349,11 +1377,16 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 	}
 
 	if !args.InternalPostDispatch {
-		isDispatched, err := prepareDispatch(log, ctx.GitX, &settings, &args, ctx.CleanupX)
+		assertOneInstallerRunning(log, ctx.CleanupX)
+
+		isDispatched, err := runInstallDispatched(log, ctx.GitX, &settings, args, ctx.CleanupX)
 		log.MoveFileWriterToEnd() // We are logging to the same file. Move it to the end.
-		log.AssertNoErrorPanic(err, "Running installer failed.")
+		if err != nil {
+			return ctx.NewCmdExit(1, "%v", err)
+		}
+
 		if isDispatched {
-			return
+			return nil
 		}
 		// intended fallthrough ... (only debug)
 	}
@@ -1367,7 +1400,11 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) {
 			" • %v errors\n"+
 			" • %v warnings\n"+
 			"occurred!", logStats.ErrorCount(), logStats.WarningCount())
+
+		return ctx.NewCmdExit(1, "Install failed.")
 	}
+
+	return nil
 }
 
 func transformLegacyGitConfigSettings(log cm.ILogContext, gitx *git.Context) {
