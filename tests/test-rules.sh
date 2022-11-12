@@ -4,6 +4,12 @@ cat <<EOF | docker build --force-rm -t githooks:test-rules -
 FROM golang:1.17-alpine
 RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
+
+RUN git config --global safe.directory /data
+
+# CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
+RUN git config --global protocol.file.allow always
+
 RUN curl -fsSL https://github.com/mvdan/sh/releases/download/v3.1.1/shfmt_v3.1.1_linux_amd64 -o /usr/local/bin/shfmt \
     && chmod +x /usr/local/bin/shfmt \
     && shfmt --version
@@ -14,7 +20,6 @@ RUN T=$(mktemp); curl -fsSL https://github.com/koalaman/shellcheck/releases/down
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.34.1
 
-RUN git config --global safe.directory /data
 EOF
 
 if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules tests/exec-rules.sh; then
