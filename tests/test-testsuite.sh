@@ -8,13 +8,12 @@ RUN apk add bash jq
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --global protocol.file.allow always
 
-# CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --global protocol.file.allow always
-
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/c/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.35.2
 
 # Git refuses to do stuff in this mounted directory.
 RUN git config --global safe.directory /githooks
+
+ENV DOCKER_RUNNING=true
 EOF
 
 if ! docker run --rm -it \

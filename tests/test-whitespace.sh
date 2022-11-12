@@ -12,6 +12,7 @@ RUN git config --global protocol.file.allow always
 
 RUN mkdir -p "/root/whitespace folder"
 ENV HOME="/root/whitespace folder"
+
 EOF
 
 # shellcheck disable=SC2016

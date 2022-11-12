@@ -42,6 +42,7 @@ ${ADDITIONAL_INSTALL_STEPS:-}
 
 RUN echo "Git version: \$(git --version)"
 WORKDIR \$GH_TESTS
+
 ENV DOCKER_RUNNING=true
 EOF
 

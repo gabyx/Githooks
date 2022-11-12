@@ -20,6 +20,7 @@ RUN T=$(mktemp); curl -fsSL https://github.com/koalaman/shellcheck/releases/down
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.34.1
 
+ENV DOCKER_RUNNING=true
 EOF
 
 if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules tests/exec-rules.sh; then

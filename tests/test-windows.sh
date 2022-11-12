@@ -65,6 +65,8 @@ RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/setup-githook
 ADD tests "$GH_TESTS"
 
 WORKDIR C:/githooks-tests/tests
+ENV DOCKER_RUNNING=true
+
 EOF
 
 docker run --rm \
