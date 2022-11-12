@@ -27,6 +27,7 @@ RUN git config --system protocol.file.allow always
 RUN go get github.com/wadey/gocovmerge
 RUN go install github.com/mattn/goveralls@latest
 
+ENV DOCKER_RUNNING=true
 ENV GH_COVERAGE_DIR="/cover"
 
 # Coveralls env. vars for upload.
@@ -44,7 +45,6 @@ fi
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 
-ENV DOCKER_RUNNING=true
 ENV GH_TESTS="/var/lib/githooks-tests"
 ENV GH_TEST_TMP="/tmp"
 ENV GH_TEST_REPO="/var/lib/githooks"
