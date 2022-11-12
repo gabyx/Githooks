@@ -81,14 +81,6 @@ function unsetEnvironment() {
     return 0
 }
 
-function checkNoLockFile() {
-    if [ -f "/tmp/githooks-installer-lock" ] ||
-        [ -f "/c/Users/ContainerAdministrator/AppData/Local/Temp/githooks-installer-lock" ]; then
-        echo "Lockfile '/tmp/githooks-installer-lock' is present, which should not!" >&2
-        exit 1
-    fi
-}
-
 if [ -z "$GH_TESTS" ] ||
     [ -z "$GH_TEST_REPO" ] ||
     [ -z "$GH_TEST_BIN" ] ||
@@ -146,7 +138,6 @@ for STEP in "$GH_TESTS"/step-*.sh; do
         break
     fi
 
-    checkNoLockFile
     cleanDirs
     resetTestRepo
 

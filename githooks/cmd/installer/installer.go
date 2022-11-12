@@ -1322,13 +1322,14 @@ func assertOneInstallerRunning(log cm.ILogContext, interruptCtx *cm.InterruptCon
 	}
 
 	log.DebugF("Created lockfile '%s'.", lockFile)
-	_, err := os.Create(lockFile)
+	err := cm.TouchFile(lockFile, true)
 	log.AssertNoErrorPanic(err, "Could not create lockfile '%v'.", lockFile)
 
 	// Remove the lock on any exit.
 	deleteLock := func() {
 		log.DebugF("Remove lockfile '%s'.", lockFile)
-		_ = os.Remove(lockFile)
+		err := os.Remove(lockFile)
+		log.AssertNoError(err, "Lockfile not removed?")
 	}
 	interruptCtx.AddHandler(deleteLock)
 }
