@@ -1354,12 +1354,9 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 			if r := recover(); r != nil {
 				panic(r)
 			}
-			log.InfoF("Test remove log file %v, %v, %v !!!!",
-				RemoveInstallerLogOnSuccess, args.InternalPostDispatch, logStats.ErrorCount())
 
 			if RemoveInstallerLogOnSuccess && logStats.ErrorCount() == 0 &&
 				isDefault && !args.InternalPostDispatch {
-				log.InfoF("Removing log now.")
 				log.RemoveFileWriter()
 				_ = os.Remove(args.Log)
 			}
