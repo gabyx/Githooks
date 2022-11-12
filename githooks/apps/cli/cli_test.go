@@ -15,9 +15,10 @@ func TestCoverage(t *testing.T) {
 		// fmt.Printf("Forward args: %q\n", os.Args)
 
 		// Run the main binary...
-		cleanUpX := cm.InterruptHandler
-		exitCode = mainRun(cleanUpX)
+		var cleanUpX cm.InterruptContext
+		exitCode := mainRun(&cleanUpX)
 		cleanUpX.RunHandlers()
+
 		if exitCode != 0 {
 			t.Fatal()
 		}
