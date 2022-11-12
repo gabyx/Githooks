@@ -10,7 +10,25 @@ import (
 	"github.com/gabyx/githooks/githooks/hooks"
 )
 
-func mainRun() (exitCode int) {
+func installSignalHandling() *cm.InterruptContext {
+	var cleanUpX cm.InterruptContext
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	defer func() {
+		signal.Stop(c)
+	}()
+
+	go func() {
+		<-c
+		cleanUpX.RunHandlers()
+		os.Exit(1) // Return 1 := canceled always...
+	}()
+
+	return &cleanUpX
+}
+
+func mainRun(cleanUpX *cm.InterruptContext) (exitCode int) {
 
 	log, err := cm.CreateLogContext(false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
@@ -29,21 +47,7 @@ func mainRun() (exitCode int) {
 		}
 	}()
 
-	// Install signal handling
-	var cleanUpX cm.InterruptContext
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	defer func() {
-		signal.Stop(c)
-	}()
-
-	go func() {
-		<-c
-		cleanUpX.RunHandlers()
-		os.Exit(1) // Return 1 := canceled always...
-	}()
-
-	err = cmd.Run(log, log, wrapPanicExitCode, &cleanUpX)
+	err = cmd.Run(log, log, wrapPanicExitCode, cleanUpX)
 
 	// Overwrite the exit code if its a command exit error.
 	if v, ok := err.(ccm.CmdExit); ok {
@@ -56,5 +60,8 @@ func mainRun() (exitCode int) {
 }
 
 func main() {
-	os.Exit(mainRun())
+	cleanUpX := installSignalHandling()
+	exitCode := mainRun(cleanUpX)
+	cleanUpX.RunHandlers()
+	os.Exit(exitCode)
 }

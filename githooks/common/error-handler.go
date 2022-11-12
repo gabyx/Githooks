@@ -9,7 +9,8 @@ import (
 func HandleCLIErrors(
 	err interface{},
 	log ILogContext,
-	getBugReportingInfo func() string) bool {
+	getBugReportingInfo func() string,
+) bool {
 
 	if err == nil {
 		return false

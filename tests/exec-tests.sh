@@ -38,10 +38,14 @@ RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
 RUN git config --global githooks.deleteDetectedLFSHooks "n"
 
+# CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
+RUN git config --global protocol.file.allow always
+
 ${ADDITIONAL_INSTALL_STEPS:-}
 
 RUN echo "Git version: \$(git --version)"
 WORKDIR \$GH_TESTS
+ENV DOCKER_RUNNING=true
 EOF
 
 docker run --rm \
