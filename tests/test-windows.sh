@@ -11,6 +11,9 @@ RUN choco install -y git
 RUN choco install -y jq
 RUN choco install -y curl
 
+# CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
+RUN git config --system protocol.file.allow always
+
 # ideally, this would be C:\go to match Linux a bit closer, but C:\go is the recommended install path for Go itself on Windows
 ENV GOPATH C:\\gopath
 
@@ -44,6 +47,7 @@ RUN $url = ('https://golang.org/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSI
     \
     Write-Host 'Complete.';
 
+ENV DOCKER_RUNNING=true
 ENV GH_TESTS="c:/githooks-tests/tests"
 ENV GH_TEST_TMP="c:/githooks-tests/tmp"
 ENV GH_TEST_REPO="c:/githooks-tests/githooks"
@@ -62,6 +66,7 @@ RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/setup-githook
 ADD tests "$GH_TESTS"
 
 WORKDIR C:/githooks-tests/tests
+
 EOF
 
 docker run --rm \

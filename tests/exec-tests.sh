@@ -13,6 +13,7 @@ fi
 cat <<EOF | docker build --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 
+ENV DOCKER_RUNNING=true
 ENV GH_TESTS="/var/lib/githooks-tests"
 ENV GH_TEST_TMP="/tmp"
 ENV GH_TEST_REPO="/var/lib/githooks"

@@ -113,7 +113,7 @@ func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Sett
 		UISettings{PromptCtx: promptx}
 }
 
-func prepareDispatch(log cm.ILogContext, settings *Settings, args *Arguments) bool {
+func runDispatchedInstall(log cm.ILogContext, settings *Settings, args *Arguments) bool {
 
 	uninstaller := hooks.GetUninstallerExecutable(settings.InstallDir)
 	if !cm.IsFile(uninstaller.Cmd) {
@@ -384,7 +384,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
 
 	if !args.InternalPostDispatch {
-		if isDispatched := prepareDispatch(log, &settings, &args); isDispatched {
+		if isDispatched := runDispatchedInstall(log, &settings, &args); isDispatched {
 			return
 		}
 	}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if ! grep '/docker/' </proc/self/cgroup >/dev/null 2>&1; then
+if [ "$DOCKER_RUNNING" != "true" ]; then
     echo "! This script is only meant to be run in a Docker container"
     exit 1
 fi
