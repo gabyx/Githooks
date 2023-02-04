@@ -348,6 +348,8 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		log.Error(m)
 		err = uiSettings.PromptCtx.ShowMessage(m, true)
 		log.AssertNoError(err, "Could not show message.")
+
+		return
 	}
 
 	switch {
