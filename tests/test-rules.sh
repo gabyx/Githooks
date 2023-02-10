@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
-FROM golang:1.17-alpine
+FROM golang:1.20-alpine
 RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
 
