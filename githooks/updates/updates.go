@@ -161,6 +161,10 @@ func FetchUpdates(
 		reclone := false
 
 		// Check if clone is dirty, if so error out.
+		// Git index can be out of sync (when this is installed in containers),
+		// so update the index first.
+		// To make the `diff-index` command work correctly.
+		_ = gitx.Check("update-index", "--refresh")
 		exitCode, e := gitx.GetExitCode("diff-index", "--quiet", git.HEAD)
 		if e != nil {
 			return false,
