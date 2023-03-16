@@ -975,33 +975,45 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 		log.DebugF("Hooks priority list written to '%s'.", file.Name())
 	}
 
-	log.DebugIf(len(hs.LocalHooks) != 0, "Launching local hooks ...")
+	log.InfoIfF(
+		len(hs.LocalHooks) != 0,
+		"Launching '%s' local hooks [threads: %s] ...",
+		len(hs.LocalHooks), nThreads)
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Local hook execution failed.")
 
-	log.DebugIf(len(hs.RepoSharedHooks) != 0, "Launching repository shared hooks ...")
+	log.InfoIfF(
+		len(hs.RepoSharedHooks) != 0,
+		"Launching '%s' repository shared hooks [threads: %s]...",
+		len(hs.RepoSharedHooks), nThreads)
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.RepoSharedHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Shared repository hook execution failed.")
 
-	log.DebugIf(len(hs.LocalSharedHooks) != 0, "Launching local shared hooks ...")
+	log.InfoIfF(
+		len(hs.LocalSharedHooks) != 0,
+		"Launching '%s' local shared hooks [threads: %s]...",
+		len(hs.LocalSharedHooks), nThreads)
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalSharedHooks,
 		results, logHookResults,
 		settings.Args...)
 	log.AssertNoErrorPanic(err, "Local shared hook execution failed.")
 
-	log.DebugIf(len(hs.GlobalSharedHooks) != 0, "Launching global shared hooks ...")
+	log.InfoIfF(
+		len(hs.GlobalSharedHooks) != 0,
+		"Launching '%s' global shared hooks [threads: %s]...",
+		len(hs.GlobalSharedHooks), nThreads)
 	_, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.GlobalSharedHooks,
 		results, logHookResults,
 		settings.Args...)
-	log.AssertNoErrorPanic(err, "Gobal shared hook execution failed.")
+	log.AssertNoErrorPanic(err, "Global shared hook execution failed.")
 }
 
 func logHookResults(res ...hooks.HookResult) {
