@@ -977,7 +977,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.LocalHooks) != 0,
-		"Launching '%s' local hooks [threads: '%s'] ...",
+		"Launching '%v' local hooks [threads: '%v'] ...",
 		len(hs.LocalHooks), nThreads)
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalHooks,
@@ -987,7 +987,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.RepoSharedHooks) != 0,
-		"Launching '%s' repository shared hooks [threads: '%s']...",
+		"Launching '%v' repository shared hooks [threads: '%v']...",
 		len(hs.RepoSharedHooks), nThreads)
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.RepoSharedHooks,
@@ -997,7 +997,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.LocalSharedHooks) != 0,
-		"Launching '%s' local shared hooks [threads: '%s']...",
+		"Launching '%v' local shared hooks [threads: '%v']...",
 		len(hs.LocalSharedHooks), nThreads)
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalSharedHooks,
@@ -1007,7 +1007,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.GlobalSharedHooks) != 0,
-		"Launching '%s' global shared hooks [threads: '%s']...",
+		"Launching '%v' global shared hooks [threads: '%v']...",
 		len(hs.GlobalSharedHooks), nThreads)
 	_, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.GlobalSharedHooks,
