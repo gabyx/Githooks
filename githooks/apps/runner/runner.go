@@ -114,7 +114,7 @@ func mainRun() (exitCode int) {
 
 func createLog() {
 	var err error
-	// Its good to output everythin to stderr since git
+	// Its good to output everything to stderr since git
 	// might read stdin for certain hooks.
 	// Either do redirection (which needs to be bombproof)
 	// or just use stderr.
@@ -397,7 +397,7 @@ func executeLFSHooks(settings *HookSettings) {
 	lfsIsRequired := lfsReqFileExists || lfsConfExists
 
 	if lfsIsAvailable {
-		log.Debug("Excuting LFS Hook")
+		log.Debug("Executing LFS Hook")
 
 		err := settings.GitX.CheckPiped(
 			append(
@@ -702,7 +702,7 @@ func checkSharedHook(
 		}
 
 		log.ErrorOrPanicF(isFatal && !settings.SkipNonExistingSharedHooks,
-			err, mess, hook.RepositoryDir, hook.OriginalURL)
+			err, mess, settings.RepositoryDir, hook.OriginalURL)
 
 		return false
 	}
