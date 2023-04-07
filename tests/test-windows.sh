@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+
 cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/windows/servercore:ltsc2019
 

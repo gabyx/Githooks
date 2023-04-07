@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 ROOT_DIR=$(git rev-parse --show-toplevel)
+
+set -e
+set -u
+
 TEST_DIR="$ROOT_DIR/tests"
 
 IMAGE_TYPE="alpine-coverage"
@@ -17,14 +21,14 @@ function cleanup() {
 trap cleanup EXIT
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
-FROM golang:1.17-alpine
+FROM golang:1.20-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq curl
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
 
-RUN go get github.com/wadey/gocovmerge
+RUN go install github.com/wadey/gocovmerge@latest
 RUN go install github.com/mattn/goveralls@latest
 
 ENV DOCKER_RUNNING=true
@@ -121,6 +125,8 @@ docker run --rm \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?
 
+CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
+
 # Upload the produced coverage
 # inside the current repo
 docker run --rm \
@@ -129,10 +135,10 @@ docker run --rm \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks \
     -e CIRCLECI \
-    -e CIRCLE_BUILD_NUM="$CIRCLE_BUILD_NUM" \
-    -e CIRCLE_PR_NUMBER="$CIRCLE_PR_NUMBER" \
+    -e CIRCLE_BUILD_NUM="${CIRCLE_BUILD_NUM:-}" \
+    -e CIRCLE_PR_NUMBER="${CIRCLE_PULL_REQUEST##*/}" \
     -e TRAVIS \
-    -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" \
-    -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" \
+    -e TRAVIS_JOB_ID="${TRAVIS_JOB_ID:-}" \
+    -e TRAVIS_PULL_REQUEST="${TRAVIS_PULL_REQUEST:-}" \
     "githooks:$IMAGE_TYPE-base" \
     ./tests/upload-coverage.sh || exit $?

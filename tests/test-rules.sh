@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+
+rootDir=$(git rev-parse --show-toplevel)
+
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
-FROM golang:1.17-alpine
+FROM golang:1.20-alpine
 RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
 
@@ -18,12 +23,12 @@ RUN T=$(mktemp); curl -fsSL https://github.com/koalaman/shellcheck/releases/down
     && chmod +x /usr/local/bin/shellcheck \
     && shellcheck --version
 
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.34.1
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.52.2
 
 ENV DOCKER_RUNNING=true
 EOF
 
-if ! docker run --rm -it -v "$(pwd)":/data -w /data githooks:test-rules tests/exec-rules.sh; then
+if ! docker run --rm -it -v "$rootDir":/data -w /data githooks:test-rules tests/exec-rules.sh; then
     echo "! Check rules had failures."
     exit 1
 fi
