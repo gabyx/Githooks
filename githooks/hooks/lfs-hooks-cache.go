@@ -1,7 +1,6 @@
 package hooks
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -123,7 +122,7 @@ func (l *lfsHooksCache) init() (err error) {
 		}
 	}
 
-	err = ioutil.WriteFile(versionFile, []byte(l.requiredLFSVersion.String()), cm.DefaultFileModeFile)
+	err = os.WriteFile(versionFile, []byte(l.requiredLFSVersion.String()), cm.DefaultFileModeFile)
 	if err != nil {
 		err = cm.CombineErrors(err, cm.ErrorF("Could not write version file in LFS hooks cache '%s'.", l.repoDir))
 	}

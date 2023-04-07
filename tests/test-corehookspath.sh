@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 
 cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-corehookspath-base -

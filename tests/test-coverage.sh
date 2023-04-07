@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 ROOT_DIR=$(git rev-parse --show-toplevel)
+
+set -e
+set -u
+
 TEST_DIR="$ROOT_DIR/tests"
 
 IMAGE_TYPE="alpine-coverage"
