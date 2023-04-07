@@ -28,7 +28,7 @@ RUN apk add bash jq curl
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
 
-RUN go get github.com/wadey/gocovmerge
+RUN go install github.com/wadey/gocovmerge@latest
 RUN go install github.com/mattn/goveralls@latest
 
 ENV DOCKER_RUNNING=true
