@@ -23,9 +23,9 @@ if [ -n "$GH_COVERAGE_DIR" ]; then
 fi
 
 service="travis-ci"
-if [ -n "$TRAVIS" ]; then
+if [ -n "${TRAVIS:-}" ]; then
     service="travis-ci"
-elif [ -n "$CIRCLECI" ]; then
+elif [ -n "${CIRCLECI:-}" ]; then
     service="circle-ci"
 else
     echo "! Service environment not implemented for goveralls."
