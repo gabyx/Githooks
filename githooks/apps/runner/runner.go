@@ -547,9 +547,11 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	disableUpdate, _ := hooks.IsSharedHooksUpdateDisabled(settings.GitX, git.Traverse)
 	updateTriggers := settings.GitX.GetConfigAll(hooks.GitCKSharedUpdateTriggers, git.Traverse)
 
-	triggered := settings.HookName == "post-merge" ||
-		(settings.HookName == "post-checkout" &&
-			settings.Args[0] == git.NullRef) ||
+	updateOnCloneDoneFile := path.Join(settings.GitDirWorktree, ".githooks-shared-update-on-clone-done")
+	updateOnCloneDoneFileExists, _ := cm.IsPathExisting(updateOnCloneDoneFile)
+	updateOnCloneNeeded := settings.HookName == "post-checkout" && !updateOnCloneDoneFileExists
+
+	triggered := settings.HookName == "post-merge" || updateOnCloneNeeded ||
 		strs.Includes(updateTriggers, settings.HookName)
 
 	if disableUpdate || !triggered {
@@ -561,6 +563,10 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	log.Debug("Updating all shared hooks.")
 	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType)
 	log.AssertNoError(err, "Errors while updating shared hooks repositories.")
+
+	if updateOnCloneNeeded {
+		_ = cm.TouchFile(updateOnCloneDoneFile, true)
+	}
 }
 
 func getRepoSharedHooks(
