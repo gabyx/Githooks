@@ -125,6 +125,8 @@ docker run --rm \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?
 
+CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
+
 # Upload the produced coverage
 # inside the current repo
 docker run --rm \
@@ -133,10 +135,10 @@ docker run --rm \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks \
     -e CIRCLECI \
-    -e CIRCLE_BUILD_NUM="$CIRCLE_BUILD_NUM" \
+    -e CIRCLE_BUILD_NUM="${CIRCLE_BUILD_NUM:-}" \
     -e CIRCLE_PR_NUMBER="${CIRCLE_PULL_REQUEST##*/}" \
     -e TRAVIS \
-    -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" \
-    -e TRAVIS_PULL_REQUEST="$TRAVIS_PULL_REQUEST" \
+    -e TRAVIS_JOB_ID="${TRAVIS_JOB_ID:-}" \
+    -e TRAVIS_PULL_REQUEST="${TRAVIS_PULL_REQUEST:-}" \
     "githooks:$IMAGE_TYPE-base" \
     ./tests/upload-coverage.sh || exit $?
