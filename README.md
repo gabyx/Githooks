@@ -1,7 +1,7 @@
 <img src="docs/githooks-logo.svg" style="margin-left: 20pt" align="right">
 <h1>Githooks</h1>
 
-[![Build Status](https://travis-ci.org/gabyx/githooks.svg?branch=main)](https://travis-ci.org/gabyx/githooks)
+[![CircleCI](https://circleci.com/gh/gabyx/Githooks.svg?style=svg)](https://circleci.com/gh/gabyx/Githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/Githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/Githooks?branch=main)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 [![goreleaser](https://github.com/gabyx/Githooks/actions/workflows/release.yml/badge.svg?branch=prepare-v2.0.3)](https://github.com/gabyx/Githooks/actions/workflows/release.yml)
