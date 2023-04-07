@@ -16,7 +16,7 @@ A **platform-independend hooks manager** written in Go to support shared hook
 repositories and per-repository
 [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working
 repository. This implementation is the Go port and successor of the
-[original impementation](https://github.com/rycus86/githooks) (see
+[original implementation](https://github.com/rycus86/githooks) (see
 [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are
@@ -480,7 +480,7 @@ when ignoring/disabling certain hooks. See
 [ignoring hooks](#ignoring-hooks-and-files). The namespace name must not contain
 white spaces (`\s`) or slashes `/`.
 
-The following namespaces names are reserved interally:
+The following namespaces names are reserved internally:
 
 - `gh-self` : for hooks in the repository where Githooks runs (if no
   `.namespace` is existing).
@@ -545,7 +545,7 @@ Any additional `<repoPath>/<hookDir>/<hookName>/.ignore.yaml` file inside
 `ns:` **are made relative to the folder `<hookName>`**. You can also manage
 `.ignore.yaml` files using
 [`git hooks ignore [add|remove] --help`](docs/cli/git_hooks_ignore.md). Consult
-this command documentation for futher information on the pattern syntax.
+this command documentation for further information on the pattern syntax.
 
 ## Trusting Hooks
 
@@ -714,7 +714,7 @@ infastructure, docker container, etc...) and need to be disabled. Setting
 ## Installation
 
 - [Download the latest release](https://github.com/gabyx/githooks/releases),
-  exctract it and execute the installer command by the below instructions.
+  extract it and execute the installer command by the below instructions.
 
 The installer will:
 
@@ -724,7 +724,7 @@ The installer will:
    3. Checking the default `/usr/share/git-core/templates` folder.
    4. Search on the filesystem for matching directories.
    5. Offer to set up a new one, and make it `init.templateDir`.
-2. Write all chosen Githooks run-wrappers into the choosen directory:
+2. Write all chosen Githooks run-wrappers into the chosen directory:
    - either `init.templateDir` or
    - `core.hooksPath` depending on the install mode `--use-core-hooks-path`.
 3. Offer to enable automatic update checks.
@@ -743,7 +743,7 @@ To install Githooks on your system, simply execute `cli installer`. It will
 guide you through the installation process. Check the `cli installer --help` for
 available options. Some of them are described below:
 
-Its adviced to only install Githooks for a selection of the supported hooks by
+Its advised to only install Githooks for a selection of the supported hooks by
 using `--maintained-hooks` as
 
 ```shell
@@ -984,7 +984,7 @@ $ git hooks update --disable
 
 #### Update Mechanics
 
-The update machanism works by tracking the tags on the Git branch (chosen at
+The update mechanism works by tracking the tags on the Git branch (chosen at
 install time) which is checked out in `<installDir>/release`. Normally, if there
 are new tags (versions) available, the newest tag (version) is installed.
 However, [prerelease version](https://semver.org) tags (e.g. `v1.0.0-rc1`) are
@@ -1077,7 +1077,7 @@ exit code behavior**. This tool should really enable proper and safe usage
 inside hooks and other scripts. You can even report the output in `json` format
 (use option `--json`). It was heavily inspired by
 [zenity](https://github.com/ncruces/zenity) and features some of the same
-properties (no `cgo`, cancelation through `context`). You can use this dialog
+properties (no `cgo`, cancellation through `context`). You can use this dialog
 tool independently of Githooks.
 
 **Test it out!** 🎉: Please refer to the
@@ -1144,7 +1144,7 @@ can then attach to the debug server with the debug configuration
 ### Version v2.x.x
 
 For upgrading from `v1.x.x` to `v2.x.x` consider the
-[braking change documention](docs/changes/Braking-Changes-v2.md).
+[braking change documentation](docs/changes/Braking-Changes-v2.md).
 
 ## FAQ
 
