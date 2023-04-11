@@ -59,7 +59,7 @@ jobs:
         with:
           version: latest
           workdir: githooks
-          args: release --rm-dist
+          args: release --clean
         env:
           GORELEASER_CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

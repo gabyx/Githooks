@@ -54,13 +54,10 @@ archives:
       - runner
       - cli
       - dialog
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}.{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ if eq .Os \"darwin\" }}macos{{else}}{{ .Os }}{{end}}.{{ .Arch }}"
     format: tar.gz
     files:
       - none*
-    replacements:
-      windows: windows
-      darwin: macos
     format_overrides:
       - goos: windows
         format: zip
