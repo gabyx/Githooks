@@ -821,7 +821,19 @@ run-wrappers in `<repoPath>/hooks` like so:
 git clone https://github.com/gabyx/githooks.git githooks
 cd githooks
 scripts/build.sh
+```
+
+Then, to globally enbale them for every repo:
+
+```shell
 git config --global core.hooksPath "$(pwd)/hooks"
+```
+
+or locally enable them for a single repo only:
+
+```shell
+cd repo
+git config --local core.hooksPath "$(pwd)/hooks"
 ```
 
 ### Non-Interactive Installation
