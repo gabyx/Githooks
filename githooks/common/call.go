@@ -25,7 +25,7 @@ func (c *ExecContext) GetWorkingDir() string {
 	return c.Cwd
 }
 
-// GetEnv gets the environement variables.
+// GetEnv gets the environment variables.
 func (c *ExecContext) GetEnv() []string {
 	return c.Env
 }
