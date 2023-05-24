@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"io"
 	"os"
 	"testing"
 
@@ -15,8 +16,7 @@ func TestLoadImagesConfig(t *testing.T) {
 
 	c := createImageConfigFile()
 	cc := ImageConfig{}
-	// cc.Pull = &ImageConfigPull{Name: "container", Tag: "1.2.9", Digest: "sha256:123"}
-	cc.Build = &ImageConfigBuild{File: "thisfile", Target: "stage-1"}
+	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Target: "stage-1"}
 	c.Images["bla"] = cc
 
 	err = cm.StoreYAML(file.Name(), c)
@@ -24,20 +24,44 @@ func TestLoadImagesConfig(t *testing.T) {
 	config, err := loadImagesConfigFile(file.Name())
 	cm.AssertNoErrorPanic(err, "Could not load yaml.")
 
-	assert.Equal(t, config.Images["bla"].Build.File, "thisfile")
+	assert.Equal(t, config.Images["bla"].Build.Dockerfile, "thisfile")
 	assert.Nil(t, config.Images["bla"].Pull)
+}
 
-	c = createImageConfigFile()
-	cc = ImageConfig{}
-	cc.Pull = &ImageConfigPull{Name: "container", Tag: "1.2.9", Digest: "sha256:123"}
-	cc.Build = &ImageConfigBuild{File: "thisfile", Target: "stage-1"}
+func TestLoadImagesConfig2(t *testing.T) {
+	file, err := os.CreateTemp("", "image.yaml")
+	cm.AssertNoErrorPanic(err, "Could not create file.")
+	defer os.Remove(file.Name())
+	c := createImageConfigFile()
+
+	cc := ImageConfig{}
+	cc.Pull = &ImageConfigPull{Reference: "container:1.2@sha256:abf"}
+	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Target: "stage-1"}
 	c.Images["bla"] = cc
 
 	err = cm.StoreYAML(file.Name(), c)
 	cm.AssertNoErrorPanic(err, "Could not store yaml.")
-	config, err = loadImagesConfigFile(file.Name())
+	config, err := loadImagesConfigFile(file.Name())
 	cm.AssertNoErrorPanic(err, "Could not load yaml.")
 
-	assert.Equal(t, config.Images["bla"].Build.File, "thisfile")
-	assert.Equal(t, config.Images["bla"].Pull.Name, "container")
+	assert.Equal(t, config.Images["bla"].Build.Dockerfile, "thisfile")
+	assert.Equal(t, config.Images["bla"].Pull.Reference, "container:1.2@sha256:abf")
+}
+
+func TestLoadImagesConfig3(t *testing.T) {
+	file, err := os.CreateTemp("", "image.yaml")
+	cm.AssertNoErrorPanic(err, "Could not create file.")
+
+	content := `
+version: 1
+images:
+`
+
+	_, err = io.WriteString(file, content)
+	cm.AssertNoErrorPanic(err, "Could not write file.")
+	defer os.Remove(file.Name())
+
+	config, err := loadImagesConfigFile(file.Name())
+	cm.AssertNoErrorPanic(err, "Could not load yaml.")
+	assert.Nil(t, config.Images)
 }

@@ -1,4 +1,4 @@
-package images
+package container
 
 import (
 	cm "github.com/gabyx/githooks/githooks/common"
@@ -8,13 +8,17 @@ type ManagerDocker struct {
 	execCtx cm.IExecContext
 }
 
-func (*ManagerDocker) ImagePull(image string) (err error) {
+func (*ManagerDocker) ImagePull(ref string) (err error) {
 	return
 }
-func (*ManagerDocker) ImageTag(imageSrc string, imageTarget string) (err error) {
+func (*ManagerDocker) ImageTag(refSrc string, refTarget string) (err error) {
 	return
 }
-func (*ManagerDocker) ImageBuild(dockerfile string, context string, target string) (err error) {
+func (*ManagerDocker) ImageBuild(dockerfile string, context string, target string, ref string) (err error) {
+	return
+}
+
+func (*ManagerDocker) ImageExists(ref string) (exists bool, err error) {
 	return
 }
 
