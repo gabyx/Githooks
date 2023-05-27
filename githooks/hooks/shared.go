@@ -446,9 +446,7 @@ func UpdateSharedHooks(
 			continue
 		}
 
-		if log != nil {
-			log.InfoF("Updating shared hooks from: '%s'", hook.OriginalURL)
-		}
+		log.InfoF("Updating shared hooks from: '%s'", hook.OriginalURL)
 
 		depth := -1
 		if hook.IsLocal {
@@ -456,13 +454,19 @@ func UpdateSharedHooks(
 		}
 
 		_, e := git.PullOrClone(hook.RepositoryDir, hook.URL, hook.Branch, depth, nil)
-		err = cm.CombineErrors(err, e)
 
-		if log != nil {
-			log.AssertNoErrorF(e, "Updating hooks '%s' failed.", hook.OriginalURL)
+		if log.AssertNoErrorF(e, "Updating hooks '%s' failed.", hook.OriginalURL) {
+			updateCount++
+		} else {
+			err = cm.CombineErrors(err, e)
 		}
 
-		updateCount++
+		e = UpdateImages(
+			log,
+			hook.OriginalURL,
+			hook.RepositoryDir,
+			GetSharedGithooksDir(hook.RepositoryDir))
+		log.AssertNoErrorF(e, "Updating container images of '%s' failed.", hook.OriginalURL)
 	}
 
 	return

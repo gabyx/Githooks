@@ -1,10 +1,13 @@
 package hooks
 
 import (
+	"io"
+	"os"
 	"path"
 
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/container"
+	"github.com/gabyx/githooks/githooks/git"
 )
 
 type ImageConfigPull struct {
@@ -78,14 +81,25 @@ func GetRepoImagesFile(hookDir string) string {
 // `hooksDir` inside `repositoryDir` (can be shared) by pulling or building them.
 func UpdateImages(
 	log cm.ILogContext,
+	fromHint string,
 	repositoryDir string,
-	hooksDir string,
-	mgr container.IManager) (err error) {
+	hooksDir string) (err error) {
 
 	file := GetRepoImagesFile(hooksDir)
 
 	if exists, _ := cm.IsPathExisting(file); !exists {
 		log.Debug("No images config existing. Skip updating images.")
+
+		return
+	}
+
+	log.InfoF("Building images for '%s'...", fromHint)
+
+	gitx := git.NewCtx()
+	manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
+	mgr, e := container.CreateManager(manager)
+	if e != nil {
+		err = cm.CombineErrors(cm.Error("Creating container manager failed."), e)
 
 		return
 	}
@@ -102,7 +116,8 @@ func UpdateImages(
 		if img.Pull != nil {
 			log.WarnIfF(img.Build != nil,
 				"Specified image build configuration on entry '%s'\n"+
-					"will be ignored because pull is specified.", name)
+					"in '.images.yaml' in '%s' will be ignored\n"+
+					"because pull is specified.", name, file)
 
 			pullSrc = img.Pull.Reference
 		}
@@ -133,14 +148,37 @@ func UpdateImages(
 		}
 
 		if img.Pull == nil && img.Build != nil {
+			if path.IsAbs(img.Build.Context) {
+				err = cm.Error(
+					"Build context path '%s' given in '%s' must be a relative path.",
+					img.Build.Context, file)
 
-			err = mgr.ImageBuild(img.Build.Dockerfile, img.Build.Context, img.Build.Target, name)
+				return
+			}
+
+			if path.IsAbs(img.Build.Dockerfile) {
+				err = cm.ErrorF(
+					"Dockerfile path '%s' given in '%s' must be a relative path.",
+					img.Build.Dockerfile, file)
+
+				return
+			}
+
+			err = mgr.ImageBuild(
+				path.Join(repositoryDir, img.Build.Dockerfile),
+				path.Join(repositoryDir, img.Build.Context),
+				img.Build.Target, name)
 
 			if err != nil {
-				err = cm.CombineErrors(err,
-					cm.ErrorF("Building image '%s' from '%s' did not succeed.\n"+
-						"Hooks may not run correctly:\n%s",
-						pullSrc, name, err))
+				// Save build error to temporary file.
+				file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
+				defer file.Close()
+				_, e = io.WriteString(file, err.Error())
+				log.AssertNoError(e, "Could not save image build errors.")
+
+				err = cm.ErrorF("Building image '%s' from '%s' did not succeed.\n"+
+					"Inspect build errors in file '%s'.",
+					pullSrc, name, file.Name())
 
 				return
 			}
