@@ -19,14 +19,15 @@ func (m *ManagerNotAvailableError) Error() string {
 type IManager interface {
 	ImagePull(ref string) error
 	ImageTag(refSrc string, refTarget string) error
-	ImageBuild(dockerfile string, context string, target string, ref string) error
+	ImageBuild(log cm.ILogContext, dockerfile string, context string, stage string, ref string) error
 	ImageExists(ref string) (bool, error)
+	ImageRemove(ref string) error
 }
 
-// CreateManager creates a container manager of type `manager`.
+// NewManager creates a container manager of type `manager`.
 // If empty `docker` is taken.
 // Currently only `docker` is supported.
-func CreateManager(manager string) (mgr IManager, err error) {
+func NewManager(manager string) (mgr IManager, err error) {
 
 	if strs.IsEmpty(manager) {
 		manager = "docker"
@@ -34,7 +35,7 @@ func CreateManager(manager string) (mgr IManager, err error) {
 
 	switch manager {
 	case "docker":
-		mgr, err = CreateManagerDocker()
+		mgr, err = NewManagerDocker()
 	default:
 		return nil, cm.ErrorF("Container manager '%s' not supported.", manager)
 	}

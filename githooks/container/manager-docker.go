@@ -7,36 +7,57 @@ import (
 )
 
 type ManagerDocker struct {
-	execCtx cm.IExecContext
+	cmdCtx cm.CmdContext
 }
 
-func (*ManagerDocker) ImagePull(ref string) (err error) {
-	return
-}
-func (*ManagerDocker) ImageTag(refSrc string, refTarget string) (err error) {
-	return
-}
-func (*ManagerDocker) ImageBuild(dockerfile string, context string, target string, ref string) (err error) {
-	return
+// ImagePull pulls an image with reference `ref`.
+func (m *ManagerDocker) ImagePull(ref string) (err error) {
+	return m.cmdCtx.Check("pull", ref)
 }
 
-func (*ManagerDocker) ImageExists(ref string) (exists bool, err error) {
-	return
+// ImageTag tags an image with reference `refSrc` to reference `refTarget`.
+func (m *ManagerDocker) ImageTag(refSrc string, refTarget string) (err error) {
+	return m.cmdCtx.Check("tag", refSrc, refTarget)
+}
+
+// ImageBuild builds the stage `stage`
+// of an image from `dockerfile` in context path `context` and tags
+// it with reference `ref`.
+func (m *ManagerDocker) ImageBuild(
+	log cm.ILogContext,
+	dockerfile string,
+	context string,
+	stage string,
+	ref string) (err error) {
+	return m.cmdCtx.Check("build", "-f", dockerfile, "-t", ref, "--target", stage, context)
+}
+
+// ImageExists checks if the image with reference `ref` exists.
+func (m *ManagerDocker) ImageExists(ref string) (exists bool, err error) {
+	out, err := m.cmdCtx.GetSplit("image", "ls", "--format", "{{ .ID }}", ref)
+
+	return len(out) != 0, err
+}
+
+// ImageRemove removes an image with reference `ref`.
+func (m *ManagerDocker) ImageRemove(ref string) (err error) {
+	return m.cmdCtx.Check("image", "rm", ref)
 }
 
 // IsDockerAvailable returns if docker is available.
 func IsDockerAvailable() bool {
 	_, err := exec.LookPath("docker")
 
-	return err != nil
+	return err == nil
 }
 
-func CreateManagerDocker() (mgr IManager, err error) {
+func NewManagerDocker() (mgr IManager, err error) {
 	if !IsDockerAvailable() {
 		return nil, &ManagerNotAvailableError{"docker"}
 	}
 
-	mgr = &ManagerDocker{execCtx: &cm.ExecContext{}}
+	cmdCtx := cm.NewCommandCtxBuilder().SetBaseCmd("docker").EnableCaptureError().Build()
+	mgr = &ManagerDocker{cmdCtx: cmdCtx}
 
 	return
 }

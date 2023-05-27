@@ -62,7 +62,7 @@ func findGoExec(cwd string) (cm.CmdContext, error) {
 	// Check from config.
 	goExec := git.NewCtx().GetConfig(hooks.GitCKGoExecutable, git.GlobalScope)
 	if strs.IsNotEmpty(goExec) && cm.IsFile(goExec) {
-		gox = cm.NewCommandCtx(goExec, cwd, nil)
+		gox = cm.NewCommandCtxBuilder().SetBaseCmd(goExec).SetCwd(cwd).Build()
 
 		e := check(gox)
 		if e == nil {
@@ -72,7 +72,7 @@ func findGoExec(cwd string) (cm.CmdContext, error) {
 	}
 
 	// Check globally in path.
-	gox = cm.NewCommandCtx("go", cwd, nil)
+	gox = cm.NewCommandCtxBuilder().SetBaseCmd("go").SetCwd(cwd).Build()
 	e := check(gox)
 	if e == nil {
 		return gox, nil
@@ -111,14 +111,15 @@ func Build(gitx *git.Context, buildTags []string, cleanUpX *cm.InterruptContext)
 	}
 
 	// Modify environment for compile.
-	gox.Env = strs.Filter(os.Environ(), func(s string) bool {
+	env := strs.Filter(os.Environ(), func(s string) bool {
 		return !strings.Contains(s, "GOBIN") &&
 			!strings.Contains(s, "GOPATH")
 	})
 
-	gox.Env = append(gox.Env,
+	env = append(env,
 		strs.Fmt("GOBIN=%s", goBinPath),
 		strs.Fmt("GOPATH=%s", goPath))
+	gox = cm.NewCommandCtxBuilder().FromCtx(gox).SetEnv(env).Build()
 
 	// Cleanup on interrupt.
 	cleanUpX.AddHandler(func() {

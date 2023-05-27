@@ -97,7 +97,7 @@ func UpdateImages(
 
 	gitx := git.NewCtx()
 	manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
-	mgr, e := container.CreateManager(manager)
+	mgr, e := container.NewManager(manager)
 	if e != nil {
 		err = cm.CombineErrors(cm.Error("Creating container manager failed."), e)
 
@@ -165,6 +165,7 @@ func UpdateImages(
 			}
 
 			err = mgr.ImageBuild(
+				log,
 				path.Join(repositoryDir, img.Build.Dockerfile),
 				path.Join(repositoryDir, img.Build.Context),
 				img.Build.Target, name)
