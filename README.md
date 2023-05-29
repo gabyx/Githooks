@@ -130,7 +130,7 @@ Take this snippet of a Git repository layout as an example:
 │    ├── ...
 │    ├── .ignore.yaml         # Main ignores.
 │    ├── .shared.yaml         # Shared hook configuration.
-│    ├── .envs.yaml           # Environment variables passed to shared hooks.README
+│    ├── .envs.yaml           # Environment variables passed to shared hooks.
 │    └── .lfs-required        # LFS is required.
 └── ...
 ```
@@ -676,7 +676,7 @@ the missing Git LFS hooks will be installed too.
 ## Running Hooks in Container
 
 There is the possibility to run hooks containerized over
-a container manager such as `docker` (others such as `podman` etc are not yet implemented). This relieves the maintainer of a Githooks shared repo from dealing with
+a container manager such as `docker` (others such as `podman` etc. are not yet implemented). This relieves the maintainer of a Githooks shared repo from dealing with
 *"It works on my machine!"*
 
 This is achieved by specifying the image reference (image name) inside a [hook run configuration](#hook-run-configuration), e.g. `<hooksDir>/pre-commit/myhook.yaml`. This works for normal repositories as well as for shared Githooks repositories. For a shared repository, the file `sharedRepo/githooks/pre-commit/checkit.yaml` might look like 
@@ -691,7 +691,38 @@ image:
 
 which will launch the command `./myscript/checkit.sh` in a docker container `my-shellcheck:1.2.0`. The current Git repository where this hook is launched is mounted as the current working directory and the relative path `./myscript/checkit.sh` will mangled to a path into a mounted read-only volume of this shared Githooks repo `sharedRepo`.
 
-**Note:** When running a hook script or command over a container, you will not have access to the same environment variables as on your host system. All Githooks [environment variables](#environment-variables) are forwarded however to the container run.
+**Note 1:** When running a hook script or command over a container, you will not have access to the same environment variables as on your host system. All Githooks [environment variables](#environment-variables) are forwarded however to the container run.
+
+Running commands in containers which modify files on writable volumes has some caveats and quirks with permissions which are host system dependent. Hongli Lai summarized these troubles in a [very good article](https://www.fullstaq.com/knowledge-hub/blogs/docker-and-the-host-filesystem-owner-matching-problem). Long story short, **you should use [`MatchHostFsOwner`](https://github.com/FooBarWidget/matchhostfsowner/releases)** which counter acts these permission problems neatly by installing this into your container: 
+
+```dockerfile
+RUN apk add git tar curl xz bash coreutils findutils grep sed parallel && \
+    curl -fsSL https://github.com/koalaman/shellcheck/releases/download/v$SHELLCHECK_VERSION/shellcheck-v$SHELLCHECK_VERSION.linux.x86_64.tar.xz | tar -xJf - && \
+    cp shellcheck-v$SHELLCHECK_VERSION/shellcheck /usr/local/bin && \
+    rm -rf shellcheck-v$SHELLCHECK_VERSION && \
+    curl -fsSL "https://github.com/mvdan/sh/releases/download/v$SHFMT_VERSION/shfmt_v${SHFMT_VERSION}_linux_amd64" -o /usr/local/bin/shfmt && \
+    chmod +x /usr/local/bin/shfmt
+
+# Install MatchHostFsOwner.
+# See https://github.com/FooBarWidget/matchhostfsowner/releases
+ADD https://github.com/FooBarWidget/matchhostfsowner/releases/download/v1.0.0/matchhostfsowner-1.0.0-x86_64-linux.gz /sbin/matchhostfsowner.gz
+RUN gunzip /sbin/matchhostfsowner.gz && \
+  chown root: /sbin/matchhostfsowner && \
+  chmod +x,+s /sbin/matchhostfsowner
+
+# Use 'githooks' for MatchHostFsOwner.
+RUN mkdir -p /etc/matchhostfsowner && \
+    echo -e "app_account: githooks\napp_group: githooks" > /etc/matchhostfsowner/config.yml && \
+    cat /etc/matchhostfsowner/config.yml && \
+    chown -R root: /etc/matchhostfsowner && \
+    chmod 700 /etc/matchhostfsowner && \
+    chmod 600 /etc/matchhostfsowner/*
+
+RUN adduser "$USER_NAME" -s /bin/zsh \
+    -D \
+    -u "$USER_UID" -g "$USER_GID" \
+    -h "/home/$USER_NAME"
+```
 
 ### Pull and Build Integration
 
