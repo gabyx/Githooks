@@ -233,7 +233,7 @@ func (h *HookPatterns) Matches(namespacePath string) (matched bool) {
 	}
 
 	// The full matches can only change the result to `true`
-	// They have no invertion "!" prefix.
+	// They have no inversion "!" prefix.
 	matched = matched || strs.Includes(h.NamespacePaths, namespacePath)
 
 	return
@@ -338,8 +338,13 @@ func LoadIgnorePatterns(file string) (patterns HookPatterns, err error) {
 		return
 	}
 
-	if data.Version == 0 {
-		err = cm.ErrorF("Version '%v' needs to be greater than 0.", data.Version)
+	if data.Version < 0 || data.Version > hookIgnoreFileVersion {
+		err =
+			cm.ErrorF("File '%s' has version '%v'. "+
+				"This version of Githooks only supports version >= 1 and <= '%v'.",
+				file,
+				data.Version,
+				hookIgnoreFileVersion)
 
 		return
 	}
