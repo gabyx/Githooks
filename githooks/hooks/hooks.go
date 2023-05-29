@@ -384,6 +384,28 @@ func (h *Hooks) GetHooksCount() int {
 		h.LocalSharedHooks.GetHooksCount() + h.GlobalSharedHooks.GetHooksCount()
 }
 
+// Count returns the number of hooks in the list as comma separated list.
+func (h HookPrioList) CountString() (count string) {
+	count = "["
+
+	if len(h) == 0 {
+		count += "0]"
+
+		return
+	}
+
+	for i := range h {
+		count += strs.Fmt("%v", len(h[i]))
+		if i < len(h)-1 {
+			count += ","
+		}
+	}
+
+	count += "]"
+
+	return
+}
+
 // AllHooksSuccessful returns `true`.
 func AllHooksSuccessful(results []HookResult) bool {
 	for _, h := range results {
