@@ -1,6 +1,8 @@
 package hooks
 
 import (
+	"io"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,4 +60,22 @@ func TestBranchSyntaxStripping(t *testing.T) {
 	assert.Equal(t, "C:/@/b/c/repo.git", prefix)
 	assert.Equal(t, "branch", branch)
 
+}
+
+func TestSharedConfigVersion(t *testing.T) {
+	f, e := os.CreateTemp("", "")
+	assert.Nil(t, e)
+
+	defer os.Remove(f.Name())
+	_, e = io.WriteString(f,
+		`
+version: 999999
+	  `)
+	assert.Nil(t, e)
+
+	_, e = loadRepoSharedHooks(f.Name())
+	assert.Error(t, e)
+	if e != nil {
+		assert.Contains(t, e.Error(), "Githooks only supports version >= 1")
+	}
 }

@@ -23,7 +23,9 @@ type runnerConfigFile struct {
 }
 
 // The current runner config gile version.
-var runnerConfigFileVersion int = 1
+// Version 1: Initial file.
+// Version 2: Added `Env` field.
+var runnerConfigFileVersion int = 2
 
 // createHookIgnoreFile creates the data for the runner config file.
 func createRunnerConfig() runnerConfigFile {
@@ -35,8 +37,13 @@ func loadRunnerConfig(hookPath string) (data runnerConfigFile, err error) {
 	data = createRunnerConfig()
 	err = cm.LoadYAML(hookPath, &data)
 
-	if data.Version == 0 {
-		err = cm.ErrorF("Version '%v' needs to be greater than 0.", data.Version)
+	if data.Version < 0 || data.Version > runnerConfigFileVersion {
+		err = cm.ErrorF(
+			"File '%s' has version '%v'. "+
+				"This version of Githooks only supports version >= 1 and <= '%v'.",
+			hookPath,
+			data.Version,
+			runnerConfigFileVersion)
 
 		return
 	}

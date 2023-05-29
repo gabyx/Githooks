@@ -96,8 +96,13 @@ func loadRepoSharedHooks(file string) (config sharedHookConfig, err error) {
 			return
 		}
 
-		if config.Version == 0 {
-			err = cm.ErrorF("Version '%v' needs to be greater than 0.", config.Version)
+		if config.Version < 0 || config.Version > sharedHookConfigVersion {
+			err = cm.ErrorF(
+				"File '%s' has version '%v'. "+
+					"This version of Githooks only supports version >= 1 and <= '%v'.",
+				file,
+				config.Version,
+				sharedHookConfigVersion)
 
 			return
 		}
