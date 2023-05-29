@@ -54,11 +54,13 @@ EOF
 "$GH_TEST_BIN/cli" shared update || exit 1
 
 # Execute pre-commit and check that env variables are applied.
-"$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit || exit 1
+GLOBAL_ENV_VAR="monkeyshit" \
+    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit || exit 1
 
 # shellcheck disable=SC2015
 grep -q "MYSTUFF_A1=aaa" "$GH_TEST_TMP/envs-a" &&
     grep -q "MYSTUFF_A2=bbb" "$GH_TEST_TMP/envs-a" &&
+    grep -q "GLOBAL_ENV_VAR=monkeyshit" "$GH_TEST_TMP/envs-a" &&
     ! grep "MYSTUFF_B" "$GH_TEST_TMP/envs-a" ||
     {
         echo "Wrong env variables:"

@@ -171,7 +171,13 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			runCmd, err = GetHookRunCmd(gitx, hookPath, parseRunnerConfig, rootDir, hookNamespaceEnvs)
+			runCmd, err = GetHookRunCmd(
+				gitx,
+				hookPath,
+				parseRunnerConfig,
+				rootDir,
+				hookNamespaceEnvs)
+
 			if err != nil {
 				return cm.CombineErrors(err,
 					cm.ErrorF("Could not detect runner for hook\n'%s'", hookPath))

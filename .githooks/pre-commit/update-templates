@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
+set -e
+set -u
 
 if command -v gsed &>/dev/null; then
     SED="gsed"
@@ -14,31 +16,31 @@ fi
 
 # Patch the hooks
 # shellcheck disable=SC2016
-HOOK_NAMES=$($SED -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githooks/hooks/githooks.go) ||
+hook_names=$($SED -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githooks/hooks/githooks.go) ||
     {
         echo "update-templates:: Replacement command failed!" >&2
         exit 1
     }
 
-for HOOK_NAME in $HOOK_NAMES; do
+for hook_name in $hook_names; do
     # shellcheck disable=SC2015
     $SED -e "s|GITHOOKS_RUNNER=.*|GITHOOKS_RUNNER=\"\$(cd \"\$(dirname \"\$0\")/../\" \&\& pwd)/githooks/bin/runner\"|" \
         -e "s|\(various Git triggers.*\)|\1\n#\n# This file is auto-generated, do not edit!|" \
-        <githooks/build/embedded/run-wrapper.sh >"hooks/$HOOK_NAME" &&
-        chmod u+x "hooks/$HOOK_NAME" &&
+        <githooks/build/embedded/run-wrapper.sh >"hooks/$hook_name" &&
+        chmod u+x "hooks/$hook_name" &&
         git add hooks/* ||
         {
-            echo "Failed to update \`hooks/$HOOK_NAME\`" >&2
+            echo "Failed to update \`hooks/$hook_name\`" >&2
             exit 2
         }
 done
 
-# Delete all files not in `$HOOK_NAME`
-for HOOK_FILE in hooks/*; do
-    NAME=$(basename "$HOOK_FILE")
-    if ! echo "$HOOK_NAMES" | grep -q "$NAME"; then
-        git rm "$HOOK_FILE" >/dev/null 2>&1 || {
-            echo "Failed to delete obsolete hook \`$HOOK_FILE\`" >&2
+# Delete all files not in `$hook_name`
+for hook_file in hooks/*; do
+    name=$(basename "$hook_file")
+    if ! echo "$hook_names" | grep -q "$name"; then
+        git rm "$hook_file" >/dev/null 2>&1 || {
+            echo "Failed to delete obsolete hook \`$hook_file\`" >&2
             exit 3
         }
     fi

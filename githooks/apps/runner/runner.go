@@ -141,7 +141,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	execx := cm.ExecContext{Env: os.Environ()}
 
 	// Current git context, in current working dir.
-	gitx := git.NewCtx()
+	gitx := git.NewCtxAt(repoPath)
 	log.AssertNoErrorF(gitx.InitConfigCache(nil),
 		"Could not init git config cache.")
 
@@ -983,8 +983,8 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.LocalHooks) != 0,
-		"Launching '%v' local hooks [threads: '%v'] ...",
-		hs.LocalHooks.CountFmt(), nThreads)
+		"Launching '%v' local hooks [type: '%s', threads: '%v'] ...",
+		hs.LocalHooks.CountFmt(), settings.HookName, nThreads)
 
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalHooks,
@@ -994,8 +994,8 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.RepoSharedHooks) != 0,
-		"Launching '%v' repository shared hooks [threads: '%v']...",
-		hs.RepoSharedHooks.CountFmt(), nThreads)
+		"Launching '%v' repository shared hooks [type: '%s', threads: '%v']...",
+		hs.RepoSharedHooks.CountFmt(), settings.HookName, nThreads)
 
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.RepoSharedHooks,
@@ -1005,8 +1005,9 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.LocalSharedHooks) != 0,
-		"Launching '%v' local shared hooks [threads: '%v']...",
-		hs.LocalSharedHooks.CountFmt(), nThreads)
+		"Launching '%v' local shared hooks [type: '%s', threads: '%v']...",
+		hs.LocalSharedHooks.CountFmt(), settings.HookName, nThreads)
+
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalSharedHooks,
 		results, logHookResults,
@@ -1015,8 +1016,8 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.GlobalSharedHooks) != 0,
-		"Launching '%v' global shared hooks [threads: '%v']...",
-		hs.GlobalSharedHooks.CountFmt(), nThreads)
+		"Launching '%v' global shared hooks [type: '%s', threads: '%v']...",
+		hs.GlobalSharedHooks.CountFmt(), settings.HookName, nThreads)
 
 	_, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.GlobalSharedHooks,

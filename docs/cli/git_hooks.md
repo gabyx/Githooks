@@ -21,6 +21,7 @@ git hooks
 * [git hooks config](git_hooks_config.md)	 - Manages various Githooks configuration.
 * [git hooks disable](git_hooks_disable.md)	 - Disables Githooks in the current repository or globally.
 * [git hooks ignore](git_hooks_ignore.md)	 - Ignores or activates hook in the current repository.
+* [git hooks images](git_hooks_images.md)	 - Manage container images.
 * [git hooks install](git_hooks_install.md)	 - Installs Githooks run-wrappers into the current repository.
 * [git hooks installer](git_hooks_installer.md)	 - Githooks installer application
 * [git hooks list](git_hooks_list.md)	 - Lists the active hooks in the current repository.

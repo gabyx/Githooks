@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gabyx/githooks/githooks/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,17 +54,21 @@ RUN apk add bash
 	_, _ = io.WriteString(file, dockerfile)
 	file.Close()
 
-	log, err := common.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false)
 	assert.Nil(t, err)
 
-	err = mgr.ImageBuild(log, file.Name(), ".", "stage2", "alpine:mine-special")
+	exists, err := mgr.ImageExists("alpine:mine-special")
+	assert.Nil(t, err)
+	assert.False(t, exists)
+
+	_, err = mgr.ImageBuild(log, file.Name(), ".", "stage2", "alpine:mine-special")
 	assert.Nil(t, err, "Build failed: '%s'", err)
 
-	exists, err := mgr.ImageExists("alpine:mine")
+	exists, err = mgr.ImageExists("alpine:mine-special")
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
-	err = mgr.ImageRemove("alpine:mine")
+	err = mgr.ImageRemove("alpine:mine-special")
 	assert.Nil(t, err)
 }
 
@@ -84,13 +88,13 @@ RUN apk add bashhhh
 	_, _ = io.WriteString(file, dockerfile)
 	file.Close()
 
-	log, err := common.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false)
 	assert.Nil(t, err)
 
-	err = mgr.ImageBuild(log, file.Name(), ".", "stage2", "alpine:mine-special")
+	_, err = mgr.ImageBuild(log, file.Name(), ".", "stage2", "alpine:mine-special")
 	assert.NotNil(t, err, "Build failed: '%s'", err)
 
-	exists, err := mgr.ImageExists("alpine:mine")
+	exists, err := mgr.ImageExists("alpine:mine-special")
 	assert.Nil(t, err)
 	assert.False(t, exists)
 }

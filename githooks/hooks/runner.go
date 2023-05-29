@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"os"
 	"path"
@@ -14,18 +16,25 @@ import (
 	"github.com/agext/regexp"
 )
 
+type imageRunConfig struct {
+	Reference string `yaml:"reference"`
+}
+
 // The data for the runner config file.
 type runnerConfigFile struct {
-	Cmd     string   `yaml:"cmd"`
-	Args    []string `yaml:"args"`
-	Env     []string `yaml:"env"`
-	Version int      `yaml:"version"`
+	Cmd   string         `yaml:"cmd"`
+	Args  []string       `yaml:"args"`
+	Env   []string       `yaml:"env"`
+	Image imageRunConfig `yaml:"image"`
+
+	Version int `yaml:"version"`
 }
 
 // The current runner config gile version.
 // Version 1: Initial file.
 // Version 2: Added `Env` field.
-var runnerConfigFileVersion int = 2
+// Version 3: Added `Images` field.
+var runnerConfigFileVersion int = 3
 
 // createHookIgnoreFile creates the data for the runner config file.
 func createRunnerConfig() runnerConfigFile {
@@ -95,8 +104,6 @@ func GetHookRunCmd(
 	}
 
 	exec.Args = config.Args
-	exec.Env = append(exec.Env, config.Env...)
-	exec.Env = append(exec.Env, envs...)
 
 	// Substitute variables in arguments.
 	for i := range exec.Args {
@@ -106,20 +113,43 @@ func GetHookRunCmd(
 		}
 	}
 
-	// Resolve commands with path separators which are
-	// relative paths relative to the `rootDir`.
-	// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
-	if strings.ContainsAny(exec.Cmd, "/\\") {
-		if runtime.GOOS == cm.WindowsOsName {
-			exec.Cmd = filepath.ToSlash(exec.Cmd)
+	exec.Env = append(exec.Env, config.Env...)
+	exec.Env = append(exec.Env, envs...)
+
+	if strs.IsEmpty(config.Image.Reference) {
+		// Normal execution.
+
+		// Resolve commands with path separators which are
+		// relative paths relative to the `rootDir`.
+		// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
+		if strings.ContainsAny(exec.Cmd, "/\\") {
+			if runtime.GOOS == cm.WindowsOsName {
+				exec.Cmd = filepath.ToSlash(exec.Cmd)
+			}
+
+			if !filepath.IsAbs(exec.Cmd) {
+				exec.Cmd = path.Join(rootDir, exec.Cmd)
+			}
 		}
 
-		if !filepath.IsAbs(exec.Cmd) {
-			exec.Cmd = path.Join(rootDir, exec.Cmd)
+		return &exec, nil
+
+	} else {
+		// Image execution.
+
+		manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
+		mgr, err := container.NewManager(manager)
+		if err != nil {
+			return nil, cm.CombineErrors(err, cm.Error("Could not create container manager."))
 		}
+
+		containerExec, err := mgr.NewHookRunExec(config.Image.Reference, gitx.GetCwd(), rootDir, &exec)
+		if err != nil {
+			return nil, cm.CombineErrors(err, cm.Error("Could not create container hook executor."))
+		}
+
+		return containerExec, nil
 	}
-
-	return &exec, nil
 }
 
 var reEnvVariable = regexp.MustCompile(`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s):([a-zA-Z.][a-zA-Z0-9_.]+)\}`)

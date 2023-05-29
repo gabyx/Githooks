@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2153
+set -e
+set -u
+
 if [ -n "${STAGED_FILES}" ]; then
     echo "* Staged files:" >&2
 
-    for STAGED_FILE in $STAGED_FILES; do
-        echo "  - $STAGED_FILE" >&2
+    for file in $STAGED_FILES; do
+        echo "  - $file" >&2
     done
 fi

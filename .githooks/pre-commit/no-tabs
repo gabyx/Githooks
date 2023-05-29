@@ -1,29 +1,33 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
+set -e
+set -u
+
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 
 assertStaged
 
-SUCCESS=0
+success=0
 
 checkTab() {
-    LINES=$(grep -rnH "$(printf '\t')" "$1")
+    local lines
+    lines=$(grep -rnH "$(printf '\t')" "$1") || true
 
-    if [ -n "$LINES" ]; then
-        echo "! Tab character found in: $LINES" >&2
-        SUCCESS=1
+    if [ -n "$lines" ]; then
+        echo "! Tab character found in: $lines" >&2
+        success=1
     fi
 }
 
-for FILE in $STAGED_FILES; do
-    if echo "$FILE" | grep -qvE "(githooks|docs)/.*$"; then
-        checkTab "$FILE"
+for file in $STAGED_FILES; do
+    if echo "$file" | grep -qvE "(githooks|docs)/.*$"; then
+        checkTab "$file"
     fi
 done
 
-if [ "$SUCCESS" = "0" ]; then
+if [ "$success" = "0" ]; then
     echo "* No tab characters detected" >&2
 else
-    exit "$SUCCESS"
+    exit "$success"
 fi

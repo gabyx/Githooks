@@ -2,7 +2,7 @@
 
 assertStaged() {
     # Export if run without githooks...
-    if [ -z "$STAGED_FILES" ]; then
+    if [ -z "${STAGED_FILES:-}" ]; then
         CHANGED_FILES=$(git diff --cached --diff-filter=ACMR --name-only)
 
         # shellcheck disable=SC2181

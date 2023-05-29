@@ -3,26 +3,28 @@ package hooks
 import (
 	"io"
 	"os"
+	"path"
 	"testing"
 
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/container"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadImagesConfig(t *testing.T) {
 	file, err := os.CreateTemp("", "image.yaml")
-	cm.AssertNoErrorPanic(err, "Could not create file.")
+	assert.Nil(t, err)
 	defer os.Remove(file.Name())
 
 	c := createImageConfigFile()
 	cc := ImageConfig{}
-	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Target: "stage-1"}
+	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Stage: "stage-1"}
 	c.Images["bla"] = cc
 
 	err = cm.StoreYAML(file.Name(), c)
-	cm.AssertNoErrorPanic(err, "Could not store yaml.")
+	assert.Nil(t, err)
 	config, err := loadImagesConfigFile(file.Name())
-	cm.AssertNoErrorPanic(err, "Could not load yaml.")
+	assert.Nil(t, err)
 
 	assert.Equal(t, config.Images["bla"].Build.Dockerfile, "thisfile")
 	assert.Nil(t, config.Images["bla"].Pull)
@@ -30,19 +32,19 @@ func TestLoadImagesConfig(t *testing.T) {
 
 func TestLoadImagesConfig2(t *testing.T) {
 	file, err := os.CreateTemp("", "image.yaml")
-	cm.AssertNoErrorPanic(err, "Could not create file.")
+	assert.Nil(t, err)
 	defer os.Remove(file.Name())
 	c := createImageConfigFile()
 
 	cc := ImageConfig{}
 	cc.Pull = &ImageConfigPull{Reference: "container:1.2@sha256:abf"}
-	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Target: "stage-1"}
+	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Stage: "stage-1"}
 	c.Images["bla"] = cc
 
 	err = cm.StoreYAML(file.Name(), c)
-	cm.AssertNoErrorPanic(err, "Could not store yaml.")
+	assert.Nil(t, err)
 	config, err := loadImagesConfigFile(file.Name())
-	cm.AssertNoErrorPanic(err, "Could not load yaml.")
+	assert.Nil(t, err)
 
 	assert.Equal(t, config.Images["bla"].Build.Dockerfile, "thisfile")
 	assert.Equal(t, config.Images["bla"].Pull.Reference, "container:1.2@sha256:abf")
@@ -50,7 +52,7 @@ func TestLoadImagesConfig2(t *testing.T) {
 
 func TestLoadImagesConfig3(t *testing.T) {
 	file, err := os.CreateTemp("", "image.yaml")
-	cm.AssertNoErrorPanic(err, "Could not create file.")
+	assert.Nil(t, err)
 
 	content := `
 version: 1
@@ -58,10 +60,91 @@ images:
 `
 
 	_, err = io.WriteString(file, content)
-	cm.AssertNoErrorPanic(err, "Could not write file.")
+	assert.Nil(t, err)
 	defer os.Remove(file.Name())
 
 	config, err := loadImagesConfigFile(file.Name())
-	cm.AssertNoErrorPanic(err, "Could not load yaml.")
+	assert.Nil(t, err)
 	assert.Nil(t, config.Images)
+}
+
+func TestUpdateImages(t *testing.T) {
+
+	repo, err := os.MkdirTemp("", "repo")
+	assert.Nil(t, err)
+	defer os.RemoveAll(repo)
+
+	err = os.MkdirAll(path.Join(repo, ".githooks/docker/src"), cm.DefaultFileModeDirectory)
+	assert.Nil(t, err)
+
+	err = os.WriteFile(path.Join(repo, ".githooks/.namespace"), []byte("mynamespace"), cm.DefaultFileModeFile)
+	assert.Nil(t, err)
+
+	imageConfig := path.Join(repo, ".githooks/.images.yaml")
+
+	content := []byte(`
+version: 1
+images:
+  registry.com/${namespace}-bla:mine1:
+    pull:
+      reference: alpine:latest
+
+  bla:mine2:
+    pull:
+      reference: alpine:3.16
+
+  registry.com/dir/bla:mine3:
+    build:
+      dockerfile: ./.githooks/docker/Dockerfile
+      stage: stage2
+      context: ./.githooks/docker/src
+`)
+
+	err = os.WriteFile(imageConfig, content, cm.DefaultFileModeFile)
+	assert.Nil(t, err)
+
+	err = os.WriteFile(path.Join(repo, ".githooks/docker/src/test"), nil, cm.DefaultFileModeFile)
+	assert.Nil(t, err)
+
+	content = []byte(`
+FROM alpine:3.16 as stage1
+COPY test /test-file
+
+FROM stage1 as stage2
+RUN apk add bash
+`)
+
+	err = os.WriteFile(path.Join(repo, ".githooks/docker/Dockerfile"), content, cm.DefaultFileModeFile)
+	assert.Nil(t, err)
+
+	log, err := cm.CreateLogContext(false)
+	assert.Nil(t, err)
+
+	err = UpdateImages(log, "test-repo", repo, path.Join(repo, ".githooks"))
+	assert.Nil(t, err, "Update images failed: %s", err)
+
+	mgr, err := container.NewManager("")
+	assert.Nil(t, err)
+
+	// Check all images.
+	exists, err := mgr.ImageExists("registry.com/mynamespace-bla:mine1")
+	assert.Nil(t, err)
+	assert.True(t, exists)
+
+	exists, err = mgr.ImageExists("bla:mine2")
+	assert.Nil(t, err)
+	assert.True(t, exists)
+
+	exists, err = mgr.ImageExists("registry.com/dir/bla:mine3")
+	assert.Nil(t, err)
+	assert.True(t, exists)
+
+	// Remove all images.
+	err = mgr.ImageRemove("registry.com/mynamespace-bla:mine1")
+	assert.Nil(t, err)
+	err = mgr.ImageRemove("bla:mine2")
+	assert.Nil(t, err)
+	err = mgr.ImageRemove("registry.com/dir/bla:mine3")
+	assert.Nil(t, err)
+
 }

@@ -388,7 +388,7 @@ func (c *LogContext) AddFileWriter(file *os.File) {
 	}
 }
 
-// Remove a potentially added file writter.
+// Remove a potentially added file writer.
 func (c *LogContext) RemoveFileWriter() {
 	if c.file != nil {
 		c.setupWriters()
@@ -439,12 +439,12 @@ func (p *proxyWriterErr) Write(s []byte) (int, error) {
 	return p.log.GetErrorWriter().Write(s)
 }
 
-// ToInfoWriter wrapps the log context info into a `io.Writer`.
+// ToInfoWriter wraps the log context info into a `io.Writer`.
 func ToInfoWriter(log ILogContext) io.Writer {
 	return &proxyWriterInfo{log: log}
 }
 
-// ToErrorWriter wrapps the log context error into a `io.Writer`.
+// ToErrorWriter wraps the log context error into a `io.Writer`.
 func ToErrorWriter(log ILogContext) io.Writer {
 	return &proxyWriterErr{log: log}
 }

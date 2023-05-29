@@ -4,10 +4,13 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
+	ref "github.com/distribution/distribution/reference"
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
 type ImageConfigPull struct {
@@ -21,8 +24,8 @@ type ImageConfigBuild struct {
 	Dockerfile string `yaml:"dockerfile"`
 	// The optional context directory relative to the shared Githooks repository.
 	Context string `yaml:"context"`
-	// The optional target in the dockerfile which should be build.
-	Target string `yaml:"target"`
+	// The optional stage in the dockerfile which should be build.
+	Stage string `yaml:"stage"`
 }
 
 type ImageConfig struct {
@@ -86,6 +89,11 @@ func UpdateImages(
 	hooksDir string) (err error) {
 
 	file := GetRepoImagesFile(hooksDir)
+	namespace, e := GetHooksNamespace(hooksDir)
+	log.AssertNoError(e, "Could not get hooks namespace in '%s'.", hooksDir)
+
+	nBuilds := 0
+	nPulls := 0
 
 	if exists, _ := cm.IsPathExisting(file); !exists {
 		log.Debug("No images config existing. Skip updating images.")
@@ -93,99 +101,141 @@ func UpdateImages(
 		return
 	}
 
-	log.InfoF("Building images for '%s'...", fromHint)
+	log.InfoF("Build/pull images for repository '%s'...", fromHint)
 
 	gitx := git.NewCtx()
 	manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
-	mgr, e := container.NewManager(manager)
-	if e != nil {
-		err = cm.CombineErrors(cm.Error("Creating container manager failed."), e)
-
-		return
+	mgr, err := container.NewManager(manager)
+	if err != nil {
+		return cm.CombineErrors(cm.Error("Creating container manager failed."), err)
 	}
 
 	var imagesConfig ImagesConfigFile
 
 	imagesConfig, err = loadImagesConfigFile(file)
-	log.AssertNoErrorPanic(err,
-		"Could not load images config file '%s'.", file)
+	if err != nil {
+		return cm.CombineErrors(
+			cm.ErrorF("Could not load images config file '%s'.", file), err)
+	}
 
-	for name, img := range imagesConfig.Images {
-		pullSrc := name
+	for imageRef, img := range imagesConfig.Images {
+
+		imageRef, e := addImageReferenceSuffix(imageRef, file, namespace)
+		if e != nil {
+			err = cm.CombineErrors(err, e)
+
+			continue
+		}
+
+		pullSrc := imageRef
 
 		if img.Pull != nil {
 			log.WarnIfF(img.Build != nil,
 				"Specified image build configuration on entry '%s'\n"+
 					"in '.images.yaml' in '%s' will be ignored\n"+
-					"because pull is specified.", name, file)
+					"because pull is specified.", imageRef, file)
 
 			pullSrc = img.Pull.Reference
 		}
 
-		err = mgr.ImagePull(pullSrc)
+		if img.Build == nil {
+			// Do a pull of the image, because `build` is not specified.
 
-		if err != nil {
-			err = cm.CombineErrors(err,
-				cm.ErrorF("Pulling image '%s' did not succeed.\n"+
-					"Hooks may not run correctly:\n%s",
-					pullSrc, err))
+			e := mgr.ImagePull(pullSrc)
 
-			return
-		}
-
-		if name != pullSrc {
-			err = mgr.ImageTag(pullSrc, name)
-
-			if err != nil {
+			if e != nil {
 				err = cm.CombineErrors(err,
-					cm.ErrorF("Retagging image '%s' to '%s' did not succeed.\n"+
-						"Hooks may not run correctly:\n%s",
-						pullSrc, name, err))
+					cm.ErrorF("Pulling image '%s' in '%s' did not succeed.\n"+
+						"Hooks may not run correctly.", imageRef, file), e)
 
-				return
+				continue
 			}
 
-		}
+			log.InfoF("  %s Pulled image '%s' for '%s'.", cm.ListItemLiteral, pullSrc, fromHint)
+			nPulls += 1
 
-		if img.Pull == nil && img.Build != nil {
+			if imageRef != pullSrc {
+				e = mgr.ImageTag(pullSrc, imageRef)
+
+				if e != nil {
+					err = cm.CombineErrors(err,
+						cm.ErrorF("Retagging image '%s' to '%s' in '%s' did not succeed.\n"+
+							"Hooks may not run correctly.", pullSrc, imageRef, file), e)
+
+					continue
+				}
+
+				log.InfoF("  %s Tagged image '%s' to '%s' for '%s'.", cm.ListItemLiteral, pullSrc, imageRef, fromHint)
+			}
+		} else if img.Pull == nil {
+			// Do a build of the image because no `pull` but `build` specified.
+
 			if path.IsAbs(img.Build.Context) {
-				err = cm.Error(
+				err = cm.CombineErrors(err, cm.Error(
 					"Build context path '%s' given in '%s' must be a relative path.",
-					img.Build.Context, file)
+					img.Build.Context, file))
 
-				return
+				continue
 			}
 
 			if path.IsAbs(img.Build.Dockerfile) {
-				err = cm.ErrorF(
+				err = cm.CombineErrors(err, cm.ErrorF(
 					"Dockerfile path '%s' given in '%s' must be a relative path.",
-					img.Build.Dockerfile, file)
+					img.Build.Dockerfile, file))
 
-				return
+				continue
 			}
 
-			err = mgr.ImageBuild(
+			out, e := mgr.ImageBuild(
 				log,
 				path.Join(repositoryDir, img.Build.Dockerfile),
 				path.Join(repositoryDir, img.Build.Context),
-				img.Build.Target, name)
+				img.Build.Stage, imageRef)
 
-			if err != nil {
+			if e != nil {
 				// Save build error to temporary file.
 				file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
 				defer file.Close()
-				_, e = io.WriteString(file, err.Error())
-				log.AssertNoError(e, "Could not save image build errors.")
+				_, e2 := io.WriteString(file,
+					e.Error()+
+						"\nOutput:\n=====================================================\n"+
+						out)
+				log.AssertNoError(e2, "Could not save image build errors.")
 
-				err = cm.ErrorF("Building image '%s' from '%s' did not succeed.\n"+
-					"Inspect build errors in file '%s'.",
-					pullSrc, name, file.Name())
+				err = cm.CombineErrors(err,
+					cm.ErrorF("Building image '%s' did not succeed.\n"+
+						"Inspect build errors in file '%s' with\n"+
+						"`cat '%s'`",
+						imageRef, file.Name(), file.Name()))
 
-				return
+				continue
 			}
-		}
 
+			log.InfoF("  %v Built image '%s' for '%s'.", cm.ListItemLiteral, imageRef, fromHint)
+			nBuilds += 1
+		}
 	}
 
+	log.InfoF("Pulled '%v' and built '%v' images.", nPulls, nBuilds)
+
 	return
+}
+
+// addImageReferenceSuffix adds the `namespace` to a image name reference at the place `${namespace}`.
+func addImageReferenceSuffix(imageRef string, file string, namespace string) (string, error) {
+	if !strs.IsEmpty(namespace) {
+		imageRef = strings.Replace(imageRef, "${namespace}", namespace, 1)
+	}
+
+	_, e := ref.Parse(imageRef)
+
+	if e != nil {
+		return imageRef, cm.CombineErrors(
+			cm.ErrorF("Could not parse image reference."+
+				"Image reference '%s' in '%s' must be a "+
+				"named reference according to "+
+				"'https://github.com/distribution/distribution/blob/main/reference/reference.go'", imageRef, file), e)
+	}
+
+	return imageRef, nil
 }

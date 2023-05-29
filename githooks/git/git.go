@@ -40,7 +40,7 @@ func NewCtx() *Context {
 }
 
 // NewCtxSanitized creates a git command execution context
-// with current working dir and sanitized environement.
+// with current working dir and sanitized environment.
 func NewCtxSanitized() *Context {
 	return NewCtxSanitizedAt("")
 }

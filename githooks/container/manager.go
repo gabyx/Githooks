@@ -13,15 +13,25 @@ func (m *ManagerNotAvailableError) Error() string {
 	return strs.Fmt("Container manager command '%s' not available.", m.Cmd)
 }
 
-// ContainerMgr provides the interface to `docker` or `podman`
+// ContainerMgr provides the interface to `docker` or `podman` (etc.)
 // for the functionality used in Githooks.
-// We do not use moby/moby because we would need to wrap agnostic arguments.
 type IManager interface {
 	ImagePull(ref string) error
 	ImageTag(refSrc string, refTarget string) error
-	ImageBuild(log cm.ILogContext, dockerfile string, context string, stage string, ref string) error
+	ImageBuild(
+		log cm.ILogContext,
+		dockerfile string,
+		context string,
+		stage string,
+		ref string) (string, error)
 	ImageExists(ref string) (bool, error)
 	ImageRemove(ref string) error
+
+	NewHookRunExec(
+		ref string,
+		workspaceDir string,
+		hookRepoDir string,
+		exec cm.IExecutable) (cm.IExecutable, error)
 }
 
 // NewManager creates a container manager of type `manager`.
