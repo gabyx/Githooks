@@ -384,8 +384,8 @@ func (h *Hooks) GetHooksCount() int {
 		h.LocalSharedHooks.GetHooksCount() + h.GlobalSharedHooks.GetHooksCount()
 }
 
-// Count returns the number of hooks in the list as comma separated list.
-func (h HookPrioList) CountString() (count string) {
+// CountFmt returns the number of hooks in the list as comma separated list.
+func (h HookPrioList) CountFmt() (count string) {
 	count = "["
 
 	if len(h) == 0 {
