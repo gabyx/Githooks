@@ -14,8 +14,8 @@ IMAGE_TYPE="alpine-coverage"
 }
 
 function cleanup() {
-    docker rmi "githooks:$IMAGE_TYPE-base"
-    docker rmi "githooks:$IMAGE_TYPE"
+    docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
+    docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
 }
 
 trap cleanup EXIT
@@ -23,7 +23,7 @@ trap cleanup EXIT
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
 FROM golang:1.20-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash jq curl
+RUN apk add bash jq curl docker
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always

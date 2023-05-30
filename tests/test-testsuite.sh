@@ -3,10 +3,16 @@
 set -e
 set -u
 
+function cleanup() {
+    docker rmi "githooks:testsuite" &>/dev/null || true
+}
+
+trap cleanup EXIT
+
 cat <<EOF | docker build --force-rm -t githooks:testsuite -
 FROM golang:1.20-alpine
 RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash jq
+RUN apk add bash jq docker
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
@@ -21,6 +27,7 @@ EOF
 
 if ! docker run --rm -it \
     -v "$(pwd)":/githooks \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     -w /githooks githooks:testsuite \
     tests/exec-testsuite.sh; then
 

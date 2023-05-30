@@ -10,8 +10,16 @@ else
     OS_USER="root"
 fi
 
-cat <<EOF | docker build --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
+# Only works on linux (macOS does not need it)
+dockerGroupId=$(getent group docker 2>/dev/null | cut -d: -f3) || true
+echo "Docker group id: $dockerGroupId"
+
+cat <<EOF | docker build \
+    --build-arg "DOCKER_GROUP_ID=$dockerGroupId" \
+    --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
+
 FROM githooks:$IMAGE_TYPE-base
+ARG DOCKER_GROUP_ID
 
 ENV DOCKER_RUNNING=true
 ENV GH_TESTS="/var/lib/githooks-tests"
@@ -45,8 +53,15 @@ RUN echo "Git version: \$(git --version)"
 WORKDIR \$GH_TESTS
 EOF
 
+runArgs=()
+if [ "${CI:-}" != "true" ]; then
+    runArgs=("-it")
+fi
+
 docker run --rm \
     -a stdout -a stderr \
+    "${runArgs[@]}" \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@"
 
