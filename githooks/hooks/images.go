@@ -202,11 +202,13 @@ func UpdateImages(
 						out)
 				log.AssertNoError(e2, "Could not save image build errors.")
 
+				const maxChars int = 500
 				err = cm.CombineErrors(err,
 					cm.ErrorF("Building image '%s' did not succeed.\n"+
 						"Inspect build errors in file '%s' with\n"+
-						"`cat '%s'`",
-						imageRef, file.Name(), file.Name()))
+						"`cat '%s'\n"+
+						"Partial output:\n%s",
+						imageRef, file.Name(), file.Name(), out[0:cm.Min(len(out), maxChars)]))
 
 				continue
 			}

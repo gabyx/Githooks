@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1091
+. "$TEST_DIR/general.sh"
+
 if [ "$1" = "--skip-docker-check" ]; then
     shift
 else
@@ -31,7 +35,6 @@ export GH_INSTALL_BIN_DIR="$GH_INSTALL_DIR/bin"
 COMMIT_BEFORE=$(git -C "$GH_TEST_REPO" rev-parse HEAD)
 
 function cleanDirs() {
-
     if [ -d "$GH_TEST_GIT_CORE" ]; then
         mkdir -p "$GH_TEST_GIT_CORE/templates/hooks" || {
             echo "! Cleanup failed."
@@ -47,6 +50,12 @@ function cleanDirs() {
         echo "! Cleanup failed."
         exit 1
     }
+}
+
+function cleanDocker() {
+    if command -v "docker" &>/dev/null; then
+        deleteAllTestImages
+    fi
 }
 
 function resetTestRepo() {
@@ -107,6 +116,7 @@ for STEP in "$GH_TESTS/steps"/step-*.sh; do
     echo "  :: $STEP_DESC"
 
     cleanDirs
+    cleanDocker
 
     TEST_RUNS=$((TEST_RUNS + 1))
 

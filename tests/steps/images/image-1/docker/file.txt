@@ -1,0 +1,1 @@
+Test copy file in docker build.

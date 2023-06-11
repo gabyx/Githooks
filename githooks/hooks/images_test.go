@@ -19,15 +19,15 @@ func TestLoadImagesConfig(t *testing.T) {
 	c := createImageConfigFile()
 	cc := ImageConfig{}
 	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Stage: "stage-1"}
-	c.Images["bla"] = cc
+	c.Images["test-image"] = cc
 
 	err = cm.StoreYAML(file.Name(), c)
 	assert.Nil(t, err)
 	config, err := loadImagesConfigFile(file.Name())
 	assert.Nil(t, err)
 
-	assert.Equal(t, config.Images["bla"].Build.Dockerfile, "thisfile")
-	assert.Nil(t, config.Images["bla"].Pull)
+	assert.Equal(t, config.Images["test-image"].Build.Dockerfile, "thisfile")
+	assert.Nil(t, config.Images["test-image"].Pull)
 }
 
 func TestLoadImagesConfig2(t *testing.T) {
@@ -39,15 +39,15 @@ func TestLoadImagesConfig2(t *testing.T) {
 	cc := ImageConfig{}
 	cc.Pull = &ImageConfigPull{Reference: "container:1.2@sha256:abf"}
 	cc.Build = &ImageConfigBuild{Dockerfile: "thisfile", Stage: "stage-1"}
-	c.Images["bla"] = cc
+	c.Images["test-image"] = cc
 
 	err = cm.StoreYAML(file.Name(), c)
 	assert.Nil(t, err)
 	config, err := loadImagesConfigFile(file.Name())
 	assert.Nil(t, err)
 
-	assert.Equal(t, config.Images["bla"].Build.Dockerfile, "thisfile")
-	assert.Equal(t, config.Images["bla"].Pull.Reference, "container:1.2@sha256:abf")
+	assert.Equal(t, config.Images["test-image"].Build.Dockerfile, "thisfile")
+	assert.Equal(t, config.Images["test-image"].Pull.Reference, "container:1.2@sha256:abf")
 }
 
 func TestLoadImagesConfig3(t *testing.T) {
@@ -85,15 +85,15 @@ func TestUpdateImages(t *testing.T) {
 	content := []byte(`
 version: 1
 images:
-  registry.com/${namespace}-bla:mine1:
+  registry.com/${namespace}-test-image:mine1:
     pull:
       reference: alpine:latest
 
-  bla:mine2:
+  test-image:mine2:
     pull:
       reference: alpine:3.16
 
-  registry.com/dir/bla:mine3:
+  registry.com/dir/test-image:mine3:
     build:
       dockerfile: ./.githooks/docker/Dockerfile
       stage: stage2
@@ -127,24 +127,24 @@ RUN apk add bash
 	assert.Nil(t, err)
 
 	// Check all images.
-	exists, err := mgr.ImageExists("registry.com/mynamespace-bla:mine1")
+	exists, err := mgr.ImageExists("registry.com/mynamespace-test-image:mine1")
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
-	exists, err = mgr.ImageExists("bla:mine2")
+	exists, err = mgr.ImageExists("test-image:mine2")
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
-	exists, err = mgr.ImageExists("registry.com/dir/bla:mine3")
+	exists, err = mgr.ImageExists("registry.com/dir/test-image:mine3")
 	assert.Nil(t, err)
 	assert.True(t, exists)
 
 	// Remove all images.
-	err = mgr.ImageRemove("registry.com/mynamespace-bla:mine1")
+	err = mgr.ImageRemove("registry.com/mynamespace-test-image:mine1")
 	assert.Nil(t, err)
-	err = mgr.ImageRemove("bla:mine2")
+	err = mgr.ImageRemove("test-image:mine2")
 	assert.Nil(t, err)
-	err = mgr.ImageRemove("registry.com/dir/bla:mine3")
+	err = mgr.ImageRemove("registry.com/dir/test-image:mine3")
 	assert.Nil(t, err)
 
 }
