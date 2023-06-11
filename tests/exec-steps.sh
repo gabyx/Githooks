@@ -95,7 +95,7 @@ echo "Tests dir: '$GH_TESTS'"
 
 startT=$(date +%s)
 
-for STEP in "$GH_TESTS"/step-*.sh; do
+for STEP in "$GH_TESTS/steps"/step-*.sh; do
     STEP_NAME=$(basename "$STEP" | sed 's/.sh$//')
     STEP_DESC=$(grep -m 1 -A 1 "Test:" "$STEP" | tail -1 | sed 's/#\s*//')
 

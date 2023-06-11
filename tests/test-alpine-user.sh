@@ -21,7 +21,7 @@ RUN adduser -D -u 1099 test
 RUN if [ -n "$DOCKER_GROUP_ID" ]; then \
         addgroup -g "$DOCKER_GROUP_ID" docker && \
         adduser test docker && \
-        apk add docker;
+        apk add docker; \
     else \
         echo "Not adding docker since not working with user!" &>2; \
     fi

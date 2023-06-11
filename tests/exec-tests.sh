@@ -53,14 +53,8 @@ RUN echo "Git version: \$(git --version)"
 WORKDIR \$GH_TESTS
 EOF
 
-runArgs=()
-if [ "${CI:-}" != "true" ]; then
-    runArgs=("-it")
-fi
-
 docker run --rm \
     -a stdout -a stderr \
-    "${runArgs[@]}" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@"
