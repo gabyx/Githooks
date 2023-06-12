@@ -14,9 +14,17 @@ function isImageExisting() {
 }
 
 function assertNoTestImages() {
-    if [ -n "$(docker images -q --filter "reference=*test-image*")" ]; then
+    images=$(
+        docker images -q --filter "reference=*test-image*" &&
+            docker images -q --filter "reference=*/*test-image*"
+        docker images -q --filter "reference=*/*/*test-image*"
+    )
+
+    if [ -n "$images" ]; then
         echo "Docker test images are still existing." >&2
         docker images --filter "reference=*test-image*"
+        docker images --filter "reference=*/*test-image*"
+        docker images --filter "reference=*/*/*test-image*"
         exit 1
     fi
 }
@@ -24,7 +32,11 @@ function assertNoTestImages() {
 function deleteAllTestImages() {
     # Delete the images by the reference name, instead of ID,
     # because multiple tags to the same ID can exists.
-    images=$(docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*test-image*")
+    images=$(
+        docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*test-image*" &&
+            docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*/*test-image*"
+        docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*/*/*test-image*"
+    )
     if [ -n "$images" ]; then
         # shellcheck disable=SC2086
         echo "$images" | while read -r img; do
