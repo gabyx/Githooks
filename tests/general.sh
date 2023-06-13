@@ -51,20 +51,25 @@ function deleteAllTestImages() {
 
 function storeIntoContainerVolume() {
     volume="$1"
-    src="$2"
+    src="$2/." # Add a `/.` to copy the content.
 
     echo "Storing '$src' into volume '$volume' for mounting."
 
     # shellcheck disable=SC2015
     docker volume create "$volume" &&
-        docker run -d --rm --name githooks-copy-to-volume \
-            "$volume:/volume" alpine:latest tail -f /dev/null &&
-        docker cp "$src" githooks-copy-to-volume:/volume &&
-        docker stop githooks-copy-to-volume ||
-        { docker stop githooks-copy-to-volume || true; }
+        docker run -d --rm --name githookscopytovolume \
+            -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null &&
+        docker cp -a "$src" "githookscopytovolume:/mnt/volume" &&
+        docker stop githookscopytovolume ||
+        {
+            docker stop githookscopytovolume &>/dev/null || true
+            return 1
+        }
+    return 0
 }
 
 function deleteContainerVolumes() {
-    docker volume delete "gh-test-volume-workspace" || true
-    docker volume delete "gh-test-volume-shared" || true
+    docker volume rm "gh-test-workspace" &>/dev/null || true
+    docker volume rm "gh-test-shared" &>/dev/null || true
+    return 0
 }

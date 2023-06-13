@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Test:
 #   Update shared hooks with images.yaml
+set -e
+set -u
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -50,8 +52,7 @@ touch "file.txt" &&
 # `docker in docker` uses directories on host volume.
 sharedRoot=$("$GH_TEST_BIN/cli" shared root ns:sharedhooks)
 storeIntoContainerVolume "gh-test-workspace" "."
-storeIntoContainerVolume "gh-test-shared" "$sharedRoot"
-deleteContainerVolumes
+storeIntoContainerVolume "gh-test-shared" "$sharedRoot/."
 
 # OUT=$(git commit -m "fix: Add file to format")
 # echo "$OUT"
