@@ -30,6 +30,10 @@ function assertNoTestImages() {
 }
 
 function deleteAllTestImages() {
+    if ! isDockerAvailable; then
+        return 0
+    fi
+
     # Delete the images by the reference name, instead of ID,
     # because multiple tags to the same ID can exists.
     images=$(
@@ -43,4 +47,24 @@ function deleteAllTestImages() {
             docker rmi -f "$img" >/dev/null
         done
     fi
+}
+
+function storeIntoContainerVolume() {
+    volume="$1"
+    src="$2"
+
+    echo "Storing '$src' into volume '$volume' for mounting."
+
+    # shellcheck disable=SC2015
+    docker volume create "$volume" &&
+        docker run -d --rm --name githooks-copy-to-volume \
+            "$volume:/volume" alpine:latest tail -f /dev/null &&
+        docker cp "$src" githooks-copy-to-volume:/volume &&
+        docker stop githooks-copy-to-volume ||
+        { docker stop githooks-copy-to-volume || true; }
+}
+
+function deleteContainerVolumes() {
+    docker volume delete "gh-test-volume-workspace" || true
+    docker volume delete "gh-test-volume-shared" || true
 }

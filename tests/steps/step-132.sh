@@ -22,7 +22,7 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-132-a.git" &&
     mkdir githooks &&
     cp -rf "$TEST_DIR/steps/images/image-1/.images.yaml" ./githooks/.images.yaml &&
     cp -rf "$TEST_DIR/steps/images/image-1/docker" ./docker &&
-    echo "myhooks" >"githooks/.namespace" &&
+    echo "sharedhooks" >"githooks/.namespace" &&
     git add . &&
     git commit -m 'Initial commit' ||
     exit 1
@@ -45,9 +45,9 @@ if ! echo "$OUT" | grep -q "Updating shared hooks from" ||
     exit 1
 fi
 
-if ! isImageExisting "myhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/myhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/dir/myhooks-test-image-built:1.0.0"; then
+if ! isImageExisting "sharedhooks-test-image:1.0.0" ||
+    ! isImageExisting "registry.com/sharedhooks-test-image:1.0.0" ||
+    ! isImageExisting "registry.com/dir/sharedhooks-test-image-built:1.0.0"; then
     echo "Could not find all updated images."
     docker images
     exit 1
