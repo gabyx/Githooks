@@ -50,10 +50,13 @@ function deleteAllTestImages() {
 }
 
 function storeIntoContainerVolumes() {
-    local workspace="$1"
-    local shared="$2"
-    storeIntoContainerVolume "gh-test-workspace" "$workspace"
-    storeIntoContainerVolume "gh-test-shared" "$shared"
+    local workspace
+    workspace=$(cd "$1" && pwd)
+    local shared
+    shared=$(cd "$2" && pwd)
+
+    storeIntoContainerVolume "gh-test-workspace" "$workspace" # copy folder into volume (not content)
+    storeIntoContainerVolume "gh-test-shared" "$shared"       # copy folder into volume
 }
 
 function restoreFromContainerVolumeWorkspace() {
@@ -64,8 +67,7 @@ function restoreFromContainerVolumeWorkspace() {
 
 function storeIntoContainerVolume() {
     volume="$1"
-    src="$2/." # Add a `/.` to copy the content.
-
+    src="$2/" # Add a `/.` to copy the content.
     echo "Storing '$src' into volume '$volume' for mounting."
 
     # shellcheck disable=SC2015
@@ -98,8 +100,19 @@ function restoreFromContainerVolume() {
         }
     return 0
 }
+
+function setGithooksContainerVolumeEnvs() {
+    export GITHOOKS_CONTAINER_VOLUME_WORKSPACE="gh-test-workspace"
+    # shellcheck disable=SC2016
+    export GITHOOKS_CONTAINER_VOLUME_WORKSPACE_BASE_PATH='./${repository-dir-name}'
+
+    export GITHOOKS_CONTAINER_VOLUME_SHARED="gh-test-shared"
+    # shellcheck disable=SC2016
+    export GITHOOKS_CONTAINER_VOLUME_SHARED_BASE_PATH='./${shared-dir-name}'
+}
+
 function deleteContainerVolumes() {
-    docker volume rm "gh-test-workspace" &>/dev/null || true
-    docker volume rm "gh-test-shared" &>/dev/null || true
+    # docker volume rm "gh-test-workspace" &>/dev/null || true
+    # docker volume rm "gh-test-shared" &>/dev/null || true
     return 0
 }

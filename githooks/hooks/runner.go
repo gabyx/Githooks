@@ -68,6 +68,7 @@ func GetHookRunCmd(
 	hookPath string,
 	parseRunnerConfig bool,
 	rootDir string,
+	containerizedEnabled bool,
 	envs []string) (cm.IExecutable, error) {
 
 	exec := cm.Executable{Cmd: hookPath}
@@ -116,7 +117,7 @@ func GetHookRunCmd(
 	exec.Env = append(exec.Env, config.Env...)
 	exec.Env = append(exec.Env, envs...)
 
-	if strs.IsEmpty(config.Image.Reference) {
+	if !containerizedEnabled || strs.IsEmpty(config.Image.Reference) {
 		// Normal execution.
 
 		// Resolve commands with path separators which are

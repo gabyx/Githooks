@@ -2,9 +2,9 @@
 FROM alpine:3.18 as stage1
 
 FROM stage1 as stage2
-RUN apk add git 
+RUN apk add git bash 
 COPY format.sh /format.sh
 RUN chmod +x /format.sh
 RUN git version
-CMD ["/format.sh"]
+ENTRYPOINT ["/format.sh"]
 

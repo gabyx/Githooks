@@ -52,7 +52,9 @@ touch "file.txt" &&
 # `docker in docker` uses directories on host volume.
 sharedRoot=$("$GH_TEST_BIN/cli" shared root ns:sharedhooks)
 storeIntoContainerVolumes "." "$sharedRoot"
-OUT=$(git commit -m "fix: Add file to format")
+
+OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format")
+
 restoreFromContainerVolumeWorkspace "." "file.txt"
 
 echo "$OUT"

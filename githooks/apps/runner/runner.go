@@ -97,13 +97,6 @@ func mainRun() (exitCode int) {
 
 	hooks := collectHooks(&settings, &uiSettings, &ignores, &checksums)
 
-	if cm.IsDebug {
-		logBatches("Local Hooks", hooks.LocalHooks)
-		logBatches("Repo Shared Hooks", hooks.RepoSharedHooks)
-		logBatches("Local Shared Hooks", hooks.LocalSharedHooks)
-		logBatches("Global Shared Hooks", hooks.GlobalSharedHooks)
-	}
-
 	executeHooks(&settings, &hooks)
 
 	uiSettings.PromptCtx.Close()
@@ -950,7 +943,23 @@ func showTrustPrompt(
 	}
 }
 
+func applyEnvToArgs(hs *hooks.Hooks, env []string) {
+	hs.Map(func(h *hooks.Hook) {
+		h.ApplyEnvironmentToArgs(env)
+	})
+}
+
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
+
+	// Containerized executions need this.
+	applyEnvToArgs(hs, hooks.FilterGithooksEnvs(settings.ExecX.GetEnv()))
+
+	if cm.IsDebug {
+		logBatches("Local Hooks", hs.LocalHooks)
+		logBatches("Repo Shared Hooks", hs.RepoSharedHooks)
+		logBatches("Local Shared Hooks", hs.LocalSharedHooks)
+		logBatches("Global Shared Hooks", hs.GlobalSharedHooks)
+	}
 
 	var nThreads = runtime.NumCPU()
 	nThSetting := settings.GitX.GetConfig(hooks.GitCKNumThreads, git.Traverse)

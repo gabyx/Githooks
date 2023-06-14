@@ -1,6 +1,8 @@
 package common
 
-import strs "github.com/gabyx/githooks/githooks/strings"
+import (
+	strs "github.com/gabyx/githooks/githooks/strings"
+)
 
 // IExecutable defines the interface for a general executable.
 type IExecutable interface {
@@ -9,6 +11,8 @@ type IExecutable interface {
 
 	GetString() string
 	GetEnvironment() []string
+
+	ApplyEnvironmentToArgs(env []string)
 }
 
 // Executable contains the data to a script/executable file.
@@ -36,7 +40,12 @@ func (e *Executable) GetString() string {
 	return strs.Fmt("%s %q", e.Cmd, e.Args)
 }
 
-// GetString gets all args.
+// GetEnvironment gets all environment variables.
 func (e *Executable) GetEnvironment() []string {
 	return e.Env
+}
+
+// GetEnvironment gets all environment variables.
+func (e *Executable) ApplyEnvironmentToArgs(env []string) {
+	// Dont to anything, since normal command dont need this.
 }

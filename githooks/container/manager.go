@@ -13,6 +13,19 @@ func (m *ManagerNotAvailableError) Error() string {
 	return strs.Fmt("Container manager command '%s' not available.", m.Cmd)
 }
 
+// EnvVariableContainerRun is the environment variable which is
+// set to true in containarized runs.
+const EnvVariableContainerRun = "GITHOOKS_CONTAINER_RUN"
+
+type ContainerManagerType int
+type containerManagerType struct {
+	Docker ContainerManagerType
+	Podman ContainerManagerType // Not yet supported.
+}
+
+// ContainerManagerTypeV enumerates all container managers supported so far.
+var ContainerManagerTypeV = &containerManagerType{Docker: 0, Podman: 1}
+
 // ContainerMgr provides the interface to `docker` or `podman` (etc.)
 // for the functionality used in Githooks.
 type IManager interface {
@@ -31,7 +44,8 @@ type IManager interface {
 		ref string,
 		workspaceDir string,
 		hookRepoDir string,
-		exec cm.IExecutable) (cm.IExecutable, error)
+		exe cm.IExecutable,
+	) (cm.IExecutable, error)
 }
 
 // NewManager creates a container manager of type `manager`.

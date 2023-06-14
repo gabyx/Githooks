@@ -176,6 +176,7 @@ func GetAllHooksIn(
 				hookPath,
 				parseRunnerConfig,
 				rootDir,
+				true,
 				hookNamespaceEnvs)
 
 			if err != nil {
@@ -315,6 +316,7 @@ func ExecuteHooksParallel(
 
 	call := func(hookRes *HookResult, hook *Hook) {
 		var err error
+
 		hookRes.Output, err =
 			cm.GetCombinedOutputFromExecutable(
 				exec,
@@ -410,6 +412,23 @@ func (h HookPrioList) CountFmt() (count string) {
 	count += "]"
 
 	return
+}
+
+// Map maps a function over all hooks.
+func (h *Hooks) Map(f func(*Hook)) {
+	h.LocalHooks.Map(f)
+	h.RepoSharedHooks.Map(f)
+	h.LocalSharedHooks.Map(f)
+	h.GlobalSharedHooks.Map(f)
+}
+
+// Map maps a function over all hooks.
+func (h HookPrioList) Map(f func(*Hook)) {
+	for i := range h {
+		for j := range h[i] {
+			f(&h[i][j])
+		}
+	}
 }
 
 // AllHooksSuccessful returns `true`.

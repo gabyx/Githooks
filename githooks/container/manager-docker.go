@@ -1,6 +1,7 @@
 package container
 
 import (
+	"os"
 	"os/exec"
 	"os/user"
 	"path"
@@ -65,62 +66,110 @@ func (m *ManagerDocker) ImageRemove(ref string) (err error) {
 	return m.cmdCtx.Check("image", "rm", ref)
 }
 
+func resolveWSBasePath(envValue string, dirname string) string {
+	return strings.ReplaceAll(envValue, "${repository-dir-name}", dirname)
+}
+
+func resolveWSSharedBasePath(envValue string, dirname string) string {
+	return strings.ReplaceAll(envValue, "${shared-dir-name}", dirname)
+}
+
 // NewHookRunExec runs a hook over a container.
 func (m *ManagerDocker) NewHookRunExec(
 	ref string,
 	workspaceDir string,
-	hookRepoDir string,
+	workspaceHookDir string,
 	hookExec cm.IExecutable,
 ) (cm.IExecutable, error) {
-	containerExec := cm.Executable{}
+	containerExec := ContainerizedExecutable{containerType: ContainerManagerTypeV.Docker}
 
 	containerExec.Cmd = dockerCmd
 
-	mntWorkspace := "/mnt/workspace"
-	mntHookRepo := "/mnt/shared"
+	// Mount: Working directory.
+	// The repository where the hook runs.
+	mntWSSrc := workspaceDir
+	mntWSDest := "/mnt/workspace"
+	if volume := os.Getenv("GITHOOKS_CONTAINER_VOLUME_WORKSPACE"); strs.IsNotEmpty(volume) {
+		mntWSSrc = volume
+	}
+	mntWSDest = path.Join(mntWSDest, resolveWSBasePath(
+		os.Getenv("GITHOOKS_CONTAINER_VOLUME_WORKSPACE_BASE_PATH"),
+		path.Base(workspaceDir))) // default to ""
 
-	cmd := hookExec.GetCommand()
+	// Mount: Shared hook repository:
+	// This mount contains a shared repository root directory.
+	mntWSSharedSrc := workspaceHookDir
+	mntWSSharedDest := "/mnt/shared"
+	cmdBasePath := mntWSSharedDest
+	mountWSShared := workspaceDir != workspaceHookDir
+
+	if !mountWSShared {
+		// Hooks are configured in current repository: Dont mount the shared location.
+		cmdBasePath = mntWSDest // For resolving paths below.
+	} else {
+		// Mount shared too.
+		if volume := os.Getenv("GITHOOKS_CONTAINER_VOLUME_SHARED"); strs.IsNotEmpty(volume) {
+			mntWSSharedSrc = volume
+		}
+		mountWSShared = true
+		mntWSSharedDest = path.Join(mntWSSharedDest, resolveWSSharedBasePath(
+			os.Getenv("GITHOOKS_CONTAINER_VOLUME_SHARED_BASE_PATH"),
+			path.Base(workspaceHookDir))) // defaults to ""
+	}
 
 	// Resolve commands with path separators which are
-	// relative paths relative to the `rootDir`.
+	// relative paths relative to `cmdBasePath`.
 	// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
+	cmd := hookExec.GetCommand()
 	if strings.ContainsAny(hookExec.GetCommand(), "/\\") {
 		if runtime.GOOS == cm.WindowsOsName {
 			cmd = filepath.ToSlash(cmd)
 		}
 
 		if !filepath.IsAbs(cmd) {
-			cmd = path.Join(mntHookRepo, cmd)
+			cmd = path.Join(cmdBasePath, cmd)
 		}
 	}
 
 	cm.DebugAssertF(!strings.Contains(workspaceDir, "\\"),
 		"No forward slashes should be passed in here '%s'.", workspaceDir)
-	cm.DebugAssertF(!strings.Contains(hookRepoDir, "\\"),
-		"No forward slashes should be passed in here '%s'.", hookRepoDir)
+	cm.DebugAssertF(!strings.Contains(workspaceHookDir, "\\"),
+		"No forward slashes should be passed in here '%s'.", workspaceHookDir)
 
-	containerExec.Args = []string{
+	containerExec.ArgsPre = []string{
 		"run",
 		"--rm",
 		"-v",
-		strs.Fmt("%v:%v", workspaceDir, mntWorkspace),
-		"-v",
-		strs.Fmt("%v:%v:ro", hookRepoDir, mntHookRepo),
-		"-w", mntWorkspace,
-		"-e", "GITHOOKS_CONTAINER_RUN=true",
+		strs.Fmt("%v:%v", mntWSSrc, mntWSDest), // Set the mount for the working directory.
+		"-w", mntWSDest,                        // Set working dir.
 	}
 
-	if runtime.GOOS != cm.WindowsOsName && runtime.GOOS != "darwin" {
-		containerExec.Args = append(containerExec.Args, "--user", strs.Fmt("%v:%v", m.uid, m.gid))
+	if mountWSShared {
+		containerExec.ArgsPre = append(containerExec.ArgsPre,
+			"-v",
+			strs.Fmt("%v:%v:ro", mntWSSharedSrc, mntWSSharedDest)) // Set the mount for the shared directory.
+	}
+
+	if runtime.GOOS != cm.WindowsOsName &&
+		runtime.GOOS != "darwin" {
+		// On non win/mac, execute as the user/group from the host.
+		containerExec.ArgsPre = append(containerExec.ArgsPre,
+			"--user",
+			strs.Fmt("%v:%v", m.uid, m.gid))
+	}
+
+	// Set env. variable denoting we are running over a container.
+	containerExec.ArgsEnv = []string{
+		"-e", strs.Fmt("%s=true", EnvVariableContainerRun),
 	}
 
 	// Re-export env variables (does not contain general environment).
 	for _, envKeyVar := range hookExec.GetEnvironment() {
-		containerExec.Args = append(containerExec.Args, "-e", envKeyVar)
+		containerExec.ArgsEnv = append(containerExec.ArgsEnv, "-e", envKeyVar)
 	}
 
-	containerExec.Args = append(containerExec.Args, ref, cmd)
-	containerExec.Args = append(containerExec.Args, hookExec.GetArgs()...)
+	containerExec.ArgsPost = append(containerExec.ArgsPost, ref, cmd)
+	containerExec.ArgsPost = append(containerExec.ArgsPost, hookExec.GetArgs()...)
 
 	return &containerExec, nil
 }
