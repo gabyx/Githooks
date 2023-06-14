@@ -51,19 +51,19 @@ touch "file.txt" &&
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume.
 sharedRoot=$("$GH_TEST_BIN/cli" shared root ns:sharedhooks)
-storeIntoContainerVolume "gh-test-workspace" "."
-storeIntoContainerVolume "gh-test-shared" "$sharedRoot/."
+storeIntoContainerVolumes "." "$sharedRoot"
+OUT=$(git commit -m "fix: Add file to format")
+restoreFromContainerVolumeWorkspace "." "file.txt"
 
-# OUT=$(git commit -m "fix: Add file to format")
-# echo "$OUT"
-# if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then
-#     echo -e "! Expected file to have formatted"
-#     exit 1
-# fi
-#
-# if ! grep -qi "formatted by containerized hook" "file.txt"; then
-#     echo -e "! Expected file should have been changed"
-#     exit 1
-# fi
+echo "$OUT"
+if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then
+    echo -e "! Expected file to have formatted"
+    exit 1
+fi
+
+if ! grep -qi "formatted by containerized hook" "file.txt"; then
+    echo -e "! Expected file should have been changed"
+    exit 1
+fi
 
 deleteAllTestImages

@@ -49,6 +49,19 @@ function deleteAllTestImages() {
     fi
 }
 
+function storeIntoContainerVolumes() {
+    local workspace="$1"
+    local shared="$2"
+    storeIntoContainerVolume "gh-test-workspace" "$workspace"
+    storeIntoContainerVolume "gh-test-shared" "$shared"
+}
+
+function restoreFromContainerVolumeWorkspace() {
+    local workspace="$1"
+    local file="$2"
+    restoreFromContainerVolume "gh-test-workspace" "$workspace" "$file"
+}
+
 function storeIntoContainerVolume() {
     volume="$1"
     src="$2/." # Add a `/.` to copy the content.
@@ -67,7 +80,24 @@ function storeIntoContainerVolume() {
         }
     return 0
 }
+function restoreFromContainerVolume() {
+    volume="$1"
+    dest="$2"
+    file="$3"
 
+    echo "Restoring '$dest/$file' from volume '$volume'."
+
+    # shellcheck disable=SC2015
+    docker run -d --rm --name githookscopytovolume \
+        -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null &&
+        docker cp -a "githookscopytovolume:/mnt/volume/$file" "$dest/$file" &&
+        docker stop githookscopytovolume ||
+        {
+            docker stop githookscopytovolume &>/dev/null || true
+            return 1
+        }
+    return 0
+}
 function deleteContainerVolumes() {
     docker volume rm "gh-test-workspace" &>/dev/null || true
     docker volume rm "gh-test-shared" &>/dev/null || true
