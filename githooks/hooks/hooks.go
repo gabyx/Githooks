@@ -148,21 +148,26 @@ func GetAllHooksIn(
 	isIgnored IgnoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
-	parseRunnerConfig bool) (allHooks []Hook, maxBatches int, err error) {
+	parseRunnerConfig bool,
+	containerizedHooksEnabled bool) (allHooks []Hook, maxBatches int, err error) {
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
 
 		prefix += "/"
 
+		trimmedHookPath := strings.TrimPrefix(hookPath, prefix)
+
 		// Prefix should always be removed! (we only have '/' in paths!)
-		cm.DebugAssertF(strings.TrimPrefix(hookPath, prefix) != hookPath,
+		cm.DebugAssertF(trimmedHookPath != hookPath,
 			"Prefix could not be removed '%s', '%s'.", prefix, hookPath)
 
+		namespacedPath := ""
 		if strs.IsNotEmpty(hookNamespace) {
-			hookNamespace = NamespacePrefix + hookNamespace
+			namespacedPath = path.Join(NamespacePrefix+hookNamespace, trimmedHookPath)
+		} else {
+			namespacedPath = trimmedHookPath
 		}
 
-		namespacedPath := path.Join(hookNamespace, strings.TrimPrefix(hookPath, prefix))
 		ignored := isIgnored(namespacedPath)
 
 		trusted := false
@@ -172,13 +177,13 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			enableContainarized := gitx.GetConfig("asdf", git.Traverse) == "true"
 			runCmd, err = GetHookRunCmd(
 				gitx,
 				hookPath,
 				parseRunnerConfig,
 				rootDir,
-				enableContainarized,
+				containerizedHooksEnabled,
+				hookNamespace,
 				hookNamespaceEnvs)
 
 			if err != nil {

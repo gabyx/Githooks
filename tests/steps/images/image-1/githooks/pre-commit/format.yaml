@@ -2,4 +2,4 @@ cmd: doit
 args:
   - --banana
 image:
-  reference: "registry.com/dir/sharedhooks-test-image-built:1.0.0"
+  reference: "registry.com/dir/${namespace}-test-image-built:1.0.0"

@@ -25,6 +25,7 @@ type HookSettings struct {
 	SkipNonExistingSharedHooks bool // If Githooks should skip non-existing shared hooks.
 	SkipUntrustedHooks         bool // If Githooks should skip active untrusted hooks.
 	NonInteractive             bool // If all non-fatal prompts should be default answered.
+	ContainerizedHooksEnabled  bool // If all hooks should run containerized (if they are setup for it).
 	Disabled                   bool // If Githooks has been disabled.
 }
 
@@ -37,8 +38,10 @@ func (s HookSettings) toString() string {
 			" • Install Dir: '%s'\n"+
 			" • Hook Path: '%s'\n"+
 			" • Hook Name: '%s'\n"+
-			" • Trusted: '%v'",
+			" • Trusted: '%v'\n"+
+			" • ContainerizedEnabled: '%v'",
 		s.Args, s.RepositoryDir,
 		s.RepositoryHooksDir, s.GitDirWorktree,
-		s.InstallDir, s.HookPath, s.HookName, s.IsRepoTrusted)
+		s.InstallDir, s.HookPath, s.HookName, s.IsRepoTrusted,
+		s.ContainerizedHooksEnabled)
 }

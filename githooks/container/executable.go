@@ -12,7 +12,7 @@ type ContainerizedExecutable struct {
 	Cmd string // The command.
 
 	ArgsPre  []string // The pre arguments.
-	ArgsEnv  []string // Arguments which set environment values inside the containarized run.
+	ArgsEnv  []string // Arguments which set environment values inside the containerized run.
 	ArgsPost []string // The post arguments.
 }
 
@@ -60,7 +60,7 @@ func (e *ContainerizedExecutable) ResolveExitCode(exitCode int) string {
 		case 125: // nolint: gomnd
 			return "The docker daemon reported an error.\n" +
 				"Note: If you are inside a container ALREADY and want\n" +
-				"to run hooks containarized (docker-in-docker) you can ONLY do\n" +
+				"to run hooks containerized (docker-in-docker) you can ONLY do\n" +
 				"this by specifying host-machine paths (or a container volume) \n" +
 				"for two locations:\n\n" +
 				" - path (or container volume) and relative base path pointing to the \n" +

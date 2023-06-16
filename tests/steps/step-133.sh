@@ -33,7 +33,9 @@ mkdir -p "$GH_TEST_TMP/test133" &&
     cp -rf "$TEST_DIR/steps/images/image-1/.images.yaml" ./.githooks/.images.yaml &&
     cp -rf "$TEST_DIR/steps/images/image-1/docker" ./docker &&
     echo "localhooks" >".githooks/.namespace" &&
-    git init || exit 1
+    echo "localhooks" >".githooks/.namespace" &&
+    git init &&
+    git config --local githooks.containerizedHooksEnabled true || exit 1
 
 # Setup shared hooks
 mkdir -p .githooks &&
@@ -41,6 +43,30 @@ mkdir -p .githooks &&
     exit 1
 
 "$GH_TEST_BIN/cli" shared update
+
+if ! isImageExisting "sharedhooks-test-image:1.0.0" ||
+    ! isImageExisting "registry.com/sharedhooks-test-image:1.0.0" ||
+    ! isImageExisting "registry.com/dir/sharedhooks-test-image-built:1.0.0"; then
+    echo "Could not find all shared images."
+    docker images
+    exit 1
+fi
+
+if isImageExisting "localhooks-test-image:1.0.0" ||
+    isImageExisting "registry.com/localhooks-test-image:1.0.0" ||
+    isImageExisting "registry.com/dir/localhooks-test-image-built:1.0.0"; then
+    echo "Local images should not be build."
+    docker images
+    exit 1
+fi
+
+deleteAllTestImages
+
+if docker images | grep -q "test-image"; then
+    echo "Could not delete all images"
+    exit 1
+fi
+
 "$GH_TEST_BIN/cli" images update
 
 if ! isImageExisting "sharedhooks-test-image:1.0.0" ||

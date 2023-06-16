@@ -94,6 +94,7 @@ func mainRun() (exitCode int) {
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
 	executeOldHook(&settings, &uiSettings, &ignores, &checksums)
+	updateLocalHookImages(&settings)
 
 	hooks := collectHooks(&settings, &uiSettings, &ignores, &checksums)
 
@@ -164,6 +165,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptx, repoPath)
 	}
 
+	runContainerized := hooks.IsContainerizedHooksEnabled(gitx, true)
+
 	s := HookSettings{
 		Args:               os.Args[2:],
 		ExecX:              execx,
@@ -182,6 +185,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive,
+		ContainerizedHooksEnabled:  runContainerized,
 		Disabled:                   isGithooksDisabled}
 
 	logInvocation(&s)
@@ -458,7 +462,8 @@ func executeOldHook(
 		settings.GitX,
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace, nil,
-		isIgnored, isTrusted, true, false)
+		isIgnored, isTrusted, true, false,
+		settings.ContainerizedHooksEnabled)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
 	if len(hooks) == 0 {
@@ -535,6 +540,20 @@ func collectHooks(
 	return
 }
 
+func updateLocalHookImages(settings *HookSettings) {
+	if !settings.ContainerizedHooksEnabled || settings.HookName != "post-merge" {
+		return
+	}
+
+	e := hooks.UpdateImages(
+		log,
+		settings.RepositoryDir,
+		settings.RepositoryDir,
+		settings.RepositoryHooksDir)
+
+	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
+}
+
 func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, sharedType hooks.SharedHookType) {
 
 	disableUpdate, _ := hooks.IsSharedHooksUpdateDisabled(settings.GitX, git.Traverse)
@@ -554,7 +573,7 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	}
 
 	log.Debug("Updating all shared hooks.")
-	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType)
+	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType, settings.ContainerizedHooksEnabled)
 	log.AssertNoError(err, "Errors while updating shared hooks repositories.")
 
 	if updateOnCloneNeeded {
@@ -785,7 +804,8 @@ func getHooksIn(
 		settings.GitX,
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace, namespaceEnvs.Get(hookNamespace),
-		isIgnored, isTrusted, true, true)
+		isIgnored, isTrusted, true, true,
+		settings.ContainerizedHooksEnabled)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	if len(allHooks) == 0 {
@@ -1049,9 +1069,8 @@ func logHookResults(res ...hooks.HookResult) {
 			if len(r.Output) != 0 {
 				_, _ = log.GetErrorWriter().Write(r.Output)
 			}
-			log.ErrorF("Hook command '%s' failed!", r.Hook.GetString())
-
-			_, _ = strs.FmtW(&sb, "\n%s '%s' [exit code: '%v']", cm.ListItemLiteral, r.Hook.NamespacePath, r.ExitCode)
+			log.AssertNoErrorF(r.Error, "Hook command '%s' failed!", r.Hook.GetString())
+			_, _ = strs.FmtW(&sb, "\n%s '%s'", cm.ListItemLiteral, r.Hook.NamespacePath)
 		}
 	}
 

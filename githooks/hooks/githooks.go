@@ -294,6 +294,22 @@ func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
 		disabled == "Y" // Legacy
 }
 
+// IsContainerizedHooksEnabled returns if containerized hooks are enabled.
+func IsContainerizedHooksEnabled(gitx *git.Context, checkEnv bool) bool {
+	if checkEnv {
+		env := os.Getenv("GITHOOKS_CONTAINERIZED_HOOKS_ENABLE")
+		if env != "" &&
+			env != "0" &&
+			env != "false" && env != "off" {
+			return true
+		}
+	}
+
+	enabled := gitx.GetConfig(GitCKContainerizedHooksEnabled, git.Traverse)
+
+	return enabled == git.GitCVTrue
+}
+
 // IsRunnerNonInteractive tells if the runner should run in non-interactive mode
 // meaning all non-fatal prompts will be skipped with default answering
 // and fatal prompts still need to be configured to pass.

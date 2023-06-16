@@ -167,6 +167,8 @@ for STEP in "$GH_TESTS/steps"/step-*.sh; do
 
 done
 
+cleanDocker
+
 endT=$(date +%s)
 elapsed=$((endT - startT))
 

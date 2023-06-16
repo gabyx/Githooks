@@ -114,7 +114,7 @@ func GetCombinedOutputFromExecutable(
 
 	out, err := cmd.CombinedOutput()
 
-	exitCode := 0
+	exitCode := -1
 	if t, ok := err.(*exec.ExitError); ok {
 		exitCode = t.ExitCode()
 	}

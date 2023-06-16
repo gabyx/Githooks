@@ -14,7 +14,7 @@ func (m *ManagerNotAvailableError) Error() string {
 }
 
 // EnvVariableContainerRun is the environment variable which is
-// set to true in containarized runs.
+// set to true in containerized runs.
 const EnvVariableContainerRun = "GITHOOKS_CONTAINER_RUN"
 
 type ContainerManagerType int

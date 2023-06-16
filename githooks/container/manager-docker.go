@@ -129,7 +129,7 @@ func (m *ManagerDocker) NewHookRunExec(
 
 		if filepath.IsAbs(cmd) {
 			return nil, cm.ErrorF("Command '%s' specified in '%s' must only contain relative paths "+
-				"for running containarized.", cmd, workspaceHookDir)
+				"for running containerized.", cmd, workspaceHookDir)
 		}
 		cmd = path.Join(cmdBasePath, cmd)
 	}

@@ -192,7 +192,8 @@ func runSharedUpdate(ctx *ccm.CmdContext) {
 			"Updating shared and local shared hooks skipped.")
 	}
 
-	updated, err := hooks.UpdateAllSharedHooks(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir)
+	containerizedHooksEnabled := hooks.IsContainerizedHooksEnabled(ctx.GitX, true)
+	updated, err := hooks.UpdateAllSharedHooks(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, containerizedHooksEnabled)
 	ctx.Log.ErrorIf(err != nil, "There have been errors while updating shared hooks")
 
 	ctx.Log.InfoF("Update '%v' shared repositories.", updated)

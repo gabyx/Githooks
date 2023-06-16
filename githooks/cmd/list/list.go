@@ -366,13 +366,16 @@ func GetAllHooksIn(
 		return ignored
 	}
 
+	containerizedHooksEnabled := hooks.IsContainerizedHooksEnabled(gitx, true)
+
 	allHooks, _, err := hooks.GetAllHooksIn(
 		gitx,
 		rootDir, hooksDir,
 		hookName, hookNamespace,
 		nil,
 		isIgnored, isTrusted, false,
-		!isReplacedHook)
+		!isReplacedHook,
+		containerizedHooksEnabled)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	return allHooks

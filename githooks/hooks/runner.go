@@ -69,6 +69,7 @@ func GetHookRunCmd(
 	parseRunnerConfig bool,
 	rootDir string,
 	containerizedEnabled bool,
+	hookNamespace string,
 	envs []string) (cm.IExecutable, error) {
 
 	exec := cm.Executable{Cmd: hookPath}
@@ -118,7 +119,7 @@ func GetHookRunCmd(
 	exec.Env = append(exec.Env, envs...)
 
 	if containerizedEnabled && strs.IsNotEmpty(config.Image.Reference) {
-		// Containarized execution.
+		// Containerized execution.
 
 		manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
 		mgr, err := container.NewManager(manager)
@@ -126,7 +127,13 @@ func GetHookRunCmd(
 			return nil, cm.CombineErrors(err, cm.Error("Could not create container manager."))
 		}
 
-		containerExec, err := mgr.NewHookRunExec(config.Image.Reference, gitx.GetCwd(), rootDir, &exec)
+		reference, err := addImageReferenceSuffix(config.Image.Reference, hookPath, hookNamespace)
+		if err != nil {
+			return nil, err
+		}
+
+		containerExec, err := mgr.NewHookRunExec(reference, gitx.GetCwd(), rootDir, &exec)
+
 		if err != nil {
 			return nil, cm.CombineErrors(err, cm.Error("Could not create container hook executor."))
 		}

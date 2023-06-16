@@ -35,10 +35,11 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-134-a.git" &&
 # Setup local repository
 mkdir -p "$GH_TEST_TMP/test134" &&
     cd "$GH_TEST_TMP/test134" &&
+    git init &&
     mkdir -p .githooks &&
     echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml &&
-    git init &&
-    git add . &&
+    git config --local githooks.containerizedHooksEnabled true &&
+    GITHOOKS_DISABLE=1 git add . &&
     GITHOOKS_DISABLE=1 git commit -m 'Initial commit' ||
     exit 1
 
@@ -46,17 +47,18 @@ mkdir -p "$GH_TEST_TMP/test134" &&
 # The above already does the below
 # "$GH_TEST_BIN/cli" images update
 
+# Make changes to be formatted.
 touch "file.txt" &&
-    git add "file.txt"
+    GITHOOKS_DISABLE=1 git add .
 
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume.
 sharedRoot=$("$GH_TEST_BIN/cli" shared root ns:sharedhooks)
+
 storeIntoContainerVolumes "." "$sharedRoot"
-
-OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 2>&1)
+OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 2>&1) ||
+    { echo "$OUT" || exit 1; }
 echo "$OUT"
-
 restoreFromContainerVolumeWorkspace "." "file.txt"
 
 if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then

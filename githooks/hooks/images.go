@@ -151,7 +151,8 @@ func UpdateImages(
 				continue
 			}
 
-			log.InfoF("  %s Pulled image '%s' for '%s'.", cm.ListItemLiteral, pullSrc, fromHint)
+			log.InfoF(
+				"  %s Pulled image '%s'.", cm.ListItemLiteral, pullSrc, fromHint)
 			nPulls += 1
 
 			if imageRef != pullSrc {
@@ -165,7 +166,9 @@ func UpdateImages(
 					continue
 				}
 
-				log.InfoF("  %s Tagged image '%s' to '%s' for '%s'.", cm.ListItemLiteral, pullSrc, imageRef, fromHint)
+				log.InfoF(
+					"  %s Tagged image '%s' to\n"+
+						"     -> '%s'.", cm.ListItemLiteral, pullSrc, imageRef, fromHint)
 			}
 		} else if img.Pull == nil {
 			// Do a build of the image because no `pull` but `build` specified.
@@ -213,7 +216,7 @@ func UpdateImages(
 				continue
 			}
 
-			log.InfoF("  %v Built image '%s' for '%s'.", cm.ListItemLiteral, imageRef, fromHint)
+			log.InfoF("  %v Built image '%s'.", cm.ListItemLiteral, imageRef)
 			nBuilds += 1
 		}
 	}
@@ -232,11 +235,11 @@ func addImageReferenceSuffix(imageRef string, file string, namespace string) (st
 	_, e := ref.Parse(imageRef)
 
 	if e != nil {
-		return imageRef, cm.CombineErrors(
+		return imageRef,
 			cm.ErrorF("Could not parse image reference."+
 				"Image reference '%s' in '%s' must be a "+
 				"named reference according to "+
-				"'https://github.com/distribution/distribution/blob/main/reference/reference.go'", imageRef, file), e)
+				"'https://github.com/distribution/distribution/blob/main/reference/reference.go'", imageRef, file)
 	}
 
 	return imageRef, nil
