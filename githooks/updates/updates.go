@@ -625,14 +625,15 @@ func RunUpdateOverExecutable(
 	}
 
 	if pipeSetup == nil {
-		output, err := cm.GetCombinedOutputFromExecutable(
+		output, exitCode, err := cm.GetCombinedOutputFromExecutable(
 			&execX,
 			&installer,
 			nil,
 			args...)
 
 		if err != nil {
-			return cm.CombineErrors(err, cm.ErrorF("Update output:\n%s", output))
+			return cm.CombineErrors(err,
+				cm.ErrorF("Update output:\n%s\nExit Code: '%v'", output, exitCode))
 		}
 
 	} else {

@@ -70,10 +70,6 @@ func resolveWSBasePath(envValue string, dirname string) string {
 	return strings.ReplaceAll(envValue, "${repository-dir-name}", dirname)
 }
 
-func resolveWSSharedBasePath(envValue string, dirname string) string {
-	return strings.ReplaceAll(envValue, "${shared-dir-name}", dirname)
-}
-
 // NewHookRunExec runs a hook over a container.
 func (m *ManagerDocker) NewHookRunExec(
 	ref string,
@@ -89,11 +85,12 @@ func (m *ManagerDocker) NewHookRunExec(
 	// The repository where the hook runs.
 	mntWSSrc := workspaceDir
 	mntWSDest := "/mnt/workspace"
-	if volume := os.Getenv("GITHOOKS_CONTAINER_VOLUME_WORKSPACE"); strs.IsNotEmpty(volume) {
-		mntWSSrc = volume
+	if hostPath := os.Getenv(EnvVariableContainerWorkspaceHostPath); strs.IsNotEmpty(hostPath) {
+		containerExec.usedVolumes = true
+		mntWSSrc = hostPath
 	}
 	mntWSDest = path.Join(mntWSDest, resolveWSBasePath(
-		os.Getenv("GITHOOKS_CONTAINER_VOLUME_WORKSPACE_BASE_PATH"),
+		os.Getenv(EnvVariableContainerWorkspaceBasePath),
 		path.Base(workspaceDir))) // default to ""
 
 	// Mount: Shared hook repository:
@@ -108,17 +105,21 @@ func (m *ManagerDocker) NewHookRunExec(
 		cmdBasePath = mntWSDest // For resolving paths below.
 	} else {
 		// Mount shared too.
-		if volume := os.Getenv("GITHOOKS_CONTAINER_VOLUME_SHARED"); strs.IsNotEmpty(volume) {
-			mntWSSharedSrc = volume
+		if hostPath := os.Getenv(EnvVariableContainerSharedHostPath); strs.IsNotEmpty(hostPath) {
+			mntWSSharedSrc = hostPath
+		} else if containerExec.usedVolumes {
+			return nil, cm.ErrorF(
+				"Host path for workspace '%s' set but missing a host path "+
+					"for shared hooks to run containerized. "+
+					"See the Githooks manual to configure it.", mntWSSrc)
 		}
+
 		mountWSShared = true
-		mntWSSharedDest = path.Join(mntWSSharedDest, resolveWSSharedBasePath(
-			os.Getenv("GITHOOKS_CONTAINER_VOLUME_SHARED_BASE_PATH"),
-			path.Base(workspaceHookDir))) // defaults to ""
+		mntWSSharedDest = path.Join(mntWSSharedDest, path.Base(workspaceHookDir))
 	}
 
 	// Resolve commands with path separators which are
-	// relative paths relative to `cmdBasePath`.
+	// relative paths relative to `workspaceHookDir`.
 	// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
 	cmd := hookExec.GetCommand()
 	if strings.ContainsAny(hookExec.GetCommand(), "/\\") {
@@ -126,9 +127,11 @@ func (m *ManagerDocker) NewHookRunExec(
 			cmd = filepath.ToSlash(cmd)
 		}
 
-		if !filepath.IsAbs(cmd) {
-			cmd = path.Join(cmdBasePath, cmd)
+		if filepath.IsAbs(cmd) {
+			return nil, cm.ErrorF("Command '%s' specified in '%s' must only contain relative paths "+
+				"for running containarized.", cmd, workspaceHookDir)
 		}
+		cmd = path.Join(cmdBasePath, cmd)
 	}
 
 	cm.DebugAssertF(!strings.Contains(workspaceDir, "\\"),

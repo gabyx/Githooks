@@ -55,6 +55,7 @@ function cleanDirs() {
 function cleanDocker() {
     if command -v "docker" &>/dev/null; then
         deleteAllTestImages
+        deleteContainerVolumes
     fi
 }
 

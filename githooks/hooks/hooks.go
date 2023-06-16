@@ -63,9 +63,10 @@ type Hooks struct {
 
 // HookResult is the data assembly of the output of an executed hook.
 type HookResult struct {
-	Hook   *Hook
-	Output []byte
-	Error  error
+	Hook     *Hook
+	Output   []byte
+	Error    error
+	ExitCode int
 }
 
 // TaggedHooksIndex is the index type for hook tags.
@@ -171,12 +172,13 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
+			enableContainarized := gitx.GetConfig("asdf", git.Traverse) == "true"
 			runCmd, err = GetHookRunCmd(
 				gitx,
 				hookPath,
 				parseRunnerConfig,
 				rootDir,
-				true,
+				enableContainarized,
 				hookNamespaceEnvs)
 
 			if err != nil {
@@ -315,17 +317,13 @@ func ExecuteHooksParallel(
 	}
 
 	call := func(hookRes *HookResult, hook *Hook) {
-		var err error
-
-		hookRes.Output, err =
+		hookRes.Hook = hook
+		hookRes.Output, hookRes.ExitCode, hookRes.Error =
 			cm.GetCombinedOutputFromExecutable(
 				exec,
 				hook,
 				cm.UseOnlyStdin(os.Stdin),
 				args...)
-
-		hookRes.Error = err
-		hookRes.Hook = hook
 	}
 
 	currIdx := 0

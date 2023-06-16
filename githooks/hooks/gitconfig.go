@@ -51,7 +51,8 @@ const (
 
 	GitCKRunnerIsNonInteractive = "githooks.runnerIsNonInteractive"
 
-	GitCKContainerManager = "githooks.containerManager"
+	GitCKContainerManager    = "githooks.containerManager"
+	GitCKContainerRunEnabled = "githooks.containerRunEnabled"
 )
 
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
@@ -96,7 +97,9 @@ func GetGlobalGitConfigKeys() []string {
 
 		GitCKRunnerIsNonInteractive,
 
-		GitCKContainerManager}
+		GitCKContainerManager,
+		GitCKContainerRunEnabled,
+	}
 }
 
 // GetLocalGitConfigKeys gets all local git config keys relevant for Githooks.
@@ -116,7 +119,9 @@ func GetLocalGitConfigKeys() []string {
 
 		GitCKRunnerIsNonInteractive,
 
-		GitCKContainerManager}
+		GitCKContainerManager,
+		GitCKContainerRunEnabled,
+	}
 }
 
 // var filterRegex = regexp.MustCompile(`^(githooks\.|alias.hooks|core.hook|init.template)`)

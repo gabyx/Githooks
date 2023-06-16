@@ -43,6 +43,7 @@ mkdir -p "$GH_TEST_TMP/test134" &&
     exit 1
 
 "$GH_TEST_BIN/cli" shared update
+# The above already does the below
 # "$GH_TEST_BIN/cli" images update
 
 touch "file.txt" &&
@@ -53,19 +54,21 @@ touch "file.txt" &&
 sharedRoot=$("$GH_TEST_BIN/cli" shared root ns:sharedhooks)
 storeIntoContainerVolumes "." "$sharedRoot"
 
-OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format")
+OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 2>&1)
+echo "$OUT"
 
 restoreFromContainerVolumeWorkspace "." "file.txt"
 
-echo "$OUT"
 if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then
-    echo -e "! Expected file to have formatted"
+    echo -e "! Expected file to have formatted: Content:"
     exit 1
 fi
 
-if ! grep -qi "formatted by containerized hook" "file.txt"; then
-    echo -e "! Expected file should have been changed"
+if [ "$(grep -ic "formatted by containerized hook" "file.txt")" != "1" ]; then
+    echo -e "! Expected file should have been changed correctly: Content:"
+    cat "file.txt"
     exit 1
 fi
 
+deleteContainerVolumes
 deleteAllTestImages

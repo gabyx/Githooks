@@ -12,6 +12,7 @@ type IExecutable interface {
 	GetString() string
 	GetEnvironment() []string
 
+	ResolveExitCode(exitCode int) string
 	ApplyEnvironmentToArgs(env []string)
 }
 
@@ -48,4 +49,10 @@ func (e *Executable) GetEnvironment() []string {
 // GetEnvironment gets all environment variables.
 func (e *Executable) ApplyEnvironmentToArgs(env []string) {
 	// Dont to anything, since normal command dont need this.
+}
+
+// GetExitCodeHelp gets help for any non-zero exit code if needed.
+func (e *Executable) ResolveExitCode(exitCode int) string {
+	// Not needed for normal commands.
+	return ""
 }

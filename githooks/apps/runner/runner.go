@@ -1036,18 +1036,27 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 }
 
 func logHookResults(res ...hooks.HookResult) {
+	hadErrors := false
+	var sb strings.Builder
+
 	for _, r := range res {
 		if r.Error == nil {
 			if len(r.Output) != 0 {
 				_, _ = log.GetInfoWriter().Write(r.Output)
 			}
 		} else {
+			hadErrors = true
 			if len(r.Output) != 0 {
 				_, _ = log.GetErrorWriter().Write(r.Output)
 			}
-			log.AssertNoErrorPanicF(r.Error, "Hook '%s' failed!",
-				r.Hook.GetString())
+			log.ErrorF("Hook command '%s' failed!", r.Hook.GetString())
+
+			_, _ = strs.FmtW(&sb, "\n%s '%s' [exit code: '%v']", cm.ListItemLiteral, r.Hook.NamespacePath, r.ExitCode)
 		}
+	}
+
+	if hadErrors {
+		log.PanicF("Some hooks failed, check output for details:\n%s", sb.String())
 	}
 }
 

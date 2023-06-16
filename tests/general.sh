@@ -102,17 +102,14 @@ function restoreFromContainerVolume() {
 }
 
 function setGithooksContainerVolumeEnvs() {
-    export GITHOOKS_CONTAINER_VOLUME_WORKSPACE="gh-test-workspace"
-    # shellcheck disable=SC2016
-    export GITHOOKS_CONTAINER_VOLUME_WORKSPACE_BASE_PATH='./${repository-dir-name}'
-
-    export GITHOOKS_CONTAINER_VOLUME_SHARED="gh-test-shared"
-    # shellcheck disable=SC2016
-    export GITHOOKS_CONTAINER_VOLUME_SHARED_BASE_PATH='./${shared-dir-name}'
+    # Use a volume for the host path.
+    export GITHOOKS_CONTAINER_WORKSPACE_HOST_PATH="gh-test-workspace"
+    export GITHOOKS_CONTAINER_WORKSPACE_BASE_PATH="./\${repository-dir-name}"
+    export GITHOOKS_CONTAINER_SHARED_HOST_PATH="gh-test-shared"
 }
 
 function deleteContainerVolumes() {
-    # docker volume rm "gh-test-workspace" &>/dev/null || true
-    # docker volume rm "gh-test-shared" &>/dev/null || true
+    docker volume rm "gh-test-workspace" &>/dev/null || true
+    docker volume rm "gh-test-shared" &>/dev/null || true
     return 0
 }

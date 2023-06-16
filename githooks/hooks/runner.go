@@ -117,7 +117,22 @@ func GetHookRunCmd(
 	exec.Env = append(exec.Env, config.Env...)
 	exec.Env = append(exec.Env, envs...)
 
-	if !containerizedEnabled || strs.IsEmpty(config.Image.Reference) {
+	if containerizedEnabled && strs.IsNotEmpty(config.Image.Reference) {
+		// Containarized execution.
+
+		manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
+		mgr, err := container.NewManager(manager)
+		if err != nil {
+			return nil, cm.CombineErrors(err, cm.Error("Could not create container manager."))
+		}
+
+		containerExec, err := mgr.NewHookRunExec(config.Image.Reference, gitx.GetCwd(), rootDir, &exec)
+		if err != nil {
+			return nil, cm.CombineErrors(err, cm.Error("Could not create container hook executor."))
+		}
+
+		return containerExec, nil
+	} else {
 		// Normal execution.
 
 		// Resolve commands with path separators which are
@@ -134,22 +149,6 @@ func GetHookRunCmd(
 		}
 
 		return &exec, nil
-
-	} else {
-		// Image execution.
-
-		manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
-		mgr, err := container.NewManager(manager)
-		if err != nil {
-			return nil, cm.CombineErrors(err, cm.Error("Could not create container manager."))
-		}
-
-		containerExec, err := mgr.NewHookRunExec(config.Image.Reference, gitx.GetCwd(), rootDir, &exec)
-		if err != nil {
-			return nil, cm.CombineErrors(err, cm.Error("Could not create container hook executor."))
-		}
-
-		return containerExec, nil
 	}
 }
 
