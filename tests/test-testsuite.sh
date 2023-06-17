@@ -3,11 +3,12 @@
 set -e
 set -u
 
-function cleanup() {
+function cleanUp() {
+    # shellcheck disable=SC2317
     docker rmi "githooks:testsuite" &>/dev/null || true
 }
 
-trap cleanup EXIT
+trap cleanUp EXIT
 
 cat <<EOF | docker build --force-rm -t githooks:testsuite -
 FROM golang:1.20-alpine

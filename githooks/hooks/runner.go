@@ -66,8 +66,9 @@ func loadRunnerConfig(hookPath string) (data runnerConfigFile, err error) {
 func GetHookRunCmd(
 	gitx *git.Context,
 	hookPath string,
-	parseRunnerConfig bool,
 	rootDir string,
+	hooksDir string,
+	parseRunnerConfig bool,
 	containerizedEnabled bool,
 	hookNamespace string,
 	envs []string) (cm.IExecutable, error) {

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+set -e
+set -u
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 IMAGE_TYPE="$1"

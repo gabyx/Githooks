@@ -43,7 +43,7 @@ type IManager interface {
 	NewHookRunExec(
 		ref string,
 		workspaceDir string,
-		hookRepoDir string,
+		workspaceHookDir string,
 		exe cm.IExecutable,
 	) (cm.IExecutable, error)
 }

@@ -180,8 +180,9 @@ func GetAllHooksIn(
 			runCmd, err = GetHookRunCmd(
 				gitx,
 				hookPath,
-				parseRunnerConfig,
 				rootDir,
+				hooksDir,
+				parseRunnerConfig,
 				containerizedHooksEnabled,
 				hookNamespace,
 				hookNamespaceEnvs)

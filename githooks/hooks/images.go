@@ -80,6 +80,103 @@ func GetRepoImagesFile(hookDir string) string {
 	return path.Join(hookDir, ".images.yaml")
 }
 
+func pullImage(
+	log cm.ILogContext,
+	mgr container.IManager,
+	pullSrc string,
+	imageRef string,
+	file string,
+) (err error) {
+	// Do a pull of the image, because `build` is not specified.
+	err = mgr.ImagePull(pullSrc)
+
+	if err != nil {
+		err = cm.CombineErrors(
+			cm.ErrorF("Pulling image '%s' in '%s' did not succeed.\n"+
+				"Hooks may not run correctly.", imageRef, file), err)
+
+		return
+	}
+
+	log.InfoF(
+		"  %s Pulled image '%s'.", cm.ListItemLiteral, pullSrc)
+
+	if imageRef != pullSrc {
+		err = mgr.ImageTag(pullSrc, imageRef)
+
+		if err != nil {
+			err = cm.CombineErrors(
+				cm.ErrorF("Retagging image '%s' to '%s' in '%s' did not succeed.\n"+
+					"Hooks may not run correctly.", pullSrc, imageRef, file), err)
+
+			return
+		}
+
+		log.InfoF(
+			"  %s Tagged image '%s' to\n"+
+				"     -> '%s'.", cm.ListItemLiteral, pullSrc, imageRef)
+	}
+
+	return
+}
+
+func buildImage(
+	log cm.ILogContext,
+	mgr container.IManager,
+	context string,
+	dockerfile string,
+	stage string,
+	imageRef string,
+	file string,
+	repositoryDir string) (err error) {
+	// Do a build of the image because no `pull` but `build` specified.
+
+	if path.IsAbs(context) {
+		return cm.Error(
+			"Build context path '%s' given in '%s' must be a relative path.",
+			context, file)
+	}
+
+	if path.IsAbs(dockerfile) {
+		return cm.ErrorF(
+			"Dockerfile path '%s' given in '%s' must be a relative path.",
+			dockerfile, file)
+	}
+
+	out, err := mgr.ImageBuild(
+		log,
+		path.Join(repositoryDir, dockerfile),
+		path.Join(repositoryDir, context),
+		stage,
+		imageRef)
+
+	if err != nil {
+		// Save build error to temporary file.
+		file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
+		defer file.Close()
+		_, e := io.WriteString(file,
+			err.Error()+
+				"\nOutput:\n=====================================================\n"+
+				out)
+		log.AssertNoError(e, "Could not save image build errors.")
+
+		const maxChars int = 500
+		length := cm.Min(len(out), maxChars)
+
+		return cm.CombineErrors(err,
+			cm.ErrorF("Building image '%s' did not succeed.\n"+
+				"Inspect build errors in file '%s' with\n"+
+				"`cat '%s'\n"+
+				"Partial output:\n...stripped...\n%s",
+				imageRef, file.Name(), file.Name(), out[len(out)-length:]))
+
+	}
+
+	log.InfoF("  %v Built image '%s'.", cm.ListItemLiteral, imageRef)
+
+	return nil
+}
+
 // UpdateImages updates the images from the `images` config from the
 // `hooksDir` inside `repositoryDir` (can be shared) by pulling or building them.
 func UpdateImages(
@@ -139,85 +236,40 @@ func UpdateImages(
 		}
 
 		if img.Build == nil {
-			// Do a pull of the image, because `build` is not specified.
-
-			e := mgr.ImagePull(pullSrc)
-
-			if e != nil {
-				err = cm.CombineErrors(err,
-					cm.ErrorF("Pulling image '%s' in '%s' did not succeed.\n"+
-						"Hooks may not run correctly.", imageRef, file), e)
-
-				continue
-			}
-
-			log.InfoF(
-				"  %s Pulled image '%s'.", cm.ListItemLiteral, pullSrc, fromHint)
-			nPulls += 1
-
-			if imageRef != pullSrc {
-				e = mgr.ImageTag(pullSrc, imageRef)
-
-				if e != nil {
-					err = cm.CombineErrors(err,
-						cm.ErrorF("Retagging image '%s' to '%s' in '%s' did not succeed.\n"+
-							"Hooks may not run correctly.", pullSrc, imageRef, file), e)
-
-					continue
-				}
-
-				log.InfoF(
-					"  %s Tagged image '%s' to\n"+
-						"     -> '%s'.", cm.ListItemLiteral, pullSrc, imageRef, fromHint)
-			}
-		} else if img.Pull == nil {
-			// Do a build of the image because no `pull` but `build` specified.
-
-			if path.IsAbs(img.Build.Context) {
-				err = cm.CombineErrors(err, cm.Error(
-					"Build context path '%s' given in '%s' must be a relative path.",
-					img.Build.Context, file))
-
-				continue
-			}
-
-			if path.IsAbs(img.Build.Dockerfile) {
-				err = cm.CombineErrors(err, cm.ErrorF(
-					"Dockerfile path '%s' given in '%s' must be a relative path.",
-					img.Build.Dockerfile, file))
-
-				continue
-			}
-
-			out, e := mgr.ImageBuild(
+			e := pullImage(
 				log,
-				path.Join(repositoryDir, img.Build.Dockerfile),
-				path.Join(repositoryDir, img.Build.Context),
-				img.Build.Stage, imageRef)
+				mgr,
+				pullSrc,
+				imageRef,
+				file)
 
 			if e != nil {
-				// Save build error to temporary file.
-				file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
-				defer file.Close()
-				_, e2 := io.WriteString(file,
-					e.Error()+
-						"\nOutput:\n=====================================================\n"+
-						out)
-				log.AssertNoError(e2, "Could not save image build errors.")
-
-				const maxChars int = 500
-				err = cm.CombineErrors(err,
-					cm.ErrorF("Building image '%s' did not succeed.\n"+
-						"Inspect build errors in file '%s' with\n"+
-						"`cat '%s'\n"+
-						"Partial output:\n%s",
-						imageRef, file.Name(), file.Name(), out[0:cm.Min(len(out), maxChars)]))
+				err = cm.CombineErrors(err, e)
 
 				continue
+			} else {
+				nPulls += 1
 			}
 
-			log.InfoF("  %v Built image '%s'.", cm.ListItemLiteral, imageRef)
-			nBuilds += 1
+		} else if img.Pull == nil {
+			e := buildImage(
+				log,
+				mgr,
+				img.Build.Context,
+				img.Build.Dockerfile,
+				img.Build.Stage,
+				imageRef,
+				file,
+				repositoryDir)
+
+			if e != nil {
+				err = cm.CombineErrors(err, e)
+
+				continue
+			} else {
+				nBuilds += 1
+			}
+
 		}
 	}
 

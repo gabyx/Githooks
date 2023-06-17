@@ -1,10 +1,12 @@
 
 FROM alpine:3.18 as stage1
+RUN apk add tree
 
 FROM stage1 as stage2
 RUN apk add git bash 
-COPY format.sh /format.sh
-RUN chmod +x /format.sh
-RUN git version
-ENTRYPOINT ["/format.sh"]
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 

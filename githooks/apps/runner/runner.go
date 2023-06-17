@@ -1069,7 +1069,7 @@ func logHookResults(res ...hooks.HookResult) {
 			if len(r.Output) != 0 {
 				_, _ = log.GetErrorWriter().Write(r.Output)
 			}
-			log.AssertNoErrorF(r.Error, "Hook command '%s' failed!", r.Hook.GetString())
+			log.AssertNoErrorF(r.Error, "Hook '%s' failed!", r.Hook.Path)
 			_, _ = strs.FmtW(&sb, "\n%s '%s'", cm.ListItemLiteral, r.Hook.NamespacePath)
 		}
 	}

@@ -1,5 +1,5 @@
-cmd: githooks/pre-commit/.format.sh
+cmd: githooks/commit-msg/.message.sh
 args:
-  - --banana
+  - --message
 image:
   reference: "registry.com/dir/${namespace}-test-image-built:1.0.0"

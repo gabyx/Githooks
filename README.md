@@ -497,11 +497,11 @@ The `.ignore.yaml` (see [specs](#yaml-specifications)) files allow excluding
 files
 
 - from being treated as hook scripts or
-- hooks from beeing run.
+- hooks from being run.
 
 You can ignore executing all sorts of hooks per Git repository by specifying
 **patterns** or explicit **paths** which match against a hook's (file's)
-_namespace path_.
+_namespace path_. **Note:** Dot-files, e.g. `.myfile` are always ignored.
 
 Each hook either in the current repository `<repoPath>/.githooks/...` or inside
 a shared hooks repository has a so called _namespace path_.
@@ -898,7 +898,7 @@ If you want, you can try out what the script would do first, without changing
 anything by using:
 
 ```shell
-$ cli installer --dry-run
+cli installer --dry-run
 ```
 
 ### Install Mode: Centralized Hooks
@@ -909,7 +909,7 @@ and the default one [below](#templates-or-central-hooks). For this, run the
 command below.
 
 ```shell
-$ cli installer --use-core-hookspath
+cli installer --use-core-hookspath
 ```
 
 Optionally, you can also pass the template directory to which you want to
@@ -917,7 +917,7 @@ install the centralized hooks by appending `--template-dir <path>` to the
 command above, for example:
 
 ```shell
-$ cli installer --use-core-hookspath --template-dir /home/public/.githooks
+cli installer --use-core-hookspath --template-dir /home/public/.githooks
 ```
 
 ### Install from different URL and Branch
@@ -927,7 +927,7 @@ companies fork), you can specify the repository clone url as well as the branch
 name (default: `main`) when installing with:
 
 ```shell
-$ cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
+cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
 ```
 
 The installer always maintains a Githooks clone inside `<installDir>/release`
@@ -960,7 +960,7 @@ cd githooks
 scripts/build.sh
 ```
 
-Then, to globally enbale them for every repo:
+Then, to globally enable them for every repo:
 
 ```shell
 git config --global core.hooksPath "$(pwd)/hooks"
@@ -985,7 +985,7 @@ The global install prefix defaults to `${HOME}` but can be changed by using the
 options `--prefix <installPrefix>`:
 
 ```shell
-$ cli installer --non-interactive [--prefix <installPrefix>]
+cli installer --non-interactive [--prefix <installPrefix>]
 ```
 
 It's possible to specify which template directory should be used, by passing the
@@ -993,7 +993,7 @@ It's possible to specify which template directory should be used, by passing the
 the templates to be installed.
 
 ```shell
-$ cli installer --template-dir "/home/public/.githooks-templates"
+cli installer --template-dir "/home/public/.githooks-templates"
 ```
 
 By default the script will install the hooks into the `~/.githooks/templates/`
@@ -1005,7 +1005,7 @@ On a server infrastructure where only _bare_ repositories are maintained, it is
 best to maintain only server hooks. This can be achieved by installing with:
 
 ```shell
-$ cli installer ---maintained-hooks "server"
+cli installer ---maintained-hooks "server"
 ```
 
 The global template directory then **only** contains the following run-wrappers
@@ -1163,7 +1163,7 @@ If you want to get rid of this hook manager, you can execute the uninstaller
 `<installDir>/bin/uninstaller` by
 
 ```shell
-$ git hooks uninstaller
+git hooks uninstaller
 ```
 
 This will delete the run-wrappers installed in the template directory,
@@ -1220,7 +1220,7 @@ such as:
 inside of hooks and scripts.
 **[See the screenshots.](docs/dialog-screenshots/Readme.md)**
 
-_Why another tool?:_ At the moment of writting there exists no proper
+_Why another tool?:_ At the moment of writing there exists no proper
 platform-independent GUI dialog tool which is **bomb-proof in it's output and
 exit code behavior**. This tool should really enable proper and safe usage
 inside hooks and other scripts. You can even report the output in `json` format
@@ -1284,7 +1284,7 @@ which will start the `delve` debugger headless as a server in a terminal. You
 can then attach to the debug server with the debug configuration
 `Debug Go [remote delve]`. Set breakpoints in the source code to trigger them.
 
-### Todos:
+### Todos
 
 - Finish deploy settings implementation for Gitea and others.
 

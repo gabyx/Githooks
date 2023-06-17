@@ -85,24 +85,28 @@ func (m *ManagerDocker) NewHookRunExec(
 	// The repository where the hook runs.
 	mntWSSrc := workspaceDir
 	mntWSDest := "/mnt/workspace"
+	mntWSSharedSrc := workspaceHookDir
+	mntWSSharedDest := "/mnt/shared"
+
 	if hostPath := os.Getenv(EnvVariableContainerWorkspaceHostPath); strs.IsNotEmpty(hostPath) {
 		containerExec.usedVolumes = true
 		mntWSSrc = hostPath
 	}
-	mntWSDest = path.Join(mntWSDest, resolveWSBasePath(
-		os.Getenv(EnvVariableContainerWorkspaceBasePath),
-		path.Base(workspaceDir))) // default to ""
+
+	workingDir := path.Join(mntWSDest,
+		resolveWSBasePath(
+			os.Getenv(EnvVariableContainerWorkspaceBasePath),
+			path.Base(workspaceDir),
+		)) // defaults to `mntWSDest`
 
 	// Mount: Shared hook repository:
 	// This mount contains a shared repository root directory.
-	mntWSSharedSrc := workspaceHookDir
-	mntWSSharedDest := "/mnt/shared"
-	cmdBasePath := mntWSSharedDest
+	var cmdBasePath string
 	mountWSShared := workspaceDir != workspaceHookDir
 
 	if !mountWSShared {
 		// Hooks are configured in current repository: Dont mount the shared location.
-		cmdBasePath = mntWSDest // For resolving paths below.
+		cmdBasePath = mntWSDest
 	} else {
 		// Mount shared too.
 		if hostPath := os.Getenv(EnvVariableContainerSharedHostPath); strs.IsNotEmpty(hostPath) {
@@ -114,12 +118,11 @@ func (m *ManagerDocker) NewHookRunExec(
 					"See the Githooks manual to configure it.", mntWSSrc)
 		}
 
-		mountWSShared = true
-		mntWSSharedDest = path.Join(mntWSSharedDest, path.Base(workspaceHookDir))
+		cmdBasePath = path.Join(mntWSSharedDest, path.Base(workspaceHookDir))
 	}
 
 	// Resolve commands with path separators which are
-	// relative paths relative to `workspaceHookDir`.
+	// relative paths relative to `cmdBasePath`.
 	// e.g `dist/custom.exe` -> `rootDir/dist/custom.exe`
 	cmd := hookExec.GetCommand()
 	if strings.ContainsAny(hookExec.GetCommand(), "/\\") {
@@ -144,7 +147,7 @@ func (m *ManagerDocker) NewHookRunExec(
 		"--rm",
 		"-v",
 		strs.Fmt("%v:%v", mntWSSrc, mntWSDest), // Set the mount for the working directory.
-		"-w", mntWSDest,                        // Set working dir.
+		"-w", workingDir,                       // Set working dir.
 	}
 
 	if mountWSShared {

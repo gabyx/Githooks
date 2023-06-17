@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test:
-#   Update shared hooks with images.yaml
+#   Run shared hooks with images.yaml
 set -e
 set -u
 
@@ -27,6 +27,7 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-134-a.git" &&
     cp -rf "$TEST_DIR/steps/images/image-1/.images.yaml" ./githooks/.images.yaml &&
     cp -rf "$TEST_DIR/steps/images/image-1/docker" ./docker &&
     cp -rf "$TEST_DIR/steps/images/image-1/githooks/pre-commit" githooks/pre-commit &&
+    cp -rf "$TEST_DIR/steps/images/image-1/githooks/commit-msg" githooks/commit-msg &&
     echo "sharedhooks" >"githooks/.namespace" &&
     git add . &&
     git commit -m 'Initial commit' ||
@@ -49,24 +50,41 @@ mkdir -p "$GH_TEST_TMP/test134" &&
 
 # Make changes to be formatted.
 touch "file.txt" &&
+    touch "file-2.txt" &&
     GITHOOKS_DISABLE=1 git add .
 
 # Creating volumes for the mounting, because
-# `docker in docker` uses directories on host volume.
-sharedRoot=$("$GH_TEST_BIN/cli" shared root ns:sharedhooks)
-
-storeIntoContainerVolumes "." "$sharedRoot"
+# `docker in docker` uses directories on host volume,
+# which we dont have.
+storeIntoContainerVolumes "." "$HOME/.githooks/shared"
+showAllContainerVolumes 3
 OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 2>&1) ||
-    { echo "$OUT" || exit 1; }
+    {
+        echo "! Commit failed"
+        echo "$OUT"
+        exit 1
+    }
+
 echo "$OUT"
-restoreFromContainerVolumeWorkspace "." "file.txt"
+restoreFromContainerVolumeWorkspace "." "file.txt" "file-2.txt" ".commit-msg-hook-run"
+
+if [ ! -f ".commit-msg-hook-run" ]; then
+    echo -e "! Expected commit-msg hook to have been run."
+    exit 1
+fi
 
 if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then
-    echo -e "! Expected file to have formatted: Content:"
+    echo"! Expected file to have formatted: Content:"
     exit 1
 fi
 
 if [ "$(grep -ic "formatted by containerized hook" "file.txt")" != "1" ]; then
+    echo -e "! Expected file should have been changed correctly: Content:"
+    cat "file.txt"
+    exit 1
+fi
+
+if [ "$(grep -ic "formatted by containerized hook" "file-2.txt")" != "1" ]; then
     echo -e "! Expected file should have been changed correctly: Content:"
     cat "file.txt"
     exit 1
