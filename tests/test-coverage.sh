@@ -22,7 +22,7 @@ trap cleanup EXIT
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
 FROM golang:1.20-alpine
-RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
+RUN apk add git git-lfs --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq curl docker
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253

@@ -7,7 +7,7 @@ rootDir=$(git rev-parse --show-toplevel)
 
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
 FROM golang:1.20-alpine
-RUN apk add git curl git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
+RUN apk add git curl git-lfs --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted
 RUN apk add bash jq
 
 RUN git config --global safe.directory /data
