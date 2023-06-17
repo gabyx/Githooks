@@ -111,6 +111,7 @@ fi
 # inside the current repo
 docker run --rm \
     -a stdout -a stderr \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks/tests \
@@ -121,6 +122,7 @@ docker run --rm \
 # Run the integration tests
 docker run --rm \
     -a stdout -a stderr \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "$TEST_DIR/cover":/cover \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?
