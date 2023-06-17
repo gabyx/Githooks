@@ -77,9 +77,9 @@ RUN git config --global githooks.deleteDetectedLFSHooks "n"
 # Replace some statements which rely on proper CLI output
 # The built instrumented executable output test&coverage shit...
 RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | grep "^/")@g' \\
-    "\$GH_TESTS"/step-* && \\
+    "\$GH_TESTS/steps/"step-* && \\
     sed -i -E 's@cli" shared root(.*)\)@cli" shared root\1 | grep "^/")@g' \\
-    "\$GH_TESTS"/step-*
+    "\$GH_TESTS/steps/"step-*
 
 # Replace all runnner/cli/dialog/'git hooks' invocations.
 # Forward over 'coverage/forwarder'.

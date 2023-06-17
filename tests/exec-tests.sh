@@ -45,7 +45,7 @@ RUN bash "\$GH_TESTS/setup-githooks.sh"
 ADD tests "\$GH_TESTS"
 
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
-        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
+        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/steps/step-* ; \\
     fi
 
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
