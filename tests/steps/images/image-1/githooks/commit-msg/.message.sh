@@ -9,4 +9,4 @@ if [ "${1:-}" != "--message" ]; then
     exit 1
 fi
 
-echo "Containerized commit-msg hook run" > ./.commit-msg-hook-run
+echo "Containerized commit-msg hook run" >./.commit-msg-hook-run

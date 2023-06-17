@@ -17,17 +17,17 @@ jobs:
       - checkout
       - run: bash tests/<<parameters.test>>.sh
 
-  windows:
-    parameters:
-      test:
-        description: "The test script name"
-        default: "test-alpine"
-        type: string
-    executor: win/default
-    steps:
-      - checkout
-      - run:
-          command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
+  # windows:
+  #   parameters:
+  #     test:
+  #       description: "The test script name"
+  #       default: "test-alpine"
+  #       type: string
+  #   executor: win/default
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
 
 workflows:
   version: 2

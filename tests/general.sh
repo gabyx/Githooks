@@ -123,7 +123,7 @@ function restoreFromContainerVolume() {
 
     # shellcheck disable=SC2015
     docker run -d --rm --name githookscopytovolume \
-        -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null || 
+        -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null ||
         die "Could not start copy container."
 
     for file in "${files[@]}"; do
