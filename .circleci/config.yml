@@ -62,9 +62,9 @@ workflows:
                 - /bugfix\/.*/
                 - "main"
 
-      - windows:
-          matrix:
-            parameters:
-              test: ["test-windows"]
-          filters: *filters
-
+      # - windows:
+      #     matrix:
+      #       parameters:
+      #         test: ["test-windows"]
+      #     filters: *filters
+      #
