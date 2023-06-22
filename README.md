@@ -618,8 +618,9 @@ not globally be defined.
 
 | Environment Variables                          | Effect                                                                                                                    |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `GITHOOKS_OS` (defined)                        | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
-| `GITHOOKS_ARCH` (defined)                      | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
+| `GITHOOKS_OS` (defined by Githooks)            | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
+| `GITHOOKS_ARCH` (defined by Githooks)          | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
+| `STAGED_FILES` (defined by Githooks)           | All staged files. Only set in `pre-commit`, `prepare-commit-msg` and `commit-msg` hook.                                   |
 | `GITHOOKS_DISABLE`                             | If defined, disables running hooks run by Githooks,<br>except `git lfs` and the replaced old hooks.                       |
 | `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution. A value of `1` enables more output.                     |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
