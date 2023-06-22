@@ -1,9 +1,5 @@
 package container
 
-import (
-	strs "github.com/gabyx/githooks/githooks/strings"
-)
-
 // ContainerizedExecutable contains the data to a script/executable file.
 type ContainerizedExecutable struct {
 	containerType ContainerManagerType
@@ -29,11 +25,6 @@ func (e *ContainerizedExecutable) GetArgs(args ...string) []string {
 	a = append(a, e.ArgsPost...)
 
 	return a
-}
-
-// GetString gets all args.
-func (e *ContainerizedExecutable) GetString() string {
-	return strs.Fmt("%s %q", e.Cmd, e.GetArgs())
 }
 
 // GetEnvironment gets all environment variables.

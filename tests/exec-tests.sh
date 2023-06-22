@@ -65,6 +65,6 @@ docker run --rm \
 
 RESULT=$?
 
-# docker rmi "githooks:$IMAGE_TYPE"
-# docker rmi "githooks:$IMAGE_TYPE-base"
+docker rmi "githooks:$IMAGE_TYPE"
+docker rmi "githooks:$IMAGE_TYPE-base"
 exit $RESULT
