@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@2.3.0
+  win: circleci/windows@5.0
 
 jobs:
   linux:
@@ -17,17 +17,17 @@ jobs:
       - checkout
       - run: bash tests/<<parameters.test>>.sh
 
-  # windows:
-  #   parameters:
-  #     test:
-  #       description: "The test script name"
-  #       default: "test-alpine"
-  #       type: string
-  #   executor: win/default
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
+  windows:
+    parameters:
+      test:
+        description: "The test script name"
+        default: "test-alpine"
+        type: string
+    executor: win/server-2022
+    steps:
+      - checkout
+      - run:
+          command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
 
 workflows:
   version: 2
@@ -62,9 +62,8 @@ workflows:
                 - /bugfix\/.*/
                 - "main"
 
-      # - windows:
-      #     matrix:
-      #       parameters:
-      #         test: ["test-windows"]
-      #     filters: *filters
-      #
+      - windows:
+          matrix:
+            parameters:
+              test: ["test-windows"]
+          filters: *filters
