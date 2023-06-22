@@ -13,7 +13,11 @@ git hooks images update
 ### Options
 
 ```
-  -h, --help   help for update
+      --config string   Use the given `.images.yaml` for the update.
+                        Useful to build images in shared repositories
+                        `githooks/.images.yaml` directory.
+                        Namespace is read from the current repository.
+  -h, --help            help for update
 ```
 
 ### SEE ALSO

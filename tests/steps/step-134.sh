@@ -39,10 +39,12 @@ mkdir -p "$GH_TEST_TMP/test134" &&
     git init &&
     mkdir -p .githooks &&
     echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml &&
-    git config --local githooks.containerizedHooksEnabled true &&
     GITHOOKS_DISABLE=1 git add . &&
     GITHOOKS_DISABLE=1 git commit -m 'Initial commit' ||
     exit 1
+
+# Enable containerized hooks.
+export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
 
 "$GH_TEST_BIN/cli" shared update
 # The above already does the below

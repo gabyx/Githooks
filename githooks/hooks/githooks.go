@@ -297,7 +297,7 @@ func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
 // IsContainerizedHooksEnabled returns if containerized hooks are enabled.
 func IsContainerizedHooksEnabled(gitx *git.Context, checkEnv bool) bool {
 	if checkEnv {
-		env := os.Getenv("GITHOOKS_CONTAINERIZED_HOOKS_ENABLE")
+		env := os.Getenv("GITHOOKS_CONTAINERIZED_HOOKS_ENABLED")
 		if env != "" &&
 			env != "0" &&
 			env != "false" && env != "off" {

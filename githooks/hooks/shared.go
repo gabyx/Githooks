@@ -468,7 +468,8 @@ func UpdateSharedHooks(
 				log,
 				hook.OriginalURL,
 				hook.RepositoryDir,
-				GetSharedGithooksDir(hook.RepositoryDir))
+				GetSharedGithooksDir(hook.RepositoryDir),
+				"")
 			log.AssertNoErrorF(e, "Updating container images of '%s' failed.", hook.OriginalURL)
 		}
 	}

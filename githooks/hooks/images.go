@@ -183,17 +183,21 @@ func UpdateImages(
 	log cm.ILogContext,
 	fromHint string,
 	repositoryDir string,
-	hooksDir string) (err error) {
+	hooksDir string,
+	configFile string) (err error) {
 
-	file := GetRepoImagesFile(hooksDir)
+	if strs.IsEmpty(configFile) {
+		configFile = GetRepoImagesFile(hooksDir)
+	}
+
 	namespace, e := GetHooksNamespace(hooksDir)
 	log.AssertNoError(e, "Could not get hooks namespace in '%s'.", hooksDir)
 
 	nBuilds := 0
 	nPulls := 0
 
-	if exists, _ := cm.IsPathExisting(file); !exists {
-		log.DebugF("No images config existing '%s'. Skip updating images.", file)
+	if exists, _ := cm.IsPathExisting(configFile); !exists {
+		log.DebugF("No images config existing '%s'. Skip updating images.", configFile)
 
 		return
 	}
@@ -209,15 +213,15 @@ func UpdateImages(
 
 	var imagesConfig ImagesConfigFile
 
-	imagesConfig, err = loadImagesConfigFile(file)
+	imagesConfig, err = loadImagesConfigFile(configFile)
 	if err != nil {
 		return cm.CombineErrors(
-			cm.ErrorF("Could not load images config file '%s'.", file), err)
+			cm.ErrorF("Could not load images config file '%s'.", configFile), err)
 	}
 
 	for imageRef, img := range imagesConfig.Images {
 
-		imageRef, e := addImageReferenceSuffix(imageRef, file, namespace)
+		imageRef, e := addImageReferenceSuffix(imageRef, configFile, namespace)
 		if e != nil {
 			err = cm.CombineErrors(err, e)
 
@@ -230,9 +234,15 @@ func UpdateImages(
 			log.WarnIfF(img.Build != nil,
 				"Specified image build configuration on entry '%s'\n"+
 					"in '.images.yaml' in '%s' will be ignored\n"+
-					"because pull is specified.", imageRef, file)
+					"because pull is specified.", imageRef, configFile)
 
-			pullSrc = img.Pull.Reference
+			pullSrc, e = addImageReferenceSuffix(img.Pull.Reference, configFile, namespace)
+
+			if e != nil {
+				err = cm.CombineErrors(err, e)
+
+				continue
+			}
 		}
 
 		if img.Build == nil {
@@ -241,7 +251,7 @@ func UpdateImages(
 				mgr,
 				pullSrc,
 				imageRef,
-				file)
+				configFile)
 
 			if e != nil {
 				err = cm.CombineErrors(err, e)
@@ -259,7 +269,7 @@ func UpdateImages(
 				img.Build.Dockerfile,
 				img.Build.Stage,
 				imageRef,
-				file,
+				configFile,
 				repositoryDir)
 
 			if e != nil {

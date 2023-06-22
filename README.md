@@ -33,7 +33,9 @@ repositories.
 - Running shared hooks from other Git repositories (with auto-update).
 - Git LFS support.
 - **No** _it works on my machine_ by
-  [running hooks over containers](#running-hooks-in-containers) (optional).
+  [running hooks over containers](#running-hooks-in-containers) and
+  [automatic build/pull integration of container images](#pull-and-build-integration)
+  (optional).
 - Command line interface.
 - Fast execution due to compiled executable. (even **2-3x faster with
   `v2.1.1`**)
@@ -342,7 +344,7 @@ It is advisable for repositories using _Git LFS_ to also have a pre-commit hook
 (e.g. `examples/lfs/pre-commit`) checked in which enforces a correct
 installation of _Git LFS_.
 
-## Shared hook repositories
+## Shared Hook Repositories
 
 The hooks are primarily designed to execute programs or scripts in the
 `<repoPath>/.githooks` folder of a single repository. However there are
@@ -675,12 +677,22 @@ git hook install \
 used. That is, when you don't select a Git LFS hooks in `--maintained-hooks`,
 the missing Git LFS hooks will be installed too.
 
-## Running Hooks in Container
+## Running Hooks in Containers
 
-There is the possibility to run hooks containerized over a container manager
-such as `docker` (others such as `podman` etc. are not yet implemented). This
-relieves the maintainer of a Githooks shared repo from dealing with _"It works
-on my machine!"_
+You can run hooks containerized over a container manager such as `docker`
+(others such as `podman` etc. are not yet implemented). This relieves the
+maintainer of a Githooks shared repo from dealing with _"It works on my
+machine!"_
+
+To enable containerized hook runs set the Git config variable
+`githooks.containerizedHooksEnabled` either locally or globally with
+
+```shell
+git config [--global] githooks.containerizedHooksEnabled true
+```
+
+to `true` or use the environment variable
+`GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true`.
 
 This is achieved by specifying the image reference (image name) inside a
 [hook run configuration](#hook-run-configuration), e.g.
@@ -699,10 +711,11 @@ image:
 which will launch the command `./myscript/checkit.sh` in a docker container
 `my-shellcheck:1.2.0`. The current Git repository where this hook is launched is
 mounted as the current working directory and the relative path
-`./myscript/checkit.sh` will mangled to a path into a mounted read-only volume
-of this shared Githooks repo `sharedRepo`.
+`./myscript/checkit.sh` will be mangled to a path in the mounted read-only
+volume of this shared Githooks repo `sharedRepo` which is cached inside
+`<installDir>/shared`.
 
-**Note 1:** When running a hook script or command over a container, you will not
+**Note:** When running a hook script or command over a container, you will not
 have access to the same environment variables as on your host system. All
 Githooks [environment variables](#environment-variables) are forwarded however
 to the container run.
@@ -714,16 +727,9 @@ summarized these troubles in a
 Long story short, **you should use
 [`MatchHostFsOwner`](https://github.com/FooBarWidget/matchhostfsowner/releases)**
 which counter acts these permission problems neatly by installing this into your
-container:
+hook's sidecar container:
 
 ```dockerfile
-RUN apk add git tar curl xz bash coreutils findutils grep sed parallel && \
-    curl -fsSL https://github.com/koalaman/shellcheck/releases/download/v$SHELLCHECK_VERSION/shellcheck-v$SHELLCHECK_VERSION.linux.x86_64.tar.xz | tar -xJf - && \
-    cp shellcheck-v$SHELLCHECK_VERSION/shellcheck /usr/local/bin && \
-    rm -rf shellcheck-v$SHELLCHECK_VERSION && \
-    curl -fsSL "https://github.com/mvdan/sh/releases/download/v$SHFMT_VERSION/shfmt_v${SHFMT_VERSION}_linux_amd64" -o /usr/local/bin/shfmt && \
-    chmod +x /usr/local/bin/shfmt
-
 # Install MatchHostFsOwner.
 # See https://github.com/FooBarWidget/matchhostfsowner/releases
 ADD https://github.com/FooBarWidget/matchhostfsowner/releases/download/v1.0.0/matchhostfsowner-1.0.0-x86_64-linux.gz /sbin/matchhostfsowner.gz
@@ -756,13 +762,13 @@ way for specifying image pull and build options in an opt-in file
 version: 1
 images:
   koalaman/shellcheck:latest:
-    # will pull the image reference according to this dictionary key.
+  # will pull the image reference according to this dictionary key.
 
   my-shellcheck:1.2.0:
     pull: # optional
-      reference: koalaman/shellcheck:v0.9.0
+      reference: myimages/${namespace}-shellcheck:v0.9.0
 
-  my-shellcheck:1.3.0:
+  ${namespace}-my-shellcheck:1.3.0:
     build:
       dockerfile: ./.githooks/docker/Dockerfile
       stage: myfinalstage
@@ -772,31 +778,33 @@ images:
 This file will be acted upon when shared hooks are updated, e.g.
 `git hooks shared update` or when this happens [automatically](#supported-urls).
 
-You can trigger the pull/build procedure by running
+You can trigger the image pull/build procedure by running
 
 ```shell
-git hooks images update
+git hooks images update [--config ...]
 ```
 
-inside a repo which uses Githooks. Running this in a repository which configures
-to use this `sharedRepo` in `.shared.yaml` will trigger
+inside a normal repo `a` which configures such a file in
+`a/.githooks/.images.yaml` or in a normal repository `b` which configures to use
+a `sharedRepo` in `.shared.yaml` which configures it in
+`sharedRepo/githooks/.images.yaml`. If this shared repo `sharedRepo` has a
+[namespace `banana` configured](#layout-of-shared-hook-repositories),
+`git hooks images update` in `b` will trigger
 
 - a **pull** of image `koalaman/shellcheck:latest`,
-- a **pull** of image `koalaman/shellcheck:v0.9.0` and tagging it with
+- a **pull** of image `myimages/banana-shellcheck:v0.9.0` and tagging it with
   `my-shellcheck:1.2.0`,
-- and a build of an image `my-shellcheck:1.3.0` of stage `myfinalstage` in the
-  respective dockerfile `./.githooks/docker/Dockerfile` where the build context
-  is set to `.githooks/docker`.
+- and a build of an image `banana-my-shellcheck:1.3.0` of stage `myfinalstage`
+  in the respective Dockerfile `./.githooks/docker/Dockerfile` where the build
+  context is set to `.githooks/docker`.
 
-**Note:** All paths in the build specification `build:` are relative towards the
-repository root where this `.images.yaml` is located e.g.
-`~/myrepo/.githooks/.images.yaml` for a normal repository and e.g.
-`sharedRepo/githooks/.images.yaml` for a shared repository.
+**Note:** All paths in the build specification `build:` are relative to the
+repository root where this `.images.yaml` is located.
 
-## Build Procedure
+## Locate Githooks Container Images
 
-All built images are labeled with `githooks-version` to make it easy to retrieve
-them, e.g.
+All built images are automatically labeled with `githooks-version` to make them
+easy to retrieve, e.g.
 
 ```shell
 docker images --filter label=githooks-version
@@ -807,6 +815,12 @@ or to easily delete all of them by
 ```shell
 docker rmi $(docker images -f "label=githooks-version" -q)
 ```
+
+**Pruning Of Older Images:** If a shared repository is updated from
+`git hooks shared update` it might come with new images references in
+`.images.yaml`. Githooks does not yet detect which references are no longer
+needed after the pull/build procedure nor does it offer a way yet to prune older
+images (just use the above).
 
 ## User Prompts
 

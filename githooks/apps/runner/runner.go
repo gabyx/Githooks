@@ -549,7 +549,8 @@ func updateLocalHookImages(settings *HookSettings) {
 		log,
 		settings.RepositoryDir,
 		settings.RepositoryDir,
-		settings.RepositoryHooksDir)
+		settings.RepositoryHooksDir,
+		"")
 
 	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
 }
@@ -972,7 +973,9 @@ func applyEnvToArgs(hs *hooks.Hooks, env []string) {
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Containerized executions need this.
-	applyEnvToArgs(hs, hooks.FilterGithooksEnvs(settings.ExecX.GetEnv()))
+	if settings.ContainerizedHooksEnabled {
+		applyEnvToArgs(hs, hooks.FilterGithooksEnvs(settings.ExecX.GetEnv()))
+	}
 
 	if cm.IsDebug {
 		logBatches("Local Hooks", hs.LocalHooks)

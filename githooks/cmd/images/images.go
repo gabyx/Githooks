@@ -4,11 +4,12 @@ import (
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
+	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra"
 )
 
-func runImagesUpdate(ctx *ccm.CmdContext) {
+func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 	repoDir, _, _, err := ctx.GitX.GetRepoRoot()
 
 	if err != nil {
@@ -18,8 +19,12 @@ func runImagesUpdate(ctx *ccm.CmdContext) {
 	}
 
 	hooksDir := hooks.GetGithooksDir(repoDir)
-	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir)
+	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, "")
 	ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", hooksDir)
+
+	if strs.IsNotEmpty(imagesFile) {
+		return
+	}
 
 	// Cycle through all shared hooks an return the first with matching namespace.
 	allRepos, err := hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
@@ -35,7 +40,7 @@ func runImagesUpdate(ctx *ccm.CmdContext) {
 	for rI := range allRepos {
 		hooksDir := hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
 
-		err = hooks.UpdateImages(ctx.Log, allRepos[rI].OriginalURL, allRepos[rI].RepositoryDir, hooksDir)
+		err = hooks.UpdateImages(ctx.Log, allRepos[rI].OriginalURL, allRepos[rI].RepositoryDir, hooksDir, "")
 		ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", allRepos[rI].OriginalURL)
 	}
 }
@@ -48,14 +53,22 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 		Short: "Manage container images.",
 		Long:  "Manages container images used by Githooks repositories in the current repository."}
 
+	imagesFile := ""
 	imagesUpdateCmd := &cobra.Command{
 		Use:    "update",
 		Short:  `Build/pull container images.`,
 		Long:   "Build/pull container images in the current repository which as needed for Githooks.",
 		PreRun: ccm.PanicIfNotExactArgs(ctx.Log, 0),
 		Run: func(c *cobra.Command, args []string) {
-			runImagesUpdate(ctx)
+			runImagesUpdate(ctx, imagesFile)
 		}}
+
+	imagesUpdateCmd.Flags().StringVar(&imagesFile,
+		"config", "",
+		"Use the given '.images.yaml' for the update.\n"+
+			"Useful to build images in shared repositories\n"+
+			"'githooks/.images.yaml' directory.\n"+
+			"Namespace is read from the current repository.")
 
 	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, imagesUpdateCmd))
 
