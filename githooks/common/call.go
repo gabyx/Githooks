@@ -25,7 +25,7 @@ func (c *ExecContext) GetWorkingDir() string {
 	return c.Cwd
 }
 
-// GetEnv gets the environement variables.
+// GetEnv gets the environment variables.
 func (c *ExecContext) GetEnv() []string {
 	return c.Env
 }
@@ -93,12 +93,14 @@ func GetOutputFromExecutable(
 	return out, err
 }
 
-// GetCombinedOutputFromExecutable calls an executable and returns its stdout and stderr output.
+// GetCombinedOutputFromExecutable calls an executable and
+// returns its stdout and stderr output and
+// exit code (only valid if error is nil).
 func GetCombinedOutputFromExecutable(
 	ctx IExecContext,
 	exe IExecutable,
 	pipeSetup PipeSetupFunc,
-	args ...string) ([]byte, error) {
+	args ...string) ([]byte, int, error) {
 
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
@@ -111,13 +113,19 @@ func GetCombinedOutputFromExecutable(
 	}
 
 	out, err := cmd.CombinedOutput()
+
+	exitCode := -1
+	if t, ok := err.(*exec.ExitError); ok {
+		exitCode = t.ExitCode()
+	}
+
 	if err != nil {
 		err = CombineErrors(
 			ErrorF("Command failed: '%s %q'.",
 				exe.GetCommand(), args), err)
 	}
 
-	return out, err
+	return out, exitCode, err
 }
 
 // GetOutputFromExecutableTrimmed calls an executable and returns its trimmed stdout output.

@@ -1,0 +1,5 @@
+cmd: githooks/commit-msg/.message.sh
+args:
+  - --message
+image:
+  reference: "registry.com/dir/${namespace}-test-image-built:1.0.0"

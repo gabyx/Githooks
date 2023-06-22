@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+set -e
+set -u
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 IMAGE_TYPE="$1"
@@ -10,8 +14,16 @@ else
     OS_USER="root"
 fi
 
-cat <<EOF | docker build --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
+# Only works on linux (macOS does not need it)
+dockerGroupId=$(getent group docker 2>/dev/null | cut -d: -f3) || true
+echo "Docker group id: $dockerGroupId"
+
+cat <<EOF | docker build \
+    --build-arg "DOCKER_GROUP_ID=$dockerGroupId" \
+    --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
+
 FROM githooks:$IMAGE_TYPE-base
+ARG DOCKER_GROUP_ID
 
 ENV DOCKER_RUNNING=true
 ENV GH_TESTS="/var/lib/githooks-tests"
@@ -33,7 +45,7 @@ RUN bash "\$GH_TESTS/setup-githooks.sh"
 ADD tests "\$GH_TESTS"
 
 RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
-        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/step-* ; \\
+        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/steps/step-* ; \\
     fi
 
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
@@ -47,6 +59,7 @@ EOF
 
 docker run --rm \
     -a stdout -a stderr \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@"
 

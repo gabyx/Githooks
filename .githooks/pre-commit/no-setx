@@ -1,27 +1,30 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
+set -e
+set -u
+
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 
 assertStaged
 
-SUCCESS=0
+success=0
 
 checkSetX() {
-    LINES=$(grep -rnHE "(set.*[-+]x)" "$FILE")
+    lines=$(grep -rnHE "(set.*[-+]x)" "$file") || true
 
-    if [ -n "$LINES" ]; then
-        echo "! Found \`set -x\`: $LINES" >&2
-        SUCCESS=1
+    if [ -n "$lines" ]; then
+        echo "! Found \`set -x\`: $lines" >&2
+        success=1
     fi
 }
 
-for FILE in $STAGED_FILES; do
-    echo "$FILE" | grep -qE '\.sh$' && checkSetX "$FILE"
+for file in $STAGED_FILES; do
+    echo "$file" | grep -qE '\.sh$' && checkSetX "$file"
 done
 
-if [ "$SUCCESS" = "0" ]; then
+if [ "$success" = "0" ]; then
     echo "* No \`set -x\` found" >&2
 else
-    exit "$SUCCESS"
+    exit "$success"
 fi

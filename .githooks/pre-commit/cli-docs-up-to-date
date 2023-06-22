@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
+set -e
+set -u
+
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 
@@ -12,15 +15,15 @@ repoDir="$DIR/../.."
 cd "$repoDir" || exit 1
 
 if command -v "gstat" &>/dev/null; then
-    STAT="gstat"
+    statCmd="gstat"
 else
-    STAT="stat"
+    statCmd="stat"
 fi
 
-for FILE in $STAGED_FILES; do
-    if echo "$FILE" | grep -qE '^.*/cmd/.*\.go$'; then
+for file in $STAGED_FILES; do
+    if echo "$file" | grep -qE '^.*/cmd/.*\.go$'; then
 
-        docDate=$($STAT -c %X "$repoDir/docs/cli/git_hooks.md")
+        docDate=$("$statCmd" -c %X "$repoDir/docs/cli/git_hooks.md")
 
         if [ "$((docDate + 2 * 5))" -lt "$(date +%s)" ]; then
             if [ "$autoRegenerate" = "true" ]; then

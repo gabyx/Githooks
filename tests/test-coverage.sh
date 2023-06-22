@@ -14,16 +14,16 @@ IMAGE_TYPE="alpine-coverage"
 }
 
 function cleanup() {
-    docker rmi "githooks:$IMAGE_TYPE-base"
-    docker rmi "githooks:$IMAGE_TYPE"
+    docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
+    docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
 }
 
 trap cleanup EXIT
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
 FROM golang:1.20-alpine
-RUN apk add git git-lfs --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash jq curl
+RUN apk add git git-lfs --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted
+RUN apk add bash jq curl docker
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
@@ -77,23 +77,23 @@ RUN git config --global githooks.deleteDetectedLFSHooks "n"
 # Replace some statements which rely on proper CLI output
 # The built instrumented executable output test&coverage shit...
 RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | grep "^/")@g' \\
-    "\$GH_TESTS"/step-* && \\
+    "\$GH_TESTS/steps/"step-* && \\
     sed -i -E 's@cli" shared root(.*)\)@cli" shared root\1 | grep "^/")@g' \\
-    "\$GH_TESTS"/step-*
+    "\$GH_TESTS/steps/"step-*
 
 # Replace all runnner/cli/dialog/'git hooks' invocations.
-# Foward over 'coverage/forwarder'.
+# Forward over 'coverage/forwarder'.
 RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
-    "\$GH_TESTS"/step-* && \\
+    "\$GH_TESTS/steps"/step-* && \\
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
-    "\$GH_TESTS"/step-* && \\
+    "\$GH_TESTS/steps"/step-* && \\
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/dialog"@g' \\
-    "\$GH_TESTS"/step-* && \\
+    "\$GH_TESTS/steps"/step-* && \\
     sed -i -E 's@".DIALOG"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1"@g' \\
-    "\$GH_TESTS"/step-* && \\
+    "\$GH_TESTS/steps"/step-* && \\
     sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GH_INSTALL_BIN_DIR/cli"@g' \\
-    "\$GH_TESTS"/step-*
+    "\$GH_TESTS/steps"/step-*
 
 ${ADDITIONAL_INSTALL_STEPS:-}
 
@@ -111,6 +111,7 @@ fi
 # inside the current repo
 docker run --rm \
     -a stdout -a stderr \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks/tests \
@@ -121,6 +122,7 @@ docker run --rm \
 # Run the integration tests
 docker run --rm \
     -a stdout -a stderr \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "$TEST_DIR/cover":/cover \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?

@@ -4,7 +4,8 @@ set -e
 set -u
 
 cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
+FROM mcr.microsoft.com/dotnet/framework/runtime:4.8-windowsservercore-ltsc2022
+
 
 # $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261324
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
@@ -26,13 +27,14 @@ RUN $newPath = ('{0}\bin;C:\go\bin;{1}' -f $env:GOPATH, $env:PATH); \
     [Environment]::SetEnvironmentVariable('PATH', $newPath, [EnvironmentVariableTarget]::Machine);
 # doing this first to share cache across versions more aggressively
 
-ENV GOLANG_VERSION 1.17
+# Check hash below for download.
+ENV GOLANG_VERSION 1.20.5
 
-RUN $url = ('https://golang.org/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION); \
+RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION); \
     Write-Host ('Downloading {0} ...' -f $url); \
     $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri $url -OutFile 'go.zip'; \
     \
-    $sha256 = '2a18bd65583e221be8b9b7c2fbe3696c40f6e27c2df689bbdcc939d49651d151'; \
+    $sha256 = 'c04a4ed73c3624d5b4c4f62e44a141549cc0bfd83a7492c31ca8b86b3752f077'; \
     Write-Host ('Verifying sha256 ({0}) ...' -f $sha256); \
     if ((Get-FileHash go.zip -Algorithm sha256).Hash -ne $sha256) { \
         Write-Host 'FAILED!'; \

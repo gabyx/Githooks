@@ -32,6 +32,10 @@ repositories.
 - Running repository checked-in hooks.
 - Running shared hooks from other Git repositories (with auto-update).
 - Git LFS support.
+- **No** _it works on my machine_ by
+  [running hooks over containers](#running-hooks-in-containers) and
+  [automatic build/pull integration of container images](#pull-and-build-integration)
+  (optional).
 - Command line interface.
 - Fast execution due to compiled executable. (even **2-3x faster with
   `v2.1.1`**)
@@ -249,6 +253,8 @@ Githooks defines the following environment variables:
   [See this list](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
 - `GITHOOKS_ARCH` : The runtime operating architecture, applicable to all hooks.
   [See this list](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
+- `GITHOOKS_CONTAINER_RUN` : If a hook is run over a container, this variable is
+  set and `true`.
 
 ### Parallel Execution
 
@@ -338,7 +344,7 @@ It is advisable for repositories using _Git LFS_ to also have a pre-commit hook
 (e.g. `examples/lfs/pre-commit`) checked in which enforces a correct
 installation of _Git LFS_.
 
-## Shared hook repositories
+## Shared Hook Repositories
 
 The hooks are primarily designed to execute programs or scripts in the
 `<repoPath>/.githooks` folder of a single repository. However there are
@@ -493,11 +499,11 @@ The `.ignore.yaml` (see [specs](#yaml-specifications)) files allow excluding
 files
 
 - from being treated as hook scripts or
-- hooks from beeing run.
+- hooks from being run.
 
 You can ignore executing all sorts of hooks per Git repository by specifying
 **patterns** or explicit **paths** which match against a hook's (file's)
-_namespace path_.
+_namespace path_. **Note:** Dot-files, e.g. `.myfile` are always ignored.
 
 Each hook either in the current repository `<repoPath>/.githooks/...` or inside
 a shared hooks repository has a so called _namespace path_.
@@ -671,6 +677,151 @@ git hook install \
 used. That is, when you don't select a Git LFS hooks in `--maintained-hooks`,
 the missing Git LFS hooks will be installed too.
 
+## Running Hooks in Containers
+
+You can run hooks containerized over a container manager such as `docker`
+(others such as `podman` etc. are not yet implemented). This relieves the
+maintainer of a Githooks shared repo from dealing with _"It works on my
+machine!"_
+
+To enable containerized hook runs set the Git config variable
+`githooks.containerizedHooksEnabled` either locally or globally with
+
+```shell
+git config [--global] githooks.containerizedHooksEnabled true
+```
+
+to `true` or use the environment variable
+`GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true`.
+
+This is achieved by specifying the image reference (image name) inside a
+[hook run configuration](#hook-run-configuration), e.g.
+`<hooksDir>/pre-commit/myhook.yaml`. This works for normal repositories as well
+as for shared Githooks repositories. For a shared repository, the file
+`sharedRepo/githooks/pre-commit/checkit.yaml` might look like
+
+```yaml
+version: 3
+cmd: ./myscripts/checkit.sh
+args:
+image:
+  reference: "my-shellcheck:1.2.0"
+```
+
+which will launch the command `./myscript/checkit.sh` in a docker container
+`my-shellcheck:1.2.0`. The current Git repository where this hook is launched is
+mounted as the current working directory and the relative path
+`./myscript/checkit.sh` will be mangled to a path in the mounted read-only
+volume of this shared Githooks repo `sharedRepo` which is cached inside
+`<installDir>/shared`.
+
+**Note:** When running a hook script or command over a container, you will not
+have access to the same environment variables as on your host system. All
+Githooks [environment variables](#environment-variables) are forwarded however
+to the container run.
+
+Running commands in containers which modify files on writable volumes has some
+caveats and quirks with permissions which are host system dependent. Hongli Lai
+summarized these troubles in a
+[very good article](https://www.fullstaq.com/knowledge-hub/blogs/docker-and-the-host-filesystem-owner-matching-problem).
+Long story short, **you should use
+[`MatchHostFsOwner`](https://github.com/FooBarWidget/matchhostfsowner/releases)**
+which counter acts these permission problems neatly by installing this into your
+hook's sidecar container:
+
+```dockerfile
+# Install MatchHostFsOwner.
+# See https://github.com/FooBarWidget/matchhostfsowner/releases
+ADD https://github.com/FooBarWidget/matchhostfsowner/releases/download/v1.0.0/matchhostfsowner-1.0.0-x86_64-linux.gz /sbin/matchhostfsowner.gz
+RUN gunzip /sbin/matchhostfsowner.gz && \
+  chown root: /sbin/matchhostfsowner && \
+  chmod +x,+s /sbin/matchhostfsowner
+
+# Use 'githooks' for MatchHostFsOwner.
+RUN mkdir -p /etc/matchhostfsowner && \
+    echo -e "app_account: githooks\napp_group: githooks" > /etc/matchhostfsowner/config.yml && \
+    cat /etc/matchhostfsowner/config.yml && \
+    chown -R root: /etc/matchhostfsowner && \
+    chmod 700 /etc/matchhostfsowner && \
+    chmod 600 /etc/matchhostfsowner/*
+
+RUN adduser "$USER_NAME" -s /bin/zsh \
+    -D \
+    -u "$USER_UID" -g "$USER_GID" \
+    -h "/home/$USER_NAME"
+```
+
+### Pull and Build Integration
+
+To have this containerized functionality neatly integrated, Githooks provides a
+way for specifying image pull and build options in an opt-in file
+`<hooksDir>/.images.yaml`
+([see `<hooksDir>` definition](#layout-of-shared-hook-repositories)), e.g.
+
+```yaml
+version: 1
+images:
+  koalaman/shellcheck:latest:
+  # will pull the image reference according to this dictionary key.
+
+  my-shellcheck:1.2.0:
+    pull: # optional
+      reference: myimages/${namespace}-shellcheck:v0.9.0
+
+  ${namespace}-my-shellcheck:1.3.0:
+    build:
+      dockerfile: ./.githooks/docker/Dockerfile
+      stage: myfinalstage
+      context: ./.githooks/docker
+```
+
+This file will be acted upon when shared hooks are updated, e.g.
+`git hooks shared update` or when this happens [automatically](#supported-urls).
+
+You can trigger the image pull/build procedure by running
+
+```shell
+git hooks images update [--config ...]
+```
+
+inside a normal repo `a` which configures such a file in
+`a/.githooks/.images.yaml` or in a normal repository `b` which configures to use
+a `sharedRepo` in `.shared.yaml` which configures it in
+`sharedRepo/githooks/.images.yaml`. If this shared repo `sharedRepo` has a
+[namespace `banana` configured](#layout-of-shared-hook-repositories),
+`git hooks images update` in `b` will trigger
+
+- a **pull** of image `koalaman/shellcheck:latest`,
+- a **pull** of image `myimages/banana-shellcheck:v0.9.0` and tagging it with
+  `my-shellcheck:1.2.0`,
+- and a build of an image `banana-my-shellcheck:1.3.0` of stage `myfinalstage`
+  in the respective Dockerfile `./.githooks/docker/Dockerfile` where the build
+  context is set to `.githooks/docker`.
+
+**Note:** All paths in the build specification `build:` are relative to the
+repository root where this `.images.yaml` is located.
+
+## Locate Githooks Container Images
+
+All built images are automatically labeled with `githooks-version` to make them
+easy to retrieve, e.g.
+
+```shell
+docker images --filter label=githooks-version
+```
+
+or to easily delete all of them by
+
+```shell
+docker rmi $(docker images -f "label=githooks-version" -q)
+```
+
+**Pruning Of Older Images:** If a shared repository is updated from
+`git hooks shared update` it might come with new images references in
+`.images.yaml`. Githooks does not yet detect which references are no longer
+needed after the pull/build procedure nor does it offer a way yet to prune older
+images (just use the above).
+
 ## User Prompts
 
 Githooks shows user prompts during installation, updating (automatic or manual),
@@ -761,7 +912,7 @@ If you want, you can try out what the script would do first, without changing
 anything by using:
 
 ```shell
-$ cli installer --dry-run
+cli installer --dry-run
 ```
 
 ### Install Mode: Centralized Hooks
@@ -772,7 +923,7 @@ and the default one [below](#templates-or-central-hooks). For this, run the
 command below.
 
 ```shell
-$ cli installer --use-core-hookspath
+cli installer --use-core-hookspath
 ```
 
 Optionally, you can also pass the template directory to which you want to
@@ -780,7 +931,7 @@ install the centralized hooks by appending `--template-dir <path>` to the
 command above, for example:
 
 ```shell
-$ cli installer --use-core-hookspath --template-dir /home/public/.githooks
+cli installer --use-core-hookspath --template-dir /home/public/.githooks
 ```
 
 ### Install from different URL and Branch
@@ -790,7 +941,7 @@ companies fork), you can specify the repository clone url as well as the branch
 name (default: `main`) when installing with:
 
 ```shell
-$ cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
+cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
 ```
 
 The installer always maintains a Githooks clone inside `<installDir>/release`
@@ -823,7 +974,7 @@ cd githooks
 scripts/build.sh
 ```
 
-Then, to globally enbale them for every repo:
+Then, to globally enable them for every repo:
 
 ```shell
 git config --global core.hooksPath "$(pwd)/hooks"
@@ -848,7 +999,7 @@ The global install prefix defaults to `${HOME}` but can be changed by using the
 options `--prefix <installPrefix>`:
 
 ```shell
-$ cli installer --non-interactive [--prefix <installPrefix>]
+cli installer --non-interactive [--prefix <installPrefix>]
 ```
 
 It's possible to specify which template directory should be used, by passing the
@@ -856,7 +1007,7 @@ It's possible to specify which template directory should be used, by passing the
 the templates to be installed.
 
 ```shell
-$ cli installer --template-dir "/home/public/.githooks-templates"
+cli installer --template-dir "/home/public/.githooks-templates"
 ```
 
 By default the script will install the hooks into the `~/.githooks/templates/`
@@ -868,7 +1019,7 @@ On a server infrastructure where only _bare_ repositories are maintained, it is
 best to maintain only server hooks. This can be achieved by installing with:
 
 ```shell
-$ cli installer ---maintained-hooks "server"
+cli installer ---maintained-hooks "server"
 ```
 
 The global template directory then **only** contains the following run-wrappers
@@ -1026,7 +1177,7 @@ If you want to get rid of this hook manager, you can execute the uninstaller
 `<installDir>/bin/uninstaller` by
 
 ```shell
-$ git hooks uninstaller
+git hooks uninstaller
 ```
 
 This will delete the run-wrappers installed in the template directory,
@@ -1083,7 +1234,7 @@ such as:
 inside of hooks and scripts.
 **[See the screenshots.](docs/dialog-screenshots/Readme.md)**
 
-_Why another tool?:_ At the moment of writting there exists no proper
+_Why another tool?:_ At the moment of writing there exists no proper
 platform-independent GUI dialog tool which is **bomb-proof in it's output and
 exit code behavior**. This tool should really enable proper and safe usage
 inside hooks and other scripts. You can even report the output in `json` format
@@ -1147,7 +1298,7 @@ which will start the `delve` debugger headless as a server in a terminal. You
 can then attach to the debug server with the debug configuration
 `Debug Go [remote delve]`. Set breakpoints in the source code to trigger them.
 
-### Todos:
+### Todos
 
 - Finish deploy settings implementation for Gitea and others.
 

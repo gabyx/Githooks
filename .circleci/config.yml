@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@2.3.0
+  win: circleci/windows@5.0
 
 jobs:
   linux:
@@ -23,7 +23,7 @@ jobs:
         description: "The test script name"
         default: "test-alpine"
         type: string
-    executor: win/default
+    executor: win/server-2022
     steps:
       - checkout
       - run:
@@ -67,4 +67,3 @@ workflows:
             parameters:
               test: ["test-windows"]
           filters: *filters
-

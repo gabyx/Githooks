@@ -1130,7 +1130,7 @@ func setupSharedRepositories(
 			"file will still be executed", hooks.GitCKShared, hooks.GetRepoSharedFileRel())
 	} else {
 
-		updated, err := hooks.UpdateAllSharedHooks(log, gitx, installDir, "")
+		updated, err := hooks.UpdateAllSharedHooks(log, gitx, installDir, "", false)
 		log.ErrorIf(err != nil, "Could not update shared hook repositories.")
 		log.InfoF("Updated '%v' shared hook repositories.", updated)
 

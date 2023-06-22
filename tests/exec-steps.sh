@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
+set -e
+set -u
 
-if [ "$1" = "--skip-docker-check" ]; then
+TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck disable=SC1091
+. "$TEST_DIR/general.sh"
+
+if [ "${1:-}" = "--skip-docker-check" ]; then
     shift
 else
     if [ "$DOCKER_RUNNING" != "true" ]; then
@@ -9,44 +15,68 @@ else
     fi
 fi
 
-if [ "$1" = "--show-output" ]; then
+TEST_SHOW="false"
+SEQUENCE=""
+TEST_RUNS=0
+FAILED=0
+SKIPPED=0
+FAILED_TEST_LIST=""
+
+if [ "${1:-}" = "--show-output" ]; then
     shift
     TEST_SHOW="true"
 fi
 
-SEQUENCE=""
-if [ "$1" = "--seq" ]; then
+if [ "${1:-}" = "--seq" ]; then
     shift
     SEQUENCE=$(for f in "$@"; do echo "step-$f"; done)
 fi
 
-TEST_RUNS=0
-FAILED=0
-SKIPPED=0
+# shellcheck disable=SC2317
+function cleanUp() {
+    set +e
+    cleanDirs
+    cleanDocker
+}
 
-FAILED_TEST_LIST=""
-
-export GH_INSTALL_DIR="$HOME/.githooks"
-export GH_INSTALL_BIN_DIR="$GH_INSTALL_DIR/bin"
-COMMIT_BEFORE=$(git -C "$GH_TEST_REPO" rev-parse HEAD)
+trap cleanUp EXIT
 
 function cleanDirs() {
-
     if [ -d "$GH_TEST_GIT_CORE" ]; then
-        mkdir -p "$GH_TEST_GIT_CORE/templates/hooks" || {
+        # shellcheck disable=SC2015
+        mkdir -p "$GH_TEST_GIT_CORE/templates/hooks" &&
+            rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"* ||
+            {
+                echo "! Cleanup failed."
+                exit 1
+            }
+    fi
+
+    rm -rf /tmp/githooks-installer-* || true
+    rm -rf ~/test* || true
+
+    if [ -d "$GH_TEST_TMP" ]; then
+        rm -rf "$GH_TEST_TMP" || {
             echo "! Cleanup failed."
             exit 1
         }
-        rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"*
+    fi
+    mkdir -p "$GH_TEST_TMP"
+
+    return 0
+}
+
+function cleanDocker() {
+    if command -v "docker" &>/dev/null; then
+        # shellcheck disable=SC2015
+        deleteAllTestImages &>/dev/null &&
+            deleteContainerVolumes &>/dev/null || {
+            echo "! Cleanup docker failed."
+            exit 1
+        }
     fi
 
-    rm -rf /tmp/githooks-installer-*
-    rm -rf ~/test*
-    rm -rf "$GH_TEST_TMP"
-    mkdir -p "$GH_TEST_TMP" || {
-        echo "! Cleanup failed."
-        exit 1
-    }
+    return 0
 }
 
 function resetTestRepo() {
@@ -81,21 +111,25 @@ function unsetEnvironment() {
     return 0
 }
 
-if [ -z "$GH_TESTS" ] ||
-    [ -z "$GH_TEST_REPO" ] ||
-    [ -z "$GH_TEST_BIN" ] ||
-    [ -z "$GH_TEST_TMP" ] ||
-    [ -z "$GH_TEST_GIT_CORE" ]; then
+if [ -z "${GH_TESTS:-}" ] ||
+    [ -z "${GH_TEST_REPO:-}" ] ||
+    [ -z "${GH_TEST_BIN:-}" ] ||
+    [ -z "${GH_TEST_TMP:-}" ] ||
+    [ -z "${GH_TEST_GIT_CORE:-}" ]; then
     echo "! Missing env. variables." >&2
     exit 1
 fi
+
+export GH_INSTALL_DIR="$HOME/.githooks"
+export GH_INSTALL_BIN_DIR="$GH_INSTALL_DIR/bin"
+COMMIT_BEFORE=$(git -C "$GH_TEST_REPO" rev-parse HEAD)
 
 echo "Test repo: '$GH_TEST_REPO'"
 echo "Tests dir: '$GH_TESTS'"
 
 startT=$(date +%s)
 
-for STEP in "$GH_TESTS"/step-*.sh; do
+for STEP in "$GH_TESTS/steps"/step-*.sh; do
     STEP_NAME=$(basename "$STEP" | sed 's/.sh$//')
     STEP_DESC=$(grep -m 1 -A 1 "Test:" "$STEP" | tail -1 | sed 's/#\s*//')
 
@@ -107,11 +141,17 @@ for STEP in "$GH_TESTS"/step-*.sh; do
     echo "  :: $STEP_DESC"
 
     cleanDirs
+    cleanDocker
 
     TEST_RUNS=$((TEST_RUNS + 1))
 
-    TEST_OUTPUT=$("$STEP" 2>&1)
-    TEST_RESULT=$?
+    {
+        set +e
+        TEST_OUTPUT=$("$STEP" 2>&1)
+        TEST_RESULT=$?
+        set -e
+    }
+
     # shellcheck disable=SC2181
     if [ $TEST_RESULT -eq 249 ]; then
         REASON=$(echo "$TEST_OUTPUT" | tail -1)
@@ -125,10 +165,9 @@ for STEP in "$GH_TESTS"/step-*.sh; do
         echo "! $STEP has failed with code $TEST_RESULT ($FAILURE), output:" >&2
         echo "$TEST_OUTPUT" | sed -E "s/^/ x: /g" >&2
         FAILED=$((FAILED + 1))
-        FAILED_TEST_LIST="$FAILED_TEST_LIST
-- $STEP ($TEST_RESULT -- $FAILURE)"
+        FAILED_TEST_LIST="$FAILED_TEST_LIST\n- $STEP ($TEST_RESULT -- $FAILURE)"
 
-    elif [ -n "$TEST_SHOW" ]; then
+    elif [ "$TEST_SHOW" = "true" ]; then
         echo ":: Output was:"
         echo "$TEST_OUTPUT" | sed -E "s/^/  | /g"
     fi
@@ -164,7 +203,7 @@ echo "Run time: $elapsed seconds"
 echo
 
 if [ -n "$FAILED_TEST_LIST" ]; then
-    echo "Failed tests: $FAILED_TEST_LIST" >&2
+    echo -e "Failed tests: $FAILED_TEST_LIST" >&2
     echo
 fi
 

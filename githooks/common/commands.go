@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"strings"
@@ -10,15 +11,60 @@ import (
 
 // CmdContext defines the command context to execute commands.
 type CmdContext struct {
-	Env []string
-
-	baseCmd string
-	cwd     string
+	baseCmd      string
+	cwd          string
+	env          []string
+	captureError bool
 }
 
-// NewCtx creates a new `CmdContext`.
-func NewCommandCtx(baseCmd string, cwd string, env []string) CmdContext {
-	return CmdContext{baseCmd: baseCmd, cwd: cwd, Env: env}
+type CmdContextBuilder struct {
+	cmdCtx CmdContext
+}
+
+func NewCommandCtxBuilder() *CmdContextBuilder {
+	return &CmdContextBuilder{cmdCtx: CmdContext{baseCmd: "", cwd: "", env: nil}}
+}
+
+func (c *CmdContextBuilder) Build() CmdContext {
+	return c.cmdCtx
+}
+
+// SetEnv sets the environment.
+func (c *CmdContextBuilder) FromCtx(cmdCtx CmdContext) *CmdContextBuilder {
+	c.cmdCtx.baseCmd = cmdCtx.baseCmd
+	c.cmdCtx.cwd = cmdCtx.cwd
+	c.cmdCtx.env = cmdCtx.env
+	c.cmdCtx.captureError = cmdCtx.captureError
+
+	return c
+}
+
+// SetEnv sets the environment.
+func (c *CmdContextBuilder) SetEnv(env []string) *CmdContextBuilder {
+	c.cmdCtx.env = env
+
+	return c
+}
+
+// SetBaseCmd sets the base command.
+func (c *CmdContextBuilder) SetBaseCmd(cmd string) *CmdContextBuilder {
+	c.cmdCtx.baseCmd = cmd
+
+	return c
+}
+
+// SetCwd sets the working dir.
+func (c *CmdContextBuilder) SetCwd(cwd string) *CmdContextBuilder {
+	c.cmdCtx.cwd = cwd
+
+	return c
+}
+
+// EnableCaptureError enables capturing the `stderr`.
+func (c *CmdContextBuilder) EnableCaptureError() *CmdContextBuilder {
+	c.cmdCtx.captureError = true
+
+	return c
 }
 
 // GetCwd returns the working directory.
@@ -34,6 +80,9 @@ func (c *CmdContext) GetBaseCmd() string {
 // GetSplit executes a command and splits the output by newlines.
 func (c *CmdContext) GetSplit(args ...string) ([]string, error) {
 	out, err := c.Get(args...)
+	if strs.IsEmpty(out) {
+		return nil, err
+	}
 
 	return strs.SplitLines(out), err
 }
@@ -42,14 +91,24 @@ func (c *CmdContext) GetSplit(args ...string) ([]string, error) {
 func (c *CmdContext) Get(args ...string) (string, error) {
 	cmd := exec.Command(c.baseCmd, args...)
 	cmd.Dir = c.cwd
-	cmd.Env = c.Env
+	cmd.Env = c.env
+
+	var buf bytes.Buffer
+	if c.captureError {
+		cmd.Stderr = &buf
+	}
 	stdout, err := cmd.Output()
 
 	if err != nil {
 		var errS string
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			errS = string(exitErr.Stderr)
+		if c.captureError {
+			errS = buf.String()
+		} else {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				errS = string(exitErr.Stderr)
+			}
 		}
+
 		err = CombineErrors(
 			ErrorF("Command failed: '%s %q' [cwd: '%s', env: %q, err: '%s'].",
 				c.baseCmd, args, cmd.Dir, cmd.Env, errS), err)
@@ -62,7 +121,7 @@ func (c *CmdContext) Get(args ...string) (string, error) {
 func (c *CmdContext) GetCombined(args ...string) (string, error) {
 	cmd := exec.Command(c.baseCmd, args...)
 	cmd.Dir = c.cwd
-	cmd.Env = c.Env
+	cmd.Env = c.env
 
 	stdout, err := cmd.CombinedOutput()
 
@@ -83,14 +142,23 @@ func (c *CmdContext) GetCombined(args ...string) (string, error) {
 func (c *CmdContext) Check(args ...string) (err error) {
 	cmd := exec.Command(c.baseCmd, args...)
 	cmd.Dir = c.cwd
-	cmd.Env = c.Env
+	cmd.Env = c.env
+
+	var buf bytes.Buffer
+	if c.captureError {
+		cmd.Stderr = &buf
+	}
 
 	err = cmd.Run()
 
 	if err != nil {
 		var errS string
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			errS = string(exitErr.Stderr)
+		if c.captureError {
+			errS = buf.String()
+		} else {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				errS = string(exitErr.Stderr)
+			}
 		}
 
 		err = CombineErrors(
@@ -105,7 +173,7 @@ func (c *CmdContext) Check(args ...string) (err error) {
 func (c *CmdContext) GetExitCode(args ...string) (int, error) {
 	cmd := exec.Command(c.baseCmd, args...)
 	cmd.Dir = c.cwd
-	cmd.Env = c.Env
+	cmd.Env = c.env
 
 	err := cmd.Run()
 
@@ -118,7 +186,7 @@ func (c *CmdContext) GetExitCode(args ...string) (int, error) {
 	}
 
 	return -1, CombineErrors(
-		ErrorF("Could get exit status of '%s %q' [cwd: '%s', env: %q].",
+		ErrorF("Could not get exit status of '%s %q' [cwd: '%s', env: %q].",
 			c.baseCmd, args, cmd.Dir, cmd.Env), err)
 }
 
@@ -129,14 +197,23 @@ func (c *CmdContext) CheckPiped(args ...string) (err error) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Dir = c.cwd
-	cmd.Env = c.Env
+	cmd.Env = c.env
+
+	buf := bytes.NewBuffer(nil)
+	if c.captureError {
+		cmd.Stderr = buf
+	}
 
 	err = cmd.Run()
 
 	if err != nil {
 		var errS string
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			errS = string(exitErr.Stderr)
+		if c.captureError {
+			errS = buf.String()
+		} else {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				errS = string(exitErr.Stderr)
+			}
 		}
 
 		err = CombineErrors(

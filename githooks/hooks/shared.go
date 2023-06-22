@@ -420,7 +420,9 @@ func ModifyGlobalSharedHooks(gitx *git.Context, url string, remove bool) (modifi
 func UpdateSharedHooks(
 	log cm.ILogContext,
 	sharedHooks []SharedRepo,
-	sharedType SharedHookType) (updateCount int, err error) {
+	sharedType SharedHookType,
+	updateImages bool,
+) (updateCount int, err error) {
 
 	for _, hook := range sharedHooks {
 
@@ -446,9 +448,7 @@ func UpdateSharedHooks(
 			continue
 		}
 
-		if log != nil {
-			log.InfoF("Updating shared hooks from: '%s'", hook.OriginalURL)
-		}
+		log.InfoF("Updating shared hooks from: '%s'", hook.OriginalURL)
 
 		depth := -1
 		if hook.IsLocal {
@@ -456,13 +456,22 @@ func UpdateSharedHooks(
 		}
 
 		_, e := git.PullOrClone(hook.RepositoryDir, hook.URL, hook.Branch, depth, nil)
-		err = cm.CombineErrors(err, e)
 
-		if log != nil {
-			log.AssertNoErrorF(e, "Updating hooks '%s' failed.", hook.OriginalURL)
+		if log.AssertNoErrorF(e, "Updating hooks '%s' failed.", hook.OriginalURL) {
+			updateCount++
+		} else {
+			err = cm.CombineErrors(err, e)
 		}
 
-		updateCount++
+		if updateImages {
+			e = UpdateImages(
+				log,
+				hook.OriginalURL,
+				hook.RepositoryDir,
+				GetSharedGithooksDir(hook.RepositoryDir),
+				"")
+			log.AssertNoErrorF(e, "Updating container images of '%s' failed.", hook.OriginalURL)
+		}
 	}
 
 	return
@@ -474,7 +483,8 @@ func UpdateAllSharedHooks(
 	log cm.ILogContext,
 	gitx *git.Context,
 	installDir string,
-	repoDir string) (updated int, err error) {
+	repoDir string,
+	updateImages bool) (updated int, err error) {
 
 	count := 0
 
@@ -484,7 +494,7 @@ func UpdateAllSharedHooks(
 		err = cm.CombineErrors(err, e)
 
 		if log.AssertNoErrorF(e, "Could not load shared hooks in '%s'.", GetRepoSharedFileRel()) {
-			count, e = UpdateSharedHooks(log, sharedHooks, SharedHookTypeV.Repo)
+			count, e = UpdateSharedHooks(log, sharedHooks, SharedHookTypeV.Repo, updateImages)
 			err = cm.CombineErrors(err, e)
 			updated += count
 		}
@@ -493,7 +503,7 @@ func UpdateAllSharedHooks(
 		err = cm.CombineErrors(err, e)
 
 		if log.AssertNoErrorF(e, "Could not load local shared hooks.") {
-			count, e = UpdateSharedHooks(log, sharedHooks, SharedHookTypeV.Local)
+			count, e = UpdateSharedHooks(log, sharedHooks, SharedHookTypeV.Local, updateImages)
 			err = cm.CombineErrors(err, e)
 			updated += count
 		}
@@ -504,7 +514,7 @@ func UpdateAllSharedHooks(
 	err = cm.CombineErrors(err, e)
 
 	if log.AssertNoErrorF(e, "Could not load global shared hooks.") {
-		count, e = UpdateSharedHooks(log, sharedHooks, SharedHookTypeV.Global)
+		count, e = UpdateSharedHooks(log, sharedHooks, SharedHookTypeV.Global, updateImages)
 		err = cm.CombineErrors(err, e)
 		updated += count
 	}

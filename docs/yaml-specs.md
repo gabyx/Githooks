@@ -34,17 +34,19 @@ version: 1
 
 ## Hook Run Configuration `<hookName>.yaml`
 
-Variable `hookName` refers top one of the supported [Git hooks](/README.md).
+Variable `hookName` refers to one of the supported [Git hooks](/README.md).
 
 ### Version 1
 
 ```yaml
 cmd: "/var/etc/lib/crazy/command"
-args:
-    - "--do-it"
-    - "--faster"
-    - "--proper"
-version: 1
+args: # optional
+  - "--do-it"
+  - "--faster"
+  - "--all"
+  - "${env:GPG_PUBLIC_KEY}"
+  - "--test ${git-l:my-local-git-config-var}"
+version: 1 # optional
 ```
 
 ### Version 2
@@ -53,11 +55,28 @@ version: 1
 
 ```yaml
 cmd: "/var/etc/lib/crazy/command"
-args:
-    - "--do-it"
-    - "--faster"
-    - "--proper"
-env:
-    - USE_CUSTOM=1
-version: 2
+args: # optional
+  - "--do-it"
+  - "${env:GPG_PUBLIC_KEY}"
+  - "--test ${git-l:my-local-git-config-var}"
+env: # optional
+  - USE_CUSTOM=1
+version: 2 # optional
+```
+
+### Version 3
+
+- Added image field `image`.
+
+```yaml
+cmd: "/var/etc/lib/crazy/command"
+args: # optional
+  - "--do-it"
+  - "${env:GPG_PUBLIC_KEY}"
+  - "--test ${git-l:my-local-git-config-var}"
+env: # optional
+  - USE_CUSTOM=1
+image: # optional
+  reference: mycontainerimage:1.2.0
+version: 3 # optional
 ```

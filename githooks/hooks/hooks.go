@@ -63,9 +63,10 @@ type Hooks struct {
 
 // HookResult is the data assembly of the output of an executed hook.
 type HookResult struct {
-	Hook   *Hook
-	Output []byte
-	Error  error
+	Hook     *Hook
+	Output   []byte
+	Error    error
+	ExitCode int
 }
 
 // TaggedHooksIndex is the index type for hook tags.
@@ -147,21 +148,26 @@ func GetAllHooksIn(
 	isIgnored IgnoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
-	parseRunnerConfig bool) (allHooks []Hook, maxBatches int, err error) {
+	parseRunnerConfig bool,
+	containerizedHooksEnabled bool) (allHooks []Hook, maxBatches int, err error) {
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
 
 		prefix += "/"
 
+		trimmedHookPath := strings.TrimPrefix(hookPath, prefix)
+
 		// Prefix should always be removed! (we only have '/' in paths!)
-		cm.DebugAssertF(strings.TrimPrefix(hookPath, prefix) != hookPath,
+		cm.DebugAssertF(trimmedHookPath != hookPath,
 			"Prefix could not be removed '%s', '%s'.", prefix, hookPath)
 
+		namespacedPath := ""
 		if strs.IsNotEmpty(hookNamespace) {
-			hookNamespace = NamespacePrefix + hookNamespace
+			namespacedPath = path.Join(NamespacePrefix+hookNamespace, trimmedHookPath)
+		} else {
+			namespacedPath = trimmedHookPath
 		}
 
-		namespacedPath := path.Join(hookNamespace, strings.TrimPrefix(hookPath, prefix))
 		ignored := isIgnored(namespacedPath)
 
 		trusted := false
@@ -171,7 +177,16 @@ func GetAllHooksIn(
 		if !ignored || !lazyIfIgnored {
 			trusted, sha = isTrusted(hookPath)
 
-			runCmd, err = GetHookRunCmd(gitx, hookPath, parseRunnerConfig, rootDir, hookNamespaceEnvs)
+			runCmd, err = GetHookRunCmd(
+				gitx,
+				hookPath,
+				rootDir,
+				hooksDir,
+				parseRunnerConfig,
+				containerizedHooksEnabled,
+				hookNamespace,
+				hookNamespaceEnvs)
+
 			if err != nil {
 				return cm.CombineErrors(err,
 					cm.ErrorF("Could not detect runner for hook\n'%s'", hookPath))
@@ -308,16 +323,13 @@ func ExecuteHooksParallel(
 	}
 
 	call := func(hookRes *HookResult, hook *Hook) {
-		var err error
-		hookRes.Output, err =
+		hookRes.Hook = hook
+		hookRes.Output, hookRes.ExitCode, hookRes.Error =
 			cm.GetCombinedOutputFromExecutable(
 				exec,
 				hook,
 				cm.UseOnlyStdin(os.Stdin),
 				args...)
-
-		hookRes.Error = err
-		hookRes.Hook = hook
 	}
 
 	currIdx := 0
@@ -404,6 +416,23 @@ func (h HookPrioList) CountFmt() (count string) {
 	count += "]"
 
 	return
+}
+
+// Map maps a function over all hooks.
+func (h *Hooks) Map(f func(*Hook)) {
+	h.LocalHooks.Map(f)
+	h.RepoSharedHooks.Map(f)
+	h.LocalSharedHooks.Map(f)
+	h.GlobalSharedHooks.Map(f)
+}
+
+// Map maps a function over all hooks.
+func (h HookPrioList) Map(f func(*Hook)) {
+	for i := range h {
+		for j := range h[i] {
+			f(&h[i][j])
+		}
+	}
 }
 
 // AllHooksSuccessful returns `true`.

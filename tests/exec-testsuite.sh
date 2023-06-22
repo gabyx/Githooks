@@ -24,7 +24,7 @@ if [ -d /cover ]; then
         exit 1
     fi
 else
-    if ! go test ./...; then
+    if ! go test -v ./...; then
         echo "! Go testsuite reported errors." >&2
         exit 1
     fi

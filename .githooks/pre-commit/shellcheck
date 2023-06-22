@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
+set -e
+set -u
+
 DIR=$(cd "$(dirname "$0")" && pwd)
 . "$DIR/.export-staged"
 
@@ -10,17 +13,17 @@ if ! shellcheck --version >/dev/null 2>&1; then
     exit 0
 fi
 
-SUCCESS=0
-for FILE in $STAGED_FILES; do
-    if echo "$FILE" | grep -qE '\.sh$' &&
-        ! shellcheck "$FILE"; then
-        echo "! shellcheck problems detected in: $FILE" >&2
-        SUCCESS=1
+success=0
+for file in $STAGED_FILES; do
+    if echo "$file" | grep -qE '\.sh$' &&
+        ! shellcheck "$file"; then
+        echo "! shellcheck problems detected in: $file" >&2
+        success=1
     fi
 done
 
-if [ "$SUCCESS" = "0" ]; then
+if [ "$success" = "0" ]; then
     echo "* shellcheck OK" >&2
 else
-    exit "$SUCCESS"
+    exit "$success"
 fi

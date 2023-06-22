@@ -5,6 +5,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
@@ -74,6 +75,26 @@ const EnvVariableArch = "GITHOOKS_ARCH"
 
 // EnvVariableStagedFiles is the environment variable which holds the staged files.
 const EnvVariableStagedFiles = "STAGED_FILES"
+
+// GetAllEnvVariables returns all Githooks internal env variables.
+func GetAllEnvVariables() []string {
+	return []string{EnvVariableOs, EnvVariableArch, EnvVariableStagedFiles}
+}
+
+// FilterGithooksEnvs filters all non-Githooks environment variables.
+func FilterGithooksEnvs(env []string) []string {
+	allowed := GetAllEnvVariables()
+
+	return strs.Filter(env, func(s string) bool {
+		for i := range allowed {
+			if strings.HasPrefix(s, allowed[i]+"=") {
+				return true
+			}
+		}
+
+		return false
+	})
+}
 
 // GetBugReportingInfo gets the default bug reporting url. Argument 'repoPath' can be empty.
 func GetBugReportingInfo() (info string) {
@@ -271,6 +292,22 @@ func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
 	return disabled == git.GitCVTrue || // nolint: goconst
 		disabled == "y" || // Legacy
 		disabled == "Y" // Legacy
+}
+
+// IsContainerizedHooksEnabled returns if containerized hooks are enabled.
+func IsContainerizedHooksEnabled(gitx *git.Context, checkEnv bool) bool {
+	if checkEnv {
+		env := os.Getenv("GITHOOKS_CONTAINERIZED_HOOKS_ENABLED")
+		if env != "" &&
+			env != "0" &&
+			env != "false" && env != "off" {
+			return true
+		}
+	}
+
+	enabled := gitx.GetConfig(GitCKContainerizedHooksEnabled, git.Traverse)
+
+	return enabled == git.GitCVTrue
 }
 
 // IsRunnerNonInteractive tells if the runner should run in non-interactive mode

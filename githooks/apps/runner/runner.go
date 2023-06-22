@@ -94,15 +94,9 @@ func mainRun() (exitCode int) {
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
 	executeOldHook(&settings, &uiSettings, &ignores, &checksums)
+	updateLocalHookImages(&settings)
 
 	hooks := collectHooks(&settings, &uiSettings, &ignores, &checksums)
-
-	if cm.IsDebug {
-		logBatches("Local Hooks", hooks.LocalHooks)
-		logBatches("Repo Shared Hooks", hooks.RepoSharedHooks)
-		logBatches("Local Shared Hooks", hooks.LocalSharedHooks)
-		logBatches("Global Shared Hooks", hooks.GlobalSharedHooks)
-	}
 
 	executeHooks(&settings, &hooks)
 
@@ -141,7 +135,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	execx := cm.ExecContext{Env: os.Environ()}
 
 	// Current git context, in current working dir.
-	gitx := git.NewCtx()
+	gitx := git.NewCtxAt(repoPath)
 	log.AssertNoErrorF(gitx.InitConfigCache(nil),
 		"Could not init git config cache.")
 
@@ -171,6 +165,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptx, repoPath)
 	}
 
+	runContainerized := hooks.IsContainerizedHooksEnabled(gitx, true)
+
 	s := HookSettings{
 		Args:               os.Args[2:],
 		ExecX:              execx,
@@ -189,6 +185,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive,
+		ContainerizedHooksEnabled:  runContainerized,
 		Disabled:                   isGithooksDisabled}
 
 	logInvocation(&s)
@@ -465,7 +462,8 @@ func executeOldHook(
 		settings.GitX,
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace, nil,
-		isIgnored, isTrusted, true, false)
+		isIgnored, isTrusted, true, false,
+		settings.ContainerizedHooksEnabled)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
 	if len(hooks) == 0 {
@@ -542,6 +540,21 @@ func collectHooks(
 	return
 }
 
+func updateLocalHookImages(settings *HookSettings) {
+	if !settings.ContainerizedHooksEnabled || settings.HookName != "post-merge" {
+		return
+	}
+
+	e := hooks.UpdateImages(
+		log,
+		settings.RepositoryDir,
+		settings.RepositoryDir,
+		settings.RepositoryHooksDir,
+		"")
+
+	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
+}
+
 func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, sharedType hooks.SharedHookType) {
 
 	disableUpdate, _ := hooks.IsSharedHooksUpdateDisabled(settings.GitX, git.Traverse)
@@ -561,7 +574,7 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	}
 
 	log.Debug("Updating all shared hooks.")
-	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType)
+	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType, settings.ContainerizedHooksEnabled)
 	log.AssertNoError(err, "Errors while updating shared hooks repositories.")
 
 	if updateOnCloneNeeded {
@@ -792,7 +805,8 @@ func getHooksIn(
 		settings.GitX,
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace, namespaceEnvs.Get(hookNamespace),
-		isIgnored, isTrusted, true, true)
+		isIgnored, isTrusted, true, true,
+		settings.ContainerizedHooksEnabled)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	if len(allHooks) == 0 {
@@ -950,7 +964,25 @@ func showTrustPrompt(
 	}
 }
 
+func applyEnvToArgs(hs *hooks.Hooks, env []string) {
+	hs.Map(func(h *hooks.Hook) {
+		h.ApplyEnvironmentToArgs(env)
+	})
+}
+
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
+
+	// Containerized executions need this.
+	if settings.ContainerizedHooksEnabled {
+		applyEnvToArgs(hs, hooks.FilterGithooksEnvs(settings.ExecX.GetEnv()))
+	}
+
+	if cm.IsDebug {
+		logBatches("Local Hooks", hs.LocalHooks)
+		logBatches("Repo Shared Hooks", hs.RepoSharedHooks)
+		logBatches("Local Shared Hooks", hs.LocalSharedHooks)
+		logBatches("Global Shared Hooks", hs.GlobalSharedHooks)
+	}
 
 	var nThreads = runtime.NumCPU()
 	nThSetting := settings.GitX.GetConfig(hooks.GitCKNumThreads, git.Traverse)
@@ -983,8 +1015,8 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.LocalHooks) != 0,
-		"Launching '%v' local hooks [threads: '%v'] ...",
-		hs.LocalHooks.CountFmt(), nThreads)
+		"Launching '%v' local hooks [type: '%s', threads: '%v'] ...",
+		hs.LocalHooks.CountFmt(), settings.HookName, nThreads)
 
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalHooks,
@@ -994,8 +1026,8 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.RepoSharedHooks) != 0,
-		"Launching '%v' repository shared hooks [threads: '%v']...",
-		hs.RepoSharedHooks.CountFmt(), nThreads)
+		"Launching '%v' repository shared hooks [type: '%s', threads: '%v']...",
+		hs.RepoSharedHooks.CountFmt(), settings.HookName, nThreads)
 
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.RepoSharedHooks,
@@ -1005,8 +1037,9 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.LocalSharedHooks) != 0,
-		"Launching '%v' local shared hooks [threads: '%v']...",
-		hs.LocalSharedHooks.CountFmt(), nThreads)
+		"Launching '%v' local shared hooks [type: '%s', threads: '%v']...",
+		hs.LocalSharedHooks.CountFmt(), settings.HookName, nThreads)
+
 	results, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.LocalSharedHooks,
 		results, logHookResults,
@@ -1015,8 +1048,8 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	log.InfoIfF(
 		len(hs.GlobalSharedHooks) != 0,
-		"Launching '%v' global shared hooks [threads: '%v']...",
-		hs.GlobalSharedHooks.CountFmt(), nThreads)
+		"Launching '%v' global shared hooks [type: '%s', threads: '%v']...",
+		hs.GlobalSharedHooks.CountFmt(), settings.HookName, nThreads)
 
 	_, err = hooks.ExecuteHooksParallel(
 		pool, &settings.ExecX, hs.GlobalSharedHooks,
@@ -1026,18 +1059,26 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 }
 
 func logHookResults(res ...hooks.HookResult) {
+	hadErrors := false
+	var sb strings.Builder
+
 	for _, r := range res {
 		if r.Error == nil {
 			if len(r.Output) != 0 {
 				_, _ = log.GetInfoWriter().Write(r.Output)
 			}
 		} else {
+			hadErrors = true
 			if len(r.Output) != 0 {
 				_, _ = log.GetErrorWriter().Write(r.Output)
 			}
-			log.AssertNoErrorPanicF(r.Error, "Hook '%s' failed!",
-				r.Hook.GetString())
+			log.AssertNoErrorF(r.Error, "Hook '%s' failed!", r.Hook.Path)
+			_, _ = strs.FmtW(&sb, "\n%s '%s'", cm.ListItemLiteral, r.Hook.NamespacePath)
 		}
+	}
+
+	if hadErrors {
+		log.PanicF("Some hooks failed, check output for details:\n%s", sb.String())
 	}
 }
 

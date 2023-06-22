@@ -41,6 +41,17 @@ func (e *shellWrappedExecutable) GetEnvironment() []string {
 	return e.Env
 }
 
+// ApplyEnvironmentToArgs applies env. variables to the arguments.
+func (e *shellWrappedExecutable) ApplyEnvironmentToArgs(env []string) {
+	// Dont to anything, since normal commands dont need this.
+}
+
+// GetExitCodeHelp gets help for any non-zero exit code if needed.
+func (e *shellWrappedExecutable) ResolveExitCode(exitCode int) string {
+	// Not needed for normal commands.
+	return ""
+}
+
 // GetDefaultRunner gets the default hook runner.
 // Because you cannot set a hook as executable on Windows and
 // there is no notion of a shebang in such an executable hook file

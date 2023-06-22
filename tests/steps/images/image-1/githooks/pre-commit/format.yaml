@@ -1,0 +1,5 @@
+cmd: githooks/pre-commit/.format.sh
+args:
+  - --banana
+image:
+  reference: "registry.com/dir/${namespace}-test-image-built:1.0.0"

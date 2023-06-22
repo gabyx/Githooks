@@ -28,6 +28,8 @@ const (
 	GitCKNumThreads        = "githooks.numThreads"
 
 	GitCKAliasHooks = "alias.hooks"
+
+	GitCKBuildImagesOnSharedUpdate = "githooks.buildImagesOnSharedUpdate"
 )
 
 // Git config keys for local config.
@@ -48,6 +50,10 @@ const (
 	GitCKSkipUntrustedHooks         = "githooks.skipUntrustedHooks"
 
 	GitCKRunnerIsNonInteractive = "githooks.runnerIsNonInteractive"
+
+	GitCKContainerizedHooksEnabled     = "githooks.containerizedHooksEnabled"
+	GitCKContainerManager              = "githooks.containerManager"
+	GitCKContainerImageUpdateAutomatic = "githooks.containerImageUpdateAutomatic"
 )
 
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
@@ -90,7 +96,11 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKSkipNonExistingSharedHooks,
 		GitCKSkipUntrustedHooks,
 
-		GitCKRunnerIsNonInteractive}
+		GitCKRunnerIsNonInteractive,
+
+		GitCKContainerManager,
+		GitCKContainerizedHooksEnabled,
+	}
 }
 
 // GetLocalGitConfigKeys gets all local git config keys relevant for Githooks.
@@ -108,7 +118,11 @@ func GetLocalGitConfigKeys() []string {
 		GitCKSkipNonExistingSharedHooks,
 		GitCKSkipUntrustedHooks,
 
-		GitCKRunnerIsNonInteractive}
+		GitCKRunnerIsNonInteractive,
+
+		GitCKContainerManager,
+		GitCKContainerizedHooksEnabled,
+	}
 }
 
 // var filterRegex = regexp.MustCompile(`^(githooks\.|alias.hooks|core.hook|init.template)`)

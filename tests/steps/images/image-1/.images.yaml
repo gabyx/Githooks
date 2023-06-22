@@ -1,0 +1,17 @@
+
+version: 1
+images:
+  registry.com/${namespace}-test-image:1.0.0:
+    pull:
+      reference: alpine:latest
+
+  ${namespace}-test-image:1.0.0:
+    pull:
+      reference: alpine:3.16
+
+  registry.com/dir/${namespace}-test-image-built:1.0.0:
+    build:
+      dockerfile: ./docker/Dockerfile.test
+      stage: stage2
+      context: ./docker
+
