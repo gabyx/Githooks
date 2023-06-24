@@ -216,6 +216,37 @@ func runSearchDir(ctx *ccm.CmdContext, opts *SetOptions) {
 	}
 }
 
+func runContainerizedHooksEnable(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	opt := hooks.GitCKContainerizedHooksEnabled
+	localOrGlobal := "locally" // nolint: goconst
+	if gitOpts.Global {
+		localOrGlobal = "globally" // nolint: goconst
+	}
+
+	scope := wrapToGitScope(ctx.Log, gitOpts)
+	switch {
+	case opts.Set:
+		err := ctx.GitX.SetConfig(opt, git.GitCVTrue, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not set Git config '%s'.", opt)
+		ctx.Log.InfoF("Running hooks containerized is now enabled %s.", localOrGlobal)
+
+	case opts.Reset:
+		err := ctx.GitX.UnsetConfig(opt, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not unset Git config '%s'.", opt)
+		ctx.Log.InfoF("Running hooks containerized is now disabled %s.", localOrGlobal)
+
+	case opts.Print:
+		conf := ctx.GitX.GetConfig(opt, scope)
+		if conf == git.GitCVTrue {
+			ctx.Log.InfoF("Running hooks containerized is enabled %s.", localOrGlobal)
+		} else {
+			ctx.Log.InfoF("Running hooks containerized is disabled %s.", localOrGlobal)
+		}
+	default:
+		cm.Panic("Wrong arguments.")
+	}
+}
+
 func runSharedRepos(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	opt := hooks.GitCKShared
 
@@ -668,6 +699,32 @@ LFS hooks and replaced previous hooks are still executed by Githooks.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, disableCmd))
 }
 
+func configContainerizedHooksEnabledCmd(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions) {
+
+	enableCmd := &cobra.Command{
+		Use:   "enable-containerized-hooks [flags]",
+		Short: "Enable running hooks containerized.",
+		Long:  `Enable running hooks containerized over a container manager.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if !gitOpts.Local && !gitOpts.Global {
+				gitOpts.Local = true
+			}
+
+			runContainerizedHooksEnable(ctx, setOpts, gitOpts)
+		}}
+
+	optsPSR := createOptionMap(true, false, true)
+
+	configSetOptions(enableCmd, setOpts, &optsPSR, ctx.Log, 0, 0)
+	enableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
+	enableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, enableCmd))
+}
+
 func configSearchDirCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
 	searchDirCmd := &cobra.Command{
@@ -1017,6 +1074,8 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configUpdateTimeCmd(ctx, configCmd, &setOpts)
 	configCloneURLCmd(ctx, configCmd, &setOpts)
 	configCloneBranchCmd(ctx, configCmd, &setOpts)
+
+	configContainerizedHooksEnabledCmd(ctx, configCmd, &setOpts, &gitOpts)
 
 	configSharedCmd(ctx, configCmd, &setOpts, &gitOpts)
 	configDisableSharedHooksUpdate(ctx, configCmd, &setOpts, &gitOpts)

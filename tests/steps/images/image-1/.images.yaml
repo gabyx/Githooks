@@ -15,3 +15,7 @@ images:
       stage: stage2
       context: ./docker
 
+  registry.com/dir/${namespace}-test-image-built:1.2.0:
+    build:
+      dockerfile: ./docker/Dockerfile.test
+      context: ./docker

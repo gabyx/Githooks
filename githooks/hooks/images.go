@@ -197,7 +197,7 @@ func UpdateImages(
 	nPulls := 0
 
 	if exists, _ := cm.IsPathExisting(configFile); !exists {
-		log.DebugF("No images config existing '%s'. Skip updating images.", configFile)
+		log.InfoF("No images config existing '%s'. Skip updating images.", configFile)
 
 		return
 	}

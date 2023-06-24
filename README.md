@@ -685,11 +685,11 @@ You can run hooks containerized over a container manager such as `docker`
 maintainer of a Githooks shared repo from dealing with _"It works on my
 machine!"_
 
-To enable containerized hook runs set the Git config variable
-`githooks.containerizedHooksEnabled` either locally or globally with
+To enable containerized hook runs set the Git config variable either locally or
+globally with
 
 ```shell
-git config [--global] githooks.containerizedHooksEnabled true
+git hooks config enable-containerized-hooks [--global] --set
 ```
 
 to `true` or use the environment variable
