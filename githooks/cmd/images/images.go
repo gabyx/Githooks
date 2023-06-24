@@ -19,7 +19,7 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 	}
 
 	hooksDir := hooks.GetGithooksDir(repoDir)
-	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, "")
+	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile)
 	ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", hooksDir)
 
 	if strs.IsNotEmpty(imagesFile) {
