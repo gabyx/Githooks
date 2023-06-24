@@ -45,13 +45,19 @@ func (m *ManagerDocker) ImageBuild(
 	stage string,
 	ref string) (string, error) {
 
-	return m.cmdCtx.GetCombined(
+	cmd := []string{
 		"build",
 		"-f", dockerfile,
 		"-t", ref,
-		"--label", strs.Fmt("githooks-version=%v", build.GetBuildVersion().String()),
-		"--target",
-		stage, context)
+		"--label", strs.Fmt("githooks-version=%v", build.GetBuildVersion().String())}
+
+	if strs.IsNotEmpty(stage) {
+		cmd = append(cmd, "--target", stage)
+	}
+
+	cmd = append(cmd, context)
+
+	return m.cmdCtx.GetCombined(cmd...)
 }
 
 // ImageExists checks if the image with reference `ref` exists.
