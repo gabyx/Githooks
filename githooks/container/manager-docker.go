@@ -91,7 +91,7 @@ func (m *ManagerDocker) NewHookRunExec(
 	// The repository where the hook runs.
 	mntWSSrc := workspaceDir
 	mntWSDest := "/mnt/workspace"
-	mntWSSharedSrc := workspaceHookDir
+	mntWSSharedSrc := path.Dir(workspaceHookDir)
 	mntWSSharedDest := "/mnt/shared"
 
 	if hostPath := os.Getenv(EnvVariableContainerWorkspaceHostPath); strs.IsNotEmpty(hostPath) {
