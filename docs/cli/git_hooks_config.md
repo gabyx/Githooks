@@ -24,6 +24,7 @@ git hooks config
 * [git hooks config delete-detected-lfs-hooks](git_hooks_config_delete-detected-lfs-hooks.md)	 - Change the behavior for detected LFS hooks during install.
 * [git hooks config disable](git_hooks_config_disable.md)	 - Disables Githooks in the current repository or globally.
 * [git hooks config disable-shared-hooks-update](git_hooks_config_disable-shared-hooks-update.md)	 - Disable/enable automatic updates of shared hooks.
+* [git hooks config enable-containerized-hooks](git_hooks_config_enable-containerized-hooks.md)	 - Enable running hooks containerized.
 * [git hooks config list](git_hooks_config_list.md)	 - Lists settings of the Githooks configuration.
 * [git hooks config non-interactive-runner](git_hooks_config_non-interactive-runner.md)	 - Enables/disables non-interactive execution of the runner.
 * [git hooks config search-dir](git_hooks_config_search-dir.md)	 - Changes the search directory used during installation.
