@@ -186,7 +186,7 @@ func UpdateImages(
 	hooksDir string,
 	configFile string) (err error) {
 
-	if strs.IsNotEmpty(configFile) {
+	if strs.IsEmpty(configFile) {
 		configFile = GetRepoImagesFile(hooksDir)
 	}
 
