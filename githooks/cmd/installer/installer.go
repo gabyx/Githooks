@@ -69,7 +69,7 @@ var MaintainedHooksDesc = "Any argument can be a hook name '<hookName>', 'all' o
 	"to all hook names if 'all' or 'server' is not given as first argument:\n" +
 	"  - 'all' : All hooks supported by Githooks.\n" +
 	"  - 'server' : Only server hooks supported by Githooks.\n" +
-	"You can list them seperatly or comma-separated in one argument."
+	"You can list them separately or comma-separated in one argument."
 
 func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	// Internal commands
@@ -87,7 +87,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 
 	// User commands
 	cmd.PersistentFlags().Bool("dry-run", false,
-		"Dry run the installation showing whats being done.")
+		"Dry run the installation showing what's being done.")
 	cmd.PersistentFlags().Bool(
 		"non-interactive", false,
 		"Run the installation non-interactively\n"+
@@ -141,7 +141,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().StringSlice(
 		"build-tags", nil,
 		"Build tags for building from source (get extended with defaults).\n"+
-			"You can list them seperatly or comma-separated in one argument.")
+			"You can list them separately or comma-separated in one argument.")
 
 	cmd.PersistentFlags().Bool(
 		"use-pre-release", false,
@@ -273,7 +273,7 @@ func buildFromSource(
 	branch string,
 	commitSHA string) updates.Binaries {
 
-	log.Info("Building binaries from source ...")
+	log.Info("Building binaries from source at commit '%s'.", commitSHA)
 
 	// Clone another copy of the release clone into temporary directory
 	log.InfoF("Clone to temporary build directory '%s'", tempDir)
@@ -395,6 +395,9 @@ func runInstallDispatched(
 			"Could not get status of release clone '%s'",
 			settings.CloneDir)
 
+		cm.PanicIfF(!status.IsUpdateAvailable,
+			"An autoupdate should only be triggered when and update is found.")
+
 	} else {
 		log.Info("Fetching update in Githooks clone...")
 		status, err = updates.FetchUpdates(
@@ -413,22 +416,18 @@ func runInstallDispatched(
 		log.DebugF("Status: %v", status)
 	}
 
-	cm.PanicIfF(args.InternalAutoUpdate && !status.IsUpdateAvailable,
-		"An autoupdate should only be triggered when and update is found.")
-
 	installer := hooks.GetInstallerExecutable(settings.InstallDir)
 	haveInstaller := cm.IsFile(installer.Cmd)
+
+	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
+	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
 
 	// We download/build the binaries if an update is available
 	// or the installer is missing.
 	binaries := updates.Binaries{}
 
-	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
-	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
-
 	if status.IsUpdateAvailable || !haveInstaller {
-
-		log.Info("Getting Githooks binaries ...")
+		log.Info("Getting Githooks binaries at version '%s' ...", status.UpdateTag)
 
 		tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
 		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
@@ -441,7 +440,6 @@ func runInstallDispatched(
 			gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
 
 		if buildFromSrc {
-			log.Info("Building from source...")
 			binaries = buildFromSource(
 				log,
 				cleanUpX,
@@ -449,21 +447,14 @@ func runInstallDispatched(
 				tempDir,
 				status.RemoteURL,
 				status.Branch,
-				status.RemoteCommitSHA)
+				status.UpdateCommitSHA)
 		}
 
 		// We need to run deploy code too when running coverage because
 		// it builds a non-instrumented binary.
 		if !buildFromSrc || IsRunningCoverage {
-			tag := status.UpdateTag
-			if strs.IsEmpty(tag) {
-				tag = status.LocalTag
-			}
-
-			log.InfoF("Download '%s' from deploy source...", tag)
-
 			deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
-			binaries = downloadBinaries(log, deploySettings, tempDir, tag)
+			binaries = downloadBinaries(log, deploySettings, tempDir, status.UpdateTag)
 		}
 
 		installer.Cmd = binaries.Cli
@@ -482,7 +473,8 @@ func runInstallDispatched(
 		return false, nil
 	}
 
-	log.PanicIfF(!cm.IsFile(installer.Cmd), "Githooks executable '%s' is not existing.", installer)
+	log.PanicIfF(!cm.IsFile(installer.Cmd),
+		"Githooks executable '%s' is not existing.", installer)
 
 	return true, runInstaller(log, &installer, &args)
 }
@@ -1173,7 +1165,7 @@ func storeSettings(log cm.ILogContext, settings *Settings, uiSettings *install.U
 func updateClone(log cm.ILogContext, cloneDir string, updateToSHA string) {
 
 	if strs.IsEmpty(updateToSHA) {
-		return // We don't need to update the relase clone.
+		return // We don't need to update the release clone.
 	}
 
 	commitSHA, err := updates.MergeUpdates(cloneDir, false)

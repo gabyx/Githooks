@@ -15,7 +15,7 @@ git hooks installer [flags]
 
 ```
       --log string                   Log file path (only for installer).
-      --dry-run                      Dry run the installation showing whats being done.
+      --dry-run                      Dry run the installation showing what's being done.
       --non-interactive              Run the installation non-interactively
                                      without showing prompts.
       --skip-install-into-existing   Skip installation into existing repositories
@@ -30,7 +30,7 @@ git hooks installer [flags]
                                      to all hook names if `all` or `server` is not given as first argument:
                                        - `all` : All hooks supported by Githooks.
                                        - `server` : Only server hooks supported by Githooks.
-                                     You can list them seperatly or comma-separated in one argument.
+                                     You can list them separately or comma-separated in one argument.
       --use-core-hookspath           If the install mode `core.hooksPath` should be used.
       --clone-url string             The clone url from which Githooks should clone
                                      and install/update itself. Githooks tries to
@@ -47,7 +47,7 @@ git hooks installer [flags]
       --build-from-source            If the binaries are built from source instead of
                                      downloaded from the deploy url.
       --build-tags strings           Build tags for building from source (get extended with defaults).
-                                     You can list them seperatly or comma-separated in one argument.
+                                     You can list them separately or comma-separated in one argument.
       --use-pre-release              When fetching the latest installer, also consider pre-release versions.
   -h, --help                         help for installer
 ```
