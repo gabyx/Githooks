@@ -392,7 +392,7 @@ ssh://user@github.com/shared/special-hooks.git@v3.3.3
 /opt/myspecialhooks
 ```
 
-### Shared Demo Repositories
+### Example Githooks Repositories
 
 The following present some shared hook repositories to get you started with:
 
@@ -716,11 +716,13 @@ git hooks config enable-containerized-hooks [--global] --set
 to `true` or use the environment variable
 `GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true`.
 
-This is achieved by specifying the image reference (image name) inside a
-[hook run configuration](#hook-run-configuration), e.g.
+Running a hook in a container is achieved by specifying the image reference
+(image name) inside a [hook run configuration](#hook-run-configuration), e.g.
 `<hooksDir>/pre-commit/myhook.yaml`. This works for normal repositories as well
-as for shared Githooks repositories. For a shared repository, the file
-`sharedRepo/githooks/pre-commit/checkit.yaml` might look like
+as for shared Githooks repositories.
+
+For a shared repository, the file `sharedRepo/githooks/pre-commit/checkit.yaml`
+might look like
 
 ```yaml
 version: 3
