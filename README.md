@@ -31,6 +31,12 @@ repositories.
 
 - Running repository checked-in hooks.
 - Running shared hooks from other Git repositories (with auto-update).
+  - See these containerized demo hook repositories for:
+    [Shell](https://github.com/gabyx/githooks-shell),
+    [Python](https://github.com/gabyx/githooks-python),
+    [C++](https://github.com/gabyx/githooks-cpp),
+    [Configuration Files](https://github.com/gabyx/githooks-configs),
+    [Documentation](https://github.com/gabyx/githooks-docs).
 - Git LFS support.
 - **No** _it works on my machine_ by
   [running hooks over containers](#running-hooks-in-containers) and
@@ -57,9 +63,10 @@ repositories.
   - [Parallel Execution](#parallel-execution)
 - [Supported Hooks](#supported-hooks)
 - [Git Large File Storage (Git LFS) Support](#git-large-file-storage-git-lfs-support)
-- [Shared hook repositories](#shared-hook-repositories)
+- [Shared Hook Repositories](#shared-hook-repositories)
   - [Global Configuration](#global-configuration)
   - [Local Configuration](#local-configuration)
+  - [Shared Demo Repositories](#shared-demo-repositories)
   - [Repository Configuration](#repository-configuration)
   - [Supported URLS](#supported-urls)
   - [Skip Non-Existing Shared Hooks](#skip-non-existing-shared-hooks)
@@ -70,8 +77,11 @@ repositories.
 - [Disabling Githooks](#disabling-githooks)
 - [Environment Variables](#environment-variables)
 - [Arguments to Shared Hooks](#arguments-to-shared-hooks)
-- [Log & Traces](#log--traces)
+- [Log \& Traces](#log--traces)
 - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
+- [Running Hooks in Containers](#running-hooks-in-containers)
+  - [Pull and Build Integration](#pull-and-build-integration)
+- [Locate Githooks Container Images](#locate-githooks-container-images)
 - [User Prompts](#user-prompts)
 - [Installation](#installation)
   - [Normal Installation](#normal-installation)
@@ -94,13 +104,13 @@ repositories.
   - [Dependencies](#dependencies)
 - [Tests and Debugging](#tests-and-debugging)
   - [Debugging in the Dev Container](#debugging-in-the-dev-container)
-  - [Todos:](#todos)
+  - [Todos](#todos)
 - [Changelog](#changelog)
   - [Version v2.x.x](#version-v2xx)
 - [FAQ](#faq)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
-- [Support & Donation](#support--donation)
+- [Support \& Donation](#support--donation)
 - [License](#license)
 
 <!-- /TOC -->
@@ -380,6 +390,16 @@ $ git config --local --get-all githooks.shared # shared hooks in local config (f
 ssh://user@github.com/shared/special-hooks.git@v3.3.3
 /opt/myspecialhooks
 ```
+
+### Shared Demo Repositories
+
+The following present some shared hook repositories to get you started with:
+
+- [Shell](https://github.com/gabyx/githooks-shell)
+- [Python](https://github.com/gabyx/githooks-python)
+- [C++](https://github.com/gabyx/githooks-cpp)
+- [Configuration Files](https://github.com/gabyx/githooks-configs)
+- [Documentation](https://github.com/gabyx/githooks-docs)
 
 ### Repository Configuration
 
