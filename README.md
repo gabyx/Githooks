@@ -66,7 +66,7 @@ repositories.
 - [Shared Hook Repositories](#shared-hook-repositories)
   - [Global Configuration](#global-configuration)
   - [Local Configuration](#local-configuration)
-  - [Shared Demo Repositories](#shared-demo-repositories)
+  - [Example Githooks Repositories](#example-githooks-repositories)
   - [Repository Configuration](#repository-configuration)
   - [Supported URLS](#supported-urls)
   - [Skip Non-Existing Shared Hooks](#skip-non-existing-shared-hooks)
