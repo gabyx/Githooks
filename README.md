@@ -141,6 +141,7 @@ Take this snippet of a Git repository layout as an example:
 │    │   ├── .all-parallel    # All hooks in this folder run in parallel.
 │    │   └── ...
 │    ├── ...
+│    ├── .images.yaml         # Container image spec for use in e.g `03-test.yaml`.
 │    ├── .ignore.yaml         # Main ignores.
 │    ├── .shared.yaml         # Shared hook configuration.
 │    ├── .envs.yaml           # Environment variables passed to shared hooks.
