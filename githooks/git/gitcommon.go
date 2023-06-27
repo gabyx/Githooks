@@ -125,7 +125,6 @@ func (c *Context) GetGitDirWorktree() (gitDir string, err error) {
 // absolute Git directory in a bare repository for `topLevel`.
 // This is the root level for Githooks.
 // The `gitDir` is the common Git directory (main Git dir for worktrees).
-//
 func (c *Context) GetRepoRoot() (topLevel string, gitDir string, gitDirWorktree string, err error) {
 	if gitDir, err = c.GetGitDirCommon(); err != nil {
 		return
@@ -293,7 +292,7 @@ func (c *Context) Pull(remote string) error {
 // This command sadly does not automatically (git 2.30) fetch the tags on this branch
 // automatically. Use `tagPattern` to specify explicitly which tags to fetch.
 func (c *Context) FetchBranch(remote string, branch string, tagPattern string) error {
-	cmd := []string{"fetch", "--prune", "--no-tags", remote, branch}
+	cmd := []string{"fetch", "--force", "--prune", "--no-tags", remote, branch}
 
 	if strs.IsNotEmpty(tagPattern) {
 		cmd = append(cmd, "tag", tagPattern)
