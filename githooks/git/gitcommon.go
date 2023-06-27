@@ -292,7 +292,7 @@ func (c *Context) Pull(remote string) error {
 // This command sadly does not automatically (git 2.30) fetch the tags on this branch
 // automatically. Use `tagPattern` to specify explicitly which tags to fetch.
 func (c *Context) FetchBranch(remote string, branch string, tagPattern string) error {
-	cmd := []string{"fetch", "--force", "--prune", "--no-tags", remote, branch}
+	cmd := []string{"fetch", "--force", "--prune", "--prune-tags", "--no-tags", remote, branch}
 
 	if strs.IsNotEmpty(tagPattern) {
 		cmd = append(cmd, "tag", tagPattern)
