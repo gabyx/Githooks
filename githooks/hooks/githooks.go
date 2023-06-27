@@ -14,6 +14,7 @@ import (
 
 // HooksDirName denotes the directory name used for repository specific hooks.
 const HooksDirName = ".githooks"
+const HooksDirNameShared = "githooks"
 
 // GithooksWebpage is the main Githooks webpage.
 const GithooksWebpage = "https://github.com/gabyx/githooks"
@@ -150,7 +151,7 @@ func GetSharedGithooksDir(repoDir string) (dir string) {
 	// This is second, to allow internal development Githooks inside shared repos.
 	// 3. Fallback to the whole repository.
 
-	if dir = path.Join(repoDir, "githooks"); cm.IsDirectory(dir) {
+	if dir = path.Join(repoDir, HooksDirNameShared); cm.IsDirectory(dir) {
 		return
 	} else if dir = GetGithooksDir(repoDir); cm.IsDirectory(dir) {
 		return
