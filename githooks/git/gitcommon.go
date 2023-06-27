@@ -295,7 +295,7 @@ func (c *Context) FetchBranch(remote string, branch string, tagPattern string) e
 	cmd := []string{"fetch", "--force", "--prune", "--prune-tags", "--no-tags", remote, branch}
 
 	if strs.IsNotEmpty(tagPattern) {
-		cmd = append(cmd, "tag", tagPattern)
+		cmd = append(cmd, strs.Fmt("refs/tags/%s:refs/tags/%s", tagPattern, tagPattern))
 	}
 
 	out, e := c.GetCombined(cmd...)
