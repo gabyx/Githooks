@@ -254,18 +254,9 @@ single YAML file for all hooks. The reason is that each hook invocation by Git
 is separate. Avoiding reading this total file several times needs time and since
 we want speed and only an opt-in solution this is avoided.
 
-### Exported Environment Variables
-
-Githooks defines the following environment variables:
-
-- `STAGED_FILES` : All staged files, applicable to hooks: `pre-commit`,
-  `prepare-commit-msg` and `commit-msg`.
-- `GITHOOKS_OS` : The runtime operating system, applicable to all hooks.
-  [See this list](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
-- `GITHOOKS_ARCH` : The runtime operating architecture, applicable to all hooks.
-  [See this list](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
-- `GITHOOKS_CONTAINER_RUN` : If a hook is run over a container, this variable is
-  set and `true`.
+Githooks defines the
+[environment variables in this table](#environment-variables) on hooks
+invocation.
 
 ### Parallel Execution
 
@@ -642,12 +633,13 @@ not globally be defined.
 | `GITHOOKS_OS` (defined by Githooks)            | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
 | `GITHOOKS_ARCH` (defined by Githooks)          | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
 | `STAGED_FILES` (defined by Githooks)           | All staged files. Only set in `pre-commit`, `prepare-commit-msg` and `commit-msg` hook.                                   |
+| `GITHOOKS_CONTAINER_RUN` (defined by Githooks) | If a hook is run over a container, this variable is set and `true`                                                        |
 | `GITHOOKS_DISABLE`                             | If defined, disables running hooks run by Githooks,<br>except `git lfs` and the replaced old hooks.                       |
 | `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution. A value of `1` enables more output.                     |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
 | `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).           |
 
-## Arguments to Shared Hooks
+### Arguments to Shared Hooks
 
 You can pass arguments to shared hooks currently by specifying a
 [`.githooks/.envs.yaml`](#yaml-specifications) file which will export
