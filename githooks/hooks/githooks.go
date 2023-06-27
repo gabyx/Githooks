@@ -140,16 +140,35 @@ func CheckGithooksSetup(gitx *git.Context) (err error) {
 
 // GetGithooksDir gets the hooks directory for Githooks inside a repository (bare, non-bare).
 func GetGithooksDir(repoDir string) string {
+
+	// 0. priority has ".${GITHOOKS_HOOKS_DIR_NAME}"
+	// 1. priority has ".githooks"
+
+	if name := os.Getenv("GITHOOKS_HOOKS_DIR_NAME"); strs.IsNotEmpty(name) {
+		name = "." + strings.TrimPrefix(".", name) // nolint: gocritic
+		if dir := path.Join(repoDir, name); cm.IsDirectory(dir) {
+			return dir
+		}
+	}
+
 	return path.Join(repoDir, HooksDirName)
 }
 
 // GetSharedGithooksDir gets the hooks directory for Githooks inside a shared repository.
 func GetSharedGithooksDir(repoDir string) (dir string) {
 
+	// 0. priority has ".${GITHOOKS_HOOKS_DIR_NAME}"
 	// 1. priority has non-dot folder 'githooks'
 	// 2. priority is the normal '.githooks' folder.
 	// This is second, to allow internal development Githooks inside shared repos.
 	// 3. Fallback to the whole repository.
+
+	if name := os.Getenv("GITHOOKS_HOOKS_DIR_NAME"); strs.IsNotEmpty(name) {
+		name = strings.TrimPrefix(".", name) // nolint: gocritic
+		if dir = path.Join(repoDir, name); cm.IsDirectory(dir) {
+			return
+		}
+	}
 
 	if dir = path.Join(repoDir, HooksDirNameShared); cm.IsDirectory(dir) {
 		return
