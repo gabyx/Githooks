@@ -30,13 +30,8 @@ repositories.
 **This Git hook manager supports:**
 
 - Running repository checked-in hooks.
-- Running shared hooks from other Git repositories (with auto-update).
-  - See these containerized demo hook repositories for:
-    [Shell](https://github.com/gabyx/githooks-shell),
-    [Python](https://github.com/gabyx/githooks-python),
-    [C++](https://github.com/gabyx/githooks-cpp),
-    [Configuration Files](https://github.com/gabyx/githooks-configs),
-    [Documentation](https://github.com/gabyx/githooks-docs).
+- Running shared hooks from other Git repositories (with auto-update). See these
+  [containerized example hook repositories](#example-githooks-repositories).
 - Git LFS support.
 - **No** _it works on my machine_ by
   [running hooks over containers](#running-hooks-in-containers) and
@@ -385,13 +380,16 @@ ssh://user@github.com/shared/special-hooks.git@v3.3.3
 
 ### Example Githooks Repositories
 
-The following present some shared hook repositories to get you started with:
+Here are some shared hook repositories to get you started with:
 
 - [Shell](https://github.com/gabyx/githooks-shell)
 - [Python](https://github.com/gabyx/githooks-python)
 - [C++](https://github.com/gabyx/githooks-cpp)
 - [Configuration Files](https://github.com/gabyx/githooks-configs)
 - [Documentation](https://github.com/gabyx/githooks-docs)
+
+They are all fully containerized so you do not have to worry about requirements
+except `docker`.
 
 ### Repository Configuration
 
