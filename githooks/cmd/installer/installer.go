@@ -533,8 +533,10 @@ func findGitHookTemplates(
 	log.PanicIfF(haveInstall,
 		"Your installation is corrupt.\n"+
 			"The global Git config 'githooks.useCoreHooksPath = %v'\n"+
-			"is set but the corresponding hook templates directory\n"+
-			"is not found. Is 'core.hooksPath' unset?", installUsesCoreHooksPath)
+			"is set (you have an install) but the corresponding\n"+
+			"hook templates directory is not found.\n"+
+			"If 'false', is 'init.templateDir' unset?\n"+
+			"Or if 'true', is 'core.hooksPath' unset?", installUsesCoreHooksPath)
 
 	// 4. Try setup new folder if running non-interactively
 	// and no folder is found by now
