@@ -58,9 +58,9 @@ func setupReadme(
 			}
 
 			answer, err := uiSettings.PromptCtx.ShowOptions(
-				msg, "(No, yes, all, skip all)",
-				"N/y/a/s",
-				"No", "Yes", "All", "Skip All")
+				msg, "(Skip all, no, yes, all)",
+				"S/n/y/a",
+				"Skip All", "No", "Yes", "All")
 			log.AssertNoError(err, "Could not show prompt.")
 
 			switch answer {
