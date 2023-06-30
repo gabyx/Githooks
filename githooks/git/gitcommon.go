@@ -377,9 +377,9 @@ func FetchOrClone(
 	url string, branch string,
 	depth int,
 	tagPattern string,
-	repoCheck RepoCheck) (isNewClone bool, err error) {
+	repoCheck RepoCheck) (isNewClone bool, gitx *Context, err error) {
 
-	gitx := NewCtxSanitizedAt(repoPath)
+	gitx = NewCtxSanitizedAt(repoPath)
 
 	if gitx.IsGitRepo() {
 		isNewClone = false

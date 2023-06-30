@@ -247,7 +247,8 @@ func (c *Context) IsConfigSet(key string, scope ConfigScope) bool {
 func SanitizeEnv(env []string) []string {
 	return strs.Filter(env, func(s string) bool {
 		return !strings.Contains(s, "GIT_DIR") &&
-			!strings.Contains(s, "GIT_WORK_TREE")
+			!strings.Contains(s, "GIT_WORK_TREE") &&
+			!strings.Contains(s, "GIT_INDEX_FILE")
 	})
 }
 
@@ -256,6 +257,7 @@ func SanitizeEnv(env []string) []string {
 func SanitizeOsEnv() error {
 	err := os.Unsetenv("GIT_DIR")
 	err = cm.CombineErrors(err, os.Unsetenv("GIT_WORK_TREE"))
+	err = cm.CombineErrors(err, os.Unsetenv("GIT_INDEX_FILE"))
 
 	return err
 }

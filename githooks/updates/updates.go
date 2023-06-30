@@ -235,12 +235,10 @@ func FetchUpdates(
 	// Fetch the whole branch because we need it.
 	// The head could be in between tags which we avoid by this.
 	depth := -1
-	isNewClone, err := git.FetchOrClone(cloneDir, url, branch, depth, "v*", check)
+	isNewClone, gitx, err := git.FetchOrClone(cloneDir, url, branch, depth, "v*", check)
 	if err != nil {
 		return
 	}
-
-	gitx := git.NewCtxSanitizedAt(cloneDir)
 
 	// If branch was empty (default branch), determine it now.
 	if strs.IsEmpty(branch) {
