@@ -93,6 +93,9 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"Run the installation non-interactively\n"+
 			"without showing prompts.")
 	cmd.PersistentFlags().Bool(
+		"update-to-latest", false,
+		"Install and update directly to the latest tag.")
+	cmd.PersistentFlags().Bool(
 		"skip-install-into-existing", false,
 		"Skip installation into existing repositories\n"+
 			"defined by a search path.")
@@ -157,6 +160,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("dryRun", cmd.PersistentFlags().Lookup("dry-run")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
+	cm.AssertNoErrorPanic(
+		vi.BindPFlag("updateToLatest", cmd.PersistentFlags().Lookup("update-to-latest")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
 	cm.AssertNoErrorPanic(
@@ -419,55 +424,58 @@ func runInstallDispatched(
 	installer := hooks.GetInstallerExecutable(settings.InstallDir)
 	haveInstaller := cm.IsFile(installer.Cmd)
 
-	// We download/build the binaries if an update is available
-	// or the installer is missing.
-	binaries := updates.Binaries{}
-
 	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
 	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
 
-	if status.IsUpdateAvailable || !haveInstaller {
+	// We download/build the binaries always.
+	doUpdate := status.IsUpdateAvailable && (args.UpdateToLatest || args.InternalAutoUpdate)
+	tag := ""
+	commit := ""
 
-		log.Info("Getting Githooks binaries ...")
-
-		tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
-		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
-		cleanUpX.AddHandler(func() {
-			_ = os.RemoveAll(tempDir) // @todo does not remove write protected files (go build)
-		})
-		defer os.RemoveAll(tempDir)
-
-		buildFromSrc := args.BuildFromSource ||
-			gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
-
-		if buildFromSrc {
-			log.Info("Building from source...")
-			binaries = buildFromSource(
-				log,
-				cleanUpX,
-				args.BuildTags,
-				tempDir,
-				status.RemoteURL,
-				status.Branch,
-				status.RemoteCommitSHA)
-		}
-
-		// We need to run deploy code too when running coverage because
-		// it builds a non-instrumented binary.
-		if !buildFromSrc || IsRunningCoverage {
-			tag := status.UpdateTag
-			if strs.IsEmpty(tag) {
-				tag = status.LocalTag
-			}
-
-			log.InfoF("Download '%s' from deploy source...", tag)
-
-			deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
-			binaries = downloadBinaries(log, deploySettings, tempDir, tag)
-		}
-
-		installer.Cmd = binaries.Cli
+	if doUpdate {
+		tag = status.UpdateTag
+		commit = status.UpdateCommitSHA
+	} else {
+		tag = status.LocalTag
+		commit = status.LocalCommitSHA
 	}
+
+	binaries := updates.Binaries{}
+	log.InfoF("Getting Githooks binaries at version '%s' ...", status.UpdateTag)
+
+	tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
+	log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
+	cleanUpX.AddHandler(func() {
+		_ = os.RemoveAll(tempDir) // @todo does not remove write protected files (go build)
+	})
+	defer os.RemoveAll(tempDir)
+
+	buildFromSrc := args.BuildFromSource ||
+		gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
+
+	if buildFromSrc {
+		log.Info("Building from source...")
+		binaries = buildFromSource(
+			log,
+			cleanUpX,
+			args.BuildTags,
+			tempDir,
+			status.RemoteURL,
+			status.Branch,
+			commit)
+	}
+
+	// We need to run deploy code too when running coverage because
+	// it builds a non-instrumented binary.
+	if !buildFromSrc || IsRunningCoverage {
+
+		log.InfoF("Download '%s' from deploy source...", tag)
+
+		deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
+		binaries = downloadBinaries(log, deploySettings, tempDir, tag)
+	}
+
+	installer.Cmd = binaries.Cli
 
 	// Set variables for further update procedure...
 	// Note: `args` is passed by value.

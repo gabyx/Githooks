@@ -1,6 +1,6 @@
 package installer
 
-// Arguments repesents all CLI arguments for the installer.
+// Arguments represents all CLI arguments for the installer.
 type Arguments struct {
 	Config string
 
@@ -14,6 +14,8 @@ type Arguments struct {
 
 	DryRun         bool
 	NonInteractive bool
+
+	UpdateToLatest bool // Directly update to latest tag. Before `2.3.3` that was always true.
 
 	SkipInstallIntoExisting bool // Skip install into existing repositories.
 
