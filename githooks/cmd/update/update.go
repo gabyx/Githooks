@@ -36,7 +36,7 @@ func runUpdate(
 			func() error {
 
 				installer := installer.NewCmd(ctx)
-				args := []string{} // should not be empty, because of SetArgs
+				args := []string{"--update"}
 				if usePreRelease {
 					args = append(args, "--use-pre-release")
 				}

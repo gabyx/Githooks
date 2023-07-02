@@ -22,7 +22,7 @@ git hooks install [flags]
                                    to all hook names if `all` or `server` is not given as first argument:
                                      - `all` : All hooks supported by Githooks.
                                      - `server` : Only server hooks supported by Githooks.
-                                   You can list them seperatly or comma-separated in one argument.
+                                   You can list them separately or comma-separated in one argument.
       --non-interactive            Install non-interactively.
 ```
 

@@ -9,7 +9,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 ![Git Version](https://img.shields.io/badge/Git-%E2%89%A5v2.28.0,%20latest%20tests%20v2.36.1-blue)
-![Go Version](https://img.shields.io/badge/Go-1.17-blue)
+![Go Version](https://img.shields.io/badge/Go-1.20-blue)
 ![OS](https://img.shields.io/badge/OS-linux,%20macOs,%20Windows-blue)
 
 A **platform-independend hooks manager** written in Go to support shared hook
@@ -132,6 +132,8 @@ Take this snippet of a Git repository layout as an example:
 │    │        ├── 01-validate # Normal hook script.
 │    │        └── 02-upload   # Normal hook script.
 │    │
+│    ├── post-merge           # An executable file.
+│    │
 │    ├── post-checkout/       # All post-checkout hooks.
 │    │   ├── .all-parallel    # All hooks in this folder run in parallel.
 │    │   └── ...
@@ -147,12 +149,12 @@ Take this snippet of a Git repository layout as an example:
 All hooks to be executed live under the `.githooks` top-level folder, that
 should be checked into the repository. Inside, we can have directories with the
 name of the hook (like `commit-msg` and `pre-commit` above), or a file matching
-the hook name (like `post-checkout` in the example). The filenames in the
-directory do not matter, but the ones starting with a `.` (dotfiles) will be
-excluded by default. All others are executed in lexical order according to the
-Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk). rules.
-Subfolders as e.g. `final` get treated as parallel batch and all hooks inside
-are by default executed in parallel over the thread pool. See
+the hook name (like `post-merge` in the example). The filenames in the directory
+do not matter, but the ones starting with a `.` (dotfiles) will be excluded by
+default. All others are executed in lexical order according to the Go function
+[`Walk`](https://golang.org/pkg/path/filepath/#Walk) rules. Subfolders as e.g.
+`final` get treated as parallel batch and all hooks inside are by default
+executed in parallel over the thread pool. See
 [Parallel Execution](#parallel-execution) for details.
 
 You can use the [command line helper](docs/cli/git_hooks.md) (a globally
@@ -878,29 +880,62 @@ infastructure, docker container, etc...) and need to be disabled. Setting
 
 ## Installation
 
-- [Download the latest release](https://github.com/gabyx/githooks/releases),
-  extract it and execute the installer command by the below instructions.
+### Quick (Secure)
+
+Launch the below shell command. It will download the release from Github and
+launch the installer.
+
+**Note:** All downloaded files are checksum & signature checked.
+
+```shell
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash
+```
+
+See the next sections on different install options.
+
+**Note:** Use `bash -s -- -h` above to show the help message of the bootstrap
+script and `bash -s -- -- <options>` to pass arguments to the installer, e.g.
+`bash -s -- -- -h` to show the help.
+
+### Procedure
 
 The installer will:
 
+1. Download the current binaries if `--update` is not given. Optionally it can
+   use a deploy settings file to specify where to get the binaries from.
+   (default is this repository here.)
+
+1. Verify the checksums and signature of the downloaded binaries.
+
+1. Launch the current (or new if `--update` is given) installer which proceeds
+   with the next steps.
+
 1. Find out where the Git templates directory is.
+
    1. From the `$GIT_TEMPLATE_DIR` environment variable.
    2. With the `git config --get init.templateDir` command.
    3. Checking the default `/usr/share/git-core/templates` folder.
    4. Search on the filesystem for matching directories.
    5. Offer to set up a new one, and make it `init.templateDir`.
-2. Write all chosen Githooks run-wrappers into the chosen directory:
+
+1. Write all chosen Githooks run-wrappers into the chosen directory:
+
    - either `init.templateDir` or
    - `core.hooksPath` depending on the install mode `--use-core-hooks-path`.
-3. Offer to enable automatic update checks.
-4. Offer to find existing Git repositories on the filesystem (disable with
+
+1. Offer to enable automatic update checks.
+
+1. Offer to find existing Git repositories on the filesystem (disable with
    `--skip-install-into-existing`)
+
    1. Install run-wrappers into them (`.git/hooks`).
    2. Offer to add an intro README in their `.githooks` folder.
-5. Install/update run-wrappers into all registered repositories: Repositories
+
+1. Install/update run-wrappers into all registered repositories: Repositories
    using Githooks get registered in the install folders `registered.yaml` file
    on their first hook invocation.
-6. Offer to set up shared hook repositories.
+
+1. Offer to set up shared hook repositories.
 
 ### Normal Installation
 
@@ -912,7 +947,7 @@ Its advised to only install Githooks for a selection of the supported hooks by
 using `--maintained-hooks` as
 
 ```shell
-cli installer \
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --maintained-hooks "!all, pre-commit, pre-merge-commit, prepare-commit-msg, commit-msg, post-commit" \
     --maintained-hooks "pre-rebase, post-checkout, post-merge, pre-push"
 ```
@@ -926,7 +961,8 @@ If you want, you can try out what the script would do first, without changing
 anything by using:
 
 ```shell
-cli installer --dry-run
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --dry-run
 ```
 
 ### Install Mode: Centralized Hooks
@@ -937,7 +973,8 @@ and the default one [below](#templates-or-central-hooks). For this, run the
 command below.
 
 ```shell
-cli installer --use-core-hookspath
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --use-core-hookspath
 ```
 
 Optionally, you can also pass the template directory to which you want to
@@ -945,7 +982,9 @@ install the centralized hooks by appending `--template-dir <path>` to the
 command above, for example:
 
 ```shell
-cli installer --use-core-hookspath --template-dir /home/public/.githooks
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --use-core-hookspath
+    --template-dir /home/public/.githooks
 ```
 
 ### Install from different URL and Branch
@@ -955,7 +994,9 @@ companies fork), you can specify the repository clone url as well as the branch
 name (default: `main`) when installing with:
 
 ```shell
-cli installer --clone-url "https://server.com/my-githooks-fork.git" --clone-branch "release"
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --clone-url "https://server.com/my-githooks-fork.git" \
+    --clone-branch "release"
 ```
 
 The installer always maintains a Githooks clone inside `<installDir>/release`
@@ -1013,7 +1054,8 @@ The global install prefix defaults to `${HOME}` but can be changed by using the
 options `--prefix <installPrefix>`:
 
 ```shell
-cli installer --non-interactive [--prefix <installPrefix>]
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --non-interactive [--prefix <installPrefix>]
 ```
 
 It's possible to specify which template directory should be used, by passing the
@@ -1021,7 +1063,8 @@ It's possible to specify which template directory should be used, by passing the
 the templates to be installed.
 
 ```shell
-cli installer --template-dir "/home/public/.githooks-templates"
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --template-dir "/home/public/.githooks-templates"
 ```
 
 By default the script will install the hooks into the `~/.githooks/templates/`
@@ -1033,7 +1076,8 @@ On a server infrastructure where only _bare_ repositories are maintained, it is
 best to maintain only server hooks. This can be achieved by installing with:
 
 ```shell
-cli installer ---maintained-hooks "server"
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --maintained-hooks "server"
 ```
 
 The global template directory then **only** contains the following run-wrappers
@@ -1192,6 +1236,12 @@ If you want to get rid of this hook manager, you can execute the uninstaller
 
 ```shell
 git hooks uninstaller
+```
+
+or
+
+```shell
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- --uninstall
 ```
 
 This will delete the run-wrappers installed in the template directory,
