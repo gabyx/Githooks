@@ -9,7 +9,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT)
 [![GitHub Releases](https://img.shields.io/github/release/gabyx/githooks.svg)](https://github.com/gabyx/githooks/releases)
 ![Git Version](https://img.shields.io/badge/Git-%E2%89%A5v2.28.0,%20latest%20tests%20v2.36.1-blue)
-![Go Version](https://img.shields.io/badge/Go-1.17-blue)
+![Go Version](https://img.shields.io/badge/Go-1.20-blue)
 ![OS](https://img.shields.io/badge/OS-linux,%20macOs,%20Windows-blue)
 
 A **platform-independend hooks manager** written in Go to support shared hook
