@@ -252,29 +252,27 @@ func FetchUpdates(
 		return
 	}
 
-	if isNewClone {
-		// On a new clone we reset local branch
-		// to the matching current release tag descending from HEAD.
-		// Remote stays and might trigger a direct update.
+	// On a new clone we reset local branch
+	// to the matching current release tag descending from HEAD.
+	// Remote stays and might trigger a direct update.
 
-		// Check if current tag is reachable from HEAD.
-		reachable, e := git.IsRefReachable(gitx, "HEAD", tag)
-		if e != nil || !reachable {
-			err = cm.CombineErrors(
-				cm.ErrorF("Current version tag '%v' could not be found on branch '%s'",
-					build.BuildTag, branch), e)
+	// Check if current tag is reachable from HEAD.
+	reachable, e := git.IsRefReachable(gitx, "HEAD", tag)
+	if e != nil || !reachable {
+		err = cm.CombineErrors(
+			cm.ErrorF("Current version tag '%v' could not be found on branch '%s'",
+				build.BuildTag, branch), e)
 
-			return
-		}
+		return
+	}
 
-		e = gitx.Check("reset", "--hard", tag)
-		if e != nil {
-			err = cm.CombineErrors(
-				cm.ErrorF("Could not reset branch '%s' to tag '%s'",
-					branch, build.BuildTag), e)
+	e = gitx.Check("reset", "--hard", tag)
+	if e != nil {
+		err = cm.CombineErrors(
+			cm.ErrorF("Could not reset branch '%s' to tag '%s'",
+				branch, build.BuildTag), e)
 
-			return
-		}
+		return
 	}
 
 	resetRemoteTo := ""
