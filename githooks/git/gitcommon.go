@@ -243,7 +243,8 @@ func Init(repoPath string, bare bool) error {
 func Clone(repoPath string, url string, branch string, depth int) error {
 	// Its important to not use any template directory here to not
 	// install accidentally Githooks run-wrappers.
-	// We set the `core.hooksPath` explicitly to its internal hooks directory to not interfer
+	// We set the `core.hooksPath` explicitly to its internal
+	// hooks directory to not interfere
 	// with global settings.
 	// Also this installs LFS hooks, which comes handy for certain shared hook repos
 	// with prebuilt binaries.
@@ -402,9 +403,13 @@ func FetchOrClone(
 			return
 		}
 		err = Clone(repoPath, url, branch, depth)
-	} else {
-		err = gitx.FetchBranch("origin", branch, tagPattern)
 	}
+
+	if err != nil {
+		return
+	}
+
+	err = gitx.FetchBranch("origin", branch, tagPattern)
 
 	return
 }

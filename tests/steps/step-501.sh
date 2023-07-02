@@ -13,13 +13,16 @@ fi
 
 acceptAllTrustPrompts || exit 1
 
+# Misuse the 2.1.0 prod build with `benchmark` build to test.
+# but forbid update during commits otherwise the runner is overwritten.
 git -C "$GH_TEST_REPO" reset --hard v2.1.0 >/dev/null 2>&1 || exit 1
 
 # run the default install
 "$GH_TEST_BIN/cli" installer &>/dev/null || exit 1
 
 # Overwrite runner.
-git config --global "githooks.runner" "$GH_TEST_BIN/runner"
+git config --global githooks.autoUpdateEnabled false
+git config --global githooks.runner "$GH_TEST_BIN/runner"
 
 mkdir -p "$GH_TEST_TMP/test501" &&
     cd "$GH_TEST_TMP/test501" &&
@@ -40,6 +43,11 @@ function average() {
 
     local input
     input=$(cat | grep "execution time:" | sed -E "s/.*'([0-9\.]+)'.*/\1/g")
+    [ -n "$input" ] || {
+        echo "no time extracted"
+        exit 1
+    }
+
     # echo "$input"
 
     # Skip the first `$skip` runs, because it contains registration etc...
@@ -50,11 +58,12 @@ function average() {
         ((count++))
     done <<<"$input"
 
+    local time
     time=$(calc "$total" / "$count")
 
     echo "execution time: '$time' ms."
 }
 
-echo "Runtime average (no load): $(runCommits | average 3)"
+echo -e "Runtime average (no load):\n$(runCommits | average 3)"
 
 exit 250
