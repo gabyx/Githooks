@@ -132,6 +132,8 @@ Take this snippet of a Git repository layout as an example:
 │    │        ├── 01-validate # Normal hook script.
 │    │        └── 02-upload   # Normal hook script.
 │    │
+│    ├── post-merge           # An executable file.
+│    │
 │    ├── post-checkout/       # All post-checkout hooks.
 │    │   ├── .all-parallel    # All hooks in this folder run in parallel.
 │    │   └── ...
@@ -147,12 +149,12 @@ Take this snippet of a Git repository layout as an example:
 All hooks to be executed live under the `.githooks` top-level folder, that
 should be checked into the repository. Inside, we can have directories with the
 name of the hook (like `commit-msg` and `pre-commit` above), or a file matching
-the hook name (like `post-checkout` in the example). The filenames in the
-directory do not matter, but the ones starting with a `.` (dotfiles) will be
-excluded by default. All others are executed in lexical order according to the
-Go function [`Walk`](https://golang.org/pkg/path/filepath/#Walk). rules.
-Subfolders as e.g. `final` get treated as parallel batch and all hooks inside
-are by default executed in parallel over the thread pool. See
+the hook name (like `post-merge` in the example). The filenames in the directory
+do not matter, but the ones starting with a `.` (dotfiles) will be excluded by
+default. All others are executed in lexical order according to the Go function
+[`Walk`](https://golang.org/pkg/path/filepath/#Walk) rules. Subfolders as e.g.
+`final` get treated as parallel batch and all hooks inside are by default
+executed in parallel over the thread pool. See
 [Parallel Execution](#parallel-execution) for details.
 
 You can use the [command line helper](docs/cli/git_hooks.md) (a globally
