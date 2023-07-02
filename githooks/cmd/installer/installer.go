@@ -405,6 +405,7 @@ func runInstallDispatched(
 
 	} else {
 		log.Info("Fetching update in Githooks clone...")
+
 		status, err = updates.FetchUpdates(
 			settings.CloneDir,
 			args.CloneURL,
@@ -441,7 +442,7 @@ func runInstallDispatched(
 	}
 
 	binaries := updates.Binaries{}
-	log.InfoF("Getting Githooks binaries at version '%s' ...", status.UpdateTag)
+	log.InfoF("Getting Githooks binaries at version '%s' ...", tag)
 
 	tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
 	log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
