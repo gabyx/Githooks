@@ -111,7 +111,7 @@ func downloadBinaries(
 	log.PanicIfF(deploySettings == nil,
 		"Could not determine deploy settings.")
 
-	err := deploySettings.Download(versionTag, tempDir)
+	err := deploySettings.Download(log, versionTag, tempDir)
 	log.AssertNoErrorPanicF(err, "Could not download binaries.")
 
 	ext := ""

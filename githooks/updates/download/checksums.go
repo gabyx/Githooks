@@ -9,9 +9,9 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 )
 
-// verifyChecksums verifies checksums with the signature and the public key, and returns
+// verifyChecksumSignature verifies checksums with the signature and the public key, and returns
 // the checksums content.
-func verifyChecksums(checksums Checksums, publicPGP string) ([]byte, error) {
+func verifyChecksumSignature(checksums Checksums, publicPGP string) ([]byte, error) {
 
 	checksumFile, err := GetFile(checksums.File.URL)
 	if err != nil {

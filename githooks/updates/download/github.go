@@ -27,14 +27,20 @@ type GithubDeploySettings struct {
 }
 
 // Download downloads the version with `versionTag` to `dir` from a Github instance.
-func (s *GithubDeploySettings) Download(versionTag string, dir string) error {
-	return downloadGithub(s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
+func (s *GithubDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
+	return downloadGithub(log, s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
 }
 
 // Downloads the Githooks release with tag `versionTag` and
 // extracts the matched asset into `dir`.
 // The assert matches the OS and architecture of the current runtime.
-func downloadGithub(owner string, repo string, versionTag string, dir string, publicPGP string) error {
+func downloadGithub(
+	log cm.ILogContext,
+	owner string,
+	repo string,
+	versionTag string,
+	dir string,
+	publicPGP string) error {
 
 	client := github.NewClient(nil)
 	rel, _, err := client.Repositories.GetReleaseByTag(context.Background(),
@@ -58,13 +64,15 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 			cm.ErrorF("Could not select asset in repo '%s/%s' at tag '%s'.", owner, repo, versionTag))
 	}
 
-	checksumData, err := verifyChecksums(checksums, publicPGP)
+	log.InfoF("Verify checksum file '%s'.", checksums.File.URL)
+	checksumData, err := verifyChecksumSignature(checksums, publicPGP)
 	if err != nil {
 		return cm.CombineErrors(err,
 			cm.ErrorF("Signature verification of update failed."+
 				"Something is fishy!"))
 	}
 
+	log.InfoF("Downloading file '%s'.", target.URL)
 	response, err := GetFile(target.URL)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
@@ -88,6 +96,7 @@ func downloadGithub(owner string, repo string, versionTag string, dir string, pu
 	temp.Close()
 
 	// Validate checksum.
+	log.InfoF("Validate checksums.")
 	err = checkChecksum(temp.Name(), checksumData)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Checksum validation failed."))
