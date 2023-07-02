@@ -21,7 +21,7 @@ checkTodo() {
 }
 
 for file in $STAGED_FILES; do
-    if echo "$file" | grep -qvE '(cover/|pre-commit/no-todo-or-fixme|\.md)'; then
+    if echo "$file" | grep -qvE '(cover/|pre-commit/no-todo-or-fixme|\.md|\.devcontainer/\.p10k)'; then
         checkTodo "$file"
     fi
 done
