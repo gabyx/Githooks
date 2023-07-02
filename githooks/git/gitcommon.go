@@ -410,6 +410,7 @@ func FetchOrClone(
 	}
 
 	err = gitx.FetchBranch("origin", branch, tagPattern)
+
 	return
 }
 
