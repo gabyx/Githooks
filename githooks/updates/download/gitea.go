@@ -62,7 +62,7 @@ func downloadGitea(
 			cm.ErrorF("Could not select asset in repo '%s/%s' at tag '%s'.", owner, repo, versionTag))
 	}
 
-	log.InfoF("Verify checksum file '%s'.", checksums.File.URL)
+	log.InfoF("Verify signature of checksum file '%s'.", checksums.File.URL)
 	checksumData, err := verifyChecksumSignature(checksums, publicPGP)
 	if err != nil {
 		return cm.CombineErrors(err,
