@@ -21,14 +21,21 @@ type GiteaDeploySettings struct {
 }
 
 // Download downloads the version with `versionTag` into `dir` from a Gitea instance.
-func (s *GiteaDeploySettings) Download(versionTag string, dir string) error {
-	return downloadGitea(s.APIUrl, s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
+func (s *GiteaDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
+	return downloadGitea(log, s.APIUrl, s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
 }
 
 // Downloads the Githooks release with tag `versionTag` and
 // extracts the matched asset into `dir`.
 // The assert matches the OS and architecture of the current runtime.
-func downloadGitea(url string, owner string, repo string, versionTag string, dir string, publicPGP string) error {
+func downloadGitea(
+	log cm.ILogContext,
+	url string,
+	owner string,
+	repo string,
+	versionTag string,
+	dir string,
+	publicPGP string) error {
 
 	client, err := gitea.NewClient(url)
 	if err != nil {
@@ -55,13 +62,15 @@ func downloadGitea(url string, owner string, repo string, versionTag string, dir
 			cm.ErrorF("Could not select asset in repo '%s/%s' at tag '%s'.", owner, repo, versionTag))
 	}
 
-	checksumData, err := verifyChecksums(checksums, publicPGP)
+	log.InfoF("Verify checksum file '%s'.", checksums.File.URL)
+	checksumData, err := verifyChecksumSignature(checksums, publicPGP)
 	if err != nil {
 		return cm.CombineErrors(err,
 			cm.ErrorF("Signature verification of update failed."+
 				"Something is fishy!"))
 	}
 
+	log.InfoF("Downloading file '%s'.", target.URL)
 	response, err := GetFile(target.URL)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
@@ -84,7 +93,7 @@ func downloadGitea(url string, owner string, repo string, versionTag string, dir
 	}
 	temp.Close()
 
-	// Validate checksum.
+	log.InfoF("Validate checksums.")
 	err = checkChecksum(temp.Name(), checksumData)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Checksum validation failed."))

@@ -26,7 +26,7 @@ type HTTPDeploySettings struct {
 
 // Download downloads the Githooks from a template URL and
 // extracts it into `dir`.
-func (s *HTTPDeploySettings) Download(versionTag string, dir string) error {
+func (s *HTTPDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
 	cm.Panic("Not implemented.")
 
 	return nil

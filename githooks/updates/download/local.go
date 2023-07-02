@@ -33,7 +33,7 @@ type LocalDeploySettings struct {
 
 // Download downloads the Githooks from a template URL and
 // extracts it into `dir`.
-func (s *LocalDeploySettings) Download(versionTag string, dir string) error {
+func (s *LocalDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
 	// Copy everything to director `dir`
 	pathTmpl := template.Must(template.New("").Parse(s.PathTemplate))
 

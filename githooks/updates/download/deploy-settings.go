@@ -21,7 +21,7 @@ const deploySettingsVersion = 1
 
 // IDeploySettings is the common interface for all deploy settings.
 type IDeploySettings interface {
-	Download(versionTag string, dir string) error
+	Download(log cm.ILogContext, versionTag string, dir string) error
 }
 
 // LoadDeploySettings load the deploy settings from `file`.
