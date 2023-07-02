@@ -9,7 +9,7 @@ cat <<EOF | docker build \
     --force-rm -t githooks:alpine-user-base -
 FROM golang:1.20-alpine
 RUN apk add git git-lfs --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main --allow-untrusted
-RUN apk add bash jq curl
+RUN apk add gawk bash jq curl
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
