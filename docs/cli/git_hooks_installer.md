@@ -18,6 +18,7 @@ git hooks installer [flags]
       --dry-run                      Dry run the installation showing what's being done.
       --non-interactive              Run the installation non-interactively
                                      without showing prompts.
+      --update-to-latest             Install and update directly to the latest tag.
       --skip-install-into-existing   Skip installation into existing repositories
                                      defined by a search path.
       --prefix string                Githooks installation prefix such that

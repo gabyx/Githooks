@@ -93,6 +93,9 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"Run the installation non-interactively\n"+
 			"without showing prompts.")
 	cmd.PersistentFlags().Bool(
+		"update-to-latest", false,
+		"Install and update directly to the latest tag.")
+	cmd.PersistentFlags().Bool(
 		"skip-install-into-existing", false,
 		"Skip installation into existing repositories\n"+
 			"defined by a search path.")
@@ -157,6 +160,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("dryRun", cmd.PersistentFlags().Lookup("dry-run")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
+	cm.AssertNoErrorPanic(
+		vi.BindPFlag("updateToLatest", cmd.PersistentFlags().Lookup("update-to-latest")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
 	cm.AssertNoErrorPanic(
@@ -422,43 +427,54 @@ func runInstallDispatched(
 	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
 	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
 
-	// We download/build the binaries if an update is available
-	// or the installer is missing.
-	binaries := updates.Binaries{}
+	// We download/build the binaries always.
+	doUpdate := status.IsUpdateAvailable && (args.UpdateToLatest || args.InternalAutoUpdate)
+	tag := ""
+	commit := ""
 
-	if status.IsUpdateAvailable || !haveInstaller {
-		log.Info("Getting Githooks binaries at version '%s' ...", status.UpdateTag)
-
-		tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
-		log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
-		cleanUpX.AddHandler(func() {
-			_ = os.RemoveAll(tempDir) // @todo does not remove write protected files (go build)
-		})
-		defer os.RemoveAll(tempDir)
-
-		buildFromSrc := args.BuildFromSource ||
-			gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
-
-		if buildFromSrc {
-			binaries = buildFromSource(
-				log,
-				cleanUpX,
-				args.BuildTags,
-				tempDir,
-				status.RemoteURL,
-				status.Branch,
-				status.UpdateCommitSHA)
-		}
-
-		// We need to run deploy code too when running coverage because
-		// it builds a non-instrumented binary.
-		if !buildFromSrc || IsRunningCoverage {
-			deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
-			binaries = downloadBinaries(log, deploySettings, tempDir, status.UpdateTag)
-		}
-
-		installer.Cmd = binaries.Cli
+	if doUpdate {
+		tag = status.UpdateTag
+		commit = status.UpdateCommitSHA
+	} else {
+		tag = status.LocalTag
+		commit = status.LocalCommitSHA
 	}
+
+	binaries := updates.Binaries{}
+	log.InfoF("Getting Githooks binaries at version '%s' ...", status.UpdateTag)
+
+	tempDir, err := os.MkdirTemp(os.TempDir(), "githooks-update-*")
+	log.AssertNoErrorPanic(err, "Can not create temporary update dir in '%s'", os.TempDir())
+	cleanUpX.AddHandler(func() {
+		_ = os.RemoveAll(tempDir) // @todo does not remove write protected files (go build)
+	})
+	defer os.RemoveAll(tempDir)
+
+	buildFromSrc := args.BuildFromSource ||
+		gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
+
+	if buildFromSrc {
+		log.Info("Building from source...")
+		binaries = buildFromSource(
+			log,
+			cleanUpX,
+			args.BuildTags,
+			tempDir,
+			status.RemoteURL,
+			status.Branch,
+			commit)
+	}
+
+	// We need to run deploy code too when running coverage because
+	// it builds a non-instrumented binary.
+	if !buildFromSrc || IsRunningCoverage {
+		log.InfoF("Download '%s' from deploy source...", tag)
+
+		deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
+		binaries = downloadBinaries(log, deploySettings, tempDir, tag)
+	}
+
+	installer.Cmd = binaries.Cli
 
 	// Set variables for further update procedure...
 	// Note: `args` is passed by value.
@@ -476,10 +492,10 @@ func runInstallDispatched(
 	log.PanicIfF(!cm.IsFile(installer.Cmd),
 		"Githooks executable '%s' is not existing.", installer)
 
-	return true, runInstaller(log, &installer, &args)
+	return true, dispatchToInstaller(log, &installer, &args)
 }
 
-func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) error {
+func dispatchToInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) error {
 
 	log.Info("Dispatching to new installer ...")
 
@@ -1190,14 +1206,18 @@ func thankYou(log cm.ILogContext) {
 		"Thanks!\n", hooks.GithooksWebpage)
 }
 
-func runUpdate(
+func runInstaller(
 	log cm.ILogContext,
 	gitx *git.Context,
 	settings *Settings,
 	uiSettings *install.UISettings,
 	args *Arguments) {
 
-	log.InfoF("Running install to version '%s' ...", build.BuildVersion)
+	if strs.IsEmpty(args.InternalUpdateFromVersion) {
+		log.InfoF("Running install to version '%s' ...", build.BuildVersion)
+	} else {
+		log.InfoF("Running install from '%s' -> '%s' ...", args.InternalUpdateFromVersion, build.BuildVersion)
+	}
 
 	transformLegacyGitConfigSettings(log, gitx)
 
@@ -1373,6 +1393,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	if !args.InternalPostDispatch {
 		assertOneInstallerRunning(log, ctx.CleanupX)
 
+		// Dispatch from an old installer to a new one.
 		isDispatched, err := runInstallDispatched(log, ctx.GitX, &settings, args, ctx.CleanupX)
 		log.MoveFileWriterToEnd() // We are logging to the same file. Move it to the end.
 		if err != nil {
@@ -1385,7 +1406,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 		// intended fallthrough ... (only debug)
 	}
 
-	runUpdate(log, ctx.GitX, &settings, &uiSettings, &args)
+	runInstaller(log, ctx.GitX, &settings, &uiSettings, &args)
 
 	if logStats.ErrorCount() == 0 {
 		thankYou(log)
