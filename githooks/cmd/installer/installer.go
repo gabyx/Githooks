@@ -468,7 +468,6 @@ func runInstallDispatched(
 	// We need to run deploy code too when running coverage because
 	// it builds a non-instrumented binary.
 	if !buildFromSrc || IsRunningCoverage {
-
 		log.InfoF("Download '%s' from deploy source...", tag)
 
 		deploySettings := getDeploySettings(log, settings.InstallDir, status.RemoteURL, &args)
@@ -492,10 +491,10 @@ func runInstallDispatched(
 
 	log.PanicIfF(!cm.IsFile(installer.Cmd), "Githooks executable '%s' is not existing.", installer)
 
-	return true, runInstaller(log, &installer, &args)
+	return true, dispatchToInstaller(log, &installer, &args)
 }
 
-func runInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) error {
+func dispatchToInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arguments) error {
 
 	log.Info("Dispatching to new installer ...")
 
@@ -1181,7 +1180,7 @@ func storeSettings(log cm.ILogContext, settings *Settings, uiSettings *install.U
 func updateClone(log cm.ILogContext, cloneDir string, updateToSHA string) {
 
 	if strs.IsEmpty(updateToSHA) {
-		return // We don't need to update the relase clone.
+		return // We don't need to update the release clone.
 	}
 
 	commitSHA, err := updates.MergeUpdates(cloneDir, false)
@@ -1206,14 +1205,18 @@ func thankYou(log cm.ILogContext) {
 		"Thanks!\n", hooks.GithooksWebpage)
 }
 
-func runUpdate(
+func runInstaller(
 	log cm.ILogContext,
 	gitx *git.Context,
 	settings *Settings,
 	uiSettings *install.UISettings,
 	args *Arguments) {
 
-	log.InfoF("Running install to version '%s' ...", build.BuildVersion)
+	if strs.IsEmpty(args.InternalUpdateFromVersion) {
+		log.InfoF("Running install to version '%s' ...", build.BuildVersion)
+	} else {
+		log.InfoF("Running install from '%s' -> '%s' ...", args.InternalUpdateFromVersion, build.BuildVersion)
+	}
 
 	transformLegacyGitConfigSettings(log, gitx)
 
@@ -1389,6 +1392,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	if !args.InternalPostDispatch {
 		assertOneInstallerRunning(log, ctx.CleanupX)
 
+		// Dispatch from an old installer to a new one.
 		isDispatched, err := runInstallDispatched(log, ctx.GitX, &settings, args, ctx.CleanupX)
 		log.MoveFileWriterToEnd() // We are logging to the same file. Move it to the end.
 		if err != nil {
@@ -1401,7 +1405,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 		// intended fallthrough ... (only debug)
 	}
 
-	runUpdate(log, ctx.GitX, &settings, &uiSettings, &args)
+	runInstaller(log, ctx.GitX, &settings, &uiSettings, &args)
 
 	if logStats.ErrorCount() == 0 {
 		thankYou(log)
