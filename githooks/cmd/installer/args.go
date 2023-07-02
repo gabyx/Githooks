@@ -15,7 +15,8 @@ type Arguments struct {
 	DryRun         bool
 	NonInteractive bool
 
-	UpdateToLatest bool // Directly update to latest tag. Before `2.3.3` that was always true.
+	Update bool // Directly update to the latest possible tag on the clone branch.
+	// Before `2.3.3` that was always true.
 
 	SkipInstallIntoExisting bool // Skip install into existing repositories.
 

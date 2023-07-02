@@ -23,7 +23,7 @@ git hooks
 * [git hooks ignore](git_hooks_ignore.md)	 - Ignores or activates hook in the current repository.
 * [git hooks images](git_hooks_images.md)	 - Manage container images.
 * [git hooks install](git_hooks_install.md)	 - Installs Githooks run-wrappers into the current repository.
-* [git hooks installer](git_hooks_installer.md)	 - Githooks installer application
+* [git hooks installer](git_hooks_installer.md)	 - Githooks installer application.
 * [git hooks list](git_hooks_list.md)	 - Lists the active hooks in the current repository.
 * [git hooks readme](git_hooks_readme.md)	 - Manages the Githooks README in the current repository.
 * [git hooks shared](git_hooks_shared.md)	 - Manages the shared hook repositories.

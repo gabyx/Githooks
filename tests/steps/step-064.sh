@@ -24,9 +24,15 @@ fi
 # Set to build from source
 git config --global githooks.buildFromSource "true"
 
+if ! "$GH_INSTALL_BIN_DIR/cli" --version | grep -q "9.9.0"; then
+    echo "! Expected to update to 9.9.0"
+    "$GH_INSTALL_BIN_DIR/cli" --version
+    exit 1
+fi
+
 CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
 if ! OUT=$("$GH_INSTALL_BIN_DIR/cli" update --yes); then
-    echo "! Failed to run the update"
+    echo -e "! Failed to run the update:\n$OUT"
 fi
 
 if ! echo "$OUT" | grep -qi "building from source"; then

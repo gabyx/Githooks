@@ -32,9 +32,14 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "installer [flags]",
-		Short: "Githooks installer application",
-		Long: "Githooks installer application\n" +
-			"See further information at https://github.com/gabyx/githooks/blob/main/README.md",
+		Short: "Githooks installer application.",
+		Long: `Githooks installer application.
+It downloads the Githooks artifacts of the current version
+from a deploy source and verifies its checksums and signature.
+Then it calls the installer on the new version which
+will then run the installation procedure for Githooks.
+
+See further information at https://github.com/gabyx/githooks/blob/main/README.md`,
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runInstall(cmd, ctx, vi)
@@ -93,8 +98,9 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"Run the installation non-interactively\n"+
 			"without showing prompts.")
 	cmd.PersistentFlags().Bool(
-		"update-to-latest", false,
-		"Install and update directly to the latest tag.")
+		"update", false,
+		"Install and update directly to the latest\n"+
+			"possible tag on the clone branch.")
 	cmd.PersistentFlags().Bool(
 		"skip-install-into-existing", false,
 		"Skip installation into existing repositories\n"+
@@ -161,7 +167,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
 	cm.AssertNoErrorPanic(
-		vi.BindPFlag("updateToLatest", cmd.PersistentFlags().Lookup("update-to-latest")))
+		vi.BindPFlag("update", cmd.PersistentFlags().Lookup("update")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
 	cm.AssertNoErrorPanic(
@@ -429,7 +435,7 @@ func runInstallDispatched(
 	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
 
 	// We download/build the binaries always.
-	doUpdate := status.IsUpdateAvailable && (args.UpdateToLatest || args.InternalAutoUpdate)
+	doUpdate := status.IsUpdateAvailable && (args.Update || args.InternalAutoUpdate)
 	tag := ""
 	commit := ""
 
