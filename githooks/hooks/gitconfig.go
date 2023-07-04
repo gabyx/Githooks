@@ -21,6 +21,9 @@ const (
 
 	GitCKDeleteDetectedLFSHooksAnswer = "githooks.deleteDetectedLFSHooks"
 
+	GitCKUseManual         = "false"
+	GitCKManualTemplateDir = "githooks.templateDir"
+
 	GitCKUseCoreHooksPath        = "githooks.useCoreHooksPath"
 	GitCKPathForUseCoreHooksPath = "githooks.pathForUseCoreHooksPath"
 
@@ -80,6 +83,9 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKBuildFromSource,
 
 		GitCKDeleteDetectedLFSHooksAnswer,
+
+		GitCKUseManual,
+		GitCKManualTemplateDir,
 
 		GitCKUseCoreHooksPath,
 		GitCKPathForUseCoreHooksPath,

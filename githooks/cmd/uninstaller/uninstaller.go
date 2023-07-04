@@ -223,9 +223,9 @@ func uninstallFromRegisteredRepos(
 }
 
 func cleanTemplateDir(log cm.ILogContext, gitx *git.Context, lfsHooksCache hooks.LFSHooksCache) {
-	installUsesCoreHooksPath := gitx.GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
+	installMode := install.GetInstallMode(gitx)
 
-	hookTemplateDir, err := install.FindHookTemplateDir(gitx, installUsesCoreHooksPath == git.GitCVTrue)
+	hookTemplateDir, err := install.FindHookTemplateDir(gitx, installMode)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 
 	if strs.IsEmpty(hookTemplateDir) {

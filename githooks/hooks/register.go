@@ -45,6 +45,7 @@ func UnmarkRepoRegistered(gitx *git.Context) error {
 
 // Load gets the registered repos loaded from the register file in the
 // install folder.
+// We ensured during load, that only existing Git directories are listed.
 func (r *RegisterRepos) Load(installDir string, filterExisting bool, filterGitDirs bool) (err error) {
 
 	file := GetRegisterFile(installDir)

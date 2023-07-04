@@ -967,6 +967,25 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
     --template-dir /home/public/.githooks
 ```
 
+### Install Mode - Manual
+
+You also have the option for none of the two above methods and to use Githooks
+in _manual_ mode. This means that hook run wrappers are not injected by the
+`init.templateDir` Git config setting into new cloned repositories, nor does it
+set `core.hooksPath`. This means, you decide yourself when to use Githooks in a
+repository simply by doing one of the following with the same effect:
+
+- Run `git hooks install` or `git hooks uninstall` to install run wrappers
+  explicitly.
+- Set `core.hooksPath` inside the repository you want to use Githooks with to
+  the template directory Githooks maintains, e.g.
+
+  ```shell
+  git config core.hooksPath "$(git config githooks.templateDir)"
+  ```
+
+This also means that Githooks might not run if you forget to install the hooks.
+
 ### Install from different URL and Branch
 
 If you want to install from another Git repository (e.g. from your own or your
