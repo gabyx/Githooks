@@ -79,8 +79,8 @@ repositories.
 - [Locate Githooks Container Images](#locate-githooks-container-images)
 - [User Prompts](#user-prompts)
 - [Installation](#installation)
-  - [Normal Installation](#normal-installation)
-  - [Install Mode: Centralized Hooks](#install-mode-centralized-hooks)
+  - [Install Mode - Normal](#install-mode-normal)
+  - [Install Mode - Centralized Hooks](#install-mode-centralized-hooks)
   - [Install from different URL and Branch](#install-from-different-url-and-branch)
   - [No Installation](#no-installation)
   - [Non-Interactive Installation](#non-interactive-installation)
@@ -285,9 +285,9 @@ The supported hooks are listed below. Refer to the
 what they do and what parameters they receive.
 
 It is receommended to use `--maintained-hooks` options during install
-([1](#normal-installation), [2](#installing-or-removing-run-wrappers)) to only
-select the hooks which are really needed, since executing the Githooks manager
-for all hooks might slow down Git operations (especially for
+([1](#installation-mode-normal), [2](#installing-or-removing-run-wrappers)) to
+only select the hooks which are really needed, since executing the Githooks
+manager for all hooks might slow down Git operations (especially for
 `reference-transaction`).
 
 - `applypatch-msg`
@@ -742,30 +742,8 @@ summarized these troubles in a
 [very good article](https://www.fullstaq.com/knowledge-hub/blogs/docker-and-the-host-filesystem-owner-matching-problem).
 Long story short, **you should use
 [`MatchHostFsOwner`](https://github.com/FooBarWidget/matchhostfsowner/releases)**
-which counter acts these permission problems neatly by installing this into your
-hook's sidecar container:
-
-```dockerfile
-# Install MatchHostFsOwner.
-# See https://github.com/FooBarWidget/matchhostfsowner/releases
-ADD https://github.com/FooBarWidget/matchhostfsowner/releases/download/v1.0.0/matchhostfsowner-1.0.0-x86_64-linux.gz /sbin/matchhostfsowner.gz
-RUN gunzip /sbin/matchhostfsowner.gz && \
-  chown root: /sbin/matchhostfsowner && \
-  chmod +x,+s /sbin/matchhostfsowner
-
-# Use 'githooks' for MatchHostFsOwner.
-RUN mkdir -p /etc/matchhostfsowner && \
-    echo -e "app_account: githooks\napp_group: githooks" > /etc/matchhostfsowner/config.yml && \
-    cat /etc/matchhostfsowner/config.yml && \
-    chown -R root: /etc/matchhostfsowner && \
-    chmod 700 /etc/matchhostfsowner && \
-    chmod 600 /etc/matchhostfsowner/*
-
-RUN adduser "$USER_NAME" -s /bin/zsh \
-    -D \
-    -u "$USER_UID" -g "$USER_GID" \
-    -h "/home/$USER_NAME"
-```
+which counter acts these permission problems neatly by installing
+[this into your hook's sidecar container](https://github.com/gabyx/Githooks-Shell/blob/main/githooks/container/Dockerfile#L29).
 
 ### Pull and Build Integration
 
@@ -894,8 +872,8 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
 See the next sections on different install options.
 
 **Note:** Use `bash -s -- -h` above to show the help message of the bootstrap
-script and `bash -s -- -- <options>` to pass arguments to the installer, e.g.
-`bash -s -- -- -h` to show the help.
+script and `bash -s -- -- <options>` to pass arguments to the installer
+(`cli installer`), e.g. `bash -s -- -- -h` to show the help.
 
 ### Procedure
 
@@ -937,7 +915,9 @@ The installer will:
 
 1. Offer to set up shared hook repositories.
 
-### Normal Installation
+### Install Mode - Template Dir
+
+**This is the default installation mode.**
 
 To install Githooks on your system, simply execute `cli installer`. It will
 guide you through the installation process. Check the `cli installer --help` for
@@ -965,11 +945,11 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
     --dry-run
 ```
 
-### Install Mode: Centralized Hooks
+### Install Mode - Centralized Hooks
 
 Lastly, you have the option to install the templates to a centralized location
 (`core.hooksPath`). You can read more about the difference between this option
-and the default one [below](#templates-or-central-hooks). For this, run the
+and the default one [below](#templates-or-global-hooks). For this, run the
 command below.
 
 ```shell
@@ -1026,20 +1006,21 @@ run-wrappers in `<repoPath>/hooks` like so:
 ```shell
 git clone https://github.com/gabyx/githooks.git githooks
 cd githooks
+githooksRepo=$(pwd)
 scripts/build.sh
 ```
 
 Then, to globally enable them for every repo:
 
 ```shell
-git config --global core.hooksPath "$(pwd)/hooks"
+git config --global core.hooksPath "$gihooksRepo/hooks"
 ```
 
 or locally enable them for a single repo only:
 
 ```shell
 cd repo
-git config --local core.hooksPath "$(pwd)/hooks"
+git config --local core.hooksPath "$githooksRepo/hooks"
 ```
 
 ### Non-Interactive Installation
@@ -1114,8 +1095,6 @@ git hooks config trust-all-hooks --accept
 # might get invoked in parallel on a server.
 git hooks config update --disable
 ```
-
-Enabling auto-updates on the server, is a todo and needs file locks.
 
 Note: A user cannot change bare repository Githooks by pushing changes to a bare
 repository on the server. If you use shared hook repositories in you bare
