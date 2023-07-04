@@ -730,7 +730,8 @@ func getTargetTemplateDir(
 	log.PanicIfF(strs.IsNotEmpty(templateDir) && !cm.IsDirectory(templateDir),
 		"Given template dir '%s' does not exist.", templateDir)
 
-	if installMode == install.InstallModeTypeV.Manual {
+	switch {
+	case installMode == install.InstallModeTypeV.Manual:
 		// Manual mode directly uses the install location
 		// as the template directory.
 		if strs.IsEmpty(templateDir) {
@@ -738,11 +739,11 @@ func getTargetTemplateDir(
 		}
 		hookTemplateDir = path.Join(templateDir, "hooks")
 
-	} else if strs.IsNotEmpty(templateDir) {
+	case strs.IsNotEmpty(templateDir):
 		// Template directory given, use this.
 		hookTemplateDir = path.Join(templateDir, "hooks")
 
-	} else if strs.IsEmpty(templateDir) {
+	case strs.IsEmpty(templateDir):
 		// Automatically find a template directory.
 		hookTemplateDir, templateDir = findGitHookTemplates(
 			log,
