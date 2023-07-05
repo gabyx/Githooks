@@ -10,5 +10,6 @@ die() {
     exit 1
 }
 
+cd "$GO_SRC"
 go run -mod=vendor "$GO_SRC/tools/generate-doc.go"
 go run -mod=vendor "$GO_SRC/apps/dialog/tools/generate-doc.go"
