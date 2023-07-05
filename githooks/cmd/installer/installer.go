@@ -125,10 +125,6 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().Bool(
 		"use-manual", false,
 		"If the install mode 'manual' should be used.")
-	cmd.PersistentFlags().Bool(
-		"use-template-dir", false,
-		"If the install mode 'init.templateDir' should be used.\n"+
-			"If no mode given, this is the default.")
 
 	cmd.PersistentFlags().String(
 		"clone-url", "",
@@ -184,8 +180,6 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("useCoreHooksPath", cmd.PersistentFlags().Lookup("use-core-hookspath")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("useManual", cmd.PersistentFlags().Lookup("use-manual")))
-	cm.AssertNoErrorPanic(
-		vi.BindPFlag("useTemplateDir", cmd.PersistentFlags().Lookup("use-template-dir")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("cloneURL", cmd.PersistentFlags().Lookup("clone-url")))
 	cm.AssertNoErrorPanic(
@@ -716,7 +710,7 @@ func setupNewTemplateDir(log cm.ILogContext, installDir string, promptx prompt.I
 	return templateDir
 }
 
-func getHookTemplateDir(
+func setupInstallMode(
 	log cm.ILogContext,
 	gitx *git.Context,
 	installDir string,
@@ -1273,27 +1267,33 @@ func thankYou(log cm.ILogContext) {
 
 func determineInstallMode(log cm.ILogContext, args *Arguments, gitx *git.Context) (bool, install.InstallModeType) {
 	installModeInstalled := install.GetInstallMode(gitx)
-
 	haveInstall := installModeInstalled != install.InstallModeTypeV.None
-	installMode := install.MapInstallerArgsToInstallMode(
-		args.UseTemplateDir,
-		args.UseCoreHooksPath,
-		args.UseManual)
 
-	if !haveInstall && installMode == install.InstallModeTypeV.None {
-		// No install and no install mode given -> take the default.
-		installMode = install.InstallModeTypeV.TemplateDir
+	if !haveInstall {
+		log.WarnF("Could not determine Githooks install mode.\n" +
+			"Taking default 'Template Dir'.")
+		installModeInstalled = install.InstallModeTypeV.TemplateDir
 	}
 
-	if haveInstall && installMode != installModeInstalled {
-		log.PanicF(
-			"You seem to have already installed Githooks in mode '%s'\n"+
-				"and we are going to reinstall it in mode '%s'.\n"+
-				"Please uninstall Githooks first by running:\n"+
-				"  $ git hooks uninstaller\n"+
-				"for a proper cleanup.",
-			install.GetInstallModeName(installModeInstalled),
-			install.GetInstallModeName(installMode))
+	var installMode install.InstallModeType
+
+	if args.InternalAutoUpdate {
+		installMode = installModeInstalled
+	} else {
+		installMode = install.MapInstallerArgsToInstallMode(
+			args.UseCoreHooksPath,
+			args.UseManual)
+
+		if haveInstall && installMode != installModeInstalled {
+			log.PanicF(
+				"You seem to have already installed Githooks in mode '%s'\n"+
+					"and we are going to reinstall it in mode '%s'.\n"+
+					"Please uninstall Githooks first by running:\n"+
+					"  $ git hooks uninstaller\n"+
+					"for a proper cleanup.",
+				install.GetInstallModeName(installModeInstalled),
+				install.GetInstallModeName(installMode))
+		}
 	}
 
 	return haveInstall, installMode
@@ -1319,7 +1319,7 @@ func runInstaller(
 
 	haveInstall, installMode := determineInstallMode(log, args, gitx)
 
-	settings.HookTemplateDir = getHookTemplateDir(
+	settings.HookTemplateDir = setupInstallMode(
 		log,
 		gitx,
 		settings.InstallDir,

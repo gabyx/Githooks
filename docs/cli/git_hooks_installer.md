@@ -40,8 +40,6 @@ git hooks installer [flags]
                                      You can list them separately or comma-separated in one argument.
       --use-core-hookspath           If the install mode `core.hooksPath` should be used.
       --use-manual                   If the install mode `manual` should be used.
-      --use-template-dir             If the install mode `init.templateDir` should be used.
-                                     If no mode given, this is the default.
       --clone-url string             The clone url from which Githooks should clone
                                      and install/update itself. Githooks tries to
                                      auto-detect the deploy setting for downloading binaries.

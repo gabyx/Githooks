@@ -7,10 +7,10 @@ import (
 
 type InstallModeType int
 type installModeType struct {
+	None          InstallModeType
 	TemplateDir   InstallModeType
 	CoreHooksPath InstallModeType
 	Manual        InstallModeType
-	None          InstallModeType
 }
 
 // InstallModeTypeV enumerates all types of install modes.
@@ -50,7 +50,6 @@ func GetInstallModeName(installMode InstallModeType) string {
 
 // MapInstallerArgsToInstallMode maps installer arguments to install modes.
 func MapInstallerArgsToInstallMode(
-	useTemplateDir bool,
 	useCoreHooksPath bool,
 	useManual bool) InstallModeType {
 
@@ -59,9 +58,7 @@ func MapInstallerArgsToInstallMode(
 		return InstallModeTypeV.Manual
 	case useCoreHooksPath:
 		return InstallModeTypeV.CoreHooksPath
-	case useTemplateDir:
-		return InstallModeTypeV.TemplateDir
 	default:
-		return InstallModeTypeV.None
+		return InstallModeTypeV.TemplateDir
 	}
 }
