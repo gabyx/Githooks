@@ -30,7 +30,6 @@ n
 y
 $GH_TEST_TMP/shared/hooks-005.git
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
-
 fi
 
 mkdir -p "$GH_TEST_TMP/test5" &&
@@ -39,6 +38,8 @@ mkdir -p "$GH_TEST_TMP/test5" &&
 
 # verify that the hooks are installed and are working
 git commit -m 'Test'
+
+"$GH_TEST_BIN/cli" list
 
 if ! grep 'From shared hook' "$GH_TEST_TMP/test-005.out"; then
     echo "! The shared hooks don't seem to be working"

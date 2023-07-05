@@ -888,18 +888,35 @@ The installer will:
 1. Launch the current (or new if `--update` is given) installer which proceeds
    with the next steps.
 
-1. Find out where the Git templates directory is.
+1. Find the install mode relevant directory:
 
+   For `Template Dir` install mode: Find the Git template directory
+
+   1. From `--template-dir` if given.
    1. From the `$GIT_TEMPLATE_DIR` environment variable.
-   2. With the `git config --get init.templateDir` command.
-   3. Checking the default `/usr/share/git-core/templates` folder.
-   4. Search on the filesystem for matching directories.
-   5. Offer to set up a new one, and make it `init.templateDir`.
+   1. With the `git config --get init.templateDir` command.
+   1. Checking the default `/usr/share/git-core/templates` folder.
+   1. Search on the file system for matching directories.
+   1. Offer to set up a new one, and make it `init.templateDir`.
 
-1. Write all chosen Githooks run-wrappers into the chosen directory:
+   For `Centralized Hooks` install mode: Find the hooks directory
 
-   - either `init.templateDir` or
-   - `core.hooksPath` depending on the install mode `--use-core-hooks-path`.
+   1. From `--template-dir` if given.
+   1. With the `git config --get core.hooksPath` command.
+   1. Search on the file system for matching directories.
+
+   For `Manual` install mode: Find the template directory
+
+   1. From `--template-dir` if given.
+   1. With the `git config --get githooks.templateDir` command.
+   1. Search on the file system for matching directories.
+
+1. Write all chosen Githooks run-wrappers into the hooks directory:
+
+   - either `init.templateDir` for `Normal` install mode or
+   - `core.hooksPath` for `Centralized Hooks` install mode
+     (`--use-core-hooks-path`) or
+   - `githooks.manualTemplateDir` for `Manual` install mode (`--use-manual`)
 
 1. Offer to enable automatic update checks.
 

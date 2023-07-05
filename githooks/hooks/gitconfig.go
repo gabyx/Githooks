@@ -21,8 +21,8 @@ const (
 
 	GitCKDeleteDetectedLFSHooksAnswer = "githooks.deleteDetectedLFSHooks"
 
-	GitCKUseManual         = "false"
-	GitCKManualTemplateDir = "githooks.templateDir"
+	GitCKUseManual         = "githooks.useManual"
+	GitCKManualTemplateDir = "githooks.manualTemplateDir"
 
 	GitCKUseCoreHooksPath        = "githooks.useCoreHooksPath"
 	GitCKPathForUseCoreHooksPath = "githooks.pathForUseCoreHooksPath"

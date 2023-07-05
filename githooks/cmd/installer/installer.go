@@ -534,17 +534,17 @@ func dispatchToInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arg
 		"--config", file.Name())
 }
 
-// findGitHookTemplates returns the Git hook template directory
+// findHookTemplateDir returns the Git hook template directory
 // and optional a Git template dir which gets only set in case of
 // not using the core.hooksPath method.
-func findGitHookTemplates(
+func findHookTemplateDir(
 	log cm.ILogContext,
 	gitx *git.Context,
 	installDir string,
 	installMode install.InstallModeType,
 	haveInstall bool,
 	nonInteractive bool,
-	promptx prompt.IContext) (string, string) {
+	promptx prompt.IContext) string {
 	cm.DebugAssert(installMode != install.InstallModeTypeV.Manual,
 		"Install mode: 'manual' should be handled directly.")
 
@@ -552,7 +552,7 @@ func findGitHookTemplates(
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 
 	if err == nil && strs.IsNotEmpty(hookTemplateDir) {
-		return hookTemplateDir, ""
+		return hookTemplateDir
 	}
 
 	// If we have an installation, and have not found
@@ -571,7 +571,7 @@ func findGitHookTemplates(
 	// and no folder is found by now
 	if nonInteractive {
 		templateDir := setupNewTemplateDir(log, installDir, nil)
-		return path.Join(templateDir, "hooks"), templateDir // nolint:nlreturn
+		return path.Join(templateDir, "hooks") // nolint:nlreturn
 	}
 
 	// 5. Try to search for it on disk
@@ -590,7 +590,7 @@ func findGitHookTemplates(
 		if strs.IsNotEmpty(templateDir) {
 
 			if installMode == install.InstallModeTypeV.CoreHooksPath {
-				return path.Join(templateDir, "hooks"), ""
+				return path.Join(templateDir, "hooks")
 			}
 
 			// If we dont use core.hooksPath, we ask
@@ -609,7 +609,7 @@ func findGitHookTemplates(
 				"Could not determine Git hook",
 				"templates directory. -> Abort.")
 
-			return path.Join(templateDir, "hooks"), templateDir
+			return path.Join(templateDir, "hooks")
 		}
 	}
 
@@ -623,10 +623,10 @@ func findGitHookTemplates(
 
 	if answer == "y" {
 		templateDir := setupNewTemplateDir(log, installDir, promptx)
-		return path.Join(templateDir, "hooks"), templateDir // nolint:nlreturn
+		return path.Join(templateDir, "hooks") // nolint:nlreturn
 	}
 
-	return "", ""
+	return ""
 }
 
 func searchPreCommitFile(log cm.ILogContext, startDirs []string, promptx prompt.IContext) (result string) {
@@ -716,7 +716,7 @@ func setupNewTemplateDir(log cm.ILogContext, installDir string, promptx prompt.I
 	return templateDir
 }
 
-func getTargetTemplateDir(
+func getHookTemplateDir(
 	log cm.ILogContext,
 	gitx *git.Context,
 	installDir string,
@@ -726,6 +726,9 @@ func getTargetTemplateDir(
 	nonInteractive bool,
 	dryRun bool,
 	promptx prompt.IContext) (hookTemplateDir string) {
+
+	cm.DebugAssert(installMode != install.InstallModeTypeV.None,
+		"Install mode must be given.")
 
 	log.PanicIfF(strs.IsNotEmpty(templateDir) && !cm.IsDirectory(templateDir),
 		"Given template dir '%s' does not exist.", templateDir)
@@ -745,7 +748,7 @@ func getTargetTemplateDir(
 
 	case strs.IsEmpty(templateDir):
 		// Automatically find a template directory.
-		hookTemplateDir, templateDir = findGitHookTemplates(
+		hookTemplateDir = findHookTemplateDir(
 			log,
 			gitx,
 			installDir,
@@ -765,30 +768,20 @@ func getTargetTemplateDir(
 		"Could not assert directory '%s' exists",
 		hookTemplateDir)
 
-	// Set the global Git configuration
-	switch installMode {
-	case install.InstallModeTypeV.CoreHooksPath:
-		setGithooksDirectory(log, gitx, installMode, hookTemplateDir, dryRun)
-
-	case install.InstallModeTypeV.None:
-		// No install or no arguments give: Map to template dir.
-		fallthrough
-	case install.InstallModeTypeV.TemplateDir:
-		setGithooksDirectory(log, gitx, installMode, templateDir, dryRun)
-
-	case install.InstallModeTypeV.Manual:
-		setGithooksDirectory(log, gitx, installMode, templateDir, dryRun)
-	}
+	// Set the global Git configuration.
+	setDirectoryForInstallMode(log, gitx, installMode, hookTemplateDir, dryRun)
 
 	return
 }
 
-func setGithooksDirectory(
+func setDirectoryForInstallMode(
 	log cm.ILogContext,
 	gitx *git.Context,
 	installMode install.InstallModeType,
-	directory string,
+	hookTemplateDir string,
 	dryRun bool) {
+
+	directory := hookTemplateDir
 
 	prefix := "Setting"
 	if dryRun {
@@ -858,7 +851,10 @@ func setGithooksDirectory(
 				"the Githooks installation without the '--use-core-hookspath'\n"+
 				"parameter.")
 
+	case install.InstallModeTypeV.None:
+		fallthrough
 	case install.InstallModeTypeV.TemplateDir:
+		directory = path.Dir(hookTemplateDir)
 
 		log.InfoF("%s '%s' to '%s'.", prefix, git.GitCKInitTemplateDir, directory)
 
@@ -884,6 +880,7 @@ func setGithooksDirectory(
 			hP)
 
 	case install.InstallModeTypeV.Manual:
+		directory = path.Dir(hookTemplateDir)
 
 		log.InfoF("%s '%s' to '%s'.", prefix, hooks.GitCKManualTemplateDir, directory)
 
@@ -893,7 +890,7 @@ func setGithooksDirectory(
 			err = gitx.SetConfig(hooks.GitCKUseManual, true, git.GlobalScope)
 			log.AssertNoErrorPanic(err, "Could not set Git config value.")
 
-			err = gitx.SetConfig(hooks.GitCKManualTemplateDir, directory, git.GlobalScope)
+			err = gitx.SetConfig(hooks.GitCKManualTemplateDir, path.Dir(hookTemplateDir), git.GlobalScope)
 			log.AssertNoErrorPanic(err, "Could not set Git config value.")
 		}
 
@@ -1283,8 +1280,8 @@ func determineInstallMode(log cm.ILogContext, args *Arguments, gitx *git.Context
 		args.UseCoreHooksPath,
 		args.UseManual)
 
-	if haveInstall && installMode == install.InstallModeTypeV.None {
-		// No install and no install mode given.
+	if !haveInstall && installMode == install.InstallModeTypeV.None {
+		// No install and no install mode given -> take the default.
 		installMode = install.InstallModeTypeV.TemplateDir
 	}
 
@@ -1322,7 +1319,7 @@ func runInstaller(
 
 	haveInstall, installMode := determineInstallMode(log, args, gitx)
 
-	settings.HookTemplateDir = getTargetTemplateDir(
+	settings.HookTemplateDir = getHookTemplateDir(
 		log,
 		gitx,
 		settings.InstallDir,
