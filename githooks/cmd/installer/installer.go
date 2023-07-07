@@ -1277,7 +1277,7 @@ func determineInstallMode(log cm.ILogContext, args *Arguments, gitx *git.Context
 
 	var installMode install.InstallModeType
 
-	if args.InternalAutoUpdate {
+	if strs.IsNotEmpty(args.InternalUpdateFromVersion) {
 		installMode = installModeInstalled
 	} else {
 		installMode = install.MapInstallerArgsToInstallMode(
