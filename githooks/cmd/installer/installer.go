@@ -542,6 +542,9 @@ func findHookTemplateDir(
 	cm.DebugAssert(installMode != install.InstallModeTypeV.Manual,
 		"Install mode: 'manual' should be handled directly.")
 
+	log.InfoF("Find hooks template dir for install mode '%s'.",
+		install.GetInstallModeName(installMode))
+
 	hookTemplateDir, err := install.FindHookTemplateDir(gitx, installMode)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 
@@ -550,7 +553,7 @@ func findHookTemplateDir(
 	}
 
 	// If we have an installation, and have not found
-	// the template folder by now...
+	// the template folder by now -> panic.
 	log.PanicIfF(haveInstall,
 		"Your installation is corrupt.\n"+
 			"You seem to have install mode '%s' but the corresponding\n"+
@@ -561,9 +564,8 @@ func findHookTemplateDir(
 		install.GetInstallModeName(install.InstallModeTypeV.TemplateDir), git.GitCKInitTemplateDir,
 		install.GetInstallModeName(install.InstallModeTypeV.CoreHooksPath), git.GitCKCoreHooksPath)
 
-	// 4. Try setup new folder if running non-interactively
-	// and no folder is found by now
-	if nonInteractive {
+	// 4. No folder found: Try setup a new folder.
+	if nonInteractive || installMode == install.InstallModeTypeV.CoreHooksPath {
 		templateDir := setupNewTemplateDir(log, installDir, nil)
 		return path.Join(templateDir, "hooks") // nolint:nlreturn
 	}
@@ -1269,17 +1271,21 @@ func determineInstallMode(log cm.ILogContext, args *Arguments, gitx *git.Context
 	installModeInstalled := install.GetInstallMode(gitx)
 	haveInstall := installModeInstalled != install.InstallModeTypeV.None
 
-	if !haveInstall {
-		log.WarnF("Could not determine Githooks install mode.\n" +
-			"Taking default 'Template Dir'.")
-		installModeInstalled = install.InstallModeTypeV.TemplateDir
-	}
-
 	var installMode install.InstallModeType
 
 	if strs.IsNotEmpty(args.InternalUpdateFromVersion) {
+
+		if !haveInstall {
+			log.WarnF("Could not determine Githooks install mode.\n" +
+				"Install seams corrupt?.\n" +
+				"Taking default 'Template Dir'.")
+			installModeInstalled = install.InstallModeTypeV.TemplateDir
+		}
+
 		installMode = installModeInstalled
+
 	} else {
+
 		installMode = install.MapInstallerArgsToInstallMode(
 			args.UseCoreHooksPath,
 			args.UseManual)
