@@ -2,7 +2,7 @@
 # Test:
 #   Run a simple install non-interactively and verify the hooks are in place
 
-TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
