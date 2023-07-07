@@ -8,15 +8,15 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 acceptAllTrustPrompts || exit 1
 
-ls -al "$GH_TEST_GIT_CORE/templates"
+mkdir -p ~/.githooks/mytemplates/hooks
 
-cd "$GH_TEST_GIT_CORE/templates/hooks" &&
+cd ~/.githooks/mytemplates/hooks &&
     echo '#!/bin/sh' >>pre-commit &&
     echo "echo 'Previous' >> '$GH_TEST_TMP/test-008.out'" >>pre-commit &&
     chmod +x pre-commit ||
     exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/cli" installer --template-dir ~/.githooks/mytemplates || exit 1
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test8" &&

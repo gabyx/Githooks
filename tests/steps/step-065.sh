@@ -6,6 +6,11 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+    echo "Using core.hooksPath"
+    exit 249
+fi
+
 acceptAllTrustPrompts || exit 1
 
 rm -rf "$GH_TEST_GIT_CORE/templates/hooks"
