@@ -39,7 +39,10 @@ cp -rf "$REPO_DIR" "$temp/repo" &&
     git hooks config enable-containerized-hooks --set &&
     git hooks shared update &&
     echo "Add all files." &&
-    git add . || die "Could not copy repo"
+    git add . &&
+    GITHOOKS_DISABLE=1 git commit --no-verify -m "Original files" &&
+    git checkout -b create-diffs &&
+    git reset --soft HEAD~1 || die "Could not copy repo"
 
 function setupGo() {
     local src="$REPO_DIR/githooks"
@@ -60,9 +63,9 @@ setGithooksContainerVolumeEnvs
 
 git commit -m "Check all hooks."
 
-if ! git diff -q; then
+if ! git diff --quiet main..create-diffs; then
     die "Commit produced diffs, probably because of format?" \
-        "$(git diff --name-only)"
+        "$(git diff --quiet --name-only main..create-diffs)"
 fi
 
 deleteContainerVolumes
