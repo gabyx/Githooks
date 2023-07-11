@@ -997,7 +997,7 @@ repository simply by doing one of the following with the same effect:
   the template directory Githooks maintains, e.g.
 
   ```shell
-  git config core.hooksPath "$(git config githooks.templateDir)"
+  git config core.hooksPath "$(git config githooks.manualTemplateDir)"
   ```
 
 This also means that Githooks might not run if you forget to install the hooks.
