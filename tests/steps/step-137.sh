@@ -8,6 +8,11 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 . "$TEST_DIR/general.sh"
 
+if [ -n "${GH_COVERAGE_DIR:-}" ]; then
+    echo "Test cannot run for covarage."
+    exit 249
+fi
+
 # Install with script.
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --use-core-hookspath
