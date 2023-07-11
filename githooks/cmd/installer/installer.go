@@ -731,8 +731,6 @@ func setupInstallMode(
 
 	switch {
 	case installMode == install.InstallModeTypeV.Manual:
-		// Manual mode directly uses the install location
-		// as the template directory.
 		if strs.IsEmpty(templateDir) {
 			templateDir = setupNewTemplateDir(log, installDir, nil)
 		}

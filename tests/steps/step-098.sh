@@ -14,7 +14,7 @@ mkdir -p "$GH_TEST_TMP/test098/.git/hooks" &&
     git config githooks.autoUpdateEnabled false ||
     exit 1
 
-if ! echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     # When not using core.hooksPath we install into the current repository.
     if ! "$GH_TEST_BIN/cli" install --non-interactive; then
         echo "! Install into current repo failed"

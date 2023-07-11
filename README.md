@@ -890,28 +890,27 @@ The installer will:
 
 1. Find the install mode relevant directory:
 
-   For `Template Dir` install mode: Find the Git template directory
+   - For `Template Dir` install mode: Use the Git template directory
 
-   1. From `--template-dir` if given.
-   1. From the `$GIT_TEMPLATE_DIR` environment variable.
-   1. With the `git config --get init.templateDir` command.
-   1. Checking the default `/usr/share/git-core/templates` folder.
-   1. Search on the file system for matching directories.
-   1. Offer to set up a new one, and make it `init.templateDir`.
+   1. from `--template-dir` if given or
+   1. from the `$GIT_TEMPLATE_DIR` environment variable or
+   1. use the `git config --get init.templateDir` or
+   1. use the Git default `/usr/share/git-core/templates` folder or
+   1. search on the file system for matching directories or
+   1. offer to set up a new one.
 
-   For `Centralized Hooks` install mode: Find the hooks directory
+   - For `Centralized Hooks` install mode: Use the hooks directory
 
-   1. From `--template-dir` if given.
-   1. With the `git config --get core.hooksPath` command.
-   1. Search on the file system for matching directories.
+   1. from `--template-dir` if given, or
+   1. use `git config --get core.hooksPath` command if set or
+   1. otherwise use `<install-dir>/templates`.
 
-   For `Manual` install mode: Find the template directory
+   - For `Manual` install mode use the directory
 
-   1. From `--template-dir` if given.
-   1. With the `git config --get githooks.templateDir` command.
-   1. Search on the file system for matching directories.
+   1. from `--template-dir` if given or
+   1. otherwise use `<install-dir>/templates`.
 
-1. Write all chosen Githooks run-wrappers into the hooks directory:
+1. Write all Githooks run-wrappers into the hooks directory and set
 
    - either `init.templateDir` for `Normal` install mode or
    - `core.hooksPath` for `Centralized Hooks` install mode
@@ -920,7 +919,7 @@ The installer will:
 
 1. Offer to enable automatic update checks.
 
-1. Offer to find existing Git repositories on the filesystem (disable with
+1. Offer to find existing Git repositories on the file system (disable with
    `--skip-install-into-existing`)
 
    1. Install run-wrappers into them (`.git/hooks`).

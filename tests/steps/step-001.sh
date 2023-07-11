@@ -17,7 +17,7 @@ mkdir -p "$GH_TEST_TMP/test1" &&
 
 # verify that the pre-commit is installed
 
-if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     grep -q 'https://github.com/gabyx/githooks' "$(git config core.hooksPath)/pre-commit"
 else
     grep -q 'https://github.com/gabyx/githooks' .git/hooks/pre-commit
