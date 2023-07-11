@@ -17,8 +17,8 @@ fi
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --use-core-hookspath
 
-mkdir -p "$GH_TEST_TMP/test136" &&
-    cd "$GH_TEST_TMP/test136" &&
+mkdir -p "$GH_TEST_TMP/test137" &&
+    cd "$GH_TEST_TMP/test137" &&
     git init
 
 if [ -z "$(git config core.hooksPath)" ]; then
