@@ -539,8 +539,6 @@ func findHookTemplateDir(
 	haveInstall bool,
 	nonInteractive bool,
 	promptx prompt.IContext) string {
-	cm.DebugAssert(installMode != install.InstallModeTypeV.Manual,
-		"Install mode: 'manual' should be handled directly.")
 
 	log.InfoF("Find hooks template dir for install mode '%s'.",
 		install.GetInstallModeName(installMode))
@@ -565,12 +563,14 @@ func findHookTemplateDir(
 		install.GetInstallModeName(install.InstallModeTypeV.CoreHooksPath), git.GitCKCoreHooksPath)
 
 	// 4. No folder found: Try setup a new folder.
-	if nonInteractive || installMode == install.InstallModeTypeV.CoreHooksPath {
+	if nonInteractive ||
+		installMode == install.InstallModeTypeV.CoreHooksPath ||
+		installMode == install.InstallModeTypeV.Manual {
 		templateDir := setupNewTemplateDir(log, installDir, nil)
 		return path.Join(templateDir, "hooks") // nolint:nlreturn
 	}
 
-	// 5. Try to search for it on disk
+	// 5. Try to search for it on disk (only normal install mode)
 	answer, err := promptx.ShowOptions(
 		"Could not find the Git hook template directory.\n"+
 			"Do you want to search for it?",
@@ -730,18 +730,11 @@ func setupInstallMode(
 		"Given template dir '%s' does not exist.", templateDir)
 
 	switch {
-	case installMode == install.InstallModeTypeV.Manual:
-		if strs.IsEmpty(templateDir) {
-			templateDir = setupNewTemplateDir(log, installDir, nil)
-		}
-		hookTemplateDir = path.Join(templateDir, "hooks")
-
 	case strs.IsNotEmpty(templateDir):
 		// Template directory given, use this.
 		hookTemplateDir = path.Join(templateDir, "hooks")
 
 	case strs.IsEmpty(templateDir):
-		// Automatically find a template directory.
 		hookTemplateDir = findHookTemplateDir(
 			log,
 			gitx,
