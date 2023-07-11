@@ -24,7 +24,7 @@ if ! "$GH_INSTALL_BIN_DIR/cli" installer; then
     exit 1
 fi
 
-if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     if [ -f "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit" ]; then
         echo "! Expected hooks not installed"
         exit 1

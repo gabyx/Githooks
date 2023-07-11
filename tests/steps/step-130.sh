@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
 fi

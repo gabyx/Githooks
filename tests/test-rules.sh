@@ -19,10 +19,10 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 
 # Install Githooks
 RUN temp=\$(mktemp -d) && \
-    curl -sL "https://github.com/gabyx/Githooks/releases/download/v2.3.3/githooks-2.3.3-linux.amd64.tar.gz" \
+    curl -sL "https://github.com/gabyx/Githooks/releases/download/v2.4.0/githooks-2.4.0-linux.amd64.tar.gz" \
         -o "\$temp/githooks.tar.gz" && \
         tar -C "\$temp" -xf "\$temp/githooks.tar.gz" && \
-        "\$temp/cli" installer --non-interactive && \
+        "\$temp/cli" installer --non-interactive --update && \
         rm -rf "\$tempDir"
 
 RUN git config --global user.email "githook@test.com" && \

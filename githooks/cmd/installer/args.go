@@ -22,7 +22,8 @@ type Arguments struct {
 
 	MaintainedHooks []string // Maintain hooks by Githooks.
 
-	UseCoreHooksPath bool // Use the `core.hooksPath` for the template dir.
+	UseCoreHooksPath bool // Use install mode: `core.hooksPath` for the template dir.
+	UseManual        bool // Use install mode: manual -> no `core.hooksPath` nor `init.templateDir`
 
 	InstallPrefix string // Install prefix for Githooks.
 	TemplateDir   string // Template dir to use for the hooks.

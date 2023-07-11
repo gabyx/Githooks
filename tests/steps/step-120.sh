@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 acceptAllTrustPrompts || exit 1
 
-if [ "$(id -u)" != "0" ] || ! echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if [ "$(id -u)" != "0" ] || ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "! Test needs root access and --use-core-hookspath."
     exit 249
 fi

@@ -27,7 +27,7 @@ mkdir -p "$GH_TEST_TMP/test116.1" && cd "$GH_TEST_TMP/test116.1" &&
     git commit --allow-empty -m 'Initial commit' ||
     exit 1
 
-if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     if grep -q "/" "$README_FILE"; then
         echo "Expected the file to contain any paths"

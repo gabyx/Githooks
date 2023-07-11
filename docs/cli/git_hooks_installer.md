@@ -39,6 +39,7 @@ git hooks installer [flags]
                                        - `server` : Only server hooks supported by Githooks.
                                      You can list them separately or comma-separated in one argument.
       --use-core-hookspath           If the install mode `core.hooksPath` should be used.
+      --use-manual                   If the install mode `manual` should be used.
       --clone-url string             The clone url from which Githooks should clone
                                      and install/update itself. Githooks tries to
                                      auto-detect the deploy setting for downloading binaries.

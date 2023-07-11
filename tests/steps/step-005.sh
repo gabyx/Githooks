@@ -18,7 +18,7 @@ cd "$GH_TEST_TMP/shared/hooks-005.git" &&
     git commit -m 'Initial commit'
 
 # run the install, and set up shared repos
-if echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "n
 y
 $GH_TEST_TMP/shared/hooks-005.git
@@ -30,7 +30,6 @@ n
 y
 $GH_TEST_TMP/shared/hooks-005.git
 " | "$GH_TEST_BIN/cli" installer --stdin || exit 1
-
 fi
 
 mkdir -p "$GH_TEST_TMP/test5" &&
@@ -39,6 +38,8 @@ mkdir -p "$GH_TEST_TMP/test5" &&
 
 # verify that the hooks are installed and are working
 git commit -m 'Test'
+
+"$GH_TEST_BIN/cli" list
 
 if ! grep 'From shared hook' "$GH_TEST_TMP/test-005.out"; then
     echo "! The shared hooks don't seem to be working"

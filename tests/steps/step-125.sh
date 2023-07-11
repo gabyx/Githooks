@@ -2,7 +2,7 @@
 # Test:
 #   Warning about core.hooksPath not being used
 
-if ! echo "$EXTRA_INSTALL_ARGS" | grep -q "use-core-hookspath"; then
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "Test needs core.hooksPath to be configured"
     exit 249
 fi
