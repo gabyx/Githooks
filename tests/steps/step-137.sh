@@ -13,7 +13,7 @@ if [ -n "${GH_COVERAGE_DIR:-}" ]; then
     exit 249
 fi
 
-ref="${CIRCLE_SHA1:-$(git rev-parse HEAD)}"
+ref="${CIRCLE_SHA1:-main}"
 # Install with script.
 curl -sL "https://raw.githubusercontent.com/gabyx/Githooks/$ref/scripts/install.sh" | bash -s -- -- \
     --use-core-hookspath
