@@ -894,23 +894,23 @@ The installer will:
 
    - For `Template Dir` install mode: Use the Git template directory
 
-   1. from `--template-dir` if given or
-   1. from the `$GIT_TEMPLATE_DIR` environment variable or
-   1. use the `git config --get init.templateDir` or
-   1. use the Git default `/usr/share/git-core/templates` folder or
-   1. search on the file system for matching directories or
-   1. offer to set up a new one.
+     1. from `--template-dir` if given or
+     1. from the `$GIT_TEMPLATE_DIR` environment variable or
+     1. use the `git config --get init.templateDir` or
+     1. use the Git default `/usr/share/git-core/templates` folder or
+     1. search on the file system for matching directories or
+     1. offer to set up a new one.
 
    - For `Centralized Hooks` install mode: Use the hooks directory
 
-   1. from `--template-dir` if given, or
-   1. use `git config --get core.hooksPath` command if set or
-   1. otherwise use `<install-dir>/templates`.
+     1. from `--template-dir` if given, or
+     1. use `git config --get core.hooksPath` command if set or
+     1. otherwise use `<install-dir>/templates`.
 
    - For `Manual` install mode use the directory
 
-   1. from `--template-dir` if given or
-   1. otherwise use `<install-dir>/templates`.
+     1. from `--template-dir` if given or
+     1. otherwise use `<install-dir>/templates`.
 
 1. Write all Githooks run-wrappers into the hooks directory and set
 
