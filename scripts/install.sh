@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+function die() {
+    echo -e "! ERROR:" "$@" >&2
+    exit 1
+}
+
 function checkTool() {
     if ! command -v "$1" &>/dev/null; then
         echo "!! Required tool '$1' is not installed."
         exit 1
+    fi
+}
+
+function checkBash() {
+    if ! declare -n _DUMMY &>/dev/null; then
+        die "You need bash at least 4.3 to run this script."
     fi
 }
 
@@ -46,6 +57,10 @@ function getPlatformOS() {
                 sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
         elif grep -qE 'ID="?alpine' "/etc/os-release"; then
             platformOSDist="alpine"
+            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
+        elif grep -qE 'ID="?nixos' "/etc/os-release"; then
+            platformOSDist="nixos"
             platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         elif grep -qE 'ID="?rhel' "/etc/os-release"; then
@@ -96,15 +111,18 @@ function getPlatformArch() {
     if uname -m | grep -q "x86_64" &>/dev/null; then
         _arch="amd64"
         return 0
-    elif uname -m | grep -q "aarch64" &>/dev/null; then
+    elif uname -m | grep -q -E "aarch64|arm64" &>/dev/null; then
         _arch="arm64"
         return 0
-    elif uname -p | grep -q "arm64" &>/dev/null; then
+    elif uname -a | grep -q -E "aarch64|arm64" &>/dev/null; then
         _arch="arm64"
     else
         die "Architecture: '$(uname -m)' not supported."
     fi
 }
+
+checkBash
+checkTool "grep"
 checkTool "jq"
 checkTool "curl"
 checkTool "sha256sum"
