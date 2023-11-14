@@ -177,7 +177,7 @@ func FetchUpdates(
 			return false, cm.ErrorF("Cannot fetch updates because the clone\n"+
 				"'%s'\n"+
 				"is dirty! Either fix this or delete the clone\n"+
-				"to trigger a new checkout.", gitx.GetCwd())
+				"to trigger a new checkout.", gitx.GetCwd()) // nolint: goconst
 		}
 
 		if checkRemote {
@@ -201,7 +201,7 @@ func FetchUpdates(
 						"See 'git hooks config [set|print] clone-url' and\n"+
 						"    'git hooks config [set|print] clone-branch'\n"+
 						"Either fix this or delete the clone\n"+
-						"'%[1]s'\n"+
+						"'%[1]s'\n"+ // nolint: goconst
 						"to trigger a new checkout.", gitx.GetCwd(), u, b, url, branch, DefaultRemote)
 				}
 

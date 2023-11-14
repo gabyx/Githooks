@@ -340,8 +340,8 @@ func LoadIgnorePatterns(file string) (patterns HookPatterns, err error) {
 
 	if data.Version < 0 || data.Version > hookIgnoreFileVersion {
 		err =
-			cm.ErrorF("File '%s' has version '%v'. "+
-				"This version of Githooks only supports version >= 1 and <= '%v'.",
+			cm.ErrorF("File '%s' has version '%v'. "+ // nolint: goconst
+				"This version of Githooks only supports version >= 1 and <= '%v'.", // nolint: goconst
 				file,
 				data.Version,
 				hookIgnoreFileVersion)

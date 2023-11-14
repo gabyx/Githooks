@@ -54,8 +54,8 @@ func (s *SetOptions) AssertOptions(log cm.ILogContext, optsMap *OptionsMapping, 
 	log.PanicIf(!s.Set && !s.Unset && !s.Reset && !s.Print, "You need to specify an option.")
 
 	log.PanicIfF(s.Print && (s.Reset || s.Unset || s.Set || len(args) != 0),
-		"You cannot use '--%s' with any other options\n"+
-			"or arguments at the same time.", optsMap.Print)
+		"You cannot use '--%s' with any other options\n"+ // nolint: goconst
+			"or arguments at the same time.", optsMap.Print) // nolint: goconst
 
 	log.PanicIfF(s.Reset && (s.Unset || s.Print || s.Set || len(args) != 0),
 		"You cannot use '--%s' with any other options\n"+

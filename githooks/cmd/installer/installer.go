@@ -786,7 +786,7 @@ func setDirectoryForInstallMode(
 			if len(files) > 0 {
 				msg = strs.Fmt(
 					"The 'init.templateDir' setting is currently set to\n"+
-						"'%s'\n"+
+						"'%s'\n"+ // nolint: goconst
 						"and contains '%v' potential hooks.\n", tD, len(files))
 			}
 		}

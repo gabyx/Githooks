@@ -99,8 +99,8 @@ func (c *LogContext) AssertNoError(err error, lines ...string) bool {
 // AssertNoErrorF Assert no error, and otherwise log it.
 func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{}) bool {
 	if err != nil {
-		c.WarnF(format+"\n-> errors:\n"+FormatError(err), args...)
-		return false // nolint:nlreturn
+		c.WarnF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+		return false                                               // nolint:nlreturn
 	}
 
 	return true
@@ -109,14 +109,14 @@ func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{
 // AssertNoErrorPanic asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
-		c.Panic(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...)
+		c.Panic(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...) //nolint: goconst
 	}
 }
 
 // AssertNoErrorPanicF asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...interface{}) {
 	if err != nil {
-		c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...)
+		c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
 	}
 }
 
@@ -124,13 +124,13 @@ func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...inter
 func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args ...interface{}) {
 	if isFatal {
 		if err != nil {
-			c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...)
+			c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
 		} else {
 			c.PanicF(format, args...)
 		}
 	} else {
 		if err != nil {
-			c.ErrorF(format+"\n-> errors:\n"+FormatError(err), args...)
+			c.ErrorF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
 		} else {
 			c.ErrorF(format, args...)
 		}
