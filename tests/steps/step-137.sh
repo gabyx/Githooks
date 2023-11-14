@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 . "$TEST_DIR/general.sh"
 
 if [ -n "${GH_COVERAGE_DIR:-}" ]; then
-    echo "Test cannot run for covarage."
+    echo "Test cannot run for coverage."
     exit 249
 fi
 
@@ -32,7 +32,7 @@ if [ -n "$(git config init.templateDir)" ]; then
     exit 1
 fi
 
-if ! grep -Rq 'github.com/gabyx/githooks' .git/hooks; then
+if grep -Rq 'github.com/gabyx/githooks' .git/hooks; then
     echo "Hooks should not have been installed."
     exit 1
 fi
