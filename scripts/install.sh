@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+function die() {
+    echo -e "! ERROR:" "$@" >&2
+    exit 1
+}
+
 function checkTool() {
     if ! command -v "$1" &>/dev/null; then
         echo "!! Required tool '$1' is not installed."
@@ -46,6 +51,10 @@ function getPlatformOS() {
                 sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
         elif grep -qE 'ID="?alpine' "/etc/os-release"; then
             platformOSDist="alpine"
+            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
+        elif grep -qE 'ID="?nixos' "/etc/os-release"; then
+            platformOSDist="nixos"
             platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         elif grep -qE 'ID="?rhel' "/etc/os-release"; then
