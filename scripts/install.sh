@@ -14,8 +14,9 @@ function checkTool() {
 }
 
 function checkBash() {
-    [ "${BASH_VERSINFO:-0}" -lt 4 ] &&
-        die "You need bash at least 4.0 to run this script."
+    if ! declare -n _DUMMY &>/dev/null; then
+        die "You need bash at least 4.3 to run this script."
+    fi
 }
 
 function getPlatformOS() {
