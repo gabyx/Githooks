@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 CURRENT_TIME=$(date +%s)
 MOCK_LAST_RUN=$((CURRENT_TIME - 5))
 
-git config --global githooks.autoUpdateCheckTimestamp $MOCK_LAST_RUN || exit 1
+setUpdateCheckTimestamp "$MOCK_LAST_RUN" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test31" &&
     cd "$GH_TEST_TMP/test31" &&
@@ -25,7 +25,7 @@ if git -C ~/.githooks/release rev-parse HEAD; then
     exit 1
 fi
 
-LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
+LAST_UPDATE=$(getUpdateCheckTimestamp)
 if [ "$LAST_UPDATE" != "$MOCK_LAST_RUN" ]; then
     echo "! Update did not behave as expected"
     exit 1

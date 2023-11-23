@@ -146,7 +146,7 @@ fi
 
 cd "$GH_TEST_TMP/test116.3" &&
     git config --global githooks.autoUpdateEnabled true &&
-    git config --global githooks.autoUpdateCheckTimestamp $MOCK_LAST_RUN &&
+    setUpdateCheckTimestamp $MOCK_LAST_RUN &&
     git commit --allow-empty -m 'Second commit' || exit 1
 
 # Check that all hooks are updated

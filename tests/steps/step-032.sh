@@ -22,7 +22,7 @@ if ! git -C ~/.githooks/release rev-parse HEAD; then
     exit 1
 fi
 
-LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
+LAST_UPDATE=$(getUpdateCheckTimestamp)
 if [ -z "$LAST_UPDATE" ]; then
     echo "! Update check was expected to start"
     exit 1

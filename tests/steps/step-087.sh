@@ -17,7 +17,7 @@ fi
 
 "$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 3
 
-git config --global githooks.autoUpdateCheckTimestamp 123 &&
+setUpdateCheckTimestamp 123 &&
     "$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' && exit 4
 
 "$GH_INSTALL_BIN_DIR/cli" config update-time --reset &&

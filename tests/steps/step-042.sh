@@ -14,7 +14,7 @@ if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     exit 249
 fi
 
-LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
+LAST_UPDATE=$(getUpdateCheckTimestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
@@ -40,7 +40,7 @@ if [ "$ARE_UPDATES_ENABLED" != "true" ]; then
     exit 1
 fi
 
-LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
+LAST_UPDATE=$(getUpdateCheckTimestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
@@ -52,7 +52,7 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
     exit 1
 fi
 
-git config --global --unset githooks.autoUpdateCheckTimestamp
+resetUpdateCheckTimestamp
 
 OUTPUT=$(
     "$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
@@ -64,7 +64,7 @@ if ! echo "$OUTPUT" | grep -q "All done! Enjoy!"; then
     exit 1
 fi
 
-LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
+LAST_UPDATE=$(getUpdateCheckTimestamp)
 if [ -z "$LAST_UPDATE" ]; then
     echo "! Update did not run"
     exit 1

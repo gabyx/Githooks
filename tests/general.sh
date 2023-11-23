@@ -34,6 +34,25 @@ function assertNoTestImages() {
     fi
 }
 
+function setUpdateCheckTimestamp() {
+    mkdir -p "$GH_INSTALL_DIR"
+    echo "$1" >"$GH_INSTALL_DIR/.last-update-check-timestamp"
+    return 0
+}
+
+function getUpdateCheckTimestamp() {
+    file="$GH_INSTALL_DIR/.last-update-check-timestamp"
+    if [ -f "$file" ]; then
+        cat "$file"
+    fi
+
+    return 0
+}
+
+function resetUpdateCheckTimestamp() {
+    rm "$GH_INSTALL_DIR/.last-update-check-timestamp" || return 0
+}
+
 function deleteAllTestImages() {
     if ! isDockerAvailable; then
         return 0

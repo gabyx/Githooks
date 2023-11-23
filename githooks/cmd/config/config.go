@@ -346,12 +346,12 @@ func runUpdateTime(ctx *ccm.CmdContext, opts *SetOptions) {
 
 	switch {
 	case opts.Reset:
-		err := updates.ResetUpdateCheckTimestamp()
+		err := updates.ResetUpdateCheckTimestamp(ctx.InstallDir)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not reset %s.", text)
 		ctx.Log.InfoF("Reset %s.", text)
 
 	case opts.Print:
-		ts, isSet, err := updates.GetUpdateCheckTimestamp(ctx.GitX)
+		ts, isSet, err := updates.GetUpdateCheckTimestamp(ctx.InstallDir)
 		ctx.Log.AssertNoErrorPanic(err, "Could not get %s.", text)
 		if isSet {
 			ctx.Log.InfoF("%s set to '%s'.", ts.Format(time.RFC1123))

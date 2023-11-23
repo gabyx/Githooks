@@ -23,14 +23,14 @@ if ! git -C ~/.githooks/release rev-parse HEAD; then
     exit 1
 fi
 
-LAST_UPDATE=$(git config --global --get githooks.autoUpdateCheckTimestamp)
+LAST_UPDATE=$(getUpdateCheckTimestamp)
 if [ -z "$LAST_UPDATE" ]; then
     echo "! Update was expected to start"
     exit 1
 fi
 
 # 'git' is removed in 'hooks update disable'
-# due to covarage replacement issues.
+# due to coverage replacement issues.
 if ! echo "$OUTPUT" | grep -q "hooks update disable"; then
     echo "! Expected update output not found"
     echo "$OUTPUT"

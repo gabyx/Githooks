@@ -62,7 +62,7 @@ git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null || {
 CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
 cd "$GH_TEST_TMP/test045/001" &&
     git config --global githooks.autoUpdateEnabled true &&
-    git config --global githooks.autoUpdateCheckTimestamp $MOCK_LAST_RUN &&
+    setUpdateCheckTimestamp $MOCK_LAST_RUN &&
     OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
 
 AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
