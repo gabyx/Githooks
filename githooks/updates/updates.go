@@ -475,7 +475,7 @@ func RunUpdate(
 	usePreRelease bool,
 	run func() error) (updateAvailable bool, accepted bool, err error) {
 
-	err = RecordUpdateCheckTimestamp()
+	err = RecordUpdateCheckTimestamp(installDir)
 
 	if err != nil {
 		err = cm.Error("Could not record update check timestamp.")

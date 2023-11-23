@@ -380,7 +380,7 @@ func shouldRunUpdateCheck(settings *HookSettings) bool {
 		return false
 	}
 
-	lastUpdateCheck, _, err := updates.GetUpdateCheckTimestamp(settings.GitX)
+	lastUpdateCheck, _, err := updates.GetUpdateCheckTimestamp(settings.InstallDir)
 	log.AssertNoErrorF(err, "Could get last update check time.")
 
 	return time.Since(lastUpdateCheck).Hours() > 24.0 //nolint: gomnd
