@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/gabyx/githooks/githooks/cmd"
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
@@ -14,10 +15,7 @@ func installSignalHandling() *cm.InterruptContext {
 	var cleanUpX cm.InterruptContext
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	defer func() {
-		signal.Stop(c)
-	}()
+	signal.Notify(c, syscall.SIGINT)
 
 	go func() {
 		<-c

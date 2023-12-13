@@ -556,9 +556,11 @@ func findHookTemplateDir(
 		"Your installation is corrupt.\n"+
 			"You seem to have install mode '%s' but the corresponding\n"+
 			"hook templates directory is not found:\n"+
-			" - For '%s', is '%s' unset?\n"+
-			" - For '%s', is '%s' unset?",
+			" - For '%s', is '%s' unset?\n"+ // nolint: goconst
+			" - For '%s', is '%s' unset?\n"+ // nolint: goconst
+			" - For '%s', is '%s' unset?\n", // nolint: goconst
 		install.GetInstallModeName(installMode),
+		install.GetInstallModeName(install.InstallModeTypeV.Manual), hooks.GitCKManualTemplateDir,
 		install.GetInstallModeName(install.InstallModeTypeV.TemplateDir), git.GitCKInitTemplateDir,
 		install.GetInstallModeName(install.InstallModeTypeV.CoreHooksPath), git.GitCKCoreHooksPath)
 
