@@ -61,9 +61,12 @@ func execPath(
 		&execx,
 		hookCmds,
 		execRes,
-		func(res ...hooks.HookResult) { logHookResults(ctx.Log, res...) })
+		func(res ...hooks.HookResult) { logHookResults(ctx.Log, res...) },
+		opts.Args...,
+	)
 
 	ctx.Log.AssertNoError(e, "Launching path '%s' failed", opts.NamespacePath)
+
 	return ctx.NewCmdExit(execRes[0].ExitCode, "Execution failed.")
 }
 
@@ -121,11 +124,14 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	execCmd := &cobra.Command{
 		Use:   "exec namespace-path [args...]",
-		Short: "Execute namespace paths pointing to an executable hook.",
+		Short: "Execute namespace paths pointing to an executable.",
 		Long: "Execute namespace paths\n" +
 			"pointing to an executable or a run configuration\n" +
 			"(e.g. `ns:xxx/mypath/a/b/c.sh` or `ns:xxx/mypath/a/b/c.yaml`).\n" +
-			"The execution is run the same as Githooks performs during its execution.",
+			"The execution is run the same as Githooks performs during its execution.\n\n" +
+			"Its not meant to execute hooks but rather add-on scripts\n" +
+			"inside Githooks repositories.\n\n" +
+			"If containerized hooks are enabled the execution always runs containerized.",
 		PreRun: ccm.PanicIfNotRangeArgs(ctx.Log, 1, -1),
 		RunE: func(c *cobra.Command, args []string) error {
 			opts.NamespacePath = args[0]
@@ -138,7 +144,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 		}}
 
 	execCmd.Flags().BoolVar(&opts.Containarized,
-		"containerized", false, "Execute the path containerized.")
+		"containerized", false, "Force the execution to be containerized.")
 
 	execCmd.Flags().BoolVar(&opts.Parallel,
 		"parallel", false, "Execute all paths in parallel (beware of race conditions).")

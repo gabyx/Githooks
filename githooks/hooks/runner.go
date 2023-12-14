@@ -73,7 +73,7 @@ func GetHookRunCmd(
 	hookNamespace string,
 	envs []string) (cm.IExecutable, error) {
 
-	exec := cm.Executable{Cmd: hookPath}
+	exec := cm.NewExecutable(hookPath, nil, envs)
 
 	if cm.IsExecutable(exec.Cmd) {
 		return &exec, nil

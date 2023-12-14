@@ -1,0 +1,5 @@
+envs:
+  sharedhooks:
+    # All these variables are exported
+    # for shared hook namespace `sharedhooks`.
+    - "MONKEY=banana"

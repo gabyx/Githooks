@@ -21,14 +21,19 @@ type Executable struct {
 	Env  []string
 }
 
+func NewExecutable(cmd string, args []string, env []string) Executable {
+	return Executable{Cmd: cmd, Args: CopySlice(args), Env: CopySlice(env)}
+}
+
 // GetCommand gets the first command.
 func (e *Executable) GetCommand() string {
 	return e.Cmd
 }
 
 // GetArgs gets all args.
-func (e *Executable) GetArgs(args ...string) []string {
-	return append(e.Args, args...)
+func (e *Executable) GetArgs(args ...string) (res []string) {
+	res = CopySliceC(e.Args, len(e.Args)+len(args))
+	return append(res, args...)
 }
 
 // GetEnvironment gets all environment variables.

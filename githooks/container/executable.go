@@ -1,5 +1,9 @@
 package container
 
+import (
+	cm "github.com/gabyx/githooks/githooks/common"
+)
+
 // ContainerizedExecutable contains the data to a script/executable file.
 type ContainerizedExecutable struct {
 	containerType ContainerManagerType
@@ -18,13 +22,13 @@ func (e *ContainerizedExecutable) GetCommand() string {
 }
 
 // GetArgs gets all args.
-func (e *ContainerizedExecutable) GetArgs(args ...string) []string {
-	var a []string
-	a = append(a, e.ArgsPre...)
-	a = append(a, e.ArgsEnv...)
-	a = append(a, e.ArgsPost...)
+func (e *ContainerizedExecutable) GetArgs(args ...string) (res []string) {
+	res = cm.CopySliceC(e.ArgsPre, len(e.ArgsPre)+len(e.ArgsEnv)+len(e.ArgsPost)+len(args))
+	res = append(res, e.ArgsEnv...)
+	res = append(res, e.ArgsPost...)
+	res = append(res, args...)
 
-	return a
+	return
 }
 
 // GetEnvironment gets all environment variables.

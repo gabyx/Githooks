@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
 
-[ "$GITHOOKS_CONTAINER_RUN" = "true" ] || {
-    echo "Should be inside container!" >&2
-    exit 222
-}
-
-echo "Executing test script '$1' '$2'."
+echo "Executing test script '$1' '$2' $MONKEY."
 exit 0

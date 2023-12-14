@@ -38,6 +38,7 @@ mkdir -p "$GH_TEST_TMP/test138" &&
     git init &&
     mkdir -p .githooks &&
     echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-138-a.git" >.githooks/.shared.yaml &&
+    cp -rf "$TEST_DIR/steps/images/image-1/.envs.yaml" .githooks/.envs.yaml &&
     GITHOOKS_DISABLE=1 git add . &&
     GITHOOKS_DISABLE=1 git commit -m 'Initial commit' ||
     exit 1
@@ -53,29 +54,50 @@ export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
 storeIntoContainerVolumes "." "$HOME/.githooks/shared"
 showAllContainerVolumes 3
 
+# Test the containerized run.
 OUT=$(setGithooksContainerVolumeEnvs &&
-    git hooks exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
+    git hooks exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
     {
-        echo "Execution failed."
+        echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
         exit 1
     }
 
-if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2'"; then
+if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2' banana"; then
     echo "! Expected output not found."
+    echo "$OUT"
     exit 1
 fi
 
+# Test the normal run as well.
 OUT=$(setGithooksContainerVolumeEnvs &&
-    git hooks exec ns:sharedhooks/scripts/test-fail.sh 2>&1)
+    git hooks exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
+    {
+        echo "Execution failed. [exit code: $?]:"
+        echo "$OUT"
+        exit 1
+    }
 
-if [ "$?" != "123" ]; then
-    echo "! Test script should have reported 123."
+if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2' banana"; then
+    echo "! Expected output not found."
+    echo "$OUT"
+    exit 1
+fi
+
+set +e
+OUT=$(setGithooksContainerVolumeEnvs &&
+    git hooks exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
+exitCode="$?"
+set -e
+
+if [ "$exitCode" != "123" ]; then
+    echo "! Test script should have reported 123 [exit code: $exitCode]"
     exit 1
 fi
 
 if ! echo "$OUT" | grep -iq "executing test script"; then
     echo "! Expected output not found."
+    echo "$OUT"
     exit 1
 fi
 

@@ -74,8 +74,7 @@ func GetOutputFromExecutable(
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, error) {
 
-	args = exe.GetArgs(args...)
-	cmd := exec.Command(exe.GetCommand(), args...)
+	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -102,8 +101,7 @@ func GetCombinedOutputFromExecutable(
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, int, error) {
 
-	args = exe.GetArgs(args...)
-	cmd := exec.Command(exe.GetCommand(), args...)
+	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -115,7 +113,9 @@ func GetCombinedOutputFromExecutable(
 	out, err := cmd.CombinedOutput()
 
 	exitCode := -1
-	if t, ok := err.(*exec.ExitError); ok {
+	if err == nil {
+		exitCode = 0
+	} else if t, ok := err.(*exec.ExitError); ok {
 		exitCode = t.ExitCode()
 	}
 
@@ -146,8 +146,7 @@ func GetOutputFromExecutableSep(
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, []byte, error) {
 
-	args = exe.GetArgs(args...)
-	cmd := exec.Command(exe.GetCommand(), args...)
+	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -177,8 +176,7 @@ func RunExecutable(
 	pipeSetup PipeSetupFunc,
 	args ...string) error {
 
-	args = exe.GetArgs(args...)
-	cmd := exec.Command(exe.GetCommand(), args...)
+	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
