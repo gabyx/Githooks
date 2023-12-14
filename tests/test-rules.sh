@@ -33,10 +33,13 @@ RUN git config --global user.email "githook@test.com" && \
 ENV DOCKER_RUNNING=true
 EOF
 
-if ! docker run --rm -it \
-    -v "$rootDir":/data \
-    -v "/var/run/docker.sock:/var/run/docker.sock" \
-    -w /data githooks:test-rules tests/exec-rules.sh; then
+if
+    ! docker run --rm -it \
+        -v "$rootDir":/data \
+        -v "/var/run/docker.sock:/var/run/docker.sock" \
+        -e "GH_SHOW_DIFFS=${GH_SHOW_DIFFS:-false}" \
+        -w /data githooks:test-rules tests/exec-rules.sh
+then
     echo "! Check rules had failures."
     exit 1
 fi

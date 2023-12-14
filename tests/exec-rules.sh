@@ -23,6 +23,8 @@ function cleanUp() {
     deleteContainerVolumes
 }
 
+[ "${GH_SHOW_DIFFS:-false}" == "false" ] || echo "INFO: SHOWING DIFFS"
+
 trap cleanUp EXIT
 
 echo "Copy whole repo to temp and make one commit with all files."
@@ -66,15 +68,19 @@ git commit -m "Check all hooks."
 restoreFromContainerVolumeWorkspace "." ""
 
 if ! git diff --quiet main..create-diffs; then
-    die "Commit produced diffs, probably because of format?" \
-        "$(git diff --name-only main..create-diffs)" \
-        "$(git diff main..create-diffs)"
+    [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff main..create-diffs
+
+    die "Commit produced diffs, probably because of format" \
+        "(use GH_SHOW_DIFFS=true to show diffs):" \
+        "$(git diff --name-only main..create-diffs)"
 fi
 
 if ! git diff --cached --quiet main; then
-    die "Commit produced diffs, probably because of format?" \
-        "$(git diff --cached --name-only main)" \
-        "$(git diff main..create-diffs)"
+    [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff --cached --name-only main
+
+    die "Commit produced diffs, probably because of format" \
+        "(use GH_SHOW_DIFFS=true to show diffs):?" \
+        "$(git diff --cached --name-only main)"
 fi
 
 deleteContainerVolumes
