@@ -1082,7 +1082,7 @@ func logHookResults(res ...hooks.HookResult) {
 	}
 
 	if hadErrors {
-		log.PanicF("Some hooks failed, check output for details:\n%s", sb.String())
+		log.PanicF("Some hooks failed, check output for details:%s", sb.String())
 	}
 }
 

@@ -4,8 +4,13 @@ set -e
 
 echo "Arguments given:" "$@"
 
-if [ "${1:-}" != "--message" ]; then
-    echo "! First argument is not --message"
+if [ -z "${1:-}" ] || [ "${1:-}" == "--message" ]; then
+    echo "! First argument must be the file to 'commit-msg' hook."
+    exit 1
+fi
+
+if [ "${2:-}" != "--message" ]; then
+    echo "! Second argument is not --message"
     exit 1
 fi
 

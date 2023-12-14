@@ -21,7 +21,7 @@ const (
 	debugSuffix       = "🛠  " + githooksSuffix
 	infoSuffix        = GithooksEmoji + " " + githooksSuffix
 	warnSuffix        = "⛑  " + githooksSuffix
-	errorSuffix       = "⛔  "
+	errorSuffix       = "⛔ "
 	promptSuffix      = "❓ " + githooksSuffix
 	informationSuffix = "ℹ️   "
 	indent            = "   "

@@ -4,6 +4,9 @@ clean:
 build:
   githooks/scripts/build.sh
 
+testsuite:
+  tests/test-testsuite.sh
+
 release-test:
   cd githooks && \
     GORELEASER_CURRENT_TAG=v9.9.9 \

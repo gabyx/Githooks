@@ -83,6 +83,10 @@ func (m *ManagerDocker) NewHookRunExec(
 	workspaceHookDir string,
 	hookExec cm.IExecutable,
 ) (cm.IExecutable, error) {
+
+	cm.DebugAssert(filepath.IsAbs(workspaceDir), "Workspace dir must be an absolute path.")
+	cm.DebugAssert(filepath.IsAbs(workspaceHookDir), "Workspace hook dir must be an abs path.")
+
 	containerExec := ContainerizedExecutable{containerType: ContainerManagerTypeV.Docker}
 
 	containerExec.Cmd = dockerCmd
