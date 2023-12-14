@@ -69,7 +69,6 @@ setGithooksContainerVolumeEnvs
 showAllContainerVolumes "2"
 
 git commit -m "Check all hooks."
-git commit -m -a "Checking generated formatted files."
 
 restoreFromContainerVolumeWorkspace "." ""
 
