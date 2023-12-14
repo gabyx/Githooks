@@ -67,11 +67,14 @@ restoreFromContainerVolumeWorkspace "." ""
 
 if ! git diff --quiet main..create-diffs; then
     die "Commit produced diffs, probably because of format?" \
-        "$(git diff --name-only main..create-diffs)"
+        "$(git diff --name-only main..create-diffs)" \
+        "$(git diff main..create-diffs)"
 fi
+
 if ! git diff --cached --quiet main; then
     die "Commit produced diffs, probably because of format?" \
-        "$(git diff --cached --name-only main)"
+        "$(git diff --cached --name-only main)" \
+        "$(git diff main..create-diffs)"
 fi
 
 deleteContainerVolumes
