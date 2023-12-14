@@ -71,7 +71,8 @@ func GetHookRunCmd(
 	parseRunnerConfig bool,
 	containerizedEnabled bool,
 	hookNamespace string,
-	envs []string) (cm.IExecutable, error) {
+	envs []string,
+) (cm.IExecutable, error) {
 
 	exec := cm.NewExecutable(hookPath, nil, envs)
 
@@ -133,7 +134,12 @@ func GetHookRunCmd(
 			return nil, err
 		}
 
-		containerExec, err := mgr.NewHookRunExec(reference, gitx.GetCwd(), rootDir, &exec)
+		containerExec, err := mgr.NewHookRunExec(
+			reference,
+			gitx.GetCwd(),
+			rootDir, &exec,
+			false, false,
+		)
 
 		if err != nil {
 			return nil, cm.CombineErrors(err, cm.Error("Could not create container hook executor."))
