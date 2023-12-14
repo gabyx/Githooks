@@ -55,19 +55,20 @@ func ResolveNamespacePaths(
 		for nI := range res {
 			p := &res[nI]
 
-			if p.Found {
+			switch {
+			case p.Found:
 				continue
-			} else if p.Namespace == NamespaceRepositoryHook {
+			case p.Namespace == NamespaceRepositoryHook:
 				p.RepositoryRoot = repoDir
 				p.HooksDir = localHooksDir
+
 				p.Found = true
 				found++
-
-			} else if p.Namespace == ns {
+			case p.Namespace == ns:
 				p.RepositoryRoot = allRepos[rI].RepositoryDir
 				p.HooksDir = hooksDir
-				p.Found = true
 
+				p.Found = true
 				found++
 			}
 		}

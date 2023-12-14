@@ -114,7 +114,6 @@ type execCmdOptions struct {
 	NamespacePath string
 	Args          []string
 	Containarized bool
-	Parallel      bool
 }
 
 // NewCmd creates this new command.
@@ -145,9 +144,6 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	execCmd.Flags().BoolVar(&opts.Containarized,
 		"containerized", false, "Force the execution to be containerized.")
-
-	execCmd.Flags().BoolVar(&opts.Parallel,
-		"parallel", false, "Execute all paths in parallel (beware of race conditions).")
 
 	return ccm.SetCommandDefaults(ctx.Log, execCmd)
 }

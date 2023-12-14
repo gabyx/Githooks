@@ -4,6 +4,9 @@ clean:
 build:
   githooks/scripts/build.sh
 
+test *ARGS:
+  tests/test-alpine-user.sh {{ARGS}}
+
 testsuite:
   tests/test-testsuite.sh
 

@@ -48,9 +48,9 @@ func GetDefaultHooksNamespaceShared(sharedRepo *SharedRepo) string {
 }
 
 // SplitNamespacePath splits a namespace path `ns:xxx/a/b/c` into
-// `xxx` and `a/b/c`
+// `xxx` and `a/b/c`.
 func SplitNamespacePath(nsPath string) (ns, path string, err error) {
-	s := strings.SplitN(nsPath, "/", 2)
+	s := strings.SplitN(nsPath, "/", 2) // nolint: gomnd
 	if len(s) > 1 {
 		path = s[1]
 	}
@@ -58,6 +58,7 @@ func SplitNamespacePath(nsPath string) (ns, path string, err error) {
 	ns = strings.TrimPrefix(s[0], NamespacePrefix)
 	if ns == s[0] {
 		err = cm.ErrorF("Namespace name '%s' does not have suffix 'ns:'.", nsPath)
+
 		return
 	}
 

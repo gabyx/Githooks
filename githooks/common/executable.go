@@ -33,6 +33,7 @@ func (e *Executable) GetCommand() string {
 // GetArgs gets all args.
 func (e *Executable) GetArgs(args ...string) (res []string) {
 	res = CopySliceC(e.Args, len(e.Args)+len(args))
+
 	return append(res, args...)
 }
 

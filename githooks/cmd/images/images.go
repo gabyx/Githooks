@@ -39,6 +39,7 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 			ctx.Log.WarnF(
 				"Shared repository '%s' is not available yet.\n"+
 					"Use 'git hooks shared update'.", repo.URL)
+
 			continue
 		}
 
@@ -60,9 +61,10 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	imagesFile := ""
 	imagesUpdateCmd := &cobra.Command{
-		Use:    "update",
-		Short:  `Build/pull container images.`,
-		Long:   "Build/pull container images in the current repository and shared repositories which are needed for Githooks.",
+		Use:   "update",
+		Short: `Build/pull container images.`,
+		Long: "Build/pull container images in the current\n" +
+			"repository and shared repositories which are needed for Githooks.",
 		PreRun: ccm.PanicIfNotExactArgs(ctx.Log, 0),
 		Run: func(c *cobra.Command, args []string) {
 			runImagesUpdate(ctx, imagesFile)

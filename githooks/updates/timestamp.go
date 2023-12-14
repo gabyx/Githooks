@@ -30,9 +30,6 @@ func RecordUpdateCheckTimestamp(installDir string) error {
 		[]byte(fmt.Sprintf("%v", time.Now().Unix())),
 		cm.DefaultFileModeFile)
 
-	s, _, _ := GetUpdateCheckTimestamp(installDir)
-	fmt.Printf("TIMESTAMPE %s", s)
-
 	return err
 }
 
