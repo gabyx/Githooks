@@ -91,7 +91,7 @@ exitCode="$?"
 set -e
 
 # Coverage cannot report correct exit codes, without wrapping it to a file.
-if [ -z "$GH_COVERAGE_DIR" ] &&
+if [ -z "${GH_COVERAGE_DIR:-}" ] &&
     [ "$exitCode" != "123" ]; then
     echo "! Test script should have reported 123 [exit code: $exitCode]"
     exit 1
