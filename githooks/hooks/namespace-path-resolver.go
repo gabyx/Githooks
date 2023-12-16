@@ -44,11 +44,13 @@ func ResolveNamespacePaths(
 	found := 0
 
 	for rI := range allRepos {
-		if !cm.IsDirectory(allRepos[rI].RepositoryDir) {
+		repo := &allRepos[rI]
+
+		if !cm.IsDirectory(repo.RepositoryDir) {
 			continue
 		}
 
-		hooksDir := GetSharedGithooksDir(allRepos[rI].RepositoryDir)
+		hooksDir := GetSharedGithooksDir(repo.RepositoryDir)
 		ns, err := GetHooksNamespace(hooksDir)
 		log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
 
@@ -65,7 +67,7 @@ func ResolveNamespacePaths(
 				p.Found = true
 				found++
 			case p.Namespace == ns:
-				p.RepositoryRoot = allRepos[rI].RepositoryDir
+				p.RepositoryRoot = repo.RepositoryDir
 				p.HooksDir = hooksDir
 
 				p.Found = true
@@ -74,9 +76,7 @@ func ResolveNamespacePaths(
 		}
 	}
 
-	if found == len(res) {
-		foundAll = true
-	}
+	foundAll = found == len(res)
 
 	return
 }

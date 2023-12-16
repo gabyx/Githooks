@@ -199,11 +199,11 @@ func runSharedUpdate(ctx *ccm.CmdContext) {
 	ctx.Log.InfoF("Update '%v' shared repositories.", updated)
 }
 
-func runSharedRoot(ctx *ccm.CmdContext, npPaths []string) (exitCode error) {
+func runSharedRoot(ctx *ccm.CmdContext, nsPaths []string) (exitCode error) {
 	ctx.WrapPanicExitCode()
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
-	results, foundAll, err := hooks.ResolveNamespacePaths(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, npPaths)
+	results, foundAll, err := hooks.ResolveNamespacePaths(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, nsPaths)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not resolve namespace paths")
 
 	for i := range results {
@@ -213,9 +213,14 @@ func runSharedRoot(ctx *ccm.CmdContext, npPaths []string) (exitCode error) {
 
 	if !foundAll {
 		var msg string
+
 		for i := range results {
-			msg += strs.Fmt("%s '%s'", cm.ListItemLiteral, npPaths[i])
+			if results[i].Found {
+				continue
+			}
+			msg += strs.Fmt("%s '%s'", cm.ListItemLiteral, nsPaths[i])
 		}
+
 		exitCode = ctx.NewCmdExit(1, "Did not find all shared repositories:\n%s", msg)
 	}
 

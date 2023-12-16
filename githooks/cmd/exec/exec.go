@@ -21,8 +21,6 @@ func execPath(
 	opts execCmdOptions,
 	namespaceEnvs hooks.NamespaceEnvs) (err error) {
 
-	ctx.Log.AssertNoError(err, "Could not load namespace environment variables.")
-
 	containerized := opts.Containarized ||
 		hooks.IsContainerizedHooksEnabled(ctx.GitX, true)
 
@@ -123,7 +121,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	execCmd := &cobra.Command{
 		Use:   "exec namespace-path [args...]",
-		Short: "Execute namespace paths pointing to an executable.",
+		Short: "Execute namespace paths pointing to an executable or run configuration.",
 		Long: "Execute namespace paths\n" +
 			"pointing to an executable or a run configuration\n" +
 			"(e.g. `ns:xxx/mypath/a/b/c.sh` or `ns:xxx/mypath/a/b/c.yaml`).\n" +

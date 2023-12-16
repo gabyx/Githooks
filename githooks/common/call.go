@@ -74,7 +74,8 @@ func GetOutputFromExecutable(
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, error) {
 
-	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
+	args = exe.GetArgs(args...)
+	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -86,7 +87,7 @@ func GetOutputFromExecutable(
 	out, err := cmd.Output()
 	if err != nil {
 		err = CombineErrors(
-			ErrorF("Command failed: '%q'.", cmd.Args), err)
+			ErrorF("Command failed: '%s %q'.", exe.GetCommand(), args), err)
 	}
 
 	return out, err
@@ -101,7 +102,8 @@ func GetCombinedOutputFromExecutable(
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, int, error) {
 
-	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
+	args = exe.GetArgs(args...)
+	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -121,7 +123,7 @@ func GetCombinedOutputFromExecutable(
 
 	if err != nil {
 		err = CombineErrors(
-			ErrorF("Command failed: '%q'.", cmd.Args), err)
+			ErrorF("Command failed: '%s %q'.", exe.GetCommand(), args), err)
 	}
 
 	return out, exitCode, err
@@ -145,7 +147,8 @@ func GetOutputFromExecutableSep(
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, []byte, error) {
 
-	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
+	args = exe.GetArgs(args...)
+	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -162,7 +165,7 @@ func GetOutputFromExecutableSep(
 	err := cmd.Run()
 	if err != nil {
 		err = CombineErrors(
-			ErrorF("Command failed: '%q'.", cmd.Args), err)
+			ErrorF("Command failed: '%s %q'.", exe.GetCommand(), args), err)
 	}
 
 	return b1.Bytes(), b2.Bytes(), err
@@ -175,7 +178,8 @@ func RunExecutable(
 	pipeSetup PipeSetupFunc,
 	args ...string) error {
 
-	cmd := exec.Command(exe.GetCommand(), exe.GetArgs(args...)...)
+	args = exe.GetArgs(args...)
+	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
 	cmd.Env = append(cmd.Env, ctx.GetEnv()...)
 	cmd.Env = append(cmd.Env, exe.GetEnvironment()...)
@@ -187,7 +191,7 @@ func RunExecutable(
 	err := cmd.Run()
 	if err != nil {
 		err = CombineErrors(
-			ErrorF("Command failed: '%q'.", cmd.Args), err)
+			ErrorF("Command failed: '%s %q'.", exe.GetCommand(), args), err)
 	}
 
 	return err
