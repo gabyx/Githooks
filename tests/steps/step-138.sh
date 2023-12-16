@@ -56,7 +56,7 @@ showAllContainerVolumes 3
 
 # Test the containerized run.
 OUT=$(setGithooksContainerVolumeEnvs &&
-    git hooks exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
+    "$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
     {
         echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
@@ -71,7 +71,7 @@ fi
 
 # Test the normal run as well.
 OUT=$(setGithooksContainerVolumeEnvs &&
-    git hooks exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
+    "$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
     {
         echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
@@ -86,7 +86,7 @@ fi
 
 set +e
 OUT=$(setGithooksContainerVolumeEnvs &&
-    git hooks exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
+    "$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
 exitCode="$?"
 set -e
 
