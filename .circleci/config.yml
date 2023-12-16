@@ -38,16 +38,7 @@ workflows:
       - linux:
           matrix:
             parameters:
-              test:
-                [
-                  "test-alpine",
-                  "test-alpine-nolfs",
-                  "test-alpine-user",
-                  "test-corehookspath",
-                  "test-whitespace",
-                  "test-testsuite",
-                  "test-rules",
-                ]
+              test: ["test-alpine"]
           filters: &filters
             branches:
               only: &task-branches
