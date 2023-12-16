@@ -255,7 +255,7 @@ func GetChecksumStorage(gitDirWorktree string) (store ChecksumStore, err error) 
 			return
 		}
 
-		if !path.IsAbs(cacheDir) {
+		if !filepath.IsAbs(cacheDir) {
 			err = cm.ErrorF("Checksum store symbolic link '%v' needs to be absolute.", cacheDir)
 
 			return

@@ -123,7 +123,7 @@ function showContainerVolume() {
         -v "$volume:/mnt/volume" \
         -w "/mnt/volume" \
         alpine:latest \
-        sh -c "apk add tree && echo Content of volume '$volume' && tree -L $level" ||
+        sh -c "apk add tree && echo Content of volume '$volume' && tree -aL $level" ||
         die "Could not show container volume."
 }
 

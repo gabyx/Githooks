@@ -1,0 +1,3 @@
+cmd: githooks/scripts/test-success.sh
+image:
+  reference: "registry.com/dir/${namespace}-test-image-built:1.0.0"

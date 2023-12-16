@@ -15,33 +15,34 @@ repoDir="$DIR/../.."
 cd "$repoDir" || exit 1
 
 if command -v "gstat" &>/dev/null; then
-    statCmd="gstat"
+  statCmd="gstat"
 else
-    statCmd="stat"
+  statCmd="stat"
 fi
 
 for file in $STAGED_FILES; do
-    if echo "$file" | grep -qE '^.*/cmd/.*\.go$'; then
+  if echo "$file" | grep -qE '^.*/cmd/.*\.go$'; then
 
-        docDate=$("$statCmd" -c %X "$repoDir/docs/cli/git_hooks.md")
+    docDate=$("$statCmd" -c %X "$repoDir/docs/cli/git_hooks.md")
 
-        if [ "$((docDate + 2 * 5))" -lt "$(date +%s)" ]; then
-            if [ "$autoRegenerate" = "true" ]; then
-                # shellcheck disable=SC2015
-                cd githooks && "scripts/build-doc.sh" || {
-                    echo "! Doc regeneration failed!" >&2
-                    exit 1
-                }
+    # Check if 7 minutes are passed.
+    if [ "$((docDate + 7 * 60))" -lt "$(date +%s)" ]; then
+      if [ "$autoRegenerate" = "true" ]; then
+        # shellcheck disable=SC2015
+        cd githooks && "scripts/build-doc.sh" || {
+          echo "! Doc regeneration failed!" >&2
+          exit 1
+        }
 
-                git add "$repoDir/docs/cli/"*
+        git add "$repoDir/docs/cli/"*
 
-                echo "Docs regenerated." >&2
-            else
-                echo "! You need to regenerate the CLI docs (its too old)!" >&2
-                exit 1
-            fi
-        fi
+        echo "* Docs regenerated." >&2
+      else
+        echo "! You need to regenerate the CLI docs (its too old)!" >&2
+        exit 1
+      fi
     fi
+  fi
 done
 
 echo "* CLI docs is up to date" >&2

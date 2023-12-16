@@ -115,14 +115,15 @@ func GetCombinedOutputFromExecutable(
 	out, err := cmd.CombinedOutput()
 
 	exitCode := -1
-	if t, ok := err.(*exec.ExitError); ok {
+	if err == nil {
+		exitCode = 0
+	} else if t, ok := err.(*exec.ExitError); ok {
 		exitCode = t.ExitCode()
 	}
 
 	if err != nil {
 		err = CombineErrors(
-			ErrorF("Command failed: '%s %q'.",
-				exe.GetCommand(), args), err)
+			ErrorF("Command failed: '%s %q'.", exe.GetCommand(), args), err)
 	}
 
 	return out, exitCode, err

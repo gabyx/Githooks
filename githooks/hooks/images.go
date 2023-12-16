@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	ref "github.com/distribution/distribution/reference"
@@ -131,13 +132,13 @@ func buildImage(
 	repositoryDir string) (err error) {
 	// Do a build of the image because no `pull` but `build` specified.
 
-	if path.IsAbs(context) {
+	if filepath.IsAbs(context) {
 		return cm.Error(
 			"Build context path '%s' given in '%s' must be a relative path.",
 			context, file)
 	}
 
-	if path.IsAbs(dockerfile) {
+	if filepath.IsAbs(dockerfile) {
 		return cm.ErrorF(
 			"Dockerfile path '%s' given in '%s' must be a relative path.",
 			dockerfile, file)

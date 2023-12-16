@@ -13,6 +13,7 @@ fi
 
 DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 REPO_DIR="$DIR/.."
+temp=""
 
 # shellcheck disable=SC1091
 . "$DIR/general.sh"
@@ -21,7 +22,12 @@ REPO_DIR="$DIR/.."
 function cleanUp() {
     set +e
     deleteContainerVolumes
+    if [ -d "$temp" ]; then
+        rm -rf "$temp" || true
+    fi
 }
+
+[ "${GH_SHOW_DIFFS:-false}" == "false" ] || echo "INFO: SHOWING DIFFS"
 
 trap cleanUp EXIT
 
@@ -60,18 +66,19 @@ setupGo
 deleteContainerVolumes
 storeIntoContainerVolumes "$REPO_DIR" "$HOME/.githooks/shared" # for dockerized containers
 setGithooksContainerVolumeEnvs
+showAllContainerVolumes "2"
 
 git commit -m "Check all hooks."
 
 restoreFromContainerVolumeWorkspace "." ""
 
-if ! git diff --quiet main..create-diffs; then
-    die "Commit produced diffs, probably because of format?" \
-        "$(git diff --name-only main..create-diffs)"
-fi
-if ! git diff --cached --quiet main; then
-    die "Commit produced diffs, probably because of format?" \
-        "$(git diff --cached --name-only main)"
+# Working tree diff to main .
+if ! git diff --quiet main; then
+    [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff --name-only main
+
+    die "Commit produced diffs, probably because of format" \
+        "(use GH_SHOW_DIFFS=true to show diffs):?" \
+        "$(git diff --name-only main)"
 fi
 
 deleteContainerVolumes

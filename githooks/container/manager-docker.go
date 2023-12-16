@@ -82,7 +82,13 @@ func (m *ManagerDocker) NewHookRunExec(
 	workspaceDir string,
 	workspaceHookDir string,
 	hookExec cm.IExecutable,
+	attachStdIn bool,
+	allocateTTY bool,
 ) (cm.IExecutable, error) {
+
+	cm.DebugAssert(filepath.IsAbs(workspaceDir), "Workspace dir must be an absolute path.")
+	cm.DebugAssert(filepath.IsAbs(workspaceHookDir), "Workspace hook dir must be an abs path.")
+
 	containerExec := ContainerizedExecutable{containerType: ContainerManagerTypeV.Docker}
 
 	containerExec.Cmd = dockerCmd
@@ -154,6 +160,14 @@ func (m *ManagerDocker) NewHookRunExec(
 		"-v",
 		strs.Fmt("%v:%v", mntWSSrc, mntWSDest), // Set the mount for the working directory.
 		"-w", workingDir,                       // Set working dir.
+	}
+
+	if attachStdIn {
+		containerExec.ArgsPre = append(containerExec.ArgsPre, "--interactive")
+	}
+
+	if allocateTTY {
+		containerExec.ArgsPre = append(containerExec.ArgsPre, "--tty")
 	}
 
 	if mountWSShared {

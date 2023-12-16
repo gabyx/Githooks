@@ -4,7 +4,8 @@ Build/pull container images.
 
 ### Synopsis
 
-Build/pull container images in the current repository which as needed for Githooks.
+Build/pull container images in the current
+repository and shared repositories which are needed for Githooks.
 
 ```
 git hooks images update

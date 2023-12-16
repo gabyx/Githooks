@@ -199,55 +199,29 @@ func runSharedUpdate(ctx *ccm.CmdContext) {
 	ctx.Log.InfoF("Update '%v' shared repositories.", updated)
 }
 
-func runSharedRoot(ctx *ccm.CmdContext, namespaces []string) (exitCode error) {
+func runSharedRoot(ctx *ccm.CmdContext, nsPaths []string) (exitCode error) {
 	ctx.WrapPanicExitCode()
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
-	for i := range namespaces {
-		ns := strings.TrimPrefix(namespaces[i], "ns:")
-		ctx.Log.PanicIfF(ns == namespaces[i],
-			"Specify namespace name '%s' with suffix 'ns:'.", namespaces[i])
-		namespaces[i] = ns
-	}
+	results, foundAll, err := hooks.ResolveNamespacePaths(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, nsPaths)
+	ctx.Log.AssertNoErrorPanicF(err, "Could not resolve namespace paths")
 
-	// Cycle through all shared hooks an return the first with matching namespace.
-	allRepos, err := hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
-	ctx.Log.AssertNoErrorPanicF(err, "Could not load shared hook list '%s'.", hooks.GetRepoSharedFileRel())
-	local, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.LocalScope)
-	ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
-	global, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.GlobalScope)
-	ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
-
-	allRepos = append(allRepos, local...)
-	allRepos = append(allRepos, global...)
-
-	roots := make([]string, len(namespaces))
-	found := 0
-
-	for rI := range allRepos {
-		if !cm.IsDirectory(allRepos[rI].RepositoryDir) {
-			continue
-		}
-
-		hooksDir := hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
-		ns, err := hooks.GetHooksNamespace(hooksDir)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
-
-		for nI := range namespaces {
-			if namespaces[nI] == ns {
-				roots[nI] = allRepos[rI].RepositoryDir
-				found++
-			}
-		}
-	}
-
-	for i := range roots {
-		_, err := ctx.Log.GetInfoWriter().Write([]byte(roots[i] + "\n"))
+	for i := range results {
+		_, err := ctx.Log.GetInfoWriter().Write([]byte(results[i].RepositoryRoot + "\n"))
 		ctx.Log.AssertNoErrorF(err, "Could not write output.")
 	}
 
-	if found != len(roots) {
-		exitCode = ctx.NewCmdExit(1, "Did not find all shared repositories.")
+	if !foundAll {
+		var msg string
+
+		for i := range results {
+			if results[i].Found {
+				continue
+			}
+			msg += strs.Fmt("%s '%s'", cm.ListItemLiteral, nsPaths[i])
+		}
+
+		exitCode = ctx.NewCmdExit(1, "Did not find all shared repositories:\n%s", msg)
 	}
 
 	return

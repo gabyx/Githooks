@@ -4,6 +4,15 @@ clean:
 build:
   githooks/scripts/build.sh
 
+test *ARGS:
+  tests/test-alpine-user.sh {{ARGS}}
+
+testsuite:
+  tests/test-testsuite.sh
+
+testrules:
+  tests/test-rules.sh
+
 release-test:
   cd githooks && \
     GORELEASER_CURRENT_TAG=v9.9.9 \

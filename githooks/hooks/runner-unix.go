@@ -9,6 +9,6 @@ func GetDefaultRunner(hookPath string, envs []string) cm.IExecutable {
 	return &cm.Executable{
 		Cmd:  "sh",
 		Args: []string{hookPath},
-		Env:  envs,
+		Env:  cm.CopySlice(envs),
 	}
 }

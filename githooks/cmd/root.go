@@ -8,6 +8,7 @@ import (
 	inst "github.com/gabyx/githooks/githooks/cmd/common/install"
 	"github.com/gabyx/githooks/githooks/cmd/config"
 	"github.com/gabyx/githooks/githooks/cmd/disable"
+	"github.com/gabyx/githooks/githooks/cmd/exec"
 	"github.com/gabyx/githooks/githooks/cmd/ignore"
 	"github.com/gabyx/githooks/githooks/cmd/images"
 	"github.com/gabyx/githooks/githooks/cmd/install"
@@ -71,6 +72,7 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 	cmd.AddCommand(images.NewCmd(ctx))
 	cmd.AddCommand(trust.NewCmd(ctx))
 	cmd.AddCommand(update.NewCmd(ctx))
+	cmd.AddCommand(exec.NewCmd(ctx))
 
 	cmd.AddCommand(installer.NewCmd(ctx))
 	cmd.AddCommand(uninstaller.NewCmd(ctx))

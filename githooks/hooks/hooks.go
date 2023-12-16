@@ -185,7 +185,8 @@ func GetAllHooksIn(
 				parseRunnerConfig,
 				containerizedHooksEnabled,
 				hookNamespace,
-				hookNamespaceEnvs)
+				hookNamespaceEnvs,
+			)
 
 			if err != nil {
 				return cm.CombineErrors(err,

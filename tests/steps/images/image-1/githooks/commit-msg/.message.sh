@@ -9,4 +9,9 @@ if [ "${1:-}" != "--message" ]; then
     exit 1
 fi
 
+if [ -z "${2:-}" ]; then
+    echo "! Second argument must be the file to 'commit-msg' hook."
+    exit 1
+fi
+
 echo "Containerized commit-msg hook run" >./.commit-msg-hook-run

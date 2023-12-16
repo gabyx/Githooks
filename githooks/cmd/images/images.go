@@ -2,6 +2,7 @@ package images
 
 import (
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
+	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	strs "github.com/gabyx/githooks/githooks/strings"
@@ -10,16 +11,10 @@ import (
 )
 
 func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
-	repoDir, _, _, err := ctx.GitX.GetRepoRoot()
-
-	if err != nil {
-		repoDir = ""
-		ctx.Log.WarnF("Not inside a bare or non-bare repository.\n" +
-			"Updating shared and local shared hooks skipped.")
-	}
+	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
 	hooksDir := hooks.GetGithooksDir(repoDir)
-	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile)
+	err := hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile)
 	ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", imagesFile)
 
 	if strs.IsNotEmpty(imagesFile) {
@@ -38,8 +33,19 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 	allRepos = append(allRepos, global...)
 
 	for rI := range allRepos {
+		repo := &allRepos[rI]
+
+		if exists, _ := cm.IsPathExisting(repo.RepositoryDir); !exists {
+			ctx.Log.WarnF(
+				"Shared repository '%s' is not available yet.\n"+
+					"Use 'git hooks shared update'.", repo.URL)
+
+			continue
+		}
+
 		hooksDir := hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
 
+		ctx.Log.InfoF("%s", hooksDir)
 		err = hooks.UpdateImages(ctx.Log, allRepos[rI].OriginalURL, allRepos[rI].RepositoryDir, hooksDir, "")
 		ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", allRepos[rI].OriginalURL)
 	}
@@ -55,9 +61,10 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	imagesFile := ""
 	imagesUpdateCmd := &cobra.Command{
-		Use:    "update",
-		Short:  `Build/pull container images.`,
-		Long:   "Build/pull container images in the current repository which as needed for Githooks.",
+		Use:   "update",
+		Short: `Build/pull container images.`,
+		Long: "Build/pull container images in the current\n" +
+			"repository and shared repositories which are needed for Githooks.",
 		PreRun: ccm.PanicIfNotExactArgs(ctx.Log, 0),
 		Run: func(c *cobra.Command, args []string) {
 			runImagesUpdate(ctx, imagesFile)

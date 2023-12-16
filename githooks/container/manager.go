@@ -45,6 +45,8 @@ type IManager interface {
 		workspaceDir string,
 		workspaceHookDir string,
 		exe cm.IExecutable,
+		attachStdIn bool,
+		allocateTTY bool,
 	) (cm.IExecutable, error)
 }
 

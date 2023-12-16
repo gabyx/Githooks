@@ -9,6 +9,6 @@ echo "Permissions for '.':"
 ls -al .
 echo "=================================================="
 
-echo "Lanuching" "$@"
+echo "Launching inside container:" "$@"
 
 exec "$@"
