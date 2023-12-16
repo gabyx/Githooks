@@ -797,7 +797,7 @@ a `sharedRepo` in `.shared.yaml` which configures it in
 **Note:** All paths in the build specification `build:` are relative to the
 repository root where this `.images.yaml` is located.
 
-## Locate Githooks Container Images
+### Locate Githooks Container Images
 
 All built images are automatically labeled with `githooks-version` to make them
 easy to retrieve, e.g.
@@ -817,6 +817,30 @@ docker rmi $(docker images -f "label=githooks-version" -q)
 `.images.yaml`. Githooks does not yet detect which references are no longer
 needed after the pull/build procedure nor does it offer a way yet to prune older
 images (just use the above).
+
+## Running Hooks/Scripts Manually
+
+The command `git hooks exec` helps to launch executables and
+[run configuration](#hook-run-configuration) the same as Githooks does when run
+normally. This features simplifies executing add-on scripts/executables
+distributed in shared hook repositories (and also locally with `ns:gh-self`).
+
+For example execute the following
+[add-on 'format-all' script in this shared repository](https://github.com/gabyx/Githooks-Docs/blob/main/githooks/scripts/format-docs-all.yaml)
+with:
+
+```shell
+git hooks exec --containerized \
+  ns:githooks-docs/scripts/format-docs-all.yaml -- \
+  --force \
+  --dir ./
+```
+
+This will launch the specified container and run the script.
+
+**Note**: You need to have configured this shared repository inside your repo
+where you use Githooks and it needs to be available with
+`git hooks shared update`.
 
 ## User Prompts
 
