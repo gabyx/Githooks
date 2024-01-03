@@ -84,6 +84,7 @@ repositories.
   - [Install Mode - Centralized Hooks](#install-mode---centralized-hooks)
   - [Install Mode - Manual](#install-mode---manual)
   - [Install from different URL and Branch](#install-from-different-url-and-branch)
+  - [Install for CI](#install-for-ci)
   - [No Installation](#no-installation)
   - [Non-Interactive Installation](#non-interactive-installation)
   - [Install on the Server](#install-on-the-server)
@@ -391,6 +392,10 @@ Here are some shared hook repositories to get you started with:
 - [C++](https://github.com/gabyx/githooks-cpp)
 - [Configuration Files](https://github.com/gabyx/githooks-configs)
 - [Documentation](https://github.com/gabyx/githooks-docs)
+
+Application of the hooks:
+
+- [Markdown2PDF](https://github.com/gabyx/RsMarkdown2PDF-Service), with CI.
 
 They are all fully containerized so you do not have to worry about requirements
 except `docker`.
@@ -1055,6 +1060,67 @@ auto-detected from the URL) and it will automatically download and **verify**
 the binaries over the implemented API. Credentials will be collected over
 [`git credential`](https://git-scm.com/docs/cli/git-credential) to access the
 API. [@todo].
+
+### Install for CI
+
+The repository [Markdown2PDF](https://github.com/gabyx/RsMarkdown2PDF-Service)
+contains a CI setup in
+[`.gitlab/pipeline.yaml`](https://github.com/gabyx/RsMarkdown2PDF-Service/blob/main/.gitlab/pipeline.yaml).
+
+For Gitlab this boils down to following pipeline step which uses dockerized
+hooks:
+
+```yaml
+format:
+  stage: <your-stage-name>
+  image: docker:24
+  rules:
+    - *defaults-rules
+  services:
+    - docker:24-dind
+  variables:
+    GITHOOKS_INSTALL_PREFIX: "$CI_BUILDS_DIR/githooks"
+  script:
+    - apk add git jq curl bash just findutils parallel
+    - just format
+```
+
+where `just format` will call the following function:
+
+```shell
+function ci_setup_githooks() {
+    mkdir -p "$GITHOOKS_INSTALL_PREFIX"
+
+    printInfo "Install Githooks."
+    curl -sL "https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh" |
+        bash -s -- -- --use-manual --non-interactive --prefix "$GITHOOKS_INSTALL_PREFIX"
+
+    git hooks config enable-containerized-hooks --global --set
+
+    printInfo "Pull all shared Githooks repositories."
+    git hooks shared update
+}
+```
+
+which then enables you to call side-car scripts in the hook repository, e.g. as
+demonstrated which will run over containers the same as in non-CI use cases:
+
+```shell
+function run_format_shared_hooks() {
+    printInfo "Run all formats scripts in shared hook repositories."
+    git hooks exec --containerized \
+        ns:githooks-shell/scripts/format-shell-all.yaml -- --force --dir "."
+
+    git hooks exec --containerized \
+        ns:githooks-configs/scripts/format-configs-all.yaml -- --force --dir "."
+
+    git hooks exec --containerized \
+        ns:githooks-docs/scripts/format-docs-all.yaml -- --force --dir "."
+
+    git hooks exec --containerized \
+        ns:githooks-python/scripts/format-python-all.yaml -- --force --dir "."
+}
+```
 
 ### No Installation
 
