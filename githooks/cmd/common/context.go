@@ -12,8 +12,10 @@ type CmdContext struct {
 	Cwd  string       // The current working directory.
 	GitX *git.Context // The git context in the current working directory.
 
-	InstallDir string // The install directory.
-	CloneDir   string // The release clone dir inside the install dir.
+	InstallDir    string // The install directory.
+	InstallDirRaw string // The raw install directory with out env. variables expanded.
+
+	CloneDir string // The release clone dir inside the install dir.
 
 	Log      cm.ILogContext // The log context.
 	LogStats cm.ILogStats   // The statistics of the log context.

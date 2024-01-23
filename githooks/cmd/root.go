@@ -44,7 +44,7 @@ func NewSettings(
 	log.AssertNoError(git.SanitizeOsEnv(), "Could not sanitize OS environment.")
 	gitx := git.NewCtx()
 
-	installDir := inst.LoadInstallDir(log, gitx)
+	installDir, installDirRaw := inst.LoadInstallDir(log, gitx)
 
 	promptx, err = prompt.CreateContext(log, false, false)
 	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
@@ -53,6 +53,7 @@ func NewSettings(
 		Cwd:               cwd,
 		GitX:              gitx,
 		InstallDir:        installDir,
+		InstallDirRaw:     installDirRaw,
 		CloneDir:          hooks.GetReleaseCloneDir(installDir),
 		PromptCtx:         promptx,
 		Log:               log,

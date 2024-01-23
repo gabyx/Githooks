@@ -229,9 +229,10 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 
 func setupSettings(
 	log cm.ILogContext,
-	gitx *git.Context,
+	cmd *ccm.CmdContext,
 	args *Arguments) (Settings, install.UISettings) {
 
+	gitx := cmd.GitX
 	var promptx prompt.IContext
 	var err error
 
@@ -246,16 +247,19 @@ func setupSettings(
 	}
 
 	var installDir string
+	var installDirRaw string
+
 	// First check if we already have
 	// an install directory set (from --prefix)
 	if strs.IsNotEmpty(args.InstallPrefix) {
 		var err error
-		args.InstallPrefix, err = cm.ReplaceTilde(filepath.ToSlash(args.InstallPrefix))
+		installPrefix, err := cm.ReplaceTilde(filepath.ToSlash(args.InstallPrefix))
 		log.AssertNoErrorPanic(err, "Could not replace '~' character in path.")
-		installDir = path.Join(args.InstallPrefix, ".githooks")
+		installDirRaw = path.Join(installPrefix, ".githooks")
+		installDir = os.ExpandEnv(installDirRaw)
 
 	} else {
-		installDir = install.LoadInstallDir(log, gitx)
+		installDir, installDirRaw = cmd.InstallDir, cmd.InstallDirRaw
 	}
 
 	// Remove temporary directory if existing
@@ -269,6 +273,7 @@ func setupSettings(
 	return Settings{
 			GitX:             gitx,
 			InstallDir:       installDir,
+			InstallDirRaw:    installDirRaw,
 			CloneDir:         hooks.GetReleaseCloneDir(installDir),
 			TempDir:          tempDir,
 			LFSHooksCache:    lfsHooksCache,
@@ -1474,13 +1479,13 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	}
 
 	log.InfoF("Log file: '%s'", args.Log)
-	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
+	settings, uiSettings := setupSettings(log, ctx, &args)
 
 	log.DebugF("Arguments: %+v", args)
 	log.DebugF("Settings: %+v", settings)
 
 	if !args.DryRun {
-		setInstallDir(log, ctx.GitX, settings.InstallDir)
+		setInstallDir(log, ctx.GitX, settings.InstallDirRaw)
 	}
 
 	if !args.InternalPostDispatch {

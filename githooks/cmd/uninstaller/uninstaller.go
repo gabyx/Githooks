@@ -89,7 +89,7 @@ func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Sett
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
-	installDir := install.LoadInstallDir(log, gitx)
+	installDir, _ := install.LoadInstallDir(log, gitx)
 
 	// Safety check.
 	log.PanicIfF(!strings.Contains(installDir, ".githooks"),

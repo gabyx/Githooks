@@ -164,7 +164,17 @@ func GetSharedGithooksDir(repoDir string) (dir string) {
 
 // GetInstallDir returns the Githooks install directory.
 func GetInstallDir(gitx *git.Context) string {
-	return filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
+	raw := filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
+
+	return os.ExpandEnv(raw)
+}
+
+// GetInstallDirWithRaw returns the Githooks install directory,
+// but also with unexpanded env. variables form.
+func GetInstallDirWithRaw(gitx *git.Context) (string, string) {
+	raw := filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
+
+	return os.ExpandEnv(raw), raw
 }
 
 // SetInstallDir sets the global Githooks install directory.

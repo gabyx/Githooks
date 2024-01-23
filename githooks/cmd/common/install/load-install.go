@@ -1,6 +1,7 @@
 package install
 
 import (
+	"os"
 	"path"
 	"path/filepath"
 
@@ -14,9 +15,9 @@ import (
 
 // LoadInstallDir loads the install directory and uses a default if
 // it does not exist.
-func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string) {
+func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string, installDirRaw string) {
 
-	installDir = hooks.GetInstallDir(gitx)
+	installDir, installDirRaw = hooks.GetInstallDirWithRaw(gitx)
 
 	if !cm.IsDirectory(installDir) {
 
@@ -26,9 +27,20 @@ func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string) {
 				"Using default location '~/.githooks'.", installDir)
 		}
 
-		home, err := homedir.Dir()
-		cm.AssertNoErrorPanic(err, "Could not get home directory.")
-		installDir = path.Join(filepath.ToSlash(home), hooks.HooksDirName)
+		home := os.Getenv("HOME")
+
+		if exists, _ := cm.IsPathExisting(home); !exists {
+			var err error
+			home, err = homedir.Dir()
+			cm.AssertNoErrorPanic(err, "Could not get home directory.")
+			installDir = path.Join(filepath.ToSlash(home), hooks.HooksDirName)
+			installDirRaw = installDir
+		} else {
+			// Home env. variable exists use this one.
+			installDir = path.Join(filepath.ToSlash(home), hooks.HooksDirName)
+			installDirRaw = path.Join("$HOME", hooks.HooksDirName)
+		}
+
 	}
 
 	return
