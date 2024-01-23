@@ -51,6 +51,9 @@ RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
 # Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
 RUN git config --global githooks.deleteDetectedLFSHooks "n"
 
+# Git-Core folder must be existing.
+RUN [ -d "\$GH_TEST_GIT_CORE/templates/hooks" ]
+
 ${ADDITIONAL_INSTALL_STEPS:-}
 
 RUN echo "Git version: \$(git --version)"
