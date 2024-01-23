@@ -2,6 +2,7 @@ package git
 
 import (
 	"bufio"
+	"os"
 	"regexp"
 	"strings"
 
@@ -121,6 +122,11 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 		if len(keyValue) != 2 ||
 			(filterFunc != nil && !filterFunc(keyValue[0])) { // nolint: gomnd
 			return
+		}
+
+		// Expand env. variables in Git config values.
+		if strings.HasPrefix(keyValue[0], GitConfigPrefix) {
+			keyValue[1] = os.ExpandEnv(keyValue[1])
 		}
 
 		c.add(keyValue[0], keyValue[0], keyValue[1], scope, false)

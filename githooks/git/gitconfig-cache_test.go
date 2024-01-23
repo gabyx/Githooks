@@ -1,6 +1,7 @@
 package git
 
 import (
+	"os"
 	"regexp"
 	"testing"
 
@@ -94,4 +95,33 @@ func TestGitConfigCache(t *testing.T) {
 	assert.Equal(t, []KeyValue{
 		{Key: "t.t", Value: "a2"},
 		{Key: "t.t", Value: "a3"}}, kv)
+}
+
+func TestGitConfigCacheEnv(t *testing.T) {
+
+	s := "system\x00githooks.a\n${MONKEY}-a" +
+		"\x00global\x00githooks.b\n$MONKEY-b" +
+		"\x00global\x00a.c\n$MONKEY-b"
+
+	os.Setenv("MONKEY", "banana")
+	assert.Equal(t, "banana", os.Getenv("MONKEY"))
+
+	c, err := parseConfig(s, func(string) bool { return true })
+
+	command := c.scopes[0]
+	worktree := c.scopes[1]
+	local := c.scopes[2]
+	global := c.scopes[3]
+	system := c.scopes[4]
+
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(command))
+	assert.Equal(t, 1, len(system))
+	assert.Equal(t, 2, len(global))
+	assert.Equal(t, 0, len(local))
+	assert.Equal(t, 0, len(worktree))
+
+	assert.Equal(t, "banana-a", system["githooks.a"].values[0])
+	assert.Equal(t, "banana-b", global["githooks.b"].values[0])
+	assert.Equal(t, "$MONKEY-b", global["a.c"].values[0])
 }

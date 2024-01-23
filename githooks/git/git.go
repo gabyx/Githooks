@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	HEAD string = "HEAD"
+	HEAD            string = "HEAD"
+	GitConfigPrefix string = "githooks."
 )
 
 // Context defines the context to execute it commands.
@@ -45,7 +46,9 @@ func NewCtxSanitized() *Context {
 	return NewCtxSanitizedAt("")
 }
 
-// SetConfigCache sets the Git config cache to use.
+// SetConfigCache sets the Git config cache to use where
+// all env. variables are replaced when `envReplacePrefix` matches the
+// key.
 func (c *Context) InitConfigCache(filter func(string) bool) error {
 	cache, err := NewConfigCache(*c, filter)
 
@@ -76,6 +79,11 @@ func (c *Context) GetConfig(key string, scope ConfigScope) (val string) {
 
 	if err != nil {
 		return ""
+	}
+
+	// Expand env. variables in Git config values.
+	if strings.HasPrefix(val, GitConfigPrefix) {
+		val = os.ExpandEnv(val)
 	}
 
 	return
