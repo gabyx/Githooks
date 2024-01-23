@@ -34,7 +34,7 @@ for file in $STAGED_FILES; do
           exit 1
         }
 
-        git add "$repoDir/docs/cli/"*
+        # git add "$repoDir/docs/cli/"*
 
         echo "* Docs regenerated." >&2
       else
