@@ -25,7 +25,7 @@ RUN if [ -n "$DOCKER_GROUP_ID" ]; then \
     else \
         echo "Not adding docker since not working with user!" &>2; \
     fi
-RUN [ -d "$GH_TEST_GIT_CORE/templates/hooks" ] && \
+RUN [ ! -d "$GH_TEST_GIT_CORE/templates/hooks" ] || \
     rm -rf "$GH_TEST_GIT_CORE/templates/hooks"
 RUN mkdir -p "$GH_TEST_REPO" "$GH_TEST_GIT_CORE/templates/hooks" && \
     chown -R test:test "$GH_TEST_REPO" "$GH_TEST_GIT_CORE"
