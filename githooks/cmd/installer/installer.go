@@ -253,9 +253,10 @@ func setupSettings(
 	// an install directory set (from --prefix)
 	if strs.IsNotEmpty(args.InstallPrefix) {
 		var err error
-		installPrefix, err := cm.ReplaceTilde(filepath.ToSlash(args.InstallPrefix))
+		args.InstallPrefix, err = cm.ReplaceTilde(filepath.ToSlash(args.InstallPrefix))
 		log.AssertNoErrorPanic(err, "Could not replace '~' character in path.")
-		installDirRaw = path.Join(installPrefix, ".githooks")
+
+		installDirRaw = path.Join(args.InstallPrefix, ".githooks")
 		installDir = os.ExpandEnv(installDirRaw)
 
 	} else {

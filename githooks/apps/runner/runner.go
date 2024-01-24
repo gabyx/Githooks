@@ -19,7 +19,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/pbenner/threadpool"
 	"github.com/pkg/math"
 )
@@ -196,15 +195,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 func getInstallDir(gitx *git.Context) string {
 	installDir := hooks.GetInstallDir(gitx)
 
-	setDefault := func() {
-		usr, err := homedir.Dir()
-		cm.AssertNoErrorPanic(err, "Could not get home directory.")
-		usr = filepath.ToSlash(usr)
-		installDir = path.Join(usr, hooks.HooksDirName)
-	}
-
 	if strs.IsEmpty(installDir) {
-		setDefault()
+		installDir, _ = hooks.GetDefaultInstallDir()
 	} else if exists, err := cm.IsPathExisting(installDir); !exists {
 
 		log.AssertNoError(err,
@@ -214,7 +206,7 @@ func getInstallDir(gitx *git.Context) string {
 				"Install directory at '%s' is missing.",
 			installDir)
 
-		setDefault()
+		installDir, _ = hooks.GetDefaultInstallDir()
 
 		log.WarnF(
 			"Falling back to default directory at '%s'.\n"+

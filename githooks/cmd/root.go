@@ -5,7 +5,6 @@ import (
 
 	"github.com/gabyx/githooks/githooks/build"
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
-	inst "github.com/gabyx/githooks/githooks/cmd/common/install"
 	"github.com/gabyx/githooks/githooks/cmd/config"
 	"github.com/gabyx/githooks/githooks/cmd/disable"
 	"github.com/gabyx/githooks/githooks/cmd/exec"
@@ -44,7 +43,7 @@ func NewSettings(
 	log.AssertNoError(git.SanitizeOsEnv(), "Could not sanitize OS environment.")
 	gitx := git.NewCtx()
 
-	installDir, installDirRaw := inst.LoadInstallDir(log, gitx)
+	installDir, installDirRaw := hooks.LoadInstallDir(log, gitx)
 
 	promptx, err = prompt.CreateContext(log, false, false)
 	log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
