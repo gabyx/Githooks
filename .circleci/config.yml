@@ -24,8 +24,9 @@ jobs:
         default: "test-alpine"
         type: string
     executor:
+      size: medium
       name: win/server-2022
-      version: 2023.04.1
+      version: 2023.11.1
     steps:
       - checkout
       - run:
