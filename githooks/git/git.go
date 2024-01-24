@@ -184,6 +184,19 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res []KeyValu
 func (c *Context) SetConfig(key string, value interface{}, scope ConfigScope) error {
 	cm.DebugAssert(scope != Traverse, "Wrong scope.")
 
+	old_value := c.GetConfig(key, scope)
+	if old_value == value {
+		// If already the same, dont do anything.
+		// We dont want to change the `.gitconfig` if we dont need to.
+		// See https://github.com/gabyx/Githooks/issues/142.
+		// Careful, we have a cache which gets used,
+		// if the content in the Git config is different
+		// after the cache was loaded, we dont set the new value.
+		// Since we control our own Git config keys and only the CLI and installer set values
+		// its not such a problem.
+		return nil
+	}
+
 	s := strs.Fmt("%v", value)
 	if c.cache != nil {
 		c.cache.Set(key, s, scope)
