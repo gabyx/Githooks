@@ -45,6 +45,7 @@ func PromptExistingRepos(
 	}
 
 	homeDir, err := homedir.Dir()
+	homeDir = filepath.ToSlash(homeDir)
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
 	searchDir := gitx.GetConfig(hooks.GitCKPreviousSearchDir, git.GlobalScope)

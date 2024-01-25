@@ -187,9 +187,17 @@ func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string, i
 func GetDefaultInstallDir() (installDir, installDirRaw string) {
 	home, err := homedir.Dir()
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
+	home = filepath.ToSlash(home)
 
 	installDir = path.Join(home, HooksDirName)
-	installDirRaw = path.Join("~", HooksDirName)
+
+	if home == filepath.ToSlash(os.Getenv("HOME")) {
+		// Home env. variable is the same as what we got above.
+		// use it instead.
+		installDirRaw = path.Join("$HOME", HooksDirName)
+	} else {
+		installDirRaw = path.Join(installDir, HooksDirName)
+	}
 
 	return
 }
@@ -206,10 +214,7 @@ func GetInstallDir(gitx *git.Context) string {
 func GetInstallDirWithRaw(gitx *git.Context) (string, string) {
 	raw := filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
 
-	dir, err := cm.ReplaceTilde(raw)
-	cm.AssertNoErrorPanic(err, "Failed to replace '~' variable.")
-
-	return filepath.ToSlash(os.ExpandEnv(dir)), raw
+	return filepath.ToSlash(os.ExpandEnv(raw)), raw
 }
 
 // SetInstallDir sets the global Githooks install directory.

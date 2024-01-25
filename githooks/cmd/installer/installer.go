@@ -19,7 +19,6 @@ import (
 	"github.com/gabyx/githooks/githooks/updates"
 	"github.com/gabyx/githooks/githooks/updates/download"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -253,8 +252,8 @@ func setupSettings(
 	// First check if we already have
 	// an install directory set (from --prefix)
 	if strs.IsNotEmpty(args.InstallPrefix) {
-		var err error
-		args.InstallPrefix, err = cm.ReplaceTilde(filepath.ToSlash(args.InstallPrefix))
+
+		args.InstallPrefix, err = cm.ReplaceTilde(args.InstallPrefix, true)
 		log.AssertNoErrorPanic(err, "Could not replace '~' character in path.")
 
 		installDirRaw = path.Join(args.InstallPrefix, ".githooks")
@@ -703,20 +702,18 @@ func searchTemplateDirOnDisk(log cm.ILogContext, promptx prompt.IContext) string
 func setupNewTemplateDir(log cm.ILogContext, installDir string, promptx prompt.IContext) string {
 	templateDir := path.Join(installDir, "templates")
 
-	homeDir, err := homedir.Dir()
-	cm.AssertNoErrorPanic(err, "Could not get home directory.")
-
 	if promptx != nil {
 		var err error
 		templateDir, err = promptx.ShowEntry(
-			"Enter the target folder",
+			"Enter the target folder ('~' and env. variables '$X' allowed)",
 			templateDir,
 			nil)
 		log.AssertNoErrorF(err, "Could not show prompt.")
 	}
 
-	templateDir = cm.ReplaceTildeWith(templateDir, homeDir)
+	templateDir, err := cm.ReplaceTilde(templateDir, false)
 	log.AssertNoErrorPanicF(err, "Could not replace tilde '~' in '%s'.", templateDir)
+	templateDir = filepath.ToSlash(os.ExpandEnv(templateDir))
 
 	return templateDir
 }

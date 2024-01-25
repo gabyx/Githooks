@@ -13,8 +13,8 @@ acceptAllTrustPrompts || exit 1
 "$GH_TEST_BIN/cli" installer || exit 1
 
 installDir=$(git config githooks.installDir)
-# shellcheck disable=SC2088
-if ! echo "$installDir" | grep '~/'; then
+# shellcheck disable=SC2088,SC2016
+if ! echo "$installDir" | grep '\$HOME'; then
     echo "! Expected ~/ to be part of install dir: $installDir"
     exit 1
 fi
