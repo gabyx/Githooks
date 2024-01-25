@@ -101,7 +101,7 @@ func disableHookIfLFSDetected(
 	return
 }
 
-// Moves existing hook `dest` to `dir(path)/GetHookReplacementFileName(dest)`
+// Moves existing hook `dest` to `dir(dest)/GetHookReplacementFileName(dest)`
 // if its not a Githooks run-wrapper.
 // If it is a run-wrapper dont do anything.
 func moveExistingHooks(

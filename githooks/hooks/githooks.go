@@ -308,7 +308,7 @@ func SetDialogExecutableConfig(path string) error {
 
 // SetCLIExecutableAlias sets the global Githooks runner executable.
 func SetCLIExecutableAlias(path string) error {
-	if !cm.IsFile(path) {
+	if !cm.IsFile(os.ExpandEnv(path)) {
 		return cm.ErrorF("CLI executable '%s' does not exist.", path)
 	}
 

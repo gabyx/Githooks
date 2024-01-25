@@ -957,6 +957,7 @@ func setupHookTemplates(
 func installBinaries(
 	log cm.ILogContext,
 	installDir string,
+	installDirRaw string,
 	cloneDir string,
 	tempDir string,
 	binaries []string,
@@ -983,7 +984,7 @@ func installBinaries(
 
 	// Set CLI executable alias.
 	cli := hooks.GetCLIExecutable(installDir)
-	err = hooks.SetCLIExecutableAlias(cli.Cmd)
+	err = hooks.SetCLIExecutableAlias(hooks.GetCLIExecutablePath(installDirRaw))
 	log.AssertNoErrorPanicF(err,
 		"Could not set Git config 'alias.hooks' to '%s'.", cli.Cmd)
 
@@ -1339,6 +1340,7 @@ func runInstaller(
 		installBinaries(
 			log,
 			settings.InstallDir,
+			settings.InstallDirRaw,
 			settings.CloneDir,
 			settings.TempDir,
 			args.InternalBinaries,

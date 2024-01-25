@@ -9,9 +9,13 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 )
 
+func GetCLIExecutablePath(installDir string) string {
+	return path.Join(GetBinaryDir(installDir), "cli")
+}
+
 // GetCLIExecutable gets the global Githooks CLI executable.
 func GetCLIExecutable(installDir string) cm.Executable {
-	p := path.Join(GetBinaryDir(installDir), "cli")
+	p := GetCLIExecutablePath(installDir)
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
