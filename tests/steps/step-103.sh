@@ -118,7 +118,7 @@ fi
 # Remove all shared hooks
 "$GH_INSTALL_BIN_DIR/cli" shared purge || exit 1
 
-echo "Commiting"
+echo "Committing"
 # Make a commit
 echo A >A || exit 1
 git add A || exit 1
@@ -126,7 +126,7 @@ OUTPUT=$(git commit -a -m "Test" 2>&1)
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ] || ! echo "$OUTPUT" | grep -q "needs shared hooks in:"; then
-    echo "! Expected to fail on not availabe shared hooks. output:"
+    echo "! Expected to fail on not available shared hooks. output:"
     echo "$OUTPUT"
     exit 1
 fi
@@ -136,7 +136,7 @@ OUTPUT=$(GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true git commit -a -m "Test" 2>
 
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
-    echo "! Expected to skip on not availabe shared hooks. output:"
+    echo "! Expected to skip on not available shared hooks. output:"
     echo "$OUTPUT"
     exit 1
 fi

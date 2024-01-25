@@ -1048,7 +1048,7 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
 The installer always maintains a Githooks clone inside `<installDir>/release`
 for its automatic update logic. The specified custom clone URL and branch will
 then be used for further updates in the above example (see
-[update machanics](#update-mechanics)).
+[update mechanics](#update-mechanics)).
 
 Because the installer **always** downloads the latest release (here from another
 URL/branch), it needs deploy settings to know where to get the binaries from.

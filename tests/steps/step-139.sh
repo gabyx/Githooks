@@ -13,8 +13,9 @@ acceptAllTrustPrompts || exit 1
 "$GH_TEST_BIN/cli" installer || exit 1
 
 installDir=$(git config githooks.installDir)
-if ! echo "$installDir" | grep "\$HOME"; then
-    echo "! Expected \$HOME to be part of install dir: $installDir"
+# shellcheck disable=SC2088
+if ! echo "$installDir" | grep '~/'; then
+    echo "! Expected ~/ to be part of install dir: $installDir"
     exit 1
 fi
 
@@ -59,13 +60,6 @@ fi
 installDir=$(git config githooks.installDir)
 if ! echo "$installDir" | grep "\$GH_TEST_TMP"; then
     echo "! Expected \$GH_TEST_TMP to be part of install dir: $installDir"
-    cat ~/.gitconfig
-    exit 1
-fi
-
-alias=$(git config alias.hooks)
-if ! echo "$alias" | grep "\$GH_TEST_TMP"; then
-    echo "! Expected \$GH_TEST_TMP to be part of alias : $alias"
     cat ~/.gitconfig
     exit 1
 fi

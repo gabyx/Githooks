@@ -108,7 +108,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().String(
 		"prefix", "",
 		"Githooks installation prefix such that\n"+
-			"'<prefix>/.githooks' will be the installation directory.")
+			"'<prefix>/.githooks' will be the installation directory "+
+			"(env. variables e.g. '$X' and '~' allowed).")
 	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("prefix"))
 
 	cmd.PersistentFlags().String(
@@ -257,7 +258,7 @@ func setupSettings(
 		log.AssertNoErrorPanic(err, "Could not replace '~' character in path.")
 
 		installDirRaw = path.Join(args.InstallPrefix, ".githooks")
-		installDir = os.ExpandEnv(installDirRaw)
+		installDir = filepath.ToSlash(os.ExpandEnv(installDirRaw))
 
 	} else {
 		installDir, installDirRaw = cmd.InstallDir, cmd.InstallDirRaw
@@ -957,7 +958,6 @@ func setupHookTemplates(
 func installBinaries(
 	log cm.ILogContext,
 	installDir string,
-	installDirRaw string,
 	cloneDir string,
 	tempDir string,
 	binaries []string,
@@ -984,7 +984,7 @@ func installBinaries(
 
 	// Set CLI executable alias.
 	cli := hooks.GetCLIExecutable(installDir)
-	err = hooks.SetCLIExecutableAlias(hooks.GetCLIExecutablePath(installDirRaw))
+	err = hooks.SetCLIExecutableAlias(cli.Cmd)
 	log.AssertNoErrorPanicF(err,
 		"Could not set Git config 'alias.hooks' to '%s'.", cli.Cmd)
 
@@ -1340,7 +1340,6 @@ func runInstaller(
 		installBinaries(
 			log,
 			settings.InstallDir,
-			settings.InstallDirRaw,
 			settings.CloneDir,
 			settings.TempDir,
 			args.InternalBinaries,

@@ -166,9 +166,10 @@ func ReplaceTildeWith(p string, repl string) string {
 
 // ReplaceTilde replaces a prefix tilde '~' character in a path
 // with the home dir.
-func ReplaceTilde(p string) (string, error) {
+func ReplaceTilde(p string) (usr string, err error) {
 	if strings.HasPrefix(p, "~") {
-		usr, err := homedir.Dir()
+
+		usr, err = homedir.Dir()
 		if err != nil {
 			return p, err
 		}

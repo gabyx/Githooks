@@ -185,32 +185,20 @@ func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string, i
 
 // / Get the default install dir.
 func GetDefaultInstallDir() (installDir, installDirRaw string) {
-	home := filepath.ToSlash(os.Getenv("HOME"))
+	home, err := homedir.Dir()
+	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
-	if exists, _ := cm.IsPathExisting(home); !exists {
-		// Home variable does not exist. Use the lib to detect it, as fallback.
-		var err error
-		home, err = homedir.Dir()
-		home = filepath.ToSlash(home)
-		cm.AssertNoErrorPanic(err, "Could not get home directory.")
-
-		installDir = path.Join(home, HooksDirName)
-		installDirRaw = installDir
-
-	} else {
-		// Home env. variable exists use this one.
-		installDir = path.Join(home, HooksDirName)
-		installDirRaw = path.Join("$HOME", HooksDirName)
-	}
+	installDir = path.Join(home, HooksDirName)
+	installDirRaw = path.Join("~", HooksDirName)
 
 	return
 }
 
 // GetInstallDir returns the Githooks install directory.
 func GetInstallDir(gitx *git.Context) string {
-	raw := gitx.GetConfig(GitCKInstallDir, git.GlobalScope)
+	p, _ := GetInstallDirWithRaw(gitx)
 
-	return filepath.ToSlash(os.ExpandEnv(raw))
+	return p
 }
 
 // GetInstallDirWithRaw returns the Githooks install directory,
@@ -218,7 +206,10 @@ func GetInstallDir(gitx *git.Context) string {
 func GetInstallDirWithRaw(gitx *git.Context) (string, string) {
 	raw := filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
 
-	return filepath.ToSlash(os.ExpandEnv(raw)), raw
+	dir, err := cm.ReplaceTilde(raw)
+	cm.AssertNoErrorPanic(err, "Failed to replace '~' variable.")
+
+	return filepath.ToSlash(os.ExpandEnv(dir)), raw
 }
 
 // SetInstallDir sets the global Githooks install directory.
@@ -308,7 +299,7 @@ func SetDialogExecutableConfig(path string) error {
 
 // SetCLIExecutableAlias sets the global Githooks runner executable.
 func SetCLIExecutableAlias(path string) error {
-	if !cm.IsFile(os.ExpandEnv(path)) {
+	if !cm.IsFile(path) {
 		return cm.ErrorF("CLI executable '%s' does not exist.", path)
 	}
 
