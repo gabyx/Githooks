@@ -67,7 +67,7 @@ func NewManager(manager string) (mgr IManager, err error) {
 
 	var e error
 	for _, manager := range mgrs {
-		switch manager {
+		switch strings.TrimSpace(manager) {
 		case "docker":
 			mgr, e = NewManagerDocker()
 		case "podman":
