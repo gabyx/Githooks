@@ -216,6 +216,34 @@ func runSearchDir(ctx *ccm.CmdContext, opts *SetOptions) {
 	}
 }
 
+func runContainerManagerTypes(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	opt := hooks.GitCKContainerManager
+	localOrGlobal := "locally" // nolint: goconst
+	if gitOpts.Global {
+		localOrGlobal = "globally" // nolint: goconst
+	}
+
+	scope := wrapToGitScope(ctx.Log, gitOpts)
+	switch {
+	case opts.Set:
+		val := strings.Join(opts.Values, ",")
+		err := ctx.GitX.SetConfig(opt, val, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not set Git config '%s'.", opt)
+		ctx.Log.InfoF("Container manager types is set to '%s' %s.", val, localOrGlobal)
+
+	case opts.Reset:
+		err := ctx.GitX.UnsetConfig(opt, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not unset Git config '%s'.", opt)
+		ctx.Log.InfoF("Container manager types is unset %s.", localOrGlobal)
+
+	case opts.Print:
+		conf := ctx.GitX.GetConfig(opt, scope)
+		ctx.Log.InfoF("Container manager types is set to '%s' %s.", conf, localOrGlobal)
+	default:
+		cm.Panic("Wrong arguments.")
+	}
+}
+
 func runContainerizedHooksEnable(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	opt := hooks.GitCKContainerizedHooksEnabled
 	localOrGlobal := "locally" // nolint: goconst
@@ -725,6 +753,33 @@ func configContainerizedHooksEnabledCmd(
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, enableCmd))
 }
 
+func configContainerManagerTypesCmd(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions) {
+
+	enableCmd := &cobra.Command{
+		Use:   "container-manager-types [flags]",
+		Short: "Set container manger types to use (see 'enable-containerized-hooks').",
+		Long: `Set container manager types to use where the first valid one is taken and used.
+If unset 'docker' is used.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if !gitOpts.Local && !gitOpts.Global {
+				gitOpts.Local = true
+			}
+
+			runContainerManagerTypes(ctx, setOpts, gitOpts)
+		}}
+
+	optsPSR := createOptionMap(true, false, true)
+
+	configSetOptions(enableCmd, setOpts, &optsPSR, ctx.Log, 1, 2) // nolint: gomnd
+	enableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
+	enableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, enableCmd))
+}
+
 func configSearchDirCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
 	searchDirCmd := &cobra.Command{
@@ -1076,6 +1131,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configCloneBranchCmd(ctx, configCmd, &setOpts)
 
 	configContainerizedHooksEnabledCmd(ctx, configCmd, &setOpts, &gitOpts)
+	configContainerManagerTypesCmd(ctx, configCmd, &setOpts, &gitOpts)
 
 	configSharedCmd(ctx, configCmd, &setOpts, &gitOpts)
 	configDisableSharedHooksUpdate(ctx, configCmd, &setOpts, &gitOpts)

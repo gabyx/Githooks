@@ -21,6 +21,7 @@ git hooks config
 * [git hooks](git_hooks.md)	 - Githooks CLI application
 * [git hooks config clone-branch](git_hooks_config_clone-branch.md)	 - Changes the Githooks clone url used for any update.
 * [git hooks config clone-url](git_hooks_config_clone-url.md)	 - Changes the Githooks clone url used for any update.
+* [git hooks config container-manager-types](git_hooks_config_container-manager-types.md)	 - Set container manger types to use (see `enable-containerized-hooks`).
 * [git hooks config delete-detected-lfs-hooks](git_hooks_config_delete-detected-lfs-hooks.md)	 - Change the behavior for detected LFS hooks during install.
 * [git hooks config disable](git_hooks_config_disable.md)	 - Disables Githooks in the current repository or globally.
 * [git hooks config disable-shared-hooks-update](git_hooks_config_disable-shared-hooks-update.md)	 - Disable/enable automatic updates of shared hooks.

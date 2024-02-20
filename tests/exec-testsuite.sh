@@ -20,13 +20,16 @@ export CGO_ENABLED=0
 go mod vendor
 go generate -mod vendor ./...
 
+regex="${1:-".*"}"
+tags="${2:-"test_docker"}"
+
 if [ -d /cover ]; then
-    if ! go test ./... -test.coverprofile /cover/tests.cov -covermode=count -coverpkg ./...; then
+    if ! go test -tags "$tags" -run "$regex" ./... -test.coverprofile /cover/tests.cov -covermode=count -coverpkg ./...; then
         echo "! Go testsuite reported errors." >&2
         exit 1
     fi
 else
-    if ! go test -v ./...; then
+    if ! go test -tags "$tags" -run "$regex" -v ./...; then
         echo "! Go testsuite reported errors." >&2
         exit 1
     fi
