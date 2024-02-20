@@ -700,20 +700,27 @@ the missing Git LFS hooks will be installed too.
 
 ## Running Hooks in Containers
 
-You can run hooks containerized over a container manager such as `docker`
-(others such as `podman` etc. are not yet implemented). This relieves the
-maintainer of a Githooks shared repo from dealing with _"It works on my
-machine!"_
+You can run hooks containerized over a container manager such as `docker`. This
+relieves the maintainer of a Githooks shared repo from dealing with _"It works
+on my machine!"_
 
 To enable containerized hook runs set the Git config variable either locally or
 globally with
 
 ```shell
-git hooks config enable-containerized-hooks [--global] --set
+git hooks config enable-containerized-hooks [--global] --set true
 ```
 
-to `true` or use the environment variable
-`GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true`.
+or use the environment variable `GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true`.
+
+Optionally set the container manager (default is `docker`) like
+
+```shell
+git hooks config container-manager-types [--global] --set "podman,docker"
+```
+
+The container manager types can be a list from \[`docker`, `podman`\] where the
+first valid one is used to run the hooks.
 
 Running a hook in a container is achieved by specifying the image reference
 (image name) inside a [hook run configuration](#hook-run-configuration), e.g.
@@ -731,7 +738,7 @@ image:
   reference: "my-shellcheck:1.2.0"
 ```
 
-which will launch the command `./myscript/checkit.sh` in a docker container
+which will launch the command `./myscript/checkit.sh` in a container
 `my-shellcheck:1.2.0`. The current Git repository where this hook is launched is
 mounted as the current working directory and the relative path
 `./myscript/checkit.sh` will be mangled to a path in the mounted read-only
@@ -743,11 +750,40 @@ have access to the same environment variables as on your host system. All
 Githooks [environment variables](#environment-variables) are forwarded however
 to the container run.
 
-Running commands in containers which modify files on writable volumes has some
-caveats and quirks with permissions which are host system dependent. Hongli Lai
-summarized these troubles in a
+**Note:** The images you run must be `rootless` (contain a `USER` statement) and
+this user must have user/group id `1000` (Todo: We can loosen this requirement
+if really needed). See the
+[example](https://github.com/gabyx/Githooks-Shell/blob/main/githooks/container/Dockerfile).
+
+### Podman Manager (rootless)
+
+**This manager is strongly preferred due to better security and less hassle with
+volume mounts.**
+
+The containers are run with the following flags to `podman`:
+
+- `--userns=keep-id:uid=1000,gid=1000`:
+  [_User namespace mapping_](https://docs.podman.io/en/v4.4/markdown/options/userns.container.html).
+  Maps the user/group id of the user running Githooks (your host user) to the
+  container user/group id `1000`. This means a host user with user/group id e.g.
+  4000 will be seen inside the container as user/group id 1000. This also works
+  for all volume mounts which will have `1000:1000` permission inside the
+  container.
+
+### Docker Manager
+
+The containers are run with the following flags to `docker`:
+
+- `--user:<uid>:<gid>`: The container is run as the same user id and group id as
+  the user which runs Githooks (your host user). See the note below why this is
+  the case.
+
+**Note:** Running commands in containers which modify files on writable volumes
+has some caveats and quirks with permissions which are host system dependent.
+Hongli Lai summarized these troubles in a
 [very good article](https://www.fullstaq.com/knowledge-hub/blogs/docker-and-the-host-filesystem-owner-matching-problem).
-Long story short, **you should use
+Long story short if the images are run with the `docker` manager, **you should
+use
 [`MatchHostFsOwner`](https://github.com/FooBarWidget/matchhostfsowner/releases)**
 which counter acts these permission problems neatly by installing
 [this into your hook's sidecar container](https://github.com/gabyx/Githooks-Shell/blob/main/githooks/container/Dockerfile#L29).

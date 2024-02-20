@@ -1,6 +1,8 @@
 package container
 
 import (
+	"strings"
+
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
@@ -20,7 +22,7 @@ const EnvVariableContainerRun = "GITHOOKS_CONTAINER_RUN"
 type ContainerManagerType int
 type containerManagerType struct {
 	Docker ContainerManagerType
-	Podman ContainerManagerType // Not yet supported.
+	Podman ContainerManagerType
 }
 
 // ContainerManagerTypeV enumerates all container managers supported so far.
@@ -52,18 +54,34 @@ type IManager interface {
 
 // NewManager creates a container manager of type `manager`.
 // If empty `docker` is taken.
-// Currently only `docker` is supported.
+// Can be a comma-separated string e.g. `podman,docker` to try
+// to use the one which first can be constructed.
+// Currently only `docker` and `podman` is supported.
 func NewManager(manager string) (mgr IManager, err error) {
 
 	if strs.IsEmpty(manager) {
 		manager = "docker"
 	}
 
-	switch manager {
-	case "docker":
-		mgr, err = NewManagerDocker()
-	default:
-		return nil, cm.ErrorF("Container manager '%s' not supported.", manager)
+	mgrs := strings.Split(manager, ",")
+
+	var e error
+	for _, manager := range mgrs {
+		switch manager {
+		case "docker":
+			mgr, e = NewManagerDocker()
+		case "podman":
+			mgr, e = NewManagerPodman()
+		default:
+			mgr, e = nil, cm.ErrorF("Container manager '%s' not supported.", manager)
+		}
+
+		// If we could construct it, immediately return it.
+		if mgr != nil {
+			return mgr, nil
+		}
+
+		err = cm.CombineErrors(err, e)
 	}
 
 	return

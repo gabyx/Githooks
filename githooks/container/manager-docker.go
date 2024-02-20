@@ -23,6 +23,9 @@ type ManagerDocker struct {
 
 	uid string
 	gid string
+
+	// Only used to wrap podman into this structure as well.
+	mgrType ContainerManagerType
 }
 
 // ImagePull pulls an image with reference `ref`.
@@ -89,9 +92,9 @@ func (m *ManagerDocker) NewHookRunExec(
 	cm.DebugAssert(filepath.IsAbs(workspaceDir), "Workspace dir must be an absolute path.")
 	cm.DebugAssert(filepath.IsAbs(workspaceHookDir), "Workspace hook dir must be an abs path.")
 
-	containerExec := ContainerizedExecutable{containerType: ContainerManagerTypeV.Docker}
+	containerExec := ContainerizedExecutable{containerType: m.mgrType}
 
-	containerExec.Cmd = dockerCmd
+	containerExec.Cmd = m.cmdCtx.GetBaseCmd()
 
 	// Mount: Working directory.
 	// The repository where the hook runs.
@@ -176,12 +179,23 @@ func (m *ManagerDocker) NewHookRunExec(
 			strs.Fmt("%v:%v:ro", mntWSSharedSrc, mntWSSharedDest)) // Set the mount for the shared directory.
 	}
 
-	if runtime.GOOS != cm.WindowsOsName &&
-		runtime.GOOS != "darwin" {
-		// On non win/mac, execute as the user/group from the host.
-		containerExec.ArgsPre = append(containerExec.ArgsPre,
-			"--user",
-			strs.Fmt("%v:%v", m.uid, m.gid))
+	if m.mgrType == ContainerManagerTypeV.Docker {
+		if runtime.GOOS != cm.WindowsOsName &&
+			runtime.GOOS != "darwin" {
+			// On non win/mac, execute as the user/group from the host.
+			// This will make all volume mounts have the same user/group
+			// in the container.
+			// The entrypoint https://github.com/FooBarWidget/matchhostfsowner
+			// will take care to adjust a specified container user
+			// to the one running.
+			containerExec.ArgsPre = append(containerExec.ArgsPre,
+				"--user",
+				strs.Fmt("%v:%v", m.uid, m.gid))
+		}
+	} else if m.mgrType == ContainerManagerTypeV.Podman {
+		// With rootless podman its much easier to make the volumes
+		// match the host user which launch this Githook.
+		containerExec.ArgsPre = append(containerExec.ArgsPre, "--userns=keep-id:uid=1000,gid=1000")
 	}
 
 	// Set env. variable denoting we are running over a container.
@@ -206,10 +220,9 @@ func IsDockerAvailable() bool {
 
 	return err == nil
 }
-
-func NewManagerDocker() (mgr IManager, err error) {
+func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDocker, err error) {
 	if !IsDockerAvailable() {
-		return nil, &ManagerNotAvailableError{dockerCmd}
+		return nil, &ManagerNotAvailableError{cmd}
 	}
 
 	var uid, gid string
@@ -228,8 +241,13 @@ func NewManagerDocker() (mgr IManager, err error) {
 		gid = usr.Gid
 	}
 
-	cmdCtx := cm.NewCommandCtxBuilder().SetBaseCmd(dockerCmd).EnableCaptureError().Build()
-	mgr = &ManagerDocker{cmdCtx: cmdCtx, uid: uid, gid: gid}
+	cmdCtx := cm.NewCommandCtxBuilder().SetBaseCmd(cmd).EnableCaptureError().Build()
+	mgr = &ManagerDocker{cmdCtx: cmdCtx, uid: uid, gid: gid, mgrType: mgrType}
 
 	return
+}
+
+// NewManagerDocker return a new mangers for Docker images.
+func NewManagerDocker() (mgr IManager, err error) {
+	return newManagerDocker(dockerCmd, ContainerManagerTypeV.Docker)
 }
