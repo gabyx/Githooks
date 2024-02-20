@@ -46,6 +46,7 @@ workflows:
                   "test-corehookspath",
                   "test-whitespace",
                   "test-testsuite",
+                  "test-testsuite-podman",
                   "test-rules",
                 ]
           filters: &filters

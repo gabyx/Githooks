@@ -73,17 +73,17 @@ func NewManager(manager string) (mgr IManager, err error) {
 		case "podman":
 			mgr, e = NewManagerPodman()
 		default:
-			mgr, e = nil, cm.ErrorF("Container manager '%s' not supported.", manager)
+			e = cm.ErrorF("Container manager '%s' not supported.", manager)
 		}
 
 		// If we could construct it, immediately return it.
-		if mgr != nil {
+		if e == nil {
 			return mgr, nil
 		}
 
 		err = cm.CombineErrors(err, e)
 	}
 
-	return
+	return nil, cm.CombineErrors(err, cm.Error("Container manager could not be validated."))
 
 }

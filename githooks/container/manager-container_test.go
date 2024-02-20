@@ -1,4 +1,4 @@
-//go:build test_docker && !test_podman
+//go:build test_docker || test_podman
 
 package container
 
@@ -11,13 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDockerManager(t *testing.T) {
-	testDockerManager(t, "docker")
-}
-
 func testDockerManager(t *testing.T, cmd string) {
+
 	mgr, err := NewManager(cmd)
-	assert.Nil(t, err)
+	if !assert.Nil(t, err, "%s", err) {
+		assert.FailNow(t, "Cannot continue.")
+	}
 
 	err = mgr.ImagePull("alpine:latest")
 	assert.Nil(t, err, "Could not pull image: %s", err)
@@ -44,13 +43,11 @@ func testDockerManager(t *testing.T, cmd string) {
 	assert.Nil(t, err)
 }
 
-func TestDockerManagerBuild(t *testing.T) {
-	testDockerManagerBuild(t, "docker")
-}
-
 func testDockerManagerBuild(t *testing.T, cmd string) {
 	mgr, err := NewManager(cmd)
-	assert.Nil(t, err)
+	if !assert.Nil(t, err, "%s", err) {
+		assert.FailNow(t, "Cannot continue.")
+	}
 
 	file, err := os.CreateTemp("", "")
 	assert.Nil(t, err)
@@ -82,14 +79,12 @@ RUN apk add bash
 	assert.Nil(t, err)
 }
 
-func TestDockerManagerBuildFail(t *testing.T) {
-	testDockerManagerBuildFail(t, "docker")
-}
-
 func testDockerManagerBuildFail(t *testing.T, cmd string) {
 
 	mgr, err := NewManager(cmd)
-	assert.Nil(t, err)
+	if !assert.Nil(t, err, "%s", err) {
+		assert.FailNow(t, "Cannot continue.")
+	}
 
 	file, err := os.CreateTemp("", "")
 	assert.Nil(t, err)

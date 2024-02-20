@@ -221,9 +221,6 @@ func IsDockerAvailable() bool {
 	return err == nil
 }
 func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDocker, err error) {
-	if !IsDockerAvailable() {
-		return nil, &ManagerNotAvailableError{cmd}
-	}
 
 	var uid, gid string
 
@@ -249,5 +246,9 @@ func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDoc
 
 // NewManagerDocker return a new mangers for Docker images.
 func NewManagerDocker() (mgr IManager, err error) {
+	if !IsDockerAvailable() {
+		return nil, &ManagerNotAvailableError{dockerCmd}
+	}
+
 	return newManagerDocker(dockerCmd, ContainerManagerTypeV.Docker)
 }
