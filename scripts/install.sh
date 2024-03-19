@@ -26,7 +26,7 @@ function getPlatformOS() {
 
     if [[ "$OSTYPE" == "linux"* ]]; then
         _platformOS="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
+    elif [[ "$OSTYPE" == "darwin"* || "$OSTYPE" == "macos"* ]]; then
         _platformOS="darwin"
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
         _platformOS="freebsd"
