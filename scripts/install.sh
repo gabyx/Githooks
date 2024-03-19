@@ -26,8 +26,8 @@ function getPlatformOS() {
 
     if [[ "$OSTYPE" == "linux"* ]]; then
         _platformOS="linux"
-    elif [[ "$OSTYPE" == "darwin"* || "$OSTYPE" == "macos"* ]]; then
-        _platformOS="darwin"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        _platformOS="macos"
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
         _platformOS="freebsd"
     else
@@ -77,7 +77,7 @@ function getPlatformOS() {
         platformOSDist="${platformOSDist// /}"
         platformOSVersion="${platformOSVersion// /}"
 
-    elif [ "$_platformOS" = "darwin" ]; then
+    elif [ "$_platformOS" = "macos" ]; then
 
         platformOSDist=$(sw_vers | grep -m 1 'ProductName' | sed -E 's/.*:\s+(.*)/\1/')
         platformOSVersion=$(sw_vers | grep -m 1 'ProductVersion' | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+)/\1/g')
