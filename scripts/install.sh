@@ -233,6 +233,11 @@ arch=""
 getPlatformOS os
 getPlatformArch arch
 
+# The download used `macos` for `darwin` platform.
+if [ "$os" = "darwin" ]; then
+    os="macos"
+fi
+
 # Download and install
 response=$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases/tags/$versionTag") || {
     echo "Could not get releases from github.com."
