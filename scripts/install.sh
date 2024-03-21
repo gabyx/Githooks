@@ -24,10 +24,7 @@ function getPlatformOS() {
     local platformOSDist=""
     local platformOSVersion=""
 
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        _platformOS="linux"
-    elif [[ "$OSTYPE" == "linux-musl"* ]]; then
-        # Alpine linux
+    if [[ "$OSTYPE" == "linux"* ]]; then
         _platformOS="linux"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         _platformOS="darwin"
@@ -65,6 +62,10 @@ function getPlatformOS() {
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         elif grep -qE 'ID="?rhel' "/etc/os-release"; then
             platformOSDist="redhat"
+            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
+        elif grep -qE 'ID="?opensuse' "/etc/os-release"; then
+            platformOSDist="opensuse"
             platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         else
@@ -231,6 +232,11 @@ arch=""
 
 getPlatformOS os
 getPlatformArch arch
+
+# The download used `macos` for `darwin` platform.
+if [ "$os" = "darwin" ]; then
+    os="macos"
+fi
 
 # Download and install
 response=$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases/tags/$versionTag") || {
