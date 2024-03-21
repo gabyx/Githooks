@@ -77,7 +77,7 @@ function getPlatformOS() {
         platformOSDist="${platformOSDist// /}"
         platformOSVersion="${platformOSVersion// /}"
 
-    elif [ "$_platformOS" = "macos" ]; then
+    elif [ "$_platformOS" = "darwin" ]; then
 
         platformOSDist=$(sw_vers | grep -m 1 'ProductName' | sed -E 's/.*:\s+(.*)/\1/')
         platformOSVersion=$(sw_vers | grep -m 1 'ProductVersion' | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+)/\1/g')
