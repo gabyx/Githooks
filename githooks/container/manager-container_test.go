@@ -61,7 +61,7 @@ RUN apk add bash
 	_, _ = io.WriteString(file, dockerfile)
 	file.Close()
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	assert.Nil(t, err)
 
 	exists, err := mgr.ImageExists("alpine:mine-special")
@@ -98,7 +98,7 @@ RUN apk add bashhhh
 	_, _ = io.WriteString(file, dockerfile)
 	file.Close()
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	assert.Nil(t, err)
 
 	_, err = mgr.ImageBuild(log, file.Name(), ".", "stage2", "alpine:mine-special")

@@ -29,7 +29,7 @@ func mainRun() (exitCode int) {
 	// ===============================================================
 
 	// We only log to stderr, because we need stdout for the output.
-	log, err := cm.CreateLogContext(true)
+	log, err := cm.CreateLogContext(true, false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
 
 	// Handle all panics and report the error

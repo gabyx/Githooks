@@ -3,16 +3,17 @@
 package prompt_test
 
 import (
+	"os"
+
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/prompt"
-	"os"
 
 	"testing"
 )
 
 func TestCoverage(t *testing.T) {
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	cm.AssertNoErrorPanic(err)
 
 	os.Stdin = nil

@@ -117,7 +117,7 @@ RUN apk add bash
 	err = os.WriteFile(path.Join(repo, ".githooks/docker/Dockerfile"), content, cm.DefaultFileModeFile)
 	assert.Nil(t, err)
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	assert.Nil(t, err)
 
 	err = UpdateImages(log, "test-repo", repo, path.Join(repo, ".githooks"), "")
