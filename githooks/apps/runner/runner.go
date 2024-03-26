@@ -112,7 +112,7 @@ func createLog() {
 	// might read stdin for certain hooks.
 	// Either do redirection (which needs to be bombproof)
 	// or just use stderr.
-	log, err = cm.CreateLogContext(true)
+	log, err = cm.CreateLogContext(true, true)
 	cm.AssertOrPanic(err == nil, "Could not create log")
 }
 

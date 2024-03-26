@@ -117,6 +117,16 @@ func (w *FormattedWriter) Write(p []byte) (n int, err error) {
 	return len(p), err
 }
 
+// Loglevel constants for runtime switching.
+const (
+	debugLevel = -1
+	infoLevel  = 0
+	warnLevel  = 1
+	errorLevel = 2
+
+	disableLevel = 10
+)
+
 // LogContext defines the data for a log context.
 type LogContext struct {
 	stdout *os.File
@@ -135,6 +145,8 @@ type LogContext struct {
 	doTrackStats bool
 	nWarnings    int
 	nErrors      int
+
+	level int
 }
 
 // NewColoredPromptWriter returns a colored prompt writer.
@@ -164,8 +176,10 @@ func NewColoredErrorWriter(writer io.Writer) io.Writer {
 	return &FormattedWriter{format: colorError, writer: writer}
 }
 
-// CreateLogContext creates a log context.
-func CreateLogContext(onlyStderr bool) (*LogContext, error) {
+// CreateLogContext creates a log context and if `setFromEnv` is set will
+// set the log level from the environment variable `GITHOOKS_LOG_LEVEL` which can be
+// `DebugLevel`, `InfoLevel`, `WarnLevel`, `ErrorLevel`, `DisableLevel`.
+func CreateLogContext(onlyStderr bool, setLogLevelFromEnv bool) (*LogContext, error) {
 	var l LogContext
 	l.stdout = os.Stdout
 	l.stderr = os.Stderr
@@ -179,6 +193,8 @@ func CreateLogContext(onlyStderr bool) (*LogContext, error) {
 	l.isColorSupported = (l.infoIsTerminal && l.errorIsTerminal) && color.IsSupportColor()
 
 	l.setupWriters()
+	l.setupLogLevel(setLogLevelFromEnv)
+
 	l.doTrackStats = true
 
 	return &l, nil
@@ -195,6 +211,34 @@ func (c *LogContext) setupWriters() {
 		c.info = c.stdout
 		c.warn = c.stderr
 		c.error = c.stderr
+	}
+}
+
+func parseLogLevel() int {
+	level := strings.TrimSpace(os.Getenv("GITHOOKS_LOG_LEVEL"))
+
+	switch level {
+	case "debug":
+		return debugLevel
+	default: // nolint: gocritic
+		fallthrough
+	case "info":
+		return infoLevel
+	case "warn":
+		return warnLevel
+	case "error":
+		return errorLevel
+	case "disable":
+		return disableLevel
+	}
+}
+
+func (c *LogContext) setupLogLevel(fromEnv bool) {
+	if DebugLog {
+		// Allways overwrites.
+		c.level = debugLevel
+	} else if fromEnv {
+		c.level = parseLogLevel()
 	}
 }
 
@@ -235,31 +279,37 @@ func (c *LogContext) IsErrorATerminal() bool {
 
 // Debug logs a debug message.
 func (c *LogContext) Debug(lines ...string) {
-	if DebugLog {
+	if c.level <= debugLevel {
 		fmt.Fprint(c.debug, FormatMessage(debugSuffix, indent, lines...), "\n")
 	}
 }
 
 // DebugF logs a debug message.
 func (c *LogContext) DebugF(format string, args ...interface{}) {
-	if DebugLog {
+	if c.level <= debugLevel {
 		fmt.Fprint(c.debug, FormatMessageF(debugSuffix, indent, format, args...), "\n")
 	}
 }
 
 // Info logs a info message.
 func (c *LogContext) Info(lines ...string) {
-	fmt.Fprint(c.info, FormatInfo(lines...), "\n")
+	if c.level <= infoLevel {
+		fmt.Fprint(c.info, FormatInfo(lines...), "\n")
+	}
 }
 
 // InfoF logs a info message.
 func (c *LogContext) InfoF(format string, args ...interface{}) {
-	fmt.Fprint(c.info, FormatInfoF(format, args...), "\n")
+	if c.level <= infoLevel {
+		fmt.Fprint(c.info, FormatInfoF(format, args...), "\n")
+	}
 }
 
 // Warn logs a warning message.
 func (c *LogContext) Warn(lines ...string) {
-	fmt.Fprint(c.warn, FormatMessage(warnSuffix, indent, lines...), "\n")
+	if c.level <= warnLevel {
+		fmt.Fprint(c.warn, FormatMessage(warnSuffix, indent, lines...), "\n")
+	}
 	if c.doTrackStats {
 		c.nWarnings++
 	}
@@ -267,7 +317,9 @@ func (c *LogContext) Warn(lines ...string) {
 
 // WarnF logs a warning message.
 func (c *LogContext) WarnF(format string, args ...interface{}) {
-	fmt.Fprint(c.warn, FormatMessageF(warnSuffix, indent, format, args...), "\n")
+	if c.level <= warnLevel {
+		fmt.Fprint(c.warn, FormatMessageF(warnSuffix, indent, format, args...), "\n")
+	}
 	if c.doTrackStats {
 		c.nWarnings++
 	}
@@ -275,7 +327,9 @@ func (c *LogContext) WarnF(format string, args ...interface{}) {
 
 // Error logs an error.
 func (c *LogContext) Error(lines ...string) {
-	fmt.Fprint(c.error, FormatMessage(errorSuffix, indent, lines...), "\n")
+	if c.level <= errorLevel {
+		fmt.Fprint(c.error, FormatMessage(errorSuffix, indent, lines...), "\n")
+	}
 	if c.doTrackStats {
 		c.nErrors++
 	}
@@ -283,7 +337,9 @@ func (c *LogContext) Error(lines ...string) {
 
 // ErrorF logs an error.
 func (c *LogContext) ErrorF(format string, args ...interface{}) {
-	fmt.Fprint(c.error, FormatMessageF(errorSuffix, indent, format, args...), "\n")
+	if c.level <= errorLevel {
+		fmt.Fprint(c.error, FormatMessageF(errorSuffix, indent, format, args...), "\n")
+	}
 	if c.doTrackStats {
 		c.nErrors++
 	}
@@ -324,14 +380,22 @@ func (c *LogContext) ErrorWithStacktraceF(format string, args ...interface{}) {
 // Panic logs an error and calls panic with a GithooksFailure.
 func (c *LogContext) Panic(lines ...string) {
 	m := FormatMessage(errorSuffix, indent, lines...)
-	fmt.Fprint(c.error, m, "\n")
+
+	if c.level <= errorLevel {
+		fmt.Fprint(c.error, m, "\n")
+	}
+
 	panic(GithooksFailure{m})
 }
 
 // PanicF logs an error and calls panic with a GithooksFailure.
 func (c *LogContext) PanicF(format string, args ...interface{}) {
 	m := FormatMessageF(errorSuffix, indent, format, args...)
-	fmt.Fprint(c.error, m, "\n")
+
+	if c.level <= errorLevel {
+		fmt.Fprint(c.error, m, "\n")
+	}
+
 	panic(GithooksFailure{m})
 }
 
@@ -374,16 +438,19 @@ func (c *LogContext) AddFileWriter(file *os.File) {
 
 	c.file = file
 
-	if c.debug != nil {
+	if c.debug != nil && c.level <= debugLevel {
 		c.debug = io.MultiWriter(c.debug, file)
 	}
-	if c.info != nil {
+
+	if c.info != nil && c.level <= infoLevel {
 		c.info = io.MultiWriter(c.info, file)
 	}
-	if c.warn != nil {
+
+	if c.warn != nil && c.level <= warnLevel {
 		c.warn = io.MultiWriter(c.warn, file)
 	}
-	if c.error != nil {
+
+	if c.error != nil && c.level <= errorLevel {
 		c.error = io.MultiWriter(c.error, file)
 	}
 }
@@ -394,6 +461,7 @@ func (c *LogContext) RemoveFileWriter() {
 		c.setupWriters()
 		c.file.Close()
 	}
+
 	c.file = nil
 }
 

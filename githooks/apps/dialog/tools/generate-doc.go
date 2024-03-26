@@ -65,7 +65,7 @@ func main() {
 
 	docRoot := path.Join(root, "docs", "dialog")
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	cm.AssertNoErrorPanic(err, "Could not create log")
 
 	ctx := dcm.CmdContext{Log: log}

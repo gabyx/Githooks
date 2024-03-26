@@ -28,7 +28,7 @@ func installSignalHandling() *cm.InterruptContext {
 
 func mainRun(cleanUpX *cm.InterruptContext) (exitCode int) {
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
 
 	exitCode = 1

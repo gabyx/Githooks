@@ -643,6 +643,7 @@ not globally be defined.
 | `GITHOOKS_CONTAINER_RUN` (defined by Githooks) | If a hook is run over a container, this variable is set and `true`                                                        |
 | `GITHOOKS_DISABLE`                             | If defined, disables running hooks run by Githooks,<br>except `git lfs` and the replaced old hooks.                       |
 | `GITHOOKS_RUNNER_TRACE`                        | If defined, enables tracing during <br>Githooks runner execution. A value of `1` enables more output.                     |
+| `GITHOOKS_LOG_LEVEL`                           | A value `debug`, `info`, `warn`, `error` or `disable` sets the log level during <br>Githooks runner execution.            |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
 | `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).           |
 

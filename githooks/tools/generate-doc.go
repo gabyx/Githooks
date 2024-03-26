@@ -70,7 +70,7 @@ func main() {
 
 	docRoot := path.Join(root, "docs", "cli")
 
-	log, err := cm.CreateLogContext(false)
+	log, err := cm.CreateLogContext(false, false)
 	cm.AssertNoErrorPanic(err, "Could not create log")
 
 	ctx := cmd.NewSettings(log, log, func() {}, nil)
