@@ -51,7 +51,7 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
     exit 1
 fi
 
-rm -rf ~/.githooks/templates/hooks/* # Remove to see if the correct folder gets choosen
+rm -rf ~/.githooks/templates/hooks/* # Remove to see if the correct folder gets chosen
 
 if ! "$GH_INSTALL_BIN_DIR/cli" update --yes; then
     echo "! Failed to run the update"

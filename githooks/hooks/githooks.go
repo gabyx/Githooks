@@ -10,6 +10,7 @@ import (
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
 	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/mitchellh/go-homedir"
 )
 
 // HooksDirName denotes the directory name used for repository specific hooks.
@@ -162,13 +163,64 @@ func GetSharedGithooksDir(repoDir string) (dir string) {
 	return
 }
 
+// LoadInstallDir loads the install directory and uses a default if
+// it does not exist.
+func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string, installDirRaw string) {
+
+	installDir, installDirRaw = GetInstallDirWithRaw(gitx)
+
+	if !cm.IsDirectory(installDir) {
+
+		if strs.IsNotEmpty(installDir) {
+			log.WarnF("Install directory '%s' does not exist.\n"+
+				"Githooks installation is corrupt!\n"+
+				"Using default location '~/.githooks'.", installDir)
+		}
+
+		installDir, installDirRaw = GetDefaultInstallDir()
+	}
+
+	return
+}
+
+// / Get the default install dir.
+func GetDefaultInstallDir() (installDir, installDirRaw string) {
+	home, err := homedir.Dir()
+	cm.AssertNoErrorPanic(err, "Could not get home directory.")
+	home = filepath.ToSlash(home)
+
+	installDir = path.Join(home, HooksDirName)
+
+	if home == filepath.ToSlash(os.Getenv("HOME")) {
+		// Home env. variable is the same as what we got above.
+		// use it instead.
+		installDirRaw = path.Join("$HOME", HooksDirName)
+	} else {
+		installDirRaw = path.Join(installDir, HooksDirName)
+	}
+
+	return
+}
+
 // GetInstallDir returns the Githooks install directory.
 func GetInstallDir(gitx *git.Context) string {
-	return filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
+	p, _ := GetInstallDirWithRaw(gitx)
+
+	return p
+}
+
+// GetInstallDirWithRaw returns the Githooks install directory,
+// but also with unexpanded env. variables form.
+func GetInstallDirWithRaw(gitx *git.Context) (string, string) {
+	raw := filepath.ToSlash(gitx.GetConfig(GitCKInstallDir, git.GlobalScope))
+
+	return filepath.ToSlash(os.ExpandEnv(raw)), raw
 }
 
 // SetInstallDir sets the global Githooks install directory.
 func SetInstallDir(gitx *git.Context, path string) error {
+	cm.DebugAssertF(path == filepath.ToSlash(path), "Filepath must be '/' delimted.")
+
 	return gitx.SetConfig(GitCKInstallDir, path, git.GlobalScope)
 }
 

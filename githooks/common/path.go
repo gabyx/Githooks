@@ -165,15 +165,28 @@ func ReplaceTildeWith(p string, repl string) string {
 }
 
 // ReplaceTilde replaces a prefix tilde '~' character in a path
-// with the home dir.
-func ReplaceTilde(p string) (string, error) {
+// with the home dir, and if `useHome=true` then `$HOME` is inserted if
+// the env. variable.
+func ReplaceTilde(p string, replaceWithEnv bool) (string, error) {
 	if strings.HasPrefix(p, "~") {
-		usr, err := homedir.Dir()
-		if err != nil {
-			return p, err
+		usr := os.Getenv("HOME")
+
+		if strs.IsEmpty(usr) {
+			replaceWithEnv = false
+
+			var err error
+			usr, err = homedir.Dir()
+			if err != nil {
+				return p, err
+			}
+			usr = filepath.ToSlash(usr)
 		}
 
-		return path.Join(filepath.ToSlash(usr), strings.TrimPrefix(p, "~")), nil
+		if replaceWithEnv {
+			return path.Join("$HOME", strings.TrimPrefix(p, "~")), nil
+		} else {
+			return path.Join(usr, strings.TrimPrefix(p, "~")), nil
+		}
 	}
 
 	return p, nil

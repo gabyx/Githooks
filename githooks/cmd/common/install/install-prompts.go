@@ -1,6 +1,8 @@
 package install
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -43,6 +45,7 @@ func PromptExistingRepos(
 	}
 
 	homeDir, err := homedir.Dir()
+	homeDir = filepath.ToSlash(homeDir)
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
 	searchDir := gitx.GetConfig(hooks.GitCKPreviousSearchDir, git.GlobalScope)
@@ -77,13 +80,13 @@ func PromptExistingRepos(
 		}
 
 		searchDir, err = promptx.ShowEntry(
-			"Where do you want to start the search?",
+			"Where do you want to start the search\n(env. variables are expanded)?",
 			searchDir,
 			prompt.CreateValidatorIsDirectory(homeDir))
 		log.AssertNoError(err, "Could not show prompt.")
 	}
 
-	searchDir = cm.ReplaceTildeWith(searchDir, homeDir)
+	searchDir = filepath.ToSlash(os.ExpandEnv(cm.ReplaceTildeWith(searchDir, homeDir)))
 
 	if !cm.IsDirectory(searchDir) {
 		log.WarnF("Search directory\n'%s'\nis not a directory.\n" + existingWarn[idx])

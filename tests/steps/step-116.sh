@@ -49,7 +49,7 @@ if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE"; then
 fi
 
 # Test that a first git action registers repo 2
-# and repo 1 ist still registered
+# and repo 1 is still registered
 mkdir -p "$GH_TEST_TMP/test116.2" && cd "$GH_TEST_TMP/test116.2" &&
     git init &&
     git commit --allow-empty -m 'Initial commit' ||

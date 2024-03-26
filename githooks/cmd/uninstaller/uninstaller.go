@@ -77,10 +77,11 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	setupMockFlags(cmd, vi)
 }
 
-func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Settings, UISettings) {
+func setupSettings(log cm.ILogContext, ctx *ccm.CmdContext, args *Arguments) (Settings, UISettings) {
 
 	var promptx prompt.IContext
 	var err error
+	gitx := ctx.GitX
 
 	log.AssertNoErrorPanic(err, "Could not get current working directory.")
 
@@ -89,24 +90,22 @@ func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Sett
 		log.AssertNoErrorF(err, "Prompt setup failed -> using fallback.")
 	}
 
-	installDir := install.LoadInstallDir(log, gitx)
-
 	// Safety check.
-	log.PanicIfF(!strings.Contains(installDir, ".githooks"),
+	log.PanicIfF(!strings.Contains(ctx.InstallDir, ".githooks"),
 		"Uninstall path at '%s' needs to contain '.githooks'.")
 
 	// Remove temporary directory if existing
-	tempDir, err := hooks.CleanTemporaryDir(installDir)
+	tempDir, err := hooks.CleanTemporaryDir(ctx.InstallDir)
 	log.AssertNoErrorPanicF(err,
-		"Could not clean temporary directory in '%s'", installDir)
+		"Could not clean temporary directory in '%s'", ctx.InstallDir)
 
-	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(installDir))
+	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
 
 	return Settings{
 			Gitx:               gitx,
-			InstallDir:         installDir,
-			CloneDir:           hooks.GetReleaseCloneDir(installDir),
+			InstallDir:         ctx.InstallDir,
+			CloneDir:           hooks.GetReleaseCloneDir(ctx.InstallDir),
 			TempDir:            tempDir,
 			UninstalledGitDirs: make(UninstallSet, 10), // nolint: gomnd
 			LFSHooksCache:      lfsHooksCache},
@@ -384,7 +383,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
+	settings, uiSettings := setupSettings(log, ctx, &args)
 
 	if !args.InternalPostDispatch {
 		if isDispatched := runDispatchedInstall(log, &settings, &args); isDispatched {

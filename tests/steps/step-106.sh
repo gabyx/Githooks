@@ -54,7 +54,7 @@ cd "$GH_TEST_TMP/test106-lfs" &&
 
 if [ -n "$GH_ON_WINDOWS" ]; then
     # On windows replace the original git-lfs completely,
-    # because git.exe perturbates the PATH
+    # because git.exe perturbs the PATH
     ORIGINAL_GIT_LFS=$(cygpath -m "$(command -v git-lfs)")
     cp -f "$ORIGINAL_GIT_LFS" "$GH_TEST_TMP/test106-lfs/git-lfs-backup" &&
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs.exe" "$ORIGINAL_GIT_LFS" || exit 4

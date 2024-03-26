@@ -19,7 +19,6 @@ import (
 	"github.com/gabyx/githooks/githooks/updates"
 	"github.com/gabyx/githooks/githooks/updates/download"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -108,7 +107,8 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cmd.PersistentFlags().String(
 		"prefix", "",
 		"Githooks installation prefix such that\n"+
-			"'<prefix>/.githooks' will be the installation directory.")
+			"'<prefix>/.githooks' will be the installation directory "+
+			"(env. variables e.g. '$X' and '~' allowed).")
 	cm.AssertNoErrorPanic(cmd.MarkPersistentFlagDirname("prefix"))
 
 	cmd.PersistentFlags().String(
@@ -229,9 +229,10 @@ func validateArgs(log cm.ILogContext, cmd *cobra.Command, args *Arguments) {
 
 func setupSettings(
 	log cm.ILogContext,
-	gitx *git.Context,
+	cmd *ccm.CmdContext,
 	args *Arguments) (Settings, install.UISettings) {
 
+	gitx := cmd.GitX
 	var promptx prompt.IContext
 	var err error
 
@@ -246,16 +247,20 @@ func setupSettings(
 	}
 
 	var installDir string
+	var installDirRaw string
+
 	// First check if we already have
 	// an install directory set (from --prefix)
 	if strs.IsNotEmpty(args.InstallPrefix) {
-		var err error
-		args.InstallPrefix, err = cm.ReplaceTilde(filepath.ToSlash(args.InstallPrefix))
+
+		args.InstallPrefix, err = cm.ReplaceTilde(args.InstallPrefix, true)
 		log.AssertNoErrorPanic(err, "Could not replace '~' character in path.")
-		installDir = path.Join(args.InstallPrefix, ".githooks")
+
+		installDirRaw = path.Join(args.InstallPrefix, ".githooks")
+		installDir = filepath.ToSlash(os.ExpandEnv(installDirRaw))
 
 	} else {
-		installDir = install.LoadInstallDir(log, gitx)
+		installDir, installDirRaw = cmd.InstallDir, cmd.InstallDirRaw
 	}
 
 	// Remove temporary directory if existing
@@ -269,6 +274,7 @@ func setupSettings(
 	return Settings{
 			GitX:             gitx,
 			InstallDir:       installDir,
+			InstallDirRaw:    installDirRaw,
 			CloneDir:         hooks.GetReleaseCloneDir(installDir),
 			TempDir:          tempDir,
 			LFSHooksCache:    lfsHooksCache,
@@ -696,20 +702,18 @@ func searchTemplateDirOnDisk(log cm.ILogContext, promptx prompt.IContext) string
 func setupNewTemplateDir(log cm.ILogContext, installDir string, promptx prompt.IContext) string {
 	templateDir := path.Join(installDir, "templates")
 
-	homeDir, err := homedir.Dir()
-	cm.AssertNoErrorPanic(err, "Could not get home directory.")
-
 	if promptx != nil {
 		var err error
 		templateDir, err = promptx.ShowEntry(
-			"Enter the target folder",
+			"Enter the target folder ('~' and env. variables '$X' allowed)",
 			templateDir,
 			nil)
 		log.AssertNoErrorF(err, "Could not show prompt.")
 	}
 
-	templateDir = cm.ReplaceTildeWith(templateDir, homeDir)
+	templateDir, err := cm.ReplaceTilde(templateDir, false)
 	log.AssertNoErrorPanicF(err, "Could not replace tilde '~' in '%s'.", templateDir)
+	templateDir = filepath.ToSlash(os.ExpandEnv(templateDir))
 
 	return templateDir
 }
@@ -1474,13 +1478,13 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	}
 
 	log.InfoF("Log file: '%s'", args.Log)
-	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
+	settings, uiSettings := setupSettings(log, ctx, &args)
 
 	log.DebugF("Arguments: %+v", args)
 	log.DebugF("Settings: %+v", settings)
 
 	if !args.DryRun {
-		setInstallDir(log, ctx.GitX, settings.InstallDir)
+		setInstallDir(log, ctx.GitX, settings.InstallDirRaw)
 	}
 
 	if !args.InternalPostDispatch {

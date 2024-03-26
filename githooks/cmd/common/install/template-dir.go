@@ -16,7 +16,7 @@ import (
 func CheckTemplateDir(targetDir string, subFolderIfExists string) (string, error) {
 	if strs.IsNotEmpty(targetDir) {
 
-		targetDir, err := cm.ReplaceTilde(targetDir)
+		targetDir, err := cm.ReplaceTilde(targetDir, false)
 		if err != nil {
 			return "", cm.ErrorF("Could not replace tilde '~' in '%s'.", targetDir)
 		}

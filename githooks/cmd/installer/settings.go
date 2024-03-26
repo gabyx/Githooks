@@ -13,6 +13,7 @@ type InstallSet = strs.StringSet
 type Settings struct {
 	GitX            *git.Context        // The git command context.
 	InstallDir      string              // The install directory.
+	InstallDirRaw   string              // The raw install directory with env. variables inside.
 	CloneDir        string              // The release clone dir inside the install dir.
 	TempDir         string              // The temporary directory inside the install dir.
 	LFSHooksCache   hooks.LFSHooksCache // LFS hooks cache if 'git lfs' is available.

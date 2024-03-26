@@ -1,6 +1,9 @@
 package prompt
 
 import (
+	"os"
+	"path/filepath"
+
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
 
@@ -44,7 +47,7 @@ var ValidatorAnswerNotEmpty AnswerValidator = func(s string) error {
 // which checks existing paths.
 func CreateValidatorIsDirectory(tildeRepl string) AnswerValidator {
 	return func(s string) error {
-		s = cm.ReplaceTildeWith(s, tildeRepl)
+		s = filepath.ToSlash(os.ExpandEnv(cm.ReplaceTildeWith(s, tildeRepl)))
 		if !cm.IsDirectory(s) {
 			return NewValidationError("Answer must be an existing directory.")
 		}
