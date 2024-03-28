@@ -1,24 +1,25 @@
 package container
 
-// EnvVariableContainerWorkspaceHostPath specifies the source mount path (can be a container volume too)
-// on the host machine where the Git repository is located in which Githooks works on.
-// Normally Githooks uses a bind mount, but for docker-in-docker that does not work
-// then we need these variables.
-// Example: `~/work/myproject`.
-const EnvVariableContainerWorkspaceHostPath = "GITHOOKS_CONTAINER_WORKSPACE_HOST_PATH"
-
-// EnvVariableContainerWorkspaceBasePath specifies a relative path to the host path
-// above. Normally empty.
-// The variable can contain `${repository-dir-name}` which is replaced by
-// the current base name of the repository where Githooks runs.
-// Example: `repos/${repository-dir-name}` (Git repo relative to `EnvVariableContainerWorkspaceHostPath`).
-const EnvVariableContainerWorkspaceBasePath = "GITHOOKS_CONTAINER_WORKSPACE_BASE_PATH"
-
-// EnvVariableContainerSharedHostPath specifies the source mount path (can be a container volume too)
-// on the host machine where the shared hook repositories are located.
-// Normally Githooks uses a bind mount, but for docker-in-docker that does not work
-// and this variable must be set if shared hooks are needed.
-// It makes sense to mount the host `~/.githooks/shared` path directly into
-// container at the same place such that they are in sync with what the containerized hooks
-// when this variable is set to e.g. `~/.githooks/shared`.
-const EnvVariableContainerSharedHostPath = "GITHOOKS_CONTAINER_SHARED_HOST_PATH"
+// EnvVariableContainerRunConfigFile is the YAML file which is used
+// for all run invocations
+// of containerized hooks. Its enables :
+//   - to set custom additional arguments to the container run invocation, e.g.
+//     mount special volumes or set special environment variables needed in CI.
+//   - override workspace path (`/mnt/workspace`) in the container.
+//   - override shared repository path `/mnt/shared` in the container.
+//
+// For example a file:
+//
+// ```yaml
+//
+//		version: 1
+//		workspace-dir-dest: /builds/a/b/c
+//		shared-dir-dest: /builds/.githooks/shared
+//	 auto-mount-workspace: false
+//	 auto-mount-shared: false
+//	 args: [ "--volumes-from", "123455" ]
+//
+// ```
+// Would mount the volumes from container `123455` (podman) and
+// use the workspace dir `builds/a/b/c` and `/builds/.githooks/shared`.
+const EnvVariableContainerRunConfigFile = "GITHOOKS_CONTAINER_RUN_CONFIG_FILE"

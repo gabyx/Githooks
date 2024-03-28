@@ -290,7 +290,7 @@ func buildFromSource(
 	branch string,
 	commitSHA string) updates.Binaries {
 
-	log.Info("Building binaries from source at commit '%s'.", commitSHA)
+	log.InfoF("Building binaries from source at commit '%s'.", commitSHA)
 
 	// Clone another copy of the release clone into temporary directory
 	log.InfoF("Clone to temporary build directory '%s'", tempDir)

@@ -126,6 +126,8 @@ COMMIT_BEFORE=$(git -C "$GH_TEST_REPO" rev-parse HEAD)
 
 echo "Test repo: '$GH_TEST_REPO'"
 echo "Tests dir: '$GH_TESTS'"
+echo "User: $(id -u)"
+echo "Group: $(id -g)"
 
 startT=$(date +%s)
 

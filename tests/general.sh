@@ -81,8 +81,14 @@ function storeIntoContainerVolumes() {
     local shared
     shared=$(cd "$2" && pwd)
 
-    storeIntoContainerVolume "gh-test-workspace" "$workspace" # copy folder into volume (not content)
-    storeIntoContainerVolume "gh-test-shared" "$shared/."     # copy content into volume
+    # copy the folder into volume (under volume/repo)
+    # we need this subfolder when entering
+    # the container running in container `test-alpine-user`, if we would not have that
+    # the directory (volume) would have root owner ship.
+    storeIntoContainerVolume "gh-test-workspace" "$workspace" "./repo"
+
+    # copy content into volume
+    storeIntoContainerVolume "gh-test-shared" "$shared/."
 }
 
 function restoreFromContainerVolumeWorkspace() {
@@ -92,7 +98,7 @@ function restoreFromContainerVolumeWorkspace() {
     local files=("$@")
 
     restoreFromContainerVolume "gh-test-workspace" \
-        "$(basename "$workspace")" \
+        "repo" \
         "$workspace" \
         "${files[@]}"
 }
@@ -100,13 +106,14 @@ function restoreFromContainerVolumeWorkspace() {
 function storeIntoContainerVolume() {
     local volume="$1"
     local src="$2" # Add a `/.` to copy the content.
+    local dest="${3:-.}"
     echo "Storing '$src' into volume '$volume' for mounting."
 
     # shellcheck disable=SC2015
     docker volume create "$volume" &&
         docker run -d --rm --name githookscopytovolume \
             -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null &&
-        docker cp -a "$src" "githookscopytovolume:/mnt/volume" &&
+        docker cp -a "$src" "githookscopytovolume:/mnt/volume/${dest}" &&
         docker stop githookscopytovolume ||
         {
             docker stop githookscopytovolume &>/dev/null || true
@@ -146,7 +153,7 @@ function restoreFromContainerVolume() {
         die "Could not start copy container."
 
     for file in "${files[@]}"; do
-        echo "Restoring '$dest/$file' from volume '$volume'."
+        echo "Restoring '$dest/$file' from volume path '$volume/$base/$file'."
         docker cp -a "githookscopytovolume:/mnt/volume/$base/$file" "$dest/$file" ||
             {
                 docker stop githookscopytovolume &>/dev/null || true
@@ -159,10 +166,21 @@ function restoreFromContainerVolume() {
 }
 
 function setGithooksContainerVolumeEnvs() {
-    # Use a volume for the host path.
-    export GITHOOKS_CONTAINER_WORKSPACE_HOST_PATH="gh-test-workspace"
-    export GITHOOKS_CONTAINER_WORKSPACE_BASE_PATH="./\${repository-dir-name}"
-    export GITHOOKS_CONTAINER_SHARED_HOST_PATH="gh-test-shared"
+    local file
+    file="$(mktemp)"
+
+    cat <<<"
+    workspace-path-dest: /mnt/workspace/repo
+    auto-mount-workspace: false
+    auto-mount-shared: false
+    args:
+      - -v
+      - gh-test-workspace:/mnt/workspace
+      - -v
+      - gh-test-shared:/mnt/shared
+    " >"$file"
+
+    export GITHOOKS_CONTAINER_RUN_CONFIG_FILE="$file"
 }
 
 function deleteContainerVolumes() {
