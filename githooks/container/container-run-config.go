@@ -10,7 +10,7 @@ import (
 type containerRunConfig struct {
 	// The path in the container where the workspace dir is located.
 	// Defaults to `/mnt/workspace`.
-	WorkspacePathDest string `yaml:"workspace-dir-dest"`
+	WorkspacePathDest string `yaml:"workspace-path-dest"`
 
 	// If the workspace directory is automatically mounted or
 	// you do it yourself with `Args`. Defaults to `true`.
@@ -22,7 +22,7 @@ type containerRunConfig struct {
 	// The path in the container to the directory where all shared repositories
 	// are located.
 	// Defaults to `/mnt/shared`.
-	SharedPathDest string `yaml:"shared-dir-dest"`
+	SharedPathDest string `yaml:"shared-path-dest"`
 
 	// If the shared directory is automatically mounted or
 	// you do it yourself `Args`.
@@ -57,8 +57,9 @@ func createContainerRunConfig() containerRunConfig {
 
 func loadContainerRunConfig() (config containerRunConfig, err error) {
 	config = createContainerRunConfig()
+	file, exists := os.LookupEnv(EnvVariableContainerRunConfigFile)
 
-	if file, exist := os.LookupEnv("GITHOOKS_CONTAINER_RUN_ARGS_FILE"); exist && cm.IsFile(file) {
+	if exists && cm.IsFile(file) {
 
 		err = cm.LoadYAML(file, &config)
 		if err != nil {

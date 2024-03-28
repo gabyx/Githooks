@@ -172,6 +172,9 @@ func (m *ManagerDocker) NewHookRunExec(
 			strs.Fmt("%v:%v:ro", mntWSSharedSrc, mntWSSharedDest)) // Set the mount for the shared directory.
 	}
 
+	// Add all additional arguments.
+	containerExec.ArgsPre = append(containerExec.ArgsPre, m.runConfig.Args...)
+
 	if m.mgrType == ContainerManagerTypeV.Docker {
 		if runtime.GOOS != cm.WindowsOsName &&
 			runtime.GOOS != "darwin" {
@@ -238,8 +241,6 @@ func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDoc
 	mgr.runConfig, err = loadContainerRunConfig()
 	if err != nil {
 		err = cm.CombineErrors(err, cm.Error("Run config for containerized runs could not be loaded."))
-
-		return
 	}
 
 	return

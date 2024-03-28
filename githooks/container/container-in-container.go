@@ -1,6 +1,6 @@
 package container
 
-// EnvVariableContainerArgsFile is the YAML file which is used
+// EnvVariableContainerRunConfigFile is the YAML file which is used
 // for all run invocations
 // of containerized hooks. Its enables :
 //   - to set custom additional arguments to the container run invocation, e.g.
@@ -22,4 +22,4 @@ package container
 // ```
 // Would mount the volumes from container `123455` (podman) and
 // use the workspace dir `builds/a/b/c` and `/builds/.githooks/shared`.
-const EnvVariableContainerArgsFile = "GITHOOKS_CONTAINER_RUN_ARGS_FILE"
+const EnvVariableContainerRunConfigFile = "GITHOOKS_CONTAINER_RUN_CONFIG_FILE"
