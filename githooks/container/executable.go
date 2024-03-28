@@ -7,7 +7,6 @@ import (
 // ContainerizedExecutable contains the data to a script/executable file.
 type ContainerizedExecutable struct {
 	containerType ContainerManagerType
-	usedVolumes   bool
 
 	Cmd string // The command.
 

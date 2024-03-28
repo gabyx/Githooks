@@ -1,7 +1,6 @@
 package container
 
 import (
-	"os"
 	"os/exec"
 	"os/user"
 	"path"
@@ -26,6 +25,8 @@ type ManagerDocker struct {
 
 	// Only used to wrap podman into this structure as well.
 	mgrType ContainerManagerType
+
+	runConfig containerRunConfig
 }
 
 // ImagePull pulls an image with reference `ref`.
@@ -75,10 +76,6 @@ func (m *ManagerDocker) ImageRemove(ref string) (err error) {
 	return m.cmdCtx.Check("image", "rm", ref)
 }
 
-func resolveWSBasePath(envValue string, dirname string) string {
-	return strings.ReplaceAll(envValue, "${repository-dir-name}", dirname)
-}
-
 // NewHookRunExec runs a hook over a container.
 func (m *ManagerDocker) NewHookRunExec(
 	ref string,
@@ -98,41 +95,30 @@ func (m *ManagerDocker) NewHookRunExec(
 
 	// Mount: Working directory.
 	// The repository where the hook runs.
+	// ==================================
 	mntWSSrc := workspaceDir
-	mntWSDest := "/mnt/workspace"
+	mntWSDest := m.runConfig.WorkspacePathDest
+	// =================================
+
+	// Mount: Shared hook directory.
+	// The directory which contain all shared hooks repositories.
+	// =================================
 	mntWSSharedSrc := path.Dir(workspaceHookDir)
-	mntWSSharedDest := "/mnt/shared"
+	mntWSSharedDest := m.runConfig.SharedPathDest
+	// =================================
 
-	if hostPath := os.Getenv(EnvVariableContainerWorkspaceHostPath); strs.IsNotEmpty(hostPath) {
-		containerExec.usedVolumes = true
-		mntWSSrc = hostPath
-	}
-
-	workingDir := path.Join(mntWSDest,
-		resolveWSBasePath(
-			os.Getenv(EnvVariableContainerWorkspaceBasePath),
-			path.Base(workspaceDir),
-		)) // defaults to `mntWSDest`
+	workingDir := mntWSDest
 
 	// Mount: Shared hook repository:
 	// This mount contains a shared repository root directory.
 	var cmdBasePath string
+	// only mount shared if we need them (we are running shared hooks)
 	mountWSShared := workspaceDir != workspaceHookDir
 
 	if !mountWSShared {
 		// Hooks are configured in current repository: Dont mount the shared location.
 		cmdBasePath = mntWSDest
 	} else {
-		// Mount shared too.
-		if hostPath := os.Getenv(EnvVariableContainerSharedHostPath); strs.IsNotEmpty(hostPath) {
-			mntWSSharedSrc = hostPath
-		} else if containerExec.usedVolumes {
-			return nil, cm.ErrorF(
-				"Host path for workspace '%s' set but missing a host path "+
-					"for shared hooks to run containerized. "+
-					"See the Githooks manual to configure it.", mntWSSrc)
-		}
-
 		cmdBasePath = path.Join(mntWSSharedDest, path.Base(workspaceHookDir))
 	}
 
@@ -160,9 +146,7 @@ func (m *ManagerDocker) NewHookRunExec(
 	containerExec.ArgsPre = []string{
 		"run",
 		"--rm",
-		"-v",
-		strs.Fmt("%v:%v", mntWSSrc, mntWSDest), // Set the mount for the working directory.
-		"-w", workingDir,                       // Set working dir.
+		"-w", workingDir, // Set working dir.
 	}
 
 	if attachStdIn {
@@ -173,7 +157,16 @@ func (m *ManagerDocker) NewHookRunExec(
 		containerExec.ArgsPre = append(containerExec.ArgsPre, "--tty")
 	}
 
-	if mountWSShared {
+	// Mount the workspace directory if set.
+	if m.runConfig.AutoMountWorkspace {
+		containerExec.ArgsPre = append(containerExec.ArgsPre,
+			"-v",
+			strs.Fmt("%v:%v", mntWSSrc, mntWSDest), // Set the mount for the working directory.
+		)
+	}
+
+	// Mount the shared directory if set.
+	if m.runConfig.AutoMountShared && mountWSShared {
 		containerExec.ArgsPre = append(containerExec.ArgsPre,
 			"-v",
 			strs.Fmt("%v:%v:ro", mntWSSharedSrc, mntWSSharedDest)) // Set the mount for the shared directory.
@@ -240,6 +233,14 @@ func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDoc
 
 	cmdCtx := cm.NewCommandCtxBuilder().SetBaseCmd(cmd).EnableCaptureError().Build()
 	mgr = &ManagerDocker{cmdCtx: cmdCtx, uid: uid, gid: gid, mgrType: mgrType}
+
+	// Load the run config or default it.
+	mgr.runConfig, err = loadContainerRunConfig()
+	if err != nil {
+		err = cm.CombineErrors(err, cm.Error("Run config for containerized runs could not be loaded."))
+
+		return
+	}
 
 	return
 }

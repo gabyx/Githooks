@@ -81,8 +81,8 @@ function storeIntoContainerVolumes() {
     local shared
     shared=$(cd "$2" && pwd)
 
-    storeIntoContainerVolume "gh-test-workspace" "$workspace" # copy folder into volume (not content)
-    storeIntoContainerVolume "gh-test-shared" "$shared/."     # copy content into volume
+    storeIntoContainerVolume "gh-test-workspace" "$workspace/." # copy content into volume (not folder)
+    storeIntoContainerVolume "gh-test-shared" "$shared/."       # copy content into volume
 }
 
 function restoreFromContainerVolumeWorkspace() {
@@ -159,10 +159,20 @@ function restoreFromContainerVolume() {
 }
 
 function setGithooksContainerVolumeEnvs() {
-    # Use a volume for the host path.
-    export GITHOOKS_CONTAINER_WORKSPACE_HOST_PATH="gh-test-workspace"
-    export GITHOOKS_CONTAINER_WORKSPACE_BASE_PATH="./\${repository-dir-name}"
-    export GITHOOKS_CONTAINER_SHARED_HOST_PATH="gh-test-shared"
+    local GITHOOKS_CONTAINER_RUN_CONFIG_FILE
+    GITHOOKS_CONTAINER_RUN_CONFIG_FILE="$(mktemp)"
+    export GITHOOKS_CONTAINER_RUN_CONFIG_FILE
+
+    cat <<<"
+    auto-mount-workspace: false
+    auto-mount-shared: false
+    args:
+      - -v
+      - gh-test-workspace:/mnt/workspace
+      - -v
+      - gh-test-shared:/mnt/shared
+    " >"$GITHOOKS_CONTAINER_RUN_CONFIG_FILE"
+
 }
 
 function deleteContainerVolumes() {
