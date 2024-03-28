@@ -8,7 +8,7 @@ rootDir=$(git rev-parse --show-toplevel)
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
 FROM golang:1.20-alpine
 RUN apk update && apk add git git-lfs
-RUN apk add bash jq curl docker
+RUN apk add bash jq curl docker just
 
 RUN git config --global safe.directory /data
 
@@ -16,14 +16,6 @@ RUN git config --global safe.directory /data
 RUN git config --system protocol.file.allow always
 
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.52.2
-
-# Install Githooks
-RUN temp=\$(mktemp -d) && \
-    curl -sL "https://github.com/gabyx/Githooks/releases/download/v2.4.0/githooks-2.4.0-linux.amd64.tar.gz" \
-        -o "\$temp/githooks.tar.gz" && \
-        tar -C "\$temp" -xf "\$temp/githooks.tar.gz" && \
-        "\$temp/cli" installer --non-interactive --update && \
-        rm -rf "\$tempDir"
 
 RUN git config --global user.email "githook@test.com" && \
     git config --global user.name "Githook Tests" && \

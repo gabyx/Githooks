@@ -22,10 +22,10 @@ testrules:
   cd "{{root_dir}}" && \
     tests/test-rules.sh
 
-release-test:
+release-test *args:
   cd "{{root_dir}}/githooks" && \
     GORELEASER_CURRENT_TAG=v9.9.9 \
-    goreleaser release --snapshot --clean --skip-sign --skip-publish --skip-validate
+    goreleaser release --snapshot --clean --skip=sign --skip=publish --skip=validate "$@"
 
 release version update-info="":
   cd "{{root_dir}}" && \

@@ -168,7 +168,6 @@ function restoreFromContainerVolume() {
 function setGithooksContainerVolumeEnvs() {
     local file
     file="$(mktemp)"
-    export GITHOOKS_CONTAINER_RUN_CONFIG_FILE="$file"
 
     cat <<<"
     workspace-path-dest: /mnt/workspace/repo
@@ -180,6 +179,8 @@ function setGithooksContainerVolumeEnvs() {
       - -v
       - gh-test-shared:/mnt/shared
     " >"$file"
+
+    export GITHOOKS_CONTAINER_RUN_CONFIG_FILE="$file"
 }
 
 function deleteContainerVolumes() {

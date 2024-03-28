@@ -18,6 +18,9 @@ temp=""
 # shellcheck disable=SC1091
 . "$DIR/general.sh"
 
+[ "${GH_SHOW_DIFFS:-false}" == "false" ] || echo "INFO: SHOWING DIFFS"
+trap cleanUp EXIT
+
 # shellcheck disable=SC2317
 function cleanUp() {
     set +e
@@ -27,59 +30,78 @@ function cleanUp() {
     fi
 }
 
-[ "${GH_SHOW_DIFFS:-false}" == "false" ] || echo "INFO: SHOWING DIFFS"
+function installGithooks() {
+    just build &&
+        "$REPO_DIR/githooks/bin/cli" installer --non-interactive --build-from-source --clone-url "file://$REPO_DIR" &&
+        git clean -fX &&
+        git hooks config trust-all --accept &&
+        git hooks config enable-containerized-hooks --set &&
+        git hooks shared update &&
+        git hooks install
+}
 
-trap cleanUp EXIT
+function copyToTemp() {
+    local temp="$1"
 
-echo "Copy whole repo to temp and make one commit with all files."
-temp=$(mktemp -d)
-cp -rf "$REPO_DIR" "$temp/repo" &&
-    REPO_DIR="$temp/repo" &&
-    cd "$REPO_DIR" &&
-    rm -rf .git &&
-    echo "Make repo..." &&
-    git init &&
-    echo "Make empty commit with tag" &&
-    GITHOOKS_DISABLE=1 git commit --no-verify --allow-empty -m "Init" &&
-    git hooks config trust-all --accept &&
-    git hooks config enable-containerized-hooks --set &&
-    git hooks shared update &&
-    echo "Add all files." &&
-    git add . &&
-    GITHOOKS_DISABLE=1 git commit --no-verify -m "Original files" &&
-    git checkout -b create-diffs &&
-    git reset --soft HEAD~1 || die "Could not copy repo"
+    echo "Copy whole repo to temp and make one commit with all files."
+    cp -rf "$REPO_DIR" "$temp/repo" &&
+        REPO_DIR="$temp/repo" &&
+        cd "$REPO_DIR" &&
+        git clean -fX &&
+        rm -rf .git &&
+        echo "Make repo..." &&
+        git init &&
+        echo "Make empty commit with tag" &&
+        git commit --no-verify --allow-empty -m "Init" &&
+        echo "Add all files." &&
+        git add . &&
+        git commit --no-verify -m "Original files" &&
+        git tag v9.9.9
+}
 
-function setupGo() {
+function generateAllFiles() {
     local src="$REPO_DIR/githooks"
 
     (cd "$src" && go mod vendor) || die "Go vendor failed."
-
-    GITHOOKS_DISABLE=1 git tag v9.9.9 &&
-        (cd "$src" && go generate -mod vendor ./...) || die "Could not generate."
+    (cd "$src" && go generate -mod vendor ./...) || die "Could not generate."
 }
 
-cd "$REPO_DIR" || exit 1
+function runAllHooks() {
+    # Run all hooks.
+    git checkout -b create-diffs &&
+        git reset --soft HEAD~1 || die "Could not copy repo"
+    git commit -m "Check all hooks."
+}
 
-setupGo
+function diff() {
+    # Working tree diff to main .
+    if ! git diff --quiet main; then
+        [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff --name-only main
+
+        die "Commit produced diffs, probably because of format" \
+            "(use GH_SHOW_DIFFS=true to show diffs):?" \
+            "$(git diff --name-only main)"
+    else
+        echo "Checking all rules successful"
+    fi
+    cd "$REPO_DIR" || exit 1
+}
+
+temp=$(mktemp -d)
+
+copyToTemp "$temp"
+installGithooks
+generateAllFiles
 
 deleteContainerVolumes
 storeIntoContainerVolumes "$REPO_DIR" "$HOME/.githooks/shared" # for dockerized containers
 setGithooksContainerVolumeEnvs
 showAllContainerVolumes "2"
 
-git commit -m "Check all hooks."
+runAllHooks
 
 restoreFromContainerVolumeWorkspace "." ""
-
-# Working tree diff to main .
-if ! git diff --quiet main; then
-    [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff --name-only main
-
-    die "Commit produced diffs, probably because of format" \
-        "(use GH_SHOW_DIFFS=true to show diffs):?" \
-        "$(git diff --name-only main)"
-fi
-
 deleteContainerVolumes
+
+diff
 exit 0
