@@ -60,7 +60,9 @@ touch "file.txt" &&
 # which we dont have.
 storeIntoContainerVolumes "." "$HOME/.githooks/shared"
 showAllContainerVolumes 3
-OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 2>&1) ||
+setGithooksContainerVolumeEnvs
+
+OUT=$(git commit -m "fix: Add file to format" 2>&1) ||
     {
         echo "! Commit failed"
         echo "$OUT"
@@ -68,6 +70,7 @@ OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 
     }
 
 echo "$OUT"
+
 restoreFromContainerVolumeWorkspace "." "file.txt" "file-2.txt" ".commit-msg-hook-run"
 
 if [ ! -f ".commit-msg-hook-run" ]; then
@@ -75,8 +78,9 @@ if [ ! -f ".commit-msg-hook-run" ]; then
     exit 1
 fi
 
-if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then
-    echo"! Expected file to have formatted: Content:"
+if ! echo "$OUT" | grep -iq "formatting file 'file.txt'" ||
+    ! echo "$OUT" | grep -iq "formatting file 'file-2.txt'"; then
+    echo "! Expected file to have formatted"
     exit 1
 fi
 
@@ -89,6 +93,21 @@ fi
 if [ "$(grep -ic "formatted by containerized hook" "file-2.txt")" != "1" ]; then
     echo -e "! Expected file should have been changed correctly: Content:"
     cat "file.txt"
+    exit 1
+fi
+
+# Do it again, but check if staged files work too.
+git config githooks.exportStagedFilesAsFile true
+OUT=$(git commit -m "fix: Add file to format, with staged files file" 2>&1) ||
+    {
+        echo "! Commit failed"
+        echo "$OUT"
+        exit 1
+    }
+
+if ! echo "$OUT" | grep -iq "formatting file 'file.txt'" ||
+    ! echo "$OUT" | grep -iq "formatting file 'file-2.txt'"; then
+    echo "! Expected file to have formatted"
     exit 1
 fi
 

@@ -93,7 +93,7 @@ func GetGithooksEnvVariables() []string {
 	names = []string{EnvVariableStagedFiles, EnvVariableStagedFilesFile}
 	for i := range names {
 		if val, exists := os.LookupEnv(names[i]); exists {
-			env = append(env, strs.Fmt("%s=%s", EnvVariableStagedFilesFile, val))
+			env = append(env, strs.Fmt("%s=%s", names[i], val))
 		}
 	}
 

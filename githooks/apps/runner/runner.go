@@ -297,7 +297,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 
 	if len(files) != 0 {
 		log.DebugF("Exporting staged files:\n- %s",
-			strings.ReplaceAll(files, "\x00", "\n- "))
+			strings.ReplaceAll(strings.TrimRight(files, "\x00"), "\x00", "\n- "))
 	}
 
 	if log.AssertNoError(err, "Could not export staged files.") {
@@ -314,16 +314,16 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
 
 		if exportOnlyFile {
-			// Place a file in the hook directory, we do this
-			// to make mounting the file when running containerized hooks easier.
-			file, err := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
+			file, err := os.CreateTemp("", ".githooks-staged-files-*")
 			relPath := path.Join(hooks.HooksDirName, path.Base(file.Name()))
 
 			defer file.Close()
 			cleanUp = func() { _ = os.Remove(file.Name()) }
 
 			if log.AssertNoError(err, "Could not open temp file for staged files") {
-				file.WriteString(files)
+				_, err := file.WriteString(files)
+				log.AssertNoError(err, "Could not write staged files to temp file.")
+
 				settings.StagedFilesFile = file.Name()
 			}
 
