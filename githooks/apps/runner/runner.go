@@ -90,7 +90,12 @@ func mainRun() (exitCode int) {
 	}
 
 	exportGeneralVars(&settings)
-	exportStagedFiles(&settings)
+
+	cleanUp := exportStagedFiles(&settings)
+	if cleanUp != nil {
+		defer cleanUp()
+	}
+
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
 	executeOldHook(&settings, &uiSettings, &ignores, &checksums)
@@ -283,33 +288,63 @@ func exportGeneralVars(settings *HookSettings) {
 		strs.Fmt("%s=%s", hooks.EnvVariableArch, runtime.GOARCH))
 }
 
-func exportStagedFiles(settings *HookSettings) {
-	if strs.Includes(hooks.StagedFilesHookNames[:], settings.HookName) {
+func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
+	if !strs.Includes(hooks.StagedFilesHookNames[:], settings.HookName) {
+		return nil
+	}
 
-		files, err := hooks.GetStagedFiles(settings.GitX)
+	files, err := hooks.GetStagedFiles(settings.GitX)
 
-		if len(files) != 0 {
-			log.DebugF("Exporting staged files:\n- %s",
-				strings.ReplaceAll(files, "\n", "\n- "))
-		}
+	if len(files) != 0 {
+		log.DebugF("Exporting staged files:\n- %s",
+			strings.ReplaceAll(files, "\x00", "\n- "))
+	}
 
-		if err != nil {
-			log.Warn("Could not export staged files.")
+	if log.AssertNoError(err, "Could not export staged files.") {
+
+		exportOnlyFile := settings.GitX.GetConfig(
+			hooks.GitCKExportStagedFilesAsFile,
+			git.Traverse) == git.GitCVTrue
+
+		cm.DebugAssertF(
+			func() bool {
+				_, exists := os.LookupEnv(hooks.EnvVariableStagedFiles)
+				return !exists // nolint:nlreturn
+			}(),
+			"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
+
+		if exportOnlyFile {
+			// Place a file in the hook directory, we do this
+			// to make mounting the file when running containerized hooks easier.
+			file, err := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
+			relPath := path.Join(hooks.HooksDirName, path.Base(file.Name()))
+
+			defer file.Close()
+			cleanUp = func() { _ = os.Remove(file.Name()) }
+
+			if log.AssertNoError(err, "Could not open temp file for staged files") {
+				file.WriteString(files)
+				settings.StagedFilesFile = file.Name()
+			}
+
+			// Set environment directly.
+			os.Setenv(hooks.EnvVariableStagedFilesFile, relPath)
+			// Set environment also in execution context.
+			settings.ExecX.Env = append(settings.ExecX.Env,
+				strs.Fmt("%s=%s", hooks.EnvVariableStagedFilesFile, relPath))
+
 		} else {
+			files = strings.ReplaceAll(files, "\x00", "\n")
 
-			cm.DebugAssertF(
-				func() bool {
-					_, exists := os.LookupEnv(hooks.EnvVariableStagedFiles)
-					return !exists // nolint:nlreturn
-				}(),
-				"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
-
+			// Set environment directly.
 			os.Setenv(hooks.EnvVariableStagedFiles, files)
+			// Set environment also in execution context.
 			settings.ExecX.Env = append(settings.ExecX.Env,
 				strs.Fmt("%s=%s", hooks.EnvVariableStagedFiles, files))
 		}
-
 	}
+
+	return
 }
 
 func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
@@ -978,7 +1013,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Containerized executions need this.
 	if settings.ContainerizedHooksEnabled {
-		applyEnvToArgs(hs, hooks.FilterGithooksEnvs(settings.ExecX.GetEnv()))
+		applyEnvToArgs(hs, hooks.GetGithooksEnvVariables())
 	}
 
 	if cm.IsDebug {

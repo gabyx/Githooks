@@ -27,6 +27,8 @@ type HookSettings struct {
 	NonInteractive             bool // If all non-fatal prompts should be default answered.
 	ContainerizedHooksEnabled  bool // If all hooks should run containerized (if they are setup for it).
 	Disabled                   bool // If Githooks has been disabled.
+
+	StagedFilesFile string // The temporary file where all staged files are written to.
 }
 
 func (s HookSettings) toString() string {

@@ -5,7 +5,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
@@ -77,24 +76,28 @@ const EnvVariableArch = "GITHOOKS_ARCH"
 // EnvVariableStagedFiles is the environment variable which holds the staged files.
 const EnvVariableStagedFiles = "STAGED_FILES"
 
-// GetAllEnvVariables returns all Githooks internal env variables.
-func GetAllEnvVariables() []string {
-	return []string{EnvVariableOs, EnvVariableArch, EnvVariableStagedFiles}
-}
+// EnvVariableStagedFilesFile is the environment variable pointing to a
+// file which holds the staged files relative
+// to the repository where Githooks runs.
+const EnvVariableStagedFilesFile = "STAGED_FILES_FILE"
 
-// FilterGithooksEnvs filters all non-Githooks environment variables.
-func FilterGithooksEnvs(env []string) []string {
-	allowed := GetAllEnvVariables()
+// GetGithooksEnvVariables gets all Githooks env variables.
+func GetGithooksEnvVariables() []string {
+	var env []string
 
-	return strs.Filter(env, func(s string) bool {
-		for i := range allowed {
-			if strings.HasPrefix(s, allowed[i]+"=") {
-				return true
-			}
+	names := []string{EnvVariableOs, EnvVariableArch}
+	for i := range names {
+		env = append(env, strs.Fmt("%s=%s", names[i], os.Getenv(names[i])))
+	}
+
+	names = []string{EnvVariableStagedFiles, EnvVariableStagedFilesFile}
+	for i := range names {
+		if val, exists := os.LookupEnv(names[i]); exists {
+			env = append(env, strs.Fmt("%s=%s", EnvVariableStagedFilesFile, val))
 		}
+	}
 
-		return false
-	})
+	return env
 }
 
 // GetBugReportingInfo gets the default bug reporting url. Argument 'repoPath' can be empty.
