@@ -13,8 +13,11 @@ import (
 func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
+	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false)
+	ctx.Log.AssertNoErrorPanicF(err, "Could not create container manager.")
+
 	hooksDir := hooks.GetGithooksDir(repoDir)
-	err := hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile)
+	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile, containerMgr)
 	ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", imagesFile)
 
 	if strs.IsNotEmpty(imagesFile) {
@@ -46,7 +49,13 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 		hooksDir := hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
 
 		ctx.Log.InfoF("%s", hooksDir)
-		err = hooks.UpdateImages(ctx.Log, allRepos[rI].OriginalURL, allRepos[rI].RepositoryDir, hooksDir, "")
+		err = hooks.UpdateImages(
+			ctx.Log,
+			allRepos[rI].OriginalURL,
+			allRepos[rI].RepositoryDir,
+			hooksDir,
+			"",
+			containerMgr)
 		ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", allRepos[rI].OriginalURL)
 	}
 }

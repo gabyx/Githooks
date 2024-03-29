@@ -170,7 +170,8 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptx, repoPath)
 	}
 
-	runContainerized := hooks.IsContainerizedHooksEnabled(gitx, true)
+	containerMgr, err := hooks.NewContainerManager(gitx, false)
+	log.AssertNoErrorPanicF(err, "Could not create container manager.")
 
 	s := HookSettings{
 		Args:               os.Args[2:],
@@ -190,7 +191,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive,
-		ContainerizedHooksEnabled:  runContainerized,
+		ContainerMgr:               containerMgr,
 		Disabled:                   isGithooksDisabled}
 
 	logInvocation(&s)
@@ -502,7 +503,7 @@ func executeOldHook(
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace, nil,
 		isIgnored, isTrusted, true, false,
-		settings.ContainerizedHooksEnabled)
+		settings.ContainerMgr)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
 	if len(hooks) == 0 {
@@ -580,7 +581,7 @@ func collectHooks(
 }
 
 func updateLocalHookImages(settings *HookSettings) {
-	if !settings.ContainerizedHooksEnabled || settings.HookName != "post-merge" {
+	if settings.ContainerMgr == nil || settings.HookName != "post-merge" {
 		return
 	}
 
@@ -589,7 +590,8 @@ func updateLocalHookImages(settings *HookSettings) {
 		settings.RepositoryDir,
 		settings.RepositoryDir,
 		settings.RepositoryHooksDir,
-		"")
+		"",
+		settings.ContainerMgr)
 
 	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
 }
@@ -613,7 +615,7 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	}
 
 	log.Debug("Updating all shared hooks.")
-	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType, settings.ContainerizedHooksEnabled)
+	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType, settings.ContainerMgr)
 	log.AssertNoError(err, "Errors while updating shared hooks repositories.")
 
 	if updateOnCloneNeeded {
@@ -845,7 +847,7 @@ func getHooksIn(
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace, namespaceEnvs.Get(hookNamespace),
 		isIgnored, isTrusted, true, true,
-		settings.ContainerizedHooksEnabled)
+		settings.ContainerMgr)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	if len(allHooks) == 0 {
@@ -1012,7 +1014,7 @@ func applyEnvToArgs(hs *hooks.Hooks, env []string) {
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Containerized executions need this.
-	if settings.ContainerizedHooksEnabled {
+	if settings.ContainerMgr != nil {
 		applyEnvToArgs(hs, hooks.GetGithooksEnvVariables())
 	}
 

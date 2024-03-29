@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
 	strs "github.com/gabyx/githooks/githooks/strings"
 
@@ -149,7 +150,7 @@ func GetAllHooksIn(
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
 	parseRunnerConfig bool,
-	containerizedHooksEnabled bool) (allHooks []Hook, maxBatches int, err error) {
+	containerMgr container.IManager) (allHooks []Hook, maxBatches int, err error) {
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
 
@@ -183,7 +184,7 @@ func GetAllHooksIn(
 				rootDir,
 				hooksDir,
 				parseRunnerConfig,
-				containerizedHooksEnabled,
+				containerMgr,
 				hookNamespace,
 				hookNamespaceEnvs,
 			)

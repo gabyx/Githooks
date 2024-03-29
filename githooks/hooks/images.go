@@ -10,7 +10,6 @@ import (
 	ref "github.com/distribution/distribution/reference"
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/container"
-	"github.com/gabyx/githooks/githooks/git"
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
@@ -185,7 +184,8 @@ func UpdateImages(
 	fromHint string,
 	repositoryDir string,
 	hooksDir string,
-	configFile string) (err error) {
+	configFile string,
+	containerMgr container.IManager) (err error) {
 
 	if strs.IsEmpty(configFile) {
 		configFile = GetRepoImagesFile(hooksDir)
@@ -204,13 +204,6 @@ func UpdateImages(
 	}
 
 	log.InfoF("Build/pull images for repository '%s'...", fromHint)
-
-	gitx := git.NewCtx()
-	manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
-	mgr, err := container.NewManager(manager)
-	if err != nil {
-		return cm.CombineErrors(cm.Error("Creating container manager failed."), err)
-	}
 
 	var imagesConfig ImagesConfigFile
 
@@ -249,7 +242,7 @@ func UpdateImages(
 		if img.Build == nil {
 			e := pullImage(
 				log,
-				mgr,
+				containerMgr,
 				pullSrc,
 				imageRef,
 				configFile)
@@ -265,7 +258,7 @@ func UpdateImages(
 		} else if img.Pull == nil {
 			e := buildImage(
 				log,
-				mgr,
+				containerMgr,
 				img.Build.Context,
 				img.Build.Dockerfile,
 				img.Build.Stage,
