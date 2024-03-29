@@ -13,7 +13,7 @@ import (
 func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
-	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false)
+	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false, nil)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create container manager.")
 
 	hooksDir := hooks.GetGithooksDir(repoDir)

@@ -4,6 +4,7 @@ package main
 import (
 	"github.com/gabyx/githooks/githooks/build"
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	"github.com/gabyx/githooks/githooks/prompt"
@@ -96,6 +97,7 @@ func mainRun() (exitCode int) {
 		defer cleanUp()
 	}
 
+	assertContainerManager(&settings)
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
 	executeOldHook(&settings, &uiSettings, &ignores, &checksums)
@@ -170,9 +172,6 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptx, repoPath)
 	}
 
-	containerMgr, err := hooks.NewContainerManager(gitx, false)
-	log.AssertNoErrorPanicF(err, "Could not create container manager.")
-
 	s := HookSettings{
 		Args:               os.Args[2:],
 		ExecX:              execx,
@@ -191,7 +190,6 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive,
-		ContainerMgr:               containerMgr,
 		Disabled:                   isGithooksDisabled}
 
 	logInvocation(&s)
@@ -287,6 +285,22 @@ func exportGeneralVars(settings *HookSettings) {
 	settings.ExecX.Env = append(settings.ExecX.Env,
 		strs.Fmt("%s=%s", hooks.EnvVariableOs, runtime.GOOS),
 		strs.Fmt("%s=%s", hooks.EnvVariableArch, runtime.GOARCH))
+}
+
+func assertContainerManager(settings *HookSettings) {
+	var readMounts []container.ReadBindMount
+
+	if strs.IsNotEmpty(settings.StagedFilesFile) {
+		readMounts = append(readMounts,
+			container.ReadBindMount{
+				Src:  settings.StagedFilesFile,
+				Dest: hooks.StagedFilesFileContainerDest})
+	}
+
+	var err error
+	settings.ContainerMgr, err = hooks.NewContainerManager(settings.GitX, false, readMounts)
+
+	log.AssertNoErrorPanicF(err, "Could not create container manager.")
 }
 
 func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
@@ -1005,17 +1019,23 @@ func showTrustPrompt(
 	}
 }
 
-func applyEnvToArgs(hs *hooks.Hooks, env []string) {
+func applyEnvToContainerRunArgs(hs *hooks.Hooks) {
 	hs.Map(func(h *hooks.Hook) {
-		h.ApplyEnvironmentToArgs(env)
+		// Apply normal envs and the namespace env. variables too.
+		// Modify the staged files to point to the correct destination.
+		envs := append(hooks.GetGithooksEnvVariables(hooks.StagedFilesFileContainerDest), h.NamespaceEnvs...)
+
+		// Note: Will do a NoOp anything for not containerized runs in `h`.
+		h.ApplyEnvironmentToArgs(envs)
 	})
 }
 
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
-	// Containerized executions need this.
+	// Containerized executions need to apply env. variables to
+	// arguments of the command.
 	if settings.ContainerMgr != nil {
-		applyEnvToArgs(hs, hooks.GetGithooksEnvVariables())
+		applyEnvToContainerRunArgs(hs)
 	}
 
 	if cm.IsDebug {

@@ -522,7 +522,7 @@ func dispatchToInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arg
 
 	// Run the installer binary
 	return cm.RunExecutable(
-		&cm.ExecContext{},
+		&cm.ExecContext{Env: os.Environ()},
 		installer,
 		cm.UseStreams(os.Stdin, os.Stdout, os.Stderr),
 		"--config", file.Name())

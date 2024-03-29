@@ -120,12 +120,12 @@ RUN apk add bash
 	log, err := cm.CreateLogContext(false, false)
 	assert.Nil(t, err)
 
-	mgr, err := container.NewManager("docker")
+	mgr, err := container.NewManager("docker", nil)
 	assert.NotNil(t, err)
 	err = UpdateImages(log, "test-repo", repo, path.Join(repo, ".githooks"), "", mgr)
 	assert.Nil(t, err, "Update images failed: %s", err)
 
-	mgr, err = container.NewManager("")
+	mgr, err = container.NewManager("", nil)
 	assert.Nil(t, err)
 
 	// Check all images.

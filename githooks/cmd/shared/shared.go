@@ -192,7 +192,7 @@ func runSharedUpdate(ctx *ccm.CmdContext) {
 			"Updating shared and local shared hooks skipped.")
 	}
 
-	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false)
+	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false, nil)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create container manager.")
 
 	updated, err := hooks.UpdateAllSharedHooks(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, containerMgr)

@@ -7,24 +7,12 @@ import (
 
 	ccm "github.com/gabyx/githooks/githooks/cmd/common"
 	cm "github.com/gabyx/githooks/githooks/common"
-	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	strs "github.com/gabyx/githooks/githooks/strings"
 
 	"github.com/spf13/cobra"
 )
-
-func createContainerMgr(gitx *git.Context, containerized bool) (containerMgr container.IManager, err error) {
-	if containerized ||
-		hooks.IsContainerizedHooksEnabled(gitx, true) {
-
-		manager := gitx.GetConfig(hooks.GitCKContainerManager, git.Traverse)
-		containerMgr, err = container.NewManager(manager)
-	}
-
-	return
-}
 
 func execPath(
 	ctx *ccm.CmdContext,
@@ -33,12 +21,13 @@ func execPath(
 	opts execCmdOptions,
 	namespaceEnvs hooks.NamespaceEnvs) (err error) {
 
-	containerMgr, err := createContainerMgr(ctx.GitX, opts.Containarized)
+	containerMgr, err := hooks.NewContainerManager(ctx.GitX, opts.Containarized, nil)
 	ctx.Log.AssertNoErrorPanic(err, "Could not create container manager.")
 
 	hookCmds := make(hooks.HookPrioList, 1)
 	path := path.Join(res.HooksDir, res.NamespacePath)
 
+	envs := namespaceEnvs.Get(res.Namespace)
 	cmd, err := hooks.GetHookRunCmd(
 		git.NewCtxAt(repoDir),
 		path,
@@ -46,7 +35,8 @@ func execPath(
 		res.HooksDir,
 		true, containerMgr,
 		res.Namespace,
-		namespaceEnvs.Get(res.Namespace))
+		envs,
+	)
 
 	if err != nil {
 		return err
@@ -57,6 +47,7 @@ func execPath(
 		Path:          path,
 		Namespace:     res.Namespace,
 		NamespacePath: res.NamespacePath,
+		NamespaceEnvs: envs,
 		Active:        true,
 		Trusted:       true,
 	}

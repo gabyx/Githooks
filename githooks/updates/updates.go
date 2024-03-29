@@ -610,8 +610,9 @@ func RunUpdateOverExecutable(
 
 	installer := hooks.GetInstallerExecutable(installDir)
 
-	execX := cm.ExecContext{Cwd: execC.GetWorkingDir()}
-	execX.Env = git.SanitizeEnv(execC.GetEnv())
+	execX := cm.ExecContext{
+		Cwd: execC.GetWorkingDir(),
+		Env: git.SanitizeEnv(execC.GetEnv())}
 
 	if !cm.IsFile(installer.Cmd) {
 		return cm.ErrorF(

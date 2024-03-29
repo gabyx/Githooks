@@ -80,9 +80,11 @@ const EnvVariableStagedFiles = "STAGED_FILES"
 // file which holds the staged files relative
 // to the repository where Githooks runs.
 const EnvVariableStagedFilesFile = "STAGED_FILES_FILE"
+const StagedFilesFileContainerDest = "/tmp/.githooks-staged-files"
 
 // GetGithooksEnvVariables gets all Githooks env variables.
-func GetGithooksEnvVariables() []string {
+// `EnvVariableStagedFilesFile` variable's value is modified optionaly.
+func GetGithooksEnvVariables(newStagedFilesFile string) []string {
 	var env []string
 
 	names := []string{EnvVariableOs, EnvVariableArch}
@@ -93,6 +95,13 @@ func GetGithooksEnvVariables() []string {
 	names = []string{EnvVariableStagedFiles, EnvVariableStagedFilesFile}
 	for i := range names {
 		if val, exists := os.LookupEnv(names[i]); exists {
+
+			// Modify the file name.
+			if names[i] == EnvVariableStagedFilesFile &&
+				strs.IsNotEmpty(newStagedFilesFile) {
+				val = newStagedFilesFile
+			}
+
 			env = append(env, strs.Fmt("%s=%s", names[i], val))
 		}
 	}

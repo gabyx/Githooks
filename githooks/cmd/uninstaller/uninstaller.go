@@ -148,7 +148,7 @@ func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Argume
 
 	// Run the uninstaller binary
 	err = cm.RunExecutable(
-		&cm.ExecContext{},
+		&cm.ExecContext{Env: os.Environ()},
 		uninstaller,
 		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetInfoWriter()),
 		"--config", file.Name())
