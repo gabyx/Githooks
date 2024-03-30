@@ -121,12 +121,14 @@ RUN apk add bash
 	assert.Nil(t, err)
 
 	mgr, err := container.NewManager("docker")
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
+	assert.NotNil(t, mgr)
 	err = UpdateImages(log, "test-repo", repo, path.Join(repo, ".githooks"), "", mgr)
 	assert.Nil(t, err, "Update images failed: %s", err)
 
 	mgr, err = container.NewManager("")
-	assert.Nil(t, err)
+	assert.Nil(t, mgr)
+	assert.NotNil(t, err)
 
 	// Check all images.
 	exists, err := mgr.ImageExists("registry.com/mynamespace-test-image:mine1")

@@ -13,6 +13,14 @@ function clean_up() {
 
 trap clean_up EXIT
 
+# Build container to only copy to volumes.
+cat <<EOF | docker build \
+    --force-rm -t "githooks:volumecopy" -f - "$ROOT_DIR" || exit 1
+    FROM scratch
+    CMD you-should-not-run-this-container
+EOF
+
+# Build test container.
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
 FROM golang:1.20-alpine
 RUN apk update && apk add git git-lfs
