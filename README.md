@@ -1122,11 +1122,111 @@ the binaries over the implemented API. Credentials will be collected over
 [`git credential`](https://git-scm.com/docs/cli/git-credential) to access the
 API. [@todo].
 
-### Install for CI
+### Use in CI
+
+The installation depends on how you use Githooks in CI. The general approach is
+to run functionality or hooks over Githooks in CI only containerized. Doing it
+without containerization will be brittle and non-robust and requires you to have
+all needed tools installed in the running environment, also potentially the
+tools used in shared hook repositories.
+
+There are generally two scenarios how you would use Githooks in CI.:
+
+1. Run functionality in hook repositories (local and shared repos): You want to
+   run containerized custom functionality. This can be done by using
+   `git hooks exec --containerized ...`. The following
+
+   ```shell
+   git hooks exec --containerized \
+      ns:githooks-shell/scripts/check-shell-all.yaml -- --force --dir "."
+   ```
+
+   would run the config `scripts/check-shell-all.yaml`
+   ([see hook run configuration](#hook-run-configuration)) from the hook
+   repository [`githooks-shell`](https://github.com/gabyx/githooks-shell.git)
+   containerized.
+
+2. Run hooks containerized directly, e.g. pre-commit over a crafted
+   `git commit`, to check all staged files in that commit with all hooks
+   specified in the respective repository. This repository does exactly that in
+   [`tests/test-lint.sh`](tests/test-lint.sh).
+
+3. Run 1. or 2. but with `nix-shell` support if hooks are setup like this. No
+   containers needed, no nested container troubles. **Not implemented yet**.
+
+**Warnings:** Running a containerized hook or script in CI might mean that a
+container starts as a nested container since your CI already uses a top-level
+container which itself has access to `docker` or `podman`. Nested containers are
+kind of
+[tricky and mind-boggling](https://github.com/gabyx/container-nesting.git).
+Githooks will launch a container with two mounts
+
+- the workspace (the repository on which Githooks runs, e.g. `/data/repo`) bind
+  mounted to `/mnt/workspace` and
+- the shared hook repository (`~/.githooks/shared`) bind mounted to
+  `/mnt/shared`,
+
+inside the hook container.
+
+These mounts can be influenced with the env. variable
+`GITHOOKS_CONTAINER_RUN_CONFIG`, see below.
+
+##### Nested Containers
+
+Some nomenclature for the next explanations: the host is considered a VM (your
+CI instance) and the top-level container `T` is your CI container you started on
+this VM for a dedicated CI job (`C` has access to a container manager). The
+nested container `N` is a launched container from Githooks.
+
+Adjusting the mounts is needed because for the nested container `N` (inside
+`C`), the mounts **might** not work because the source paths (e.g. `/data/repo`
+in `-v /data/repo:/mnt/workspace`) are interpreted where the container manager
+service runs. E.g. for `docker`, when you mount the `docker` socket into the
+top-level container to have connect to the docker instance (running on the host,
+**generally not the best security practice**!), then that would be the host and
+the paths would not exist (e.g. there is no `/data/repo` on the host). If you
+have a full container manager (`podman` preferred) inside container `T`, it is
+different. In that case, the mount paths are interpreted inside container `T`.
+The mounts might still not work because the paths cannot be mounted further into
+a nested container `N` due to restrictions what you can mount to nested
+containers - if the path comes from a bind mount from the host (VM) into `C` it
+does not work (AFAIK). In that case you can workaround this by
+`GITHOOKS_CONTAINER_RUN_CONFIG` which is the path to a YAML file which modifies
+the mounts:
+
+```yaml
+# Tell Githooks where the workspace is.
+# (optional, default `/mnt/workspace`)
+workspace-path-dest: /tmp/ci-job-1/build/repo
+# Tell Githooks where the shared repository checkouts are.
+# (optional, default: `/mnt/shared`)
+shared-path-dest: /tmp/ci-job-1/githooks-install/.githooks/shared
+
+# Do not auto-mount the workspace (bind mount), do it yourself with args.
+# (optional, default: true)
+auto-mount-workspace: false
+# Do not auto-mount the shared (bind mount), do it yourself with args.
+# (optional, default: true)
+auto-mount-shared: false
+
+# Additional arguments to `docker run` or `podman run`.
+args: ["-v", "gh-test-tmp:/tmp"]
+```
+
+The above will mount a volume `gh-test-tmp` volume to `/tmp` in `N` where
+Githooks will find the workspace under `/tmp/ci-job-1/build/repo` and the shared
+repository checkouts in `/tmp/ci-job-1/githooks-install/.githooks/shared`.
+
+**Note**: You can use whatever `docker run` or `podman run` accepts. To mention
+is `--volumes-from` where you can mount the same volumes from another containers
+id.
+
+### Gitlab Demo
 
 The repository [Markdown2PDF](https://github.com/gabyx/RsMarkdown2PDF-Service)
 contains a CI setup in
-[`.gitlab/pipeline.yaml`](https://github.com/gabyx/RsMarkdown2PDF-Service/blob/main/.gitlab/pipeline.yaml).
+[`.gitlab/pipeline.yaml`](https://github.com/gabyx/RsMarkdown2PDF-Service/blob/ff2f97188742c6908d00dd05c6f30e16267239e9/.gitlab/pipeline.yaml#L31)
+for Gitlab
 
 For Gitlab this boils down to following pipeline step which uses dockerized
 hooks:
@@ -1567,7 +1667,7 @@ When you use Githooks and you would like to say thank you for its development
 and its future maintenance: I am happy to receive any donation which will be
 distributed equally among all contributors.
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6S6BJL4GSMSG4)
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bs/webscr?cmd=_s-xclick&hosted_button_id=6S6BJL4GSMSG4)
 
 ## License
 
