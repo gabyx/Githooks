@@ -10,9 +10,20 @@ build *args:
   cd "{{root_dir}}" && \
     githooks/scripts/build.sh "$@"
 
-test *ARGS:
+test-user *args:
   cd "{{root_dir}}" && \
-    tests/test-alpine-user.sh {{ARGS}}
+    tests/test-alpine-user.sh "$@"
+
+test *args:
+  cd "{{root_dir}}" && \
+    tests/test-alpine.sh "$@"
+
+lint fix="false":
+  cd "{{root_dir}}" && \
+    GH_FIX="{{fix}}" \
+    tests/test-lint.sh
+
+lint-fix: (lint "true")
 
 testsuite:
   cd "{{root_dir}}" && \
@@ -20,7 +31,7 @@ testsuite:
 
 testrules:
   cd "{{root_dir}}" && \
-    tests/test-rules.sh
+    tests/test-lint.sh
 
 release-test *args:
   cd "{{root_dir}}/githooks" && \

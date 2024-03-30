@@ -110,6 +110,31 @@ function storeIntoContainerVolume() {
         }
 }
 
+function restoreFromContainerVolume() {
+    local volume="$1"
+    local base="$2"
+    local dest="$3"
+    shift 3
+    local files=("$@")
+
+    # shellcheck disable=SC2015
+    docker container create --name githookscopytovolume \
+        -v "$volume:/mnt/volume" githooks:volumecopy ||
+        die "Could not start copy container."
+
+    for file in "${files[@]}"; do
+        echo "Restoring '$dest/$file' from volume path '$volume/$base/$file'."
+        docker cp -a "githookscopytovolume:/mnt/volume/$base/$file" "$dest/$file" ||
+            {
+                docker container rm githookscopytovolume &>/dev/null || true
+                die "Docker copy failed."
+            }
+    done
+
+    docker container rm githookscopytovolume &>/dev/null ||
+        die "Removing copycontainer failed."
+}
+
 function showContainerVolume() {
     local volume="$1"
     local level="$2"

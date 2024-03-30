@@ -4,8 +4,6 @@
 set -e
 set -u
 
-true && false && true
-
 if [ "${DOCKER_RUNNING:-}" != "true" ]; then
     echo "! This script is only meant to be run in a Docker container"
     exit 1
@@ -13,6 +11,7 @@ fi
 
 DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
 REPO_DIR="$DIR/.."
+REPO_DIR_ORIG="$REPO_DIR"
 temp=""
 
 # shellcheck disable=SC1091
@@ -23,8 +22,8 @@ trap cleanUp EXIT
 
 # shellcheck disable=SC2317
 function cleanUp() {
-    set +e
-    deleteContainerVolumes
+    deleteContainerVolumes || true
+
     if [ -d "$temp" ]; then
         rm -rf "$temp" || true
     fi
@@ -44,7 +43,9 @@ function copyToTemp() {
     local temp="$1"
 
     echo "Copy whole repo to temp and make one commit with all files."
-    cp -rf "$REPO_DIR" "$temp/repo" &&
+    mkdir -p "$temp" &&
+        cp -rf "$REPO_DIR" "$temp/repo" &&
+        REPO_DIR_ORIG="$REPO_DIR" &&
         REPO_DIR="$temp/repo" &&
         cd "$REPO_DIR" &&
         git clean -fX &&
@@ -70,13 +71,21 @@ function runAllHooks() {
     # Run all hooks.
     git checkout -b create-diffs &&
         git reset --soft HEAD~1 || die "Could not copy repo"
-    git commit -m "Check all hooks."
+    git commit -m "Check all hooks." || die "Could not commit."
 }
 
 function diff() {
+    if [ "${GH_FIX:-false}" != "false" ]; then
+        echo "Copy diffing files back ..."
+        readarray files <(git diff --name-only main)
+        for file in "${files[@]}"; do
+            cp "$file" "$REPO_DIR_ORIG/$file"
+        done
+    fi
+
     # Working tree diff to main .
     if ! git diff --quiet main; then
-        [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff --name-only main
+        [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff main
 
         die "Commit produced diffs, probably because of format" \
             "(use GH_SHOW_DIFFS=true to show diffs):?" \
@@ -84,12 +93,16 @@ function diff() {
     else
         echo "Checking all rules successful"
     fi
-    cd "$REPO_DIR" || exit 1
 }
 
-temp=$(mktemp -d)
+function fix() {
+    restoreFromVolumes
+}
+
+cleanUp
 
 git config --global githooks.exportStagedFilesAsFile true
+temp=$(mktemp -d)
 
 copyToTemp "$temp"
 installGithooks
@@ -103,4 +116,3 @@ showAllContainerVolumes 2
 runAllHooks
 
 diff
-exit 0

@@ -80,7 +80,6 @@ const EnvVariableStagedFiles = "STAGED_FILES"
 // file which holds the staged files relative
 // to the repository where Githooks runs.
 const EnvVariableStagedFilesFile = "STAGED_FILES_FILE"
-const StagedFilesFileContainerDest = "/tmp/.githooks-staged-files"
 
 // GetGithooksEnvVariables gets all Githooks env variables.
 // `EnvVariableStagedFilesFile` variable's value is modified optionaly.

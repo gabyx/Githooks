@@ -10,7 +10,7 @@ if [ -n "${STAGED_FILES:-}" ]; then
   done
 elif [ -n "${STAGED_FILES_FILE:-}" ]; then
   echo "* Staged files:" >&2
-  while read -rd $'\\0' "$file"; do
+  while read -rd $'\\0' file; do
     echo "  - $file" >&2
   done <"$STAGED_FILES_FILE"
 fi

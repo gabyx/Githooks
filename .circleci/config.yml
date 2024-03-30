@@ -47,7 +47,7 @@ workflows:
                   "test-whitespace",
                   "test-testsuite",
                   "test-testsuite-podman",
-                  "test-rules",
+                  "test-lint",
                 ]
           filters: &filters
             branches:

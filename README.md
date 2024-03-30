@@ -196,8 +196,8 @@ and expect spaces in paths, you might want to set the `IFS` like this:
 ```shell
 IFS="
 "
-for STAGED in ${STAGED_FILES}; do
-    ...
+for file in ${STAGED_FILES}; do
+    echo "$file"
 done
 ```
 
@@ -216,8 +216,8 @@ and read this file in `bash` with something like:
 
 ```shell
 #!/bin/bash
-while read -rd $'\\0' "$file"; do
-    ...
+while read -rd $'\\0' file; do
+    echo "$file"
 done < "$STAGED_FILES_FILE"
 ```
 
