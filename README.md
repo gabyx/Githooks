@@ -1196,10 +1196,10 @@ does not work (AFAIK). In that case you can workaround this by
 the mounts:
 
 ```yaml
-# Tell Githooks where the workspace is.
+# Tell Githooks where the workspace will be in the nested container.
 # (optional, default `/mnt/workspace`)
 workspace-path-dest: /tmp/ci-job-1/build/repo
-# Tell Githooks where the shared repository checkouts are.
+# Tell Githooks where the shared repository checkouts are in the nested container.
 # (optional, default: `/mnt/shared`)
 shared-path-dest: /tmp/ci-job-1/githooks-install/.githooks/shared
 
