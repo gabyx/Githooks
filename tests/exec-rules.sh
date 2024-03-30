@@ -48,6 +48,8 @@ function copyToTemp() {
         REPO_DIR_ORIG="$REPO_DIR" &&
         REPO_DIR="$temp/repo" &&
         cd "$REPO_DIR" &&
+        rm -rf .git/hooks &&
+        git commit --no-verify -a -m "Current working dir" &&
         git clean -fX &&
         rm -rf .git &&
         echo "Make repo..." &&
@@ -70,33 +72,34 @@ function generateAllFiles() {
 function runAllHooks() {
     # Run all hooks.
     git checkout -b create-diffs &&
-        git reset --soft HEAD~1 || die "Could not copy repo"
+        git reset --soft HEAD~1 || die "Could not copy repo."
     git commit -m "Check all hooks." || die "Could not commit."
+}
+
+function fix() {
+    echo "Copy diffing files back to fix them ..."
+    readarray -t files < <(git --no-pager diff --name-only main)
+    for file in "${files[@]}"; do
+        echo "Copy file $file"
+        cp "$file" "$REPO_DIR_ORIG/$file"
+    done
 }
 
 function diff() {
     if [ "${GH_FIX:-false}" != "false" ]; then
-        echo "Copy diffing files back ..."
-        readarray files <(git diff --name-only main)
-        for file in "${files[@]}"; do
-            cp "$file" "$REPO_DIR_ORIG/$file"
-        done
+        fix
     fi
 
     # Working tree diff to main .
     if ! git diff --quiet main; then
-        [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git diff main
+        [ "${GH_SHOW_DIFFS:-false}" == "false" ] || git --no-pager diff main
 
         die "Commit produced diffs, probably because of format" \
             "(use GH_SHOW_DIFFS=true to show diffs):?" \
-            "$(git diff --name-only main)"
+            "$(git --no-pager diff --name-only main)"
     else
-        echo "Checking all rules successful"
+        echo "Checking all rules successful."
     fi
-}
-
-function fix() {
-    restoreFromVolumes
 }
 
 cleanUp

@@ -20,8 +20,8 @@ test *args:
 
 lint fix="false":
   cd "{{root_dir}}" && \
-    GH_FIX="{{fix}}" \
-    tests/test-lint.sh
+    GH_FIX="{{fix}}" tests/test-lint.sh || \
+      echo "Run 'just lint-fix' to fix the files."
 
 lint-fix: (lint "true")
 

@@ -47,13 +47,13 @@ EOF
 # Is mounted to `/tmp`
 docker volume create gh-test-tmp
 
-mountArg="ro"
+mountArg=":ro"
 if [ "$GH_FIX" = "true" ]; then
     mountArg=""
 fi
 
 docker run --rm -it \
-    -v "$rootDir:/data:$mountArg" \
+    -v "$rootDir:/data$mountArg" \
     -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -e "GH_SHOW_DIFFS=${GH_SHOW_DIFFS:-false}" \
