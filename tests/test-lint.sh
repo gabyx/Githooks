@@ -3,7 +3,7 @@
 set -e
 set -u
 
-rootDir=$(git rev-parse --show-toplevel)
+ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # shellcheck disable=SC2317
 function clean_up() {
@@ -53,7 +53,7 @@ if [ "${GH_FIX:-}" = "true" ]; then
 fi
 
 docker run --rm -it \
-    -v "$rootDir:/data$mountArg" \
+    -v "$ROOT_DIR:/data$mountArg" \
     -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -e "GH_SHOW_DIFFS=${GH_SHOW_DIFFS:-false}" \

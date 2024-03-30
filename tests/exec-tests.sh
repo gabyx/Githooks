@@ -4,29 +4,29 @@
 set -e
 set -u
 
-rootDir=$(git rev-parse --show-toplevel)
-. "$rootDir/tests/general.sh"
+ROOT_DIR=$(git rev-parse --show-toplevel)
+. "$ROOT_DIR/tests/general.sh"
 
-imageType="$1"
+IMAGE_TYPE="$1"
 shift
 
-if echo "$imageType" | grep -q "\-user"; then
-    os_user="test"
+if echo "$IMAGE_TYPE" | grep -q "\-user"; then
+    OS_USER="test"
 else
-    os_user="root"
+    OS_USER="root"
 fi
 
 # shellcheck disable=SC2317
 function clean_up() {
-    docker rmi "githooks:$imageType" &>/dev/null || true
-    docker rmi "githooks:$imageType-base" &>/dev/null || true
+    docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
+    docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
     docker volume rm gh-test-tmp &>/dev/null || true
 }
 
 trap clean_up EXIT
 
 function build_image() {
-    local dockerGroupId="$1"
+    local docker_group_id="$1"
 
     # Build container to only copy to volumes.
     cat <<EOF | docker build \
@@ -37,10 +37,10 @@ EOF
 
     # Build the Githooks test container.
     cat <<EOF | docker build \
-        --build-arg "DOCKER_GROUP_ID=$dockerGroupId" \
-        --force-rm -t "githooks:$imageType" -f - "$rootDir" || exit 1
+        --build-arg "DOCKER_GROUP_ID=$docker_group_id" \
+        --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
 
-FROM githooks:$imageType-base
+FROM githooks:$IMAGE_TYPE-base
 ARG DOCKER_GROUP_ID
 
 ENV DOCKER_RUNNING=true
@@ -53,7 +53,7 @@ ENV GH_TEST_GIT_CORE="/usr/share/git-core"
 ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
 # Add sources
-COPY --chown=$os_user:$os_user githooks "\$GH_TEST_REPO/githooks"
+COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
 ADD .githooks/README.md "\$GH_TEST_REPO/.githooks/README.md"
 ADD examples "\$GH_TEST_REPO/examples"
 
@@ -102,5 +102,5 @@ docker run \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
-    "githooks:$imageType" \
+    "githooks:$IMAGE_TYPE" \
     bash ./exec-steps.sh "$@"

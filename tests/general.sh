@@ -154,14 +154,14 @@ function show_all_container_volumes() {
 }
 
 function set_githooks_container_volume_envs() {
-    local workspaceDest
-    workspaceDest="$(cd "$1" && pwd)"
+    local workspace_dest
+    workspace_dest="$(cd "$1" && pwd)"
 
     local file
     file="$(mktemp)"
 
     cat <<<"
-    workspace-path-dest: $workspaceDest
+    workspace-path-dest: $workspace_dest
     # shared-path-dest: /mnt/shared # this is the default
 
     auto-mount-workspace: false

@@ -19,54 +19,54 @@ function check_bash() {
     fi
 }
 
-function get_platform_o_s() {
-    local -n _platformOS="$1"
-    local platformOSDist=""
-    local platformOSVersion=""
+function get_platform_os() {
+    local -n _platform_os="$1"
+    local platform_os_dist=""
+    local platform_os_version=""
 
     if [[ "$OSTYPE" == "linux"* ]]; then
-        _platformOS="linux"
+        _platform_os="linux"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        _platformOS="darwin"
+        _platform_os="darwin"
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
-        _platformOS="freebsd"
+        _platform_os="freebsd"
     else
         # Resort to `uname` for windows stuff.
         local name
         name=$(uname -a)
         case "$name" in
-        CYGWIN*) _platformOS="windows" && platformOSDist="cygwin" ;;
-        MINGW*) _platformOS="windows" && platformOSDist="mingw" ;;
-        *Msys) _platformOS="windows" && platformOSDist="msys" ;;
+        CYGWIN*) _platform_os="windows" && platform_os_dist="cygwin" ;;
+        MINGW*) _platform_os="windows" && platform_os_dist="mingw" ;;
+        *Msys) _platform_os="windows" && platform_os_dist="msys" ;;
         *) die "Platform: '$name' not supported." ;;
         esac
     fi
 
-    if [ "$_platformOS" = "linux" ]; then
+    if [ "$_platform_os" = "linux" ]; then
 
         if [ "$(lsb_release -si 2>/dev/null)" = "Ubuntu" ]; then
-            platformOSDist="ubuntu"
-            platformOSVersion=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
+            platform_os_dist="ubuntu"
+            platform_os_version=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
                 sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
         elif grep -qE 'ID="?debian' "/etc/os-release"; then
-            platformOSDist="debian"
-            platformOSVersion=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
+            platform_os_dist="debian"
+            platform_os_version=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
                 sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
         elif grep -qE 'ID="?alpine' "/etc/os-release"; then
-            platformOSDist="alpine"
-            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+            platform_os_dist="alpine"
+            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         elif grep -qE 'ID="?nixos' "/etc/os-release"; then
-            platformOSDist="nixos"
-            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+            platform_os_dist="nixos"
+            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         elif grep -qE 'ID="?rhel' "/etc/os-release"; then
-            platformOSDist="redhat"
-            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+            platform_os_dist="redhat"
+            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         elif grep -qE 'ID="?opensuse' "/etc/os-release"; then
-            platformOSDist="opensuse"
-            platformOSVersion=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
+            platform_os_dist="opensuse"
+            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
                 sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
         else
             die "Linux Distro '/etc/os-release' not supported currently:" \
@@ -74,32 +74,32 @@ function get_platform_o_s() {
         fi
 
         # Remove whitespaces
-        platformOSDist="${platformOSDist// /}"
-        platformOSVersion="${platformOSVersion// /}"
+        platform_os_dist="${platform_os_dist// /}"
+        platform_os_version="${platform_os_version// /}"
 
-    elif [ "$_platformOS" = "darwin" ]; then
+    elif [ "$_platform_os" = "darwin" ]; then
 
-        platformOSDist=$(sw_vers | grep -m 1 'ProductName' | sed -E 's/.*:\s+(.*)/\1/')
-        platformOSVersion=$(sw_vers | grep -m 1 'ProductVersion' | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+)/\1/g')
+        platform_os_dist=$(sw_vers | grep -m 1 'ProductName' | sed -E 's/.*:\s+(.*)/\1/')
+        platform_os_version=$(sw_vers | grep -m 1 'ProductVersion' | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+)/\1/g')
         # Remove whitespaces
-        platformOSDist="${platformOSDist// /}"
-        platformOSVersion="${platformOSVersion// /}"
+        platform_os_dist="${platform_os_dist// /}"
+        platform_os_version="${platform_os_version// /}"
 
-    elif [ "$_platformOS" = "windows" ]; then
-        platformOSVersion=$(systeminfo | grep -m 1 'OS Version:' | sed -E "s/.*:\s+([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
-        platformOSVersion="${platformOSVersion// /}"
+    elif [ "$_platform_os" = "windows" ]; then
+        platform_os_version=$(systeminfo | grep -m 1 'OS Version:' | sed -E "s/.*:\s+([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+        platform_os_version="${platform_os_version// /}"
     else
-        die "Platform '$_platformOS' not supported currently."
+        die "Platform '$_platform_os' not supported currently."
     fi
 
     if [ -n "${2:-}" ]; then
         local -n _platformOSDist="$2"
-        _platformOSDist="$platformOSDist"
+        _platformOSDist="$platform_os_dist"
     fi
 
     if [ -n "${3:-}" ]; then
         local -n _platformOSVersion="$3"
-        _platformOSVersion="$platformOSVersion"
+        _platformOSVersion="$platform_os_version"
     fi
 
     return 0
@@ -182,11 +182,11 @@ function print_help() {
 }
 
 function parse_args() {
-    local toInstaller=false
+    local to_installer=false
     local prev=""
 
     for p in "$@"; do
-        if [ "$toInstaller" = "true" ]; then
+        if [ "$to_installer" = "true" ]; then
             installerArgs+=("$p")
         elif [ "$p" = "--help" ] || [ "$p" = "-h" ]; then
             print_help
@@ -199,7 +199,7 @@ function parse_args() {
             versionTag="v$p"
 
         elif [ "$p" = "--" ]; then
-            toInstaller="true"
+            to_installer="true"
         else
             echo "! Unknown argument '$p'." >&2
             return 1
@@ -230,7 +230,7 @@ fi
 os=""
 arch=""
 
-get_platform_o_s os
+get_platform_os os
 get_platform_arch arch
 
 # The download used `macos` for `darwin` platform.

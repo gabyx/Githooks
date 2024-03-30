@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-ROOT_DIR=$(git rev-parse --show-toplevel)
 
 set -e
 set -u
 
+ROOT_DIR=$(git rev-parse --show-toplevel)
 TEST_DIR="$ROOT_DIR/tests"
+
 IMAGE_TYPE="alpine-coverage"
 
 if echo "$IMAGE_TYPE" | grep -q "\-user"; then

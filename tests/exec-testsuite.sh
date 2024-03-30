@@ -8,10 +8,9 @@ if [ "$DOCKER_RUNNING" != "true" ]; then
 fi
 
 DIR="$(cd "$(dirname "$0")" >/dev/null 2>&1 && pwd)"
-
 REPO_DIR="$DIR/.."
-GO_SRC="$REPO_DIR/githooks"
 
+GO_SRC="$REPO_DIR/githooks"
 cd "$GO_SRC" || exit 1
 
 echo "Go generate ..."
