@@ -54,7 +54,7 @@ archives:
       - runner
       - cli
       - dialog
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ if eq .Os \"darwin\" }}macos{{else}}{{ .Os }}{{end}}.{{ .Arch }}"
+    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ if eq .Os "darwin" }}macos{{else}}{{ .Os }}{{end}}.{{ .Arch }}'
     format: tar.gz
     files:
       - none*
@@ -77,7 +77,15 @@ signs:
   - artifacts: checksum
     cmd: gpg
     # Signing with the private key where 'deploy.asc' is this public key in this repo.
-    args: ["-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
+    args:
+      [
+        "-u",
+        "{{ .Env.GPG_FINGERPRINT }}",
+        "--output",
+        "${signature}",
+        "--detach-sign",
+        "${artifact}",
+      ]
     signature: "${artifact}.sig"
 release:
   github:
