@@ -107,5 +107,10 @@ if [ "$(grep -ic "formatted by containerized hook" "file-2.txt")" != "1" ]; then
     exit 1
 fi
 
+if [ "$(find .githooks -name ".githooks-staged.*" | wc -l)" != "0" ]; then
+    echo "Staged file still exists in .githooks."
+    exit 1
+fi
+
 deleteContainerVolumes
 deleteAllTestImages

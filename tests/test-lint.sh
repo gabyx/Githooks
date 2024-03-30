@@ -48,7 +48,7 @@ EOF
 docker volume create gh-test-tmp
 
 mountArg=":ro"
-if [ "$GH_FIX" = "true" ]; then
+if [ "${GH_FIX:-}" = "true" ]; then
     mountArg=""
 fi
 

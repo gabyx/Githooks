@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 
 set -e
 set -u
 
-ROOT_DIR=$(git rev-parse --show-toplevel)
+rootDir=$(git rev-parse --show-toplevel)
+. "$rootDir/tests/general.sh"
 
-IMAGE_TYPE="$1"
+imageType="$1"
 shift
 
-if echo "$IMAGE_TYPE" | grep -q "\-user"; then
-    OS_USER="test"
+if echo "$imageType" | grep -q "\-user"; then
+    os_user="test"
 else
-    OS_USER="root"
+    os_user="root"
 fi
 
 # shellcheck disable=SC2317
 function clean_up() {
-    docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
-    docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
+    docker rmi "githooks:$imageType" &>/dev/null || true
+    docker rmi "githooks:$imageType-base" &>/dev/null || true
     docker volume rm gh-test-tmp &>/dev/null || true
 }
 
@@ -36,9 +38,9 @@ EOF
     # Build the Githooks test container.
     cat <<EOF | docker build \
         --build-arg "DOCKER_GROUP_ID=$dockerGroupId" \
-        --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
+        --force-rm -t "githooks:$imageType" -f - "$rootDir" || exit 1
 
-FROM githooks:$IMAGE_TYPE-base
+FROM githooks:$imageType-base
 ARG DOCKER_GROUP_ID
 
 ENV DOCKER_RUNNING=true
@@ -51,7 +53,7 @@ ENV GH_TEST_GIT_CORE="/usr/share/git-core"
 ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
 # Add sources
-COPY --chown=$OS_USER:$OS_USER githooks "\$GH_TEST_REPO/githooks"
+COPY --chown=$os_user:$os_user githooks "\$GH_TEST_REPO/githooks"
 ADD .githooks/README.md "\$GH_TEST_REPO/.githooks/README.md"
 ADD examples "\$GH_TEST_REPO/examples"
 
@@ -81,15 +83,14 @@ EOF
 
 }
 
-clean_up
-
 # Only works on linux (macOS does not need it)
 dockerGroupId=$(getent group docker 2>/dev/null | cut -d: -f3) || true
 echo "Docker group id: $dockerGroupId"
 buildImage "$dockerGroupId"
 
 # Create a volume where all test setup and repositories go in.
-# Is mounted to `/tmp`
+# Is mounted to `/tmp`.
+deleteContainerVolume gh-test-tmp
 docker volume create gh-test-tmp
 
 # Privileged --privileged is needed if you want
@@ -101,9 +102,5 @@ docker run \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
-    "githooks:$IMAGE_TYPE" \
+    "githooks:$imageType" \
     bash ./exec-steps.sh "$@"
-
-RESULT=$?
-
-exit $RESULT

@@ -179,8 +179,12 @@ function setGithooksContainerVolumeEnvs() {
 
 function deleteContainerVolumes() {
     echo "Deleting all test container volumes ..."
+    deleteContainerVolume "gh-test-shared"
+}
 
-    if docker volume ls | grep "gh-test-shared"; then
-        docker volume rm "gh-test-shared" &>/dev/null || die "Could not delete volume workspace."
+function deleteContainerVolume() {
+    volume="$1"
+    if docker volume ls | grep "$volume"; then
+        docker volume rm "$volume" &>/dev/null || die "Could not delete volume workspace."
     fi
 }
