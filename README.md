@@ -49,10 +49,12 @@ repositories.
 
 <details>
 <summary><b>Table of Content (click to expand)</b></summary>
-<!-- TOC -->
+
+<!--toc:start-->
 
 - [Layout and Options](#layout-and-options)
 - [Execution](#execution)
+  - [Staged Files](#staged-files)
   - [Hook Run Configuration](#hook-run-configuration)
   - [Parallel Execution](#parallel-execution)
 - [Supported Hooks](#supported-hooks)
@@ -71,18 +73,21 @@ repositories.
 - [Disabling Githooks](#disabling-githooks)
 - [Environment Variables](#environment-variables)
   - [Arguments to Shared Hooks](#arguments-to-shared-hooks)
-- [Log \& Traces](#log--traces)
+- [Log & Traces](#log-traces)
 - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
 - [Running Hooks in Containers](#running-hooks-in-containers)
+  - [Podman Manager (rootless)](#podman-manager-rootless)
+  - [Docker Manager](#docker-manager)
   - [Pull and Build Integration](#pull-and-build-integration)
-- [Locate Githooks Container Images](#locate-githooks-container-images)
+  - [Locate Githooks Container Images](#locate-githooks-container-images)
+- [Running Hooks/Scripts Manually](#running-hooksscripts-manually)
 - [User Prompts](#user-prompts)
 - [Installation](#installation)
   - [Quick (Secure)](#quick-secure)
   - [Procedure](#procedure)
-  - [Install Mode - Template Dir](#install-mode---template-dir)
-  - [Install Mode - Centralized Hooks](#install-mode---centralized-hooks)
-  - [Install Mode - Manual](#install-mode---manual)
+  - [Install Mode - Template Dir](#install-mode-template-dir)
+  - [Install Mode - Centralized Hooks](#install-mode-centralized-hooks)
+  - [Install Mode - Manual](#install-mode-manual)
   - [Install from different URL and Branch](#install-from-different-url-and-branch)
   - [Install for CI](#install-for-ci)
   - [No Installation](#no-installation)
@@ -108,10 +113,10 @@ repositories.
 - [FAQ](#faq)
 - [Acknowledgements](#acknowledgements)
 - [Authors](#authors)
-- [Support \& Donation](#support--donation)
+- [Support & Donation](#support-donation)
 - [License](#license)
+<!--toc:end-->
 
-<!-- /TOC -->
 </details>
 
 ## Layout and Options
@@ -179,12 +184,14 @@ error stream which might or might not get read by Git itself (e.g. `pre-push`).
 Hooks can also be specified by a run configuration in a corresponding YAML file,
 see [Hook Run Configuration](#hook-run-configuration).
 
+### Staged Files
+
 Hooks related to `commit` events (where it makes sense, not `post-commit`) will
-also have a `${STAGED_FILES}` environment variable set, i.e. the list of staged
-and changed files according to
-`git diff --cached --diff-filter=ACMR --name-only`. File paths are separated by
-a newline `\n`. If you want to iterate in a shell script over them, and expect
-spaces in paths, you might want to set the `IFS` like this:
+also have a `${STAGED_FILES}` or `${STAGED_FILES_FILE}` environment variable
+set. By default, `STAGED_FILES` contains the list of staged and changed files
+according to `git diff --cached --diff-filter=ACMR --name-only`. File paths are
+separated by a newline `\n`. If you want to iterate in a shell script over them,
+and expect spaces in paths, you might want to set the `IFS` like this:
 
 ```shell
 IFS="
@@ -196,6 +203,23 @@ done
 
 The `ACMR` filter in the `git diff` will include staged files that are added,
 copied, modified or renamed.
+
+To enable the `STAGED_FILES_FILE` variable which contains the path to the file
+containing the paths to all staged files (separated by null-chars `\0`, e.g.
+`<path>\0<path>\0`) use
+
+```shell
+git config githooks.exportStagedFilesAsFile true
+```
+
+and read this file in `bash` with something like:
+
+```shell
+#!/bin/bash
+while read -d $'\\0' "$file"; do
+    ...
+done < "$STAGED_FILES_FILE"
+```
 
 **<span id="1"><sup>1</sup></span>[⏎](#a1) Note:** This caveat is basically
 there because standard output and error might get interleaved badly and so far
