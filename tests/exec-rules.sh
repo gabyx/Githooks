@@ -89,13 +89,15 @@ function diff() {
 
 temp=$(mktemp -d)
 
+git config --global githooks.exportStagedFilesAsFile true
+
 copyToTemp "$temp"
 installGithooks
 generateAllFiles
 
 deleteContainerVolumes
 storeIntoContainerVolumes "$HOME/.githooks/shared"
-setGithooksContainerVolumeEnvs "$temp"
+setGithooksContainerVolumeEnvs "$temp/repo"
 showAllContainerVolumes 2
 
 runAllHooks

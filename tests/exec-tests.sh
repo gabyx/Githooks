@@ -81,10 +81,11 @@ EOF
 
 }
 
+clean_up
+
 # Only works on linux (macOS does not need it)
 dockerGroupId=$(getent group docker 2>/dev/null | cut -d: -f3) || true
 echo "Docker group id: $dockerGroupId"
-
 buildImage "$dockerGroupId"
 
 # Create a volume where all test setup and repositories go in.

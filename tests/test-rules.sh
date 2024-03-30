@@ -13,6 +13,8 @@ function clean_up() {
 
 trap clean_up EXIT
 
+clean_up
+
 # Build container to only copy to volumes.
 cat <<EOF | docker build \
     --force-rm -t "githooks:volumecopy" -f - . || exit 1
