@@ -49,7 +49,7 @@ function copy_to_temp() {
         REPO_DIR="$temp/repo" &&
         cd "$REPO_DIR" &&
         rm -rf .git/hooks &&
-        git commit --no-verify --allow-empty -a -m "Current working dir" &&
+        git commit --allow-empty -a -m "Current working dir" &&
         git clean -fX &&
         rm -rf .git &&
         echo "Make repo..." &&
