@@ -10,8 +10,7 @@ echo "Permissions for '.':"
 ls -ald "$(pwd)"
 ls -al "$(pwd)"
 
-echo "Permissions for /mnt/workspace and /mnt/shared"
-ls -ald /mnt/workspace
+echo "Permissions for /mnt/shared"
 ls -ald /mnt/shared || true
 echo "=================================================="
 

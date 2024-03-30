@@ -90,7 +90,13 @@ func mainRun() (exitCode int) {
 	}
 
 	exportGeneralVars(&settings)
-	exportStagedFiles(&settings)
+
+	cleanUp := exportStagedFiles(&settings)
+	if cleanUp != nil {
+		defer cleanUp()
+	}
+
+	assertContainerManager(&settings)
 	updateGithooks(&settings, &uiSettings)
 	executeLFSHooks(&settings)
 	executeOldHook(&settings, &uiSettings, &ignores, &checksums)
@@ -165,8 +171,6 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		isTrusted = showTrustRepoPrompt(gitx, promptx, repoPath)
 	}
 
-	runContainerized := hooks.IsContainerizedHooksEnabled(gitx, true)
-
 	s := HookSettings{
 		Args:               os.Args[2:],
 		ExecX:              execx,
@@ -185,7 +189,6 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		SkipNonExistingSharedHooks: skipNonExistingSharedHooks,
 		SkipUntrustedHooks:         skipUntrustedHooks,
 		NonInteractive:             nonInteractive,
-		ContainerizedHooksEnabled:  runContainerized,
 		Disabled:                   isGithooksDisabled}
 
 	logInvocation(&s)
@@ -283,33 +286,76 @@ func exportGeneralVars(settings *HookSettings) {
 		strs.Fmt("%s=%s", hooks.EnvVariableArch, runtime.GOARCH))
 }
 
-func exportStagedFiles(settings *HookSettings) {
-	if strs.Includes(hooks.StagedFilesHookNames[:], settings.HookName) {
+func assertContainerManager(settings *HookSettings) {
+	var err error
+	settings.ContainerMgr, err = hooks.NewContainerManager(settings.GitX, false, nil)
 
-		files, err := hooks.GetStagedFiles(settings.GitX)
+	log.AssertNoErrorPanicF(err, "Could not create container manager.")
+}
 
-		if len(files) != 0 {
-			log.DebugF("Exporting staged files:\n- %s",
-				strings.ReplaceAll(files, "\n", "\n- "))
-		}
+func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
+	if !strs.Includes(hooks.StagedFilesHookNames[:], settings.HookName) {
+		return nil
+	}
 
-		if err != nil {
-			log.Warn("Could not export staged files.")
+	files, err := hooks.GetStagedFiles(settings.GitX)
+
+	if len(files) != 0 {
+		log.DebugF("Exporting staged files:\n- %s",
+			strings.ReplaceAll(strings.TrimRight(files, "\x00"), "\x00", "\n- "))
+	}
+
+	if log.AssertNoError(err, "Could not export staged files.") {
+
+		exportOnlyFile := settings.GitX.GetConfig(
+			hooks.GitCKExportStagedFilesAsFile,
+			git.Traverse) == git.GitCVTrue
+
+		cm.DebugAssertF(
+			func() bool {
+				_, exists := os.LookupEnv(hooks.EnvVariableStagedFiles)
+				return !exists // nolint:nlreturn
+			}(),
+			"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
+
+		if exportOnlyFile {
+			// Create the file inside the `.githooks` directory.
+			// to make it better accessible when running containerized.
+			// If it would be in /tmp we would need to mount this file to the container
+			// as well.
+			file, err := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
+			filePath := filepath.ToSlash(file.Name())
+			relPath := path.Join(hooks.HooksDirName, path.Base(filePath))
+
+			// Remove the file on exit.
+			defer file.Close()
+			cleanUp = func() { _ = os.Remove(file.Name()) }
+
+			if log.AssertNoError(err, "Could not open temp file for staged files") {
+				_, err := file.WriteString(files)
+				log.AssertNoError(err, "Could not write staged files to temp file.")
+
+				settings.StagedFilesFile = filePath
+			}
+
+			// Set environment directly.
+			os.Setenv(hooks.EnvVariableStagedFilesFile, relPath)
+			// Set environment also in execution context.
+			settings.ExecX.Env = append(settings.ExecX.Env,
+				strs.Fmt("%s=%s", hooks.EnvVariableStagedFilesFile, relPath))
+
 		} else {
+			files = strings.ReplaceAll(files, "\x00", "\n")
 
-			cm.DebugAssertF(
-				func() bool {
-					_, exists := os.LookupEnv(hooks.EnvVariableStagedFiles)
-					return !exists // nolint:nlreturn
-				}(),
-				"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
-
+			// Set environment directly.
 			os.Setenv(hooks.EnvVariableStagedFiles, files)
+			// Set environment also in execution context.
 			settings.ExecX.Env = append(settings.ExecX.Env,
 				strs.Fmt("%s=%s", hooks.EnvVariableStagedFiles, files))
 		}
-
 	}
+
+	return
 }
 
 func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
@@ -467,7 +513,7 @@ func executeOldHook(
 		settings.RepositoryDir,
 		settings.HookDir, hookName, hookNamespace, nil,
 		isIgnored, isTrusted, true, false,
-		settings.ContainerizedHooksEnabled)
+		settings.ContainerMgr)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", settings.HookDir)
 
 	if len(hooks) == 0 {
@@ -510,6 +556,7 @@ func collectHooks(
 	// Load common env. file if existing.
 	namespaceEnvs, err := hooks.LoadNamespaceEnvs(settings.RepositoryHooksDir)
 	cm.AssertNoErrorPanic(err, "Could not load env. file")
+	log.DebugF("Namespace envs: %v", namespaceEnvs)
 
 	// Local hooks in repository
 	// No parsing of local includes because already happened.
@@ -545,7 +592,7 @@ func collectHooks(
 }
 
 func updateLocalHookImages(settings *HookSettings) {
-	if !settings.ContainerizedHooksEnabled || settings.HookName != "post-merge" {
+	if settings.ContainerMgr == nil || settings.HookName != "post-merge" {
 		return
 	}
 
@@ -554,7 +601,8 @@ func updateLocalHookImages(settings *HookSettings) {
 		settings.RepositoryDir,
 		settings.RepositoryDir,
 		settings.RepositoryHooksDir,
-		"")
+		"",
+		settings.ContainerMgr)
 
 	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
 }
@@ -578,7 +626,7 @@ func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, s
 	}
 
 	log.Debug("Updating all shared hooks.")
-	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType, settings.ContainerizedHooksEnabled)
+	_, err := hooks.UpdateSharedHooks(log, sharedHooks, sharedType, settings.ContainerMgr)
 	log.AssertNoError(err, "Errors while updating shared hooks repositories.")
 
 	if updateOnCloneNeeded {
@@ -810,7 +858,7 @@ func getHooksIn(
 		rootDir,
 		hooksDir, settings.HookName, hookNamespace, namespaceEnvs.Get(hookNamespace),
 		isIgnored, isTrusted, true, true,
-		settings.ContainerizedHooksEnabled)
+		settings.ContainerMgr)
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	if len(allHooks) == 0 {
@@ -968,17 +1016,23 @@ func showTrustPrompt(
 	}
 }
 
-func applyEnvToArgs(hs *hooks.Hooks, env []string) {
+func applyEnvToContainerRunArgs(hs *hooks.Hooks) {
 	hs.Map(func(h *hooks.Hook) {
-		h.ApplyEnvironmentToArgs(env)
+		// Apply normal envs and the namespace env. variables too.
+		// Modify the staged files to point to the correct destination.
+		envs := append(hooks.GetGithooksEnvVariables(""), h.NamespaceEnvs...)
+
+		// Note: Will do a NoOp anything for not containerized runs in `h`.
+		h.ApplyEnvironmentToArgs(envs)
 	})
 }
 
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
-	// Containerized executions need this.
-	if settings.ContainerizedHooksEnabled {
-		applyEnvToArgs(hs, hooks.FilterGithooksEnvs(settings.ExecX.GetEnv()))
+	// Containerized executions need to apply env. variables to
+	// arguments of the command.
+	if settings.ContainerMgr != nil {
+		applyEnvToContainerRunArgs(hs)
 	}
 
 	if cm.IsDebug {

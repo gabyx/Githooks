@@ -6,13 +6,13 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if ! isDockerAvailable; then
+if ! is_docker_available; then
     echo "docker is not available"
     exit 249
 fi
 
-acceptAllTrustPrompts || exit 1
-assertNoTestImages
+accept_all_trust_prompts || exit 1
+assert_no_test_images
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
@@ -44,23 +44,23 @@ mkdir -p .githooks &&
 
 "$GH_TEST_BIN/cli" shared update
 
-if ! isImageExisting "sharedhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/sharedhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/dir/sharedhooks-test-image-built:1.0.0"; then
+if ! is_image_existing "sharedhooks-test-image:1.0.0" ||
+    ! is_image_existing "registry.com/sharedhooks-test-image:1.0.0" ||
+    ! is_image_existing "registry.com/dir/sharedhooks-test-image-built:1.0.0"; then
     echo "Could not find all shared images."
     docker images
     exit 1
 fi
 
-if isImageExisting "localhooks-test-image:1.0.0" ||
-    isImageExisting "registry.com/localhooks-test-image:1.0.0" ||
-    isImageExisting "registry.com/dir/localhooks-test-image-built:1.0.0"; then
+if is_image_existing "localhooks-test-image:1.0.0" ||
+    is_image_existing "registry.com/localhooks-test-image:1.0.0" ||
+    is_image_existing "registry.com/dir/localhooks-test-image-built:1.0.0"; then
     echo "Local images should not be build."
     docker images
     exit 1
 fi
 
-deleteAllTestImages
+delete_all_test_images
 
 if docker images | grep -q "test-image"; then
     echo "Could not delete all images"
@@ -69,20 +69,20 @@ fi
 
 "$GH_TEST_BIN/cli" images update
 
-if ! isImageExisting "sharedhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/sharedhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/dir/sharedhooks-test-image-built:1.0.0"; then
+if ! is_image_existing "sharedhooks-test-image:1.0.0" ||
+    ! is_image_existing "registry.com/sharedhooks-test-image:1.0.0" ||
+    ! is_image_existing "registry.com/dir/sharedhooks-test-image-built:1.0.0"; then
     echo "Could not find all shared images."
     docker images
     exit 1
 fi
 
-if ! isImageExisting "localhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/localhooks-test-image:1.0.0" ||
-    ! isImageExisting "registry.com/dir/localhooks-test-image-built:1.0.0"; then
+if ! is_image_existing "localhooks-test-image:1.0.0" ||
+    ! is_image_existing "registry.com/localhooks-test-image:1.0.0" ||
+    ! is_image_existing "registry.com/dir/localhooks-test-image-built:1.0.0"; then
     echo "Could not find all local images."
     docker images
     exit 1
 fi
 
-deleteAllTestImages
+delete_all_test_images

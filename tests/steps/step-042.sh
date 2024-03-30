@@ -7,14 +7,14 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
     exit 249
 fi
 
-LAST_UPDATE=$(getUpdateCheckTimestamp)
+LAST_UPDATE=$(get_update_check_timestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
@@ -40,7 +40,7 @@ if [ "$ARE_UPDATES_ENABLED" != "true" ]; then
     exit 1
 fi
 
-LAST_UPDATE=$(getUpdateCheckTimestamp)
+LAST_UPDATE=$(get_update_check_timestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
@@ -52,7 +52,7 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
     exit 1
 fi
 
-resetUpdateCheckTimestamp
+reset_update_check_timestamp
 
 OUTPUT=$(
     "$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
@@ -64,7 +64,7 @@ if ! echo "$OUTPUT" | grep -q "All done! Enjoy!"; then
     exit 1
 fi
 
-LAST_UPDATE=$(getUpdateCheckTimestamp)
+LAST_UPDATE=$(get_update_check_timestamp)
 if [ -z "$LAST_UPDATE" ]; then
     echo "! Update did not run"
     exit 1

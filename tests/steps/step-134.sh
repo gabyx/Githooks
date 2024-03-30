@@ -8,15 +8,21 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if ! isDockerAvailable; then
+# Test can be run with staged files exported as file too.
+exportStagedFilesAsFile="false"
+if [ "${1:-}" = "--export-staged-files-as-file" ]; then
+    exportStagedFilesAsFile="true"
+fi
+
+if ! is_docker_available; then
     echo "docker is not available"
     exit 249
 fi
 
 "$GH_TEST_BIN/cli" installer || exit 1
 
-acceptAllTrustPrompts || exit 1
-assertNoTestImages
+accept_all_trust_prompts || exit 1
+assert_no_test_images
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
@@ -30,18 +36,25 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-134-a.git" &&
     cp -rf "$TEST_DIR/steps/images/image-1/githooks/commit-msg" githooks/commit-msg &&
     echo "sharedhooks" >"githooks/.namespace" &&
     git add . &&
-    git commit -m 'Initial commit' ||
-    exit 1
+    git commit -m 'Initial commit'
 
 # Setup local repository
 mkdir -p "$GH_TEST_TMP/test134" &&
     cd "$GH_TEST_TMP/test134" &&
     git init &&
     mkdir -p .githooks &&
-    echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml &&
-    GITHOOKS_DISABLE=1 git add . &&
-    GITHOOKS_DISABLE=1 git commit -m 'Initial commit' ||
-    exit 1
+    echo -e "envs:\n  sharedhooks:\n    - MONKEY=gaga" >.githooks/.envs.yaml &&
+    echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml
+
+# Maybe run with exported staged files file.
+if [ "$exportStagedFilesAsFile" = "true" ]; then
+    git config --global githooks.exportStagedFilesAsFile true
+    touch .githooks-test-export-staged-files
+fi
+
+# Commit all files.
+GITHOOKS_DISABLE=1 git add . &&
+    GITHOOKS_DISABLE=1 git commit -m 'Initial commit'
 
 # Enable containerized hooks.
 export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
@@ -58,9 +71,11 @@ touch "file.txt" &&
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume,
 # which we dont have.
-storeIntoContainerVolumes "." "$HOME/.githooks/shared"
-showAllContainerVolumes 3
-OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 2>&1) ||
+store_into_container_volumes "$HOME/.githooks/shared"
+show_all_container_volumes 3
+set_githooks_container_volume_envs "."
+
+OUT=$(git commit -m "fix: Add file to format" 2>&1) ||
     {
         echo "! Commit failed"
         echo "$OUT"
@@ -68,15 +83,15 @@ OUT=$(setGithooksContainerVolumeEnvs && git commit -m "fix: Add file to format" 
     }
 
 echo "$OUT"
-restoreFromContainerVolumeWorkspace "." "file.txt" "file-2.txt" ".commit-msg-hook-run"
 
 if [ ! -f ".commit-msg-hook-run" ]; then
     echo -e "! Expected commit-msg hook to have been run."
     exit 1
 fi
 
-if ! echo "$OUT" | grep -iq "formatting file 'file.txt'"; then
-    echo"! Expected file to have formatted: Content:"
+if ! echo "$OUT" | grep -iq "formatting file 'file.txt'" ||
+    ! echo "$OUT" | grep -iq "formatting file 'file-2.txt'"; then
+    echo "! Expected file to have formatted"
     exit 1
 fi
 
@@ -92,5 +107,10 @@ if [ "$(grep -ic "formatted by containerized hook" "file-2.txt")" != "1" ]; then
     exit 1
 fi
 
-deleteContainerVolumes
-deleteAllTestImages
+if [ "$(find .githooks -name ".githooks-staged.*" | wc -l)" != "0" ]; then
+    echo "Staged file still exists in .githooks."
+    exit 1
+fi
+
+delete_container_volumes
+delete_all_test_images

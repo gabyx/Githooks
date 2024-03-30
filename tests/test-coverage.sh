@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
-ROOT_DIR=$(git rev-parse --show-toplevel)
 
 set -e
 set -u
 
+ROOT_DIR=$(git rev-parse --show-toplevel)
 TEST_DIR="$ROOT_DIR/tests"
 
 IMAGE_TYPE="alpine-coverage"
+
+if echo "$IMAGE_TYPE" | grep -q "\-user"; then
+    OS_USER="test"
+else
+    OS_USER="root"
+fi
 
 [ -n "$COVERALLS_TOKEN" ] || {
     echo "! You need to set 'COVERALLS_TOKEN'."
@@ -19,6 +25,13 @@ function cleanup() {
 }
 
 trap cleanup EXIT
+
+# Build container to only copy to volumes.
+cat <<EOF | docker build \
+    --force-rm -t "githooks:volumecopy" -f - . || exit 1
+    FROM scratch
+    CMD you-should-not-run-this-container
+EOF
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
 FROM golang:1.20-alpine
@@ -40,17 +53,12 @@ ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
 RUN git config --global safe.directory /githooks
 EOF
 
-if echo "$IMAGE_TYPE" | grep -q "\-user"; then
-    OS_USER="test"
-else
-    OS_USER="root"
-fi
-
+# Build test container.
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 
 ENV GH_TESTS="/var/lib/githooks-tests"
-ENV GH_TEST_TMP="/tmp"
+ENV GH_TEST_TMP="/tmp/githooks"
 ENV GH_TEST_REPO="/var/lib/githooks"
 ENV GH_TEST_BIN="/var/lib/githooks/githooks/bin"
 ENV GH_TEST_GIT_CORE="/usr/share/git-core"
@@ -116,12 +124,16 @@ docker run --rm \
     -v "$TEST_DIR/..":/githooks \
     -w /githooks/tests \
     "githooks:$IMAGE_TYPE-base" \
-    ./exec-testsuite.sh ||
+    ./exec-unittests.sh ||
     exit $?
 
-# Run the integration tests
+# Run the integration tests# Create a volume where all test setup and repositories go in.
+# Is mounted to `/tmp`.
+delete_container_volume gh-test-tmp &>/dev/null || true
+docker volume create gh-test-tmp
 docker run --rm \
     -a stdout -a stderr \
+    -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "$TEST_DIR/cover":/cover \
     "githooks:$IMAGE_TYPE" \

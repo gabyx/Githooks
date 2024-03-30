@@ -20,7 +20,7 @@ if git -C ~/.githooks/release rev-parse HEAD; then
     exit 1
 fi
 
-LAST_UPDATE=$(getUpdateCheckTimestamp)
+LAST_UPDATE=$(get_update_check_timestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update unexpectedly run"
     exit 1

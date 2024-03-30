@@ -21,20 +21,22 @@ func execPath(
 	opts execCmdOptions,
 	namespaceEnvs hooks.NamespaceEnvs) (err error) {
 
-	containerized := opts.Containarized ||
-		hooks.IsContainerizedHooksEnabled(ctx.GitX, true)
+	containerMgr, err := hooks.NewContainerManager(ctx.GitX, opts.Containarized, nil)
+	ctx.Log.AssertNoErrorPanic(err, "Could not create container manager.")
 
 	hookCmds := make(hooks.HookPrioList, 1)
 	path := path.Join(res.HooksDir, res.NamespacePath)
 
+	envs := namespaceEnvs.Get(res.Namespace)
 	cmd, err := hooks.GetHookRunCmd(
 		git.NewCtxAt(repoDir),
 		path,
 		res.RepositoryRoot,
 		res.HooksDir,
-		true, containerized,
+		true, containerMgr,
 		res.Namespace,
-		namespaceEnvs.Get(res.Namespace))
+		envs,
+	)
 
 	if err != nil {
 		return err
@@ -45,6 +47,7 @@ func execPath(
 		Path:          path,
 		Namespace:     res.Namespace,
 		NamespacePath: res.NamespacePath,
+		NamespaceEnvs: envs,
 		Active:        true,
 		Trusted:       true,
 	}

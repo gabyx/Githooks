@@ -522,7 +522,7 @@ func dispatchToInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arg
 
 	// Run the installer binary
 	return cm.RunExecutable(
-		&cm.ExecContext{},
+		&cm.ExecContext{Env: os.Environ()},
 		installer,
 		cm.UseStreams(os.Stdin, os.Stdout, os.Stderr),
 		"--config", file.Name())
@@ -1194,7 +1194,7 @@ func setupSharedRepositories(
 			"file will still be executed", hooks.GitCKShared, hooks.GetRepoSharedFileRel())
 	} else {
 
-		updated, err := hooks.UpdateAllSharedHooks(log, gitx, installDir, "", false)
+		updated, err := hooks.UpdateAllSharedHooks(log, gitx, installDir, "", nil)
 		log.ErrorIf(err != nil, "Could not update shared hook repositories.")
 		log.InfoF("Updated '%v' shared hook repositories.", updated)
 

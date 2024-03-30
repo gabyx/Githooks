@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 TEST_PREFIX_DIR=""$GH_TEST_TMP/githooks""
 GH_INSTALL_BIN_DIR="$TEST_PREFIX_DIR/.githooks/bin"

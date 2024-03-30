@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test:
-#   Run CLI exec.
+#   Run CLI exec command.
 set -e
 set -u
 
@@ -8,15 +8,15 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if ! isDockerAvailable; then
+if ! is_docker_available; then
     echo "docker is not available"
     exit 249
 fi
 
 "$GH_TEST_BIN/cli" installer || exit 1
 
-acceptAllTrustPrompts || exit 1
-assertNoTestImages
+accept_all_trust_prompts || exit 1
+assert_no_test_images
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
@@ -51,12 +51,12 @@ export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume,
 # which we dont have.
-storeIntoContainerVolumes "." "$HOME/.githooks/shared"
-showAllContainerVolumes 3
+store_into_container_volumes "$HOME/.githooks/shared"
+show_all_container_volumes 3
+set_githooks_container_volume_envs "."
 
 # Test the containerized run.
-OUT=$(setGithooksContainerVolumeEnvs &&
-    "$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
+OUT=$("$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
     {
         echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
@@ -70,8 +70,7 @@ if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2' banana"; then
 fi
 
 # Test the normal run as well.
-OUT=$(setGithooksContainerVolumeEnvs &&
-    "$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
+OUT=$("$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
     {
         echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
@@ -85,8 +84,7 @@ if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2' banana"; then
 fi
 
 set +e
-OUT=$(setGithooksContainerVolumeEnvs &&
-    "$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
+OUT=$("$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
 exitCode="$?"
 set -e
 
@@ -103,5 +101,5 @@ if ! echo "$OUT" | grep -iq "executing test script"; then
     exit 1
 fi
 
-deleteContainerVolumes
-deleteAllTestImages
+delete_container_volumes
+delete_all_test_images

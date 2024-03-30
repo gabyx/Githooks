@@ -51,7 +51,7 @@ jobs:
 
     - if: type = pull_request
       os: linux
-      env: TEST_INSTANCE=test-rules
+      env: TEST_INSTANCE=test-lint
 
 script:
   - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin

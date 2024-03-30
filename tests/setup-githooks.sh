@@ -3,11 +3,11 @@
 set -e
 set -u
 
-cliAddArgs=()
-buildAddArgs=()
+CLI_ADD_ARGS=()
+BUILD_ADD_ARGS=()
 if [ "${1:-}" = "--coverage" ]; then
-    buildAddArgs+=("--coverage")
-    cliAddArgs+=("githooksCoverage")
+    BUILD_ADD_ARGS+=("--coverage")
+    CLI_ADD_ARGS+=("githooksCoverage")
 fi
 
 git config --global user.email "githook@test.com" &&
@@ -31,8 +31,8 @@ cd "$GH_TEST_REPO/githooks" &&
         -m "Build version 2.1.0 for download test over Github" >/dev/null 2>&1 &&
     git tag "v2.1.0" &&
     ./scripts/clean.sh &&
-    ./scripts/build.sh "${buildAddArgs[@]}" --prod --benchmark &&
-    ./bin/cli "${cliAddArgs[@]}" --version || exit 1
+    ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --prod --benchmark &&
+    ./bin/cli "${CLI_ADD_ARGS[@]}" --version || exit 1
 echo "Commit build v2.1.0 to repo (for test download) ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
@@ -47,8 +47,8 @@ cd "$GH_TEST_REPO/githooks" &&
     git checkout main &&
     git tag "v9.9.0" &&
     ./scripts/clean.sh &&
-    ./scripts/build.sh "${buildAddArgs[@]}" --build-tags "mock" &&
-    ./bin/cli $"${cliAddArgs[@]}" --version || exit 1
+    ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --build-tags "mock" &&
+    ./bin/cli $"${CLI_ADD_ARGS[@]}" --version || exit 1
 echo "Commit build v9.9.0 to repo ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
@@ -61,8 +61,8 @@ cd "$GH_TEST_REPO/githooks" &&
     git commit -a --allow-empty -m "Before build" >/dev/null 2>&1 &&
     git tag -f "v9.9.1" &&
     ./scripts/clean.sh &&
-    ./scripts/build.sh "${buildAddArgs[@]}" --build-tags "mock" &&
-    ./bin/cli "${cliAddArgs[@]}" --version || exit 1
+    ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --build-tags "mock" &&
+    ./bin/cli "${CLI_ADD_ARGS[@]}" --version || exit 1
 echo "Commit build v9.9.1 to repo (no-skip)..." &&
     cd "$GH_TEST_REPO" &&
     git commit -a --allow-empty -m "Version 9.9.1" -m "Update-NoSkip: true" >/dev/null 2>&1 &&

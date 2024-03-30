@@ -45,9 +45,9 @@ workflows:
                   "test-alpine-user",
                   "test-corehookspath",
                   "test-whitespace",
-                  "test-testsuite",
-                  "test-testsuite-podman",
-                  "test-rules",
+                  "test-unittests",
+                  "test-unittests-podman",
+                  "test-lint",
                 ]
           filters: &filters
             branches:

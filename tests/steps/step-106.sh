@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-function onExit() {
+function on_exit() {
     if [ -n "$ORIGINAL_GIT_LFS" ]; then
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs-backup" "$ORIGINAL_GIT_LFS" || {
             echo "WARNING: LFS recovery failure! All succeeding tests will be UNSTABLE!"
@@ -58,7 +58,7 @@ if [ -n "$GH_ON_WINDOWS" ]; then
     ORIGINAL_GIT_LFS=$(cygpath -m "$(command -v git-lfs)")
     cp -f "$ORIGINAL_GIT_LFS" "$GH_TEST_TMP/test106-lfs/git-lfs-backup" &&
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs.exe" "$ORIGINAL_GIT_LFS" || exit 4
-    trap onExit EXIT # Move the original back in place
+    trap on_exit EXIT # Move the original back in place
 else
     # On Unix, a git-lfs shell script is enough.
     ln -s "$GH_TEST_TMP/test106-lfs/git-lfs.exe" "$GH_TEST_TMP/test106-lfs/git-lfs"

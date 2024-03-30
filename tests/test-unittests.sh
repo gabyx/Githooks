@@ -3,14 +3,14 @@
 set -e
 set -u
 
-function cleanUp() {
+function clean_up() {
     # shellcheck disable=SC2317
-    docker rmi "githooks:testsuite" &>/dev/null || true
+    docker rmi "githooks:unittests" &>/dev/null || true
 }
 
-trap cleanUp EXIT
+trap clean_up EXIT
 
-cat <<EOF | docker build --force-rm -t githooks:testsuite -
+cat <<EOF | docker build --force-rm -t githooks:unittests -
 FROM golang:1.20-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
@@ -29,8 +29,8 @@ EOF
 if ! docker run --rm -it \
     -v "$(pwd)":/githooks \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
-    -w /githooks githooks:testsuite \
-    tests/exec-testsuite.sh; then
+    -w /githooks githooks:unittests \
+    tests/exec-unittests.sh; then
 
     echo "! Check rules had failures."
     exit 1

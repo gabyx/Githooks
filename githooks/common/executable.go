@@ -18,7 +18,9 @@ type Executable struct {
 
 	// Arguments to the hook script/executable.
 	Args []string
-	Env  []string
+
+	// Additional environment variables (execution ctx. vars are added when called)
+	Env []string
 }
 
 func NewExecutable(cmd string, args []string, env []string) Executable {

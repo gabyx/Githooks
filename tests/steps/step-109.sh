@@ -11,7 +11,7 @@ if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     exit 249
 fi
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test109/p001" && mkdir -p "$GH_TEST_TMP/test109/p002" && mkdir -p "$GH_TEST_TMP/test109/p003" || exit 1
 

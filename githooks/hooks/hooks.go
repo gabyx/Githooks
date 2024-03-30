@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
 	strs "github.com/gabyx/githooks/githooks/strings"
 
@@ -27,6 +28,9 @@ type Hook struct {
 
 	// The namespaced path of the hook `<namespace>/<relPath>`.
 	NamespacePath string
+
+	// Namespace environment variables added to the `cm.IExecutable`.
+	NamespaceEnvs []string
 
 	// If the hook is not ignored by any ignore patterns.
 	// Has priority 1 for execution determination.
@@ -144,12 +148,12 @@ func GetAllHooksIn(
 	hooksDir string,
 	hookName string,
 	hookNamespace string,
-	hookNamespaceEnvs []string,
+	namespaceEnvs []string,
 	isIgnored IgnoreCallback,
 	isTrusted TrustCallback,
 	lazyIfIgnored bool,
 	parseRunnerConfig bool,
-	containerizedHooksEnabled bool) (allHooks []Hook, maxBatches int, err error) {
+	containerMgr container.IManager) (allHooks []Hook, maxBatches int, err error) {
 
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
 
@@ -183,9 +187,9 @@ func GetAllHooksIn(
 				rootDir,
 				hooksDir,
 				parseRunnerConfig,
-				containerizedHooksEnabled,
+				containerMgr,
 				hookNamespace,
-				hookNamespaceEnvs,
+				namespaceEnvs,
 			)
 
 			if err != nil {
@@ -200,6 +204,7 @@ func GetAllHooksIn(
 				Path:          hookPath,
 				Namespace:     hookNamespace,
 				NamespacePath: namespacedPath,
+				NamespaceEnvs: namespaceEnvs,
 				Active:        !ignored,
 				Trusted:       trusted,
 				SHA1:          sha,

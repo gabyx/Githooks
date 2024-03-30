@@ -17,6 +17,11 @@ const (
 	dockerCmd = "docker"
 )
 
+type ReadBindMount struct {
+	Src  string
+	Dest string
+}
+
 type ManagerDocker struct {
 	cmdCtx cm.CmdContext
 
@@ -216,7 +221,11 @@ func IsDockerAvailable() bool {
 
 	return err == nil
 }
-func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDocker, err error) {
+
+func newManagerDocker(
+	cmd string,
+	mgrType ContainerManagerType,
+	readMounts []ReadBindMount) (mgr *ManagerDocker, err error) {
 
 	var uid, gid string
 
@@ -243,6 +252,14 @@ func newManagerDocker(cmd string, mgrType ContainerManagerType) (mgr *ManagerDoc
 		err = cm.CombineErrors(err, cm.Error("Run config for containerized runs could not be loaded."))
 	}
 
+	// Add additional mounts.
+	for i := range readMounts {
+		m := &readMounts[i]
+		mgr.runConfig.Args = append(
+			mgr.runConfig.Args,
+			[]string{"-v", strs.Fmt("%s:%s:ro", m.Src, m.Dest)}...)
+	}
+
 	return
 }
 
@@ -252,5 +269,5 @@ func NewManagerDocker() (mgr IManager, err error) {
 		return nil, &ManagerNotAvailableError{dockerCmd}
 	}
 
-	return newManagerDocker(dockerCmd, ContainerManagerTypeV.Docker)
+	return newManagerDocker(dockerCmd, ContainerManagerTypeV.Docker, nil)
 }

@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 # change it and expect it to reset it
 git config --global githooks.shared "$GH_TEST_TMP/shared/some-previous-example"

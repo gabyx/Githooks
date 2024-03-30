@@ -56,6 +56,8 @@ const (
 	GitCKContainerizedHooksEnabled     = "githooks.containerizedHooksEnabled"
 	GitCKContainerManager              = "githooks.containerManager"
 	GitCKContainerImageUpdateAutomatic = "githooks.containerImageUpdateAutomatic"
+
+	GitCKExportStagedFilesAsFile = "githooks.exportStagedFilesAsFile"
 )
 
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
@@ -103,6 +105,8 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKRunnerIsNonInteractive,
 
 		GitCKContainerManager,
+		GitCKExportStagedFilesAsFile,
+
 		GitCKContainerizedHooksEnabled,
 	}
 }
@@ -126,6 +130,8 @@ func GetLocalGitConfigKeys() []string {
 
 		GitCKContainerManager,
 		GitCKContainerizedHooksEnabled,
+
+		GitCKExportStagedFilesAsFile,
 	}
 }
 

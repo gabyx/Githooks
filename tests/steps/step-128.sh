@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 "$GH_TEST_BIN/cli" installer || exit 1
 # Do not accept trust prompt.
-# acceptAllTrustPrompts || exit 1
+# accept_all_trust_prompts || exit 1
 
 # Make submodule with post-checkout hook.
 mkdir -p "$GH_TEST_TMP/test128-sub/.githooks" &&

@@ -71,5 +71,5 @@ func NewManagerPodman() (IManager, error) {
 		return nil, &ManagerNotAvailableError{podmanCmd}
 	}
 
-	return newManagerDocker(podmanCmd, ContainerManagerTypeV.Podman)
+	return newManagerDocker(podmanCmd, ContainerManagerTypeV.Podman, nil)
 }

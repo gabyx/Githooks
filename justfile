@@ -10,17 +10,24 @@ build *args:
   cd "{{root_dir}}" && \
     githooks/scripts/build.sh "$@"
 
-test *ARGS:
+test-user *args:
   cd "{{root_dir}}" && \
-    tests/test-alpine-user.sh {{ARGS}}
+    tests/test-alpine-user.sh "$@"
 
-testsuite:
+test *args:
   cd "{{root_dir}}" && \
-    tests/test-testsuite.sh
+    tests/test-alpine.sh "$@"
 
-testrules:
+lint fix="false":
   cd "{{root_dir}}" && \
-    tests/test-rules.sh
+    GH_FIX="{{fix}}" tests/test-lint.sh || \
+      echo "Run 'just lint-fix' to fix the files."
+
+lint-fix: (lint "true")
+
+unittests:
+  cd "{{root_dir}}" && \
+    tests/test-unittests.sh
 
 release-test *args:
   cd "{{root_dir}}/githooks" && \

@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-LAST_UPDATE=$(getUpdateCheckTimestamp)
+LAST_UPDATE=$(get_update_check_timestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
@@ -25,7 +25,7 @@ if ! git -C ~/.githooks/release rev-parse HEAD; then
     exit 1
 fi
 
-LAST_UPDATE=$(getUpdateCheckTimestamp)
+LAST_UPDATE=$(get_update_check_timestamp)
 if [ -z "$LAST_UPDATE" ]; then
     echo "! Update check did not run"
     exit 1
