@@ -5,6 +5,14 @@ set -u
 
 rootDir=$(git rev-parse --show-toplevel)
 
+# shellcheck disable=SC2317
+function clean_up() {
+    docker rmi "githooks:test-rules" &>/dev/null || true
+    docker volume rm gh-test-tmp &>/dev/null || true
+}
+
+trap clean_up EXIT
+
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
 FROM golang:1.20-alpine
 RUN apk update && apk add git git-lfs
@@ -25,15 +33,20 @@ RUN git config --global user.email "githook@test.com" && \
 ENV DOCKER_RUNNING=true
 EOF
 
-if
-    ! docker run --rm -it \
-        -v "$rootDir":/data \
-        -v "/var/run/docker.sock:/var/run/docker.sock" \
-        -e "GH_SHOW_DIFFS=${GH_SHOW_DIFFS:-false}" \
-        -w /data githooks:test-rules tests/exec-rules.sh
-then
-    echo "! Check rules had failures."
-    exit 1
-fi
+# Create a volume where all test setup and repositories go in.
+# Is mounted to `/tmp`
+docker volume create gh-test-tmp
+
+docker run --rm -it \
+    -v "$rootDir:/data:ro" \
+    -v "gh-test-tmp:/tmp" \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -e "GH_SHOW_DIFFS=${GH_SHOW_DIFFS:-false}" \
+    -w /data \
+    githooks:test-rules tests/exec-rules.sh ||
+    {
+        echo "! Check rules had failures."
+        exit 1
+    }
 
 exit 0

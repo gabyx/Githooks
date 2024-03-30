@@ -264,10 +264,10 @@ func newManagerDocker(
 }
 
 // NewManagerDocker return a new mangers for Docker images.
-func NewManagerDocker(readMounts []ReadBindMount) (mgr IManager, err error) {
+func NewManagerDocker() (mgr IManager, err error) {
 	if !IsDockerAvailable() {
 		return nil, &ManagerNotAvailableError{dockerCmd}
 	}
 
-	return newManagerDocker(dockerCmd, ContainerManagerTypeV.Docker, readMounts)
+	return newManagerDocker(dockerCmd, ContainerManagerTypeV.Docker, nil)
 }

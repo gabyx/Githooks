@@ -76,31 +76,20 @@ function deleteAllTestImages() {
 }
 
 function storeIntoContainerVolumes() {
-    local workspace
-    workspace=$(cd "$1" && pwd)
     local shared
-    shared=$(cd "$2" && pwd)
-
-    # copy the folder into volume (under volume/repo)
-    # we need this subfolder when entering
-    # the container running in container `test-alpine-user`, if we would not have that
-    # the directory (volume) would have root owner ship.
-    storeIntoContainerVolume "gh-test-workspace" "$workspace" "./repo"
+    shared=$(cd "$1" && pwd)
 
     # copy content into volume
     storeIntoContainerVolume "gh-test-shared" "$shared/."
-}
 
-function restoreFromContainerVolumeWorkspace() {
-    local workspace
-    workspace=$(cd "$1" && pwd)
-    shift 1
-    local files=("$@")
-
-    restoreFromContainerVolume "gh-test-workspace" \
-        "repo" \
-        "$workspace" \
-        "${files[@]}"
+    # Currently we do not need to store the workspace
+    # because its in a volume from the start.
+    # ==================================================
+    # Copy the workspace into volume (under volume/repo)
+    # we need this subfolder when entering
+    # the container running in container `test-alpine-user`, if we would not have that
+    # the directory (volume) would have root owner ship.
+    # storeIntoContainerVolume "gh-test-workspace" "$workspace" "./repo"
 }
 
 function storeIntoContainerVolume() {
@@ -111,13 +100,13 @@ function storeIntoContainerVolume() {
 
     # shellcheck disable=SC2015
     docker volume create "$volume" &&
-        docker run -d --rm --name githookscopytovolume \
-            -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null &&
+        docker container create --name githookscopytovolume \
+            -v "$volume:/mnt/volume" githooks:volumecopy &&
         docker cp -a "$src" "githookscopytovolume:/mnt/volume/${dest}" &&
-        docker stop githookscopytovolume ||
+        docker container rm githookscopytovolume ||
         {
-            docker stop githookscopytovolume &>/dev/null || true
-            die "Could not copy file from storage."
+            docker container rm githookscopytovolume &>/dev/null || true
+            die "Could not copy file to storage."
         }
 }
 
@@ -136,48 +125,28 @@ function showContainerVolume() {
 
 function showAllContainerVolumes() {
     local level="$1"
-    showContainerVolume "gh-test-workspace" "$level"
     showContainerVolume "gh-test-shared" "$level"
 }
 
-function restoreFromContainerVolume() {
-    local volume="$1"
-    local base="$2"
-    local dest="$3"
-    shift 3
-    local files=("$@")
-
-    # shellcheck disable=SC2015
-    docker run -d --rm --name githookscopytovolume \
-        -v "$volume:/mnt/volume" alpine:latest tail -f /dev/null ||
-        die "Could not start copy container."
-
-    for file in "${files[@]}"; do
-        echo "Restoring '$dest/$file' from volume path '$volume/$base/$file'."
-        docker cp -a "githookscopytovolume:/mnt/volume/$base/$file" "$dest/$file" ||
-            {
-                docker stop githookscopytovolume &>/dev/null || true
-                die "Docker copy failed."
-            }
-    done
-
-    docker stop githookscopytovolume &>/dev/null ||
-        die "Shutting down copycontainer failed."
-}
-
 function setGithooksContainerVolumeEnvs() {
+    local workspaceDest
+    workspaceDest="$(cd "$1" && pwd)"
+
     local file
     file="$(mktemp)"
 
     cat <<<"
-    workspace-path-dest: /mnt/workspace/repo
+    workspace-path-dest: $workspaceDest
+    # shared-path-dest: /mnt/shared # this is the default
+
     auto-mount-workspace: false
     auto-mount-shared: false
+
     args:
       - -v
-      - gh-test-workspace:/mnt/workspace
-      - -v
       - gh-test-shared:/mnt/shared
+      - -v
+      - gh-test-tmp:/tmp
     " >"$file"
 
     export GITHOOKS_CONTAINER_RUN_CONFIG_FILE="$file"
@@ -185,10 +154,6 @@ function setGithooksContainerVolumeEnvs() {
 
 function deleteContainerVolumes() {
     echo "Deleting all test container volumes ..."
-
-    if docker volume ls | grep "gh-test-workspace"; then
-        docker volume rm "gh-test-workspace" &>/dev/null || die "Could not delete volume workspace."
-    fi
 
     if docker volume ls | grep "gh-test-shared"; then
         docker volume rm "gh-test-shared" &>/dev/null || die "Could not delete volume workspace."

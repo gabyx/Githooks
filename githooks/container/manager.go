@@ -57,7 +57,7 @@ type IManager interface {
 // Can be a comma-separated string e.g. `podman,docker` to try
 // to use the one which first can be constructed.
 // Currently only `docker` and `podman` is supported.
-func NewManager(manager string, readMounts []ReadBindMount) (mgr IManager, err error) {
+func NewManager(manager string) (mgr IManager, err error) {
 
 	if strs.IsEmpty(manager) {
 		manager = "docker"
@@ -69,9 +69,9 @@ func NewManager(manager string, readMounts []ReadBindMount) (mgr IManager, err e
 	for _, manager := range mgrs {
 		switch strings.TrimSpace(manager) {
 		case "docker":
-			mgr, e = NewManagerDocker(readMounts)
+			mgr, e = NewManagerDocker()
 		case "podman":
-			mgr, e = NewManagerPodman(readMounts)
+			mgr, e = NewManagerPodman()
 		default:
 			e = cm.ErrorF("Container manager '%s' not supported.", manager)
 		}

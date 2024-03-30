@@ -4,7 +4,6 @@ package main
 import (
 	"github.com/gabyx/githooks/githooks/build"
 	cm "github.com/gabyx/githooks/githooks/common"
-	"github.com/gabyx/githooks/githooks/container"
 	"github.com/gabyx/githooks/githooks/git"
 	"github.com/gabyx/githooks/githooks/hooks"
 	"github.com/gabyx/githooks/githooks/prompt"
@@ -288,17 +287,8 @@ func exportGeneralVars(settings *HookSettings) {
 }
 
 func assertContainerManager(settings *HookSettings) {
-	var readMounts []container.ReadBindMount
-
-	if strs.IsNotEmpty(settings.StagedFilesFile) {
-		readMounts = append(readMounts,
-			container.ReadBindMount{
-				Src:  settings.StagedFilesFile,
-				Dest: hooks.StagedFilesFileContainerDest})
-	}
-
 	var err error
-	settings.ContainerMgr, err = hooks.NewContainerManager(settings.GitX, false, readMounts)
+	settings.ContainerMgr, err = hooks.NewContainerManager(settings.GitX, false, nil)
 
 	log.AssertNoErrorPanicF(err, "Could not create container manager.")
 }
@@ -329,9 +319,14 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
 
 		if exportOnlyFile {
-			file, err := os.CreateTemp("", ".githooks-staged-files-*")
+			// Create the file inside the `.githooks` directory.
+			// to make it better accessible when running containerized.
+			// If it would be in /tmp we would need to mount this file to the container
+			// as well.
+			file, err := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
 			relPath := path.Join(hooks.HooksDirName, path.Base(file.Name()))
 
+			// Remove the file on exit.
 			defer file.Close()
 			cleanUp = func() { _ = os.Remove(file.Name()) }
 
@@ -1023,7 +1018,7 @@ func applyEnvToContainerRunArgs(hs *hooks.Hooks) {
 	hs.Map(func(h *hooks.Hook) {
 		// Apply normal envs and the namespace env. variables too.
 		// Modify the staged files to point to the correct destination.
-		envs := append(hooks.GetGithooksEnvVariables(hooks.StagedFilesFileContainerDest), h.NamespaceEnvs...)
+		envs := append(hooks.GetGithooksEnvVariables(""), h.NamespaceEnvs...)
 
 		// Note: Will do a NoOp anything for not containerized runs in `h`.
 		h.ApplyEnvironmentToArgs(envs)

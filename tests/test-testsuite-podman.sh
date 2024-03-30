@@ -75,7 +75,6 @@ EOF
 
 if ! docker run --privileged --rm -it \
     -v "$(pwd)":/githooks \
-    -v "/var/run/docker.sock:/var/run/docker.sock" \
     -w /githooks githooks:testsuite \
     tests/exec-testsuite.sh ".*Podman.*" "test_podman"; then
 

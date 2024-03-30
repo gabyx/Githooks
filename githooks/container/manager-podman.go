@@ -66,10 +66,10 @@ func IsPodmanAvailable() bool {
 }
 
 // NewManagerPodman returns a manger to manage images with podman.
-func NewManagerPodman(readMounts []ReadBindMount) (IManager, error) {
+func NewManagerPodman() (IManager, error) {
 	if !IsPodmanAvailable() {
 		return nil, &ManagerNotAvailableError{podmanCmd}
 	}
 
-	return newManagerDocker(podmanCmd, ContainerManagerTypeV.Podman, readMounts)
+	return newManagerDocker(podmanCmd, ContainerManagerTypeV.Podman, nil)
 }

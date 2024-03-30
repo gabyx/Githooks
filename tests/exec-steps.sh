@@ -52,9 +52,12 @@ function cleanDirs() {
             }
     fi
 
-    rm -rf /tmp/githooks-installer-* || true
+    # Delete all files in /tmp (/tmp might be a mount! cannot delete whole folder.)
+    find /tmp -mindepth 1 -delete
+
     rm -rf ~/test* || true
 
+    # Delete Githooks temp folder.
     if [ -d "$GH_TEST_TMP" ]; then
         rm -rf "$GH_TEST_TMP" || {
             echo "! Cleanup failed."

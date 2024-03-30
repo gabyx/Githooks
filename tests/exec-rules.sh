@@ -94,14 +94,11 @@ installGithooks
 generateAllFiles
 
 deleteContainerVolumes
-storeIntoContainerVolumes "$REPO_DIR" "$HOME/.githooks/shared" # for dockerized containers
-setGithooksContainerVolumeEnvs
-showAllContainerVolumes "2"
+storeIntoContainerVolumes "$HOME/.githooks/shared"
+setGithooksContainerVolumeEnvs "$temp"
+showAllContainerVolumes 2
 
 runAllHooks
-
-restoreFromContainerVolumeWorkspace "." ""
-deleteContainerVolumes
 
 diff
 exit 0

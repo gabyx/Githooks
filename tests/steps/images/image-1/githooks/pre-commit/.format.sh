@@ -19,12 +19,17 @@ function do_stuff() {
     echo "Formatted by containerized hook" >>"$file"
 }
 
-if [ -n "${STAGED_FILES:-}" ]; then
+# Make sure we really do the right thing for the test.
+if [ ! -f .githooks-test-export-staged-files ]; then
+    [ -z "${STAGED_FILES_FILE:-}" ] || die "STAGED_FILES_FILE must not be defined."
+
     for file in $STAGED_FILES; do
         do_stuff "$file"
     done
-elif [ -n "${STAGED_FILES_FILE:-}" ]; then
-    while read -rd $'\\0' file; do
+else
+    [ -z "${STAGED_FILES:-}" ] || die "STAGED_FILES must not be defined."
+
+    while read -rd $'\0' file; do
         do_stuff "$file"
     done <"$STAGED_FILES_FILE"
 fi

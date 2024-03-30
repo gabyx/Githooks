@@ -8,6 +8,12 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+# Test can be run with staged files exported as file too.
+exportStagedFilesAsFile="false"
+if [ "${1:-}" = "--export-staged-files-as-file" ]; then
+    exportStagedFilesAsFile="true"
+fi
+
 if ! isDockerAvailable; then
     echo "docker is not available"
     exit 249
@@ -30,18 +36,24 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-134-a.git" &&
     cp -rf "$TEST_DIR/steps/images/image-1/githooks/commit-msg" githooks/commit-msg &&
     echo "sharedhooks" >"githooks/.namespace" &&
     git add . &&
-    git commit -m 'Initial commit' ||
-    exit 1
+    git commit -m 'Initial commit'
 
 # Setup local repository
 mkdir -p "$GH_TEST_TMP/test134" &&
     cd "$GH_TEST_TMP/test134" &&
     git init &&
     mkdir -p .githooks &&
-    echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml &&
-    GITHOOKS_DISABLE=1 git add . &&
-    GITHOOKS_DISABLE=1 git commit -m 'Initial commit' ||
-    exit 1
+    echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml
+
+# Maybe run with exported staged files file.
+if [ "$exportStagedFilesAsFile" = "true" ]; then
+    git config --global githooks.exportStagedFilesAsFile true
+    touch .githooks-test-export-staged-files
+fi
+
+# Commit all files.
+GITHOOKS_DISABLE=1 git add . &&
+    GITHOOKS_DISABLE=1 git commit -m 'Initial commit'
 
 # Enable containerized hooks.
 export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
@@ -58,9 +70,9 @@ touch "file.txt" &&
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume,
 # which we dont have.
-storeIntoContainerVolumes "." "$HOME/.githooks/shared"
+storeIntoContainerVolumes "$HOME/.githooks/shared"
 showAllContainerVolumes 3
-setGithooksContainerVolumeEnvs
+setGithooksContainerVolumeEnvs "."
 
 OUT=$(git commit -m "fix: Add file to format" 2>&1) ||
     {
@@ -70,8 +82,6 @@ OUT=$(git commit -m "fix: Add file to format" 2>&1) ||
     }
 
 echo "$OUT"
-
-restoreFromContainerVolumeWorkspace "." "file.txt" "file-2.txt" ".commit-msg-hook-run"
 
 if [ ! -f ".commit-msg-hook-run" ]; then
     echo -e "! Expected commit-msg hook to have been run."
@@ -93,21 +103,6 @@ fi
 if [ "$(grep -ic "formatted by containerized hook" "file-2.txt")" != "1" ]; then
     echo -e "! Expected file should have been changed correctly: Content:"
     cat "file.txt"
-    exit 1
-fi
-
-# Do it again, but check if staged files work too.
-git config githooks.exportStagedFilesAsFile true
-OUT=$(git commit -m "fix: Add file to format, with staged files file" 2>&1) ||
-    {
-        echo "! Commit failed"
-        echo "$OUT"
-        exit 1
-    }
-
-if ! echo "$OUT" | grep -iq "formatting file 'file.txt'" ||
-    ! echo "$OUT" | grep -iq "formatting file 'file-2.txt'"; then
-    echo "! Expected file to have formatted"
     exit 1
 fi
 
