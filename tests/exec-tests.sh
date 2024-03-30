@@ -28,7 +28,7 @@ function buildImage() {
 
     # Build container to only copy to volumes.
     cat <<EOF | docker build \
-        --force-rm -t "githooks:volumecopy" -f - "$ROOT_DIR" || exit 1
+        --force-rm -t "githooks:volumecopy" -f - . || exit 1
     FROM scratch
     CMD you-should-not-run-this-container
 EOF
