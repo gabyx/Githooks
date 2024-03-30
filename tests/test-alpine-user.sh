@@ -29,9 +29,6 @@ RUN rm -rf "$GH_TEST_GIT_CORE/templates/hooks" && \
     mkdir -p "$GH_TEST_REPO" "$GH_TEST_GIT_CORE/templates/hooks" && \
     chown -R test:test "$GH_TEST_REPO" "$GH_TEST_GIT_CORE"
 USER test
-
-RUN mkdir -p /home/test/tmp
-ENV GH_TEST_TMP=/home/test/tmp
 '
 
 exec "$TEST_DIR/exec-tests.sh" 'alpine-user' "$@"
