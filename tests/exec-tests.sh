@@ -90,7 +90,7 @@ buildImage "$dockerGroupId"
 
 # Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
-deleteContainerVolume gh-test-tmp
+deleteContainerVolume gh-test-tmp &>/dev/null || true
 docker volume create gh-test-tmp
 
 # Privileged --privileged is needed if you want

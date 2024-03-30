@@ -25,13 +25,9 @@ lint fix="false":
 
 lint-fix: (lint "true")
 
-testsuite:
+unittests:
   cd "{{root_dir}}" && \
-    tests/test-testsuite.sh
-
-testrules:
-  cd "{{root_dir}}" && \
-    tests/test-lint.sh
+    tests/test-unittests.sh
 
 release-test *args:
   cd "{{root_dir}}/githooks" && \

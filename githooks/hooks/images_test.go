@@ -127,8 +127,8 @@ RUN apk add bash
 	assert.Nil(t, err, "Update images failed: %s", err)
 
 	mgr, err = container.NewManager("")
-	assert.Nil(t, mgr)
-	assert.NotNil(t, err)
+	assert.NotNil(t, mgr)
+	assert.Nil(t, err)
 
 	// Check all images.
 	exists, err := mgr.ImageExists("registry.com/mynamespace-test-image:mine1")

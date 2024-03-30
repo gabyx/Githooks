@@ -185,6 +185,6 @@ function deleteContainerVolumes() {
 function deleteContainerVolume() {
     volume="$1"
     if docker volume ls | grep "$volume"; then
-        docker volume rm "$volume" &>/dev/null || die "Could not delete volume workspace."
+        docker volume rm "$volume"
     fi
 }
