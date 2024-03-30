@@ -16,7 +16,7 @@ if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     exit 249
 fi
 
-function checkLFSHook() {
+function check_lfs_hook() {
     local repo="$1"
     shift 1
     local hooks=("$@")
@@ -58,7 +58,7 @@ function checkLFSHook() {
     done
 }
 
-function checkHooks() {
+function check_hooks() {
     local repo="$1"
     shift 1
     local hooks=("$@")
@@ -108,7 +108,7 @@ lfsHooks1=(
 
 mkdir -p ~/.githooks/templates
 "$GH_TEST_BIN/cli" installer --maintained-hooks "$maintainedHooks1" --template-dir ~/.githooks/templates || exit 1
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 [ -n "$(git config --global githooks.maintainedHooks)" ] || {
     echo "Global maintained hooks should be set, but it is not."
@@ -126,8 +126,8 @@ if [ -n "$(git config githooks.registered)" ]; then
     exit 1
 fi
 
-checkHooks "." "${maintainedHooksRef1[@]}"
-checkLFSHook "." "${lfsHooks1[@]}"
+check_hooks "." "${maintainedHooksRef1[@]}"
+check_lfs_hook "." "${lfsHooks1[@]}"
 
 echo " Change maintainable hooks, locally."
 maintainedHooks2="!all,  commit-msg"
@@ -149,13 +149,13 @@ if [ "$(git config githooks.registered)" != "true" ]; then
     exit 1
 fi
 
-checkHooks "." "${maintainedHooksRef2[@]}"
-checkLFSHook "." "${allLFSHooks[@]}"
+check_hooks "." "${maintainedHooksRef2[@]}"
+check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Uninstall and place a custom hook which should survive."
 "$GH_TEST_BIN/cli" uninstall || exit 1
-checkHooks "." "${allLFSHooks[@]}"
-checkLFSHook "." "${allLFSHooks[@]}"
+check_hooks "." "${allLFSHooks[@]}"
+check_lfs_hook "." "${allLFSHooks[@]}"
 echo "echo 'custom-to-survive'" >.git/hooks/commit-msg
 
 echo "Change maintainable hooks again."
@@ -178,8 +178,8 @@ grep -q "custom-to-survive" .git/hooks/commit-msg || {
 }
 
 export ADD_COUNT=1 # commit-msg
-checkHooks "." "${maintainedHooksRef3[@]}"
-checkLFSHook "." "${lfsHooks3[@]}"
+check_hooks "." "${maintainedHooksRef3[@]}"
+check_lfs_hook "." "${lfsHooks3[@]}"
 
 echo "Change maintainable hooks, locally. again"
 maintainedHooks4="!all, server"
@@ -204,8 +204,8 @@ lfsHooks4=(
 git config githooks.maintainedHooks "$maintainedHooks4"
 "$GH_TEST_BIN/cli" install || exit 1
 
-checkHooks "." "${maintainedHooksRef4[@]}"
-checkLFSHook "." "${lfsHooks4[@]}"
+check_hooks "." "${maintainedHooksRef4[@]}"
+check_lfs_hook "." "${lfsHooks4[@]}"
 
 echo "Pollute an LFS hook and reinstall again."
 echo "echo 'overwritten LFS hooks'" >.git/hooks/post-checkout
@@ -222,19 +222,19 @@ grep -q "overwritten LFS hooks" .git/hooks/post-checkout || {
 echo "Delete the polluted LFS hook an run again"
 rm .git/hooks/post-checkout || exit 1
 "$GH_TEST_BIN/cli" install || exit 1
-checkHooks "." "${maintainedHooksRef4[@]}"
-checkLFSHook "." "${lfsHooks4[@]}"
+check_hooks "." "${maintainedHooksRef4[@]}"
+check_lfs_hook "." "${lfsHooks4[@]}"
 
 echo "Uninstall all hooks, check that all LFS hooks are installed."
 "$GH_TEST_BIN/cli" uninstall || exit 1
-checkHooks "." "${allLFSHooks[@]}"
-checkLFSHook "." "${allLFSHooks[@]}"
+check_hooks "." "${allLFSHooks[@]}"
+check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Unset git config githooks.maintainedHooks and check that original setup is maintained."
 git config --unset githooks.maintainedHooks
 "$GH_TEST_BIN/cli" install || exit 1
-checkHooks "." "${maintainedHooksRef1[@]}"
-checkLFSHook "." "${lfsHooks1[@]}"
+check_hooks "." "${maintainedHooksRef1[@]}"
+check_lfs_hook "." "${lfsHooks1[@]}"
 grep -q "custom-to-survive" .git/hooks/commit-msg.replaced.githook || {
     echo "Replaced hook should still exist."
     ls -al .git/hooks/

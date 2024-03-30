@@ -7,7 +7,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 . "$TEST_DIR/general.sh"
 
 "$GH_TEST_BIN/cli" installer || exit 1
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 function cleanup() {
     true

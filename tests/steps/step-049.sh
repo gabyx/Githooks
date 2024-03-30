@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 git config --global githooks.autoUpdateEnabled false || exit 1
 "$GH_TEST_BIN/cli" installer --non-interactive || exit 1

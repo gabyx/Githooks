@@ -5,8 +5,13 @@ set -e
 set -u
 
 TEST_DIR="$ROOT_DIR/tests"
-
 IMAGE_TYPE="alpine-coverage"
+
+if echo "$IMAGE_TYPE" | grep -q "\-user"; then
+    OS_USER="test"
+else
+    OS_USER="root"
+fi
 
 [ -n "$COVERALLS_TOKEN" ] || {
     echo "! You need to set 'COVERALLS_TOKEN'."
@@ -19,6 +24,13 @@ function cleanup() {
 }
 
 trap cleanup EXIT
+
+# Build container to only copy to volumes.
+cat <<EOF | docker build \
+    --force-rm -t "githooks:volumecopy" -f - . || exit 1
+    FROM scratch
+    CMD you-should-not-run-this-container
+EOF
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
 FROM golang:1.20-alpine
@@ -40,12 +52,7 @@ ENV COVERALLS_TOKEN="$COVERALLS_TOKEN"
 RUN git config --global safe.directory /githooks
 EOF
 
-if echo "$IMAGE_TYPE" | grep -q "\-user"; then
-    OS_USER="test"
-else
-    OS_USER="root"
-fi
-
+# Build test container.
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 

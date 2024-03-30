@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test14" &&
     cd "$GH_TEST_TMP/test14" &&

@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/shared/hooks-023-a.git/pre-commit" &&
     echo "echo 'From shared hook A' >> '$GH_TEST_TMP/test-023.out'" \

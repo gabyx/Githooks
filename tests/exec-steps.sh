@@ -33,15 +33,15 @@ if [ "${1:-}" = "--seq" ]; then
 fi
 
 # shellcheck disable=SC2317
-function cleanUp() {
+function clean_up() {
     set +e
-    cleanDirs
-    cleanDocker
+    clean_dirs
+    clean_docker
 }
 
-trap cleanUp EXIT
+trap clean_up EXIT
 
-function cleanDirs() {
+function clean_dirs() {
     if [ -d "$GH_TEST_GIT_CORE" ]; then
         # shellcheck disable=SC2015
         mkdir -p "$GH_TEST_GIT_CORE/templates/hooks" &&
@@ -69,11 +69,11 @@ function cleanDirs() {
     return 0
 }
 
-function cleanDocker() {
+function clean_docker() {
     if command -v "docker" &>/dev/null; then
         # shellcheck disable=SC2015
-        deleteAllTestImages &>/dev/null &&
-            deleteContainerVolumes &>/dev/null || {
+        delete_all_test_images &>/dev/null &&
+            delete_container_volumes &>/dev/null || {
             echo "! Cleanup docker failed."
             exit 1
         }
@@ -82,7 +82,7 @@ function cleanDocker() {
     return 0
 }
 
-function resetTestRepo() {
+function reset_test_repo() {
     # Reset test repo
     # shellcheck disable=SC2015
     git -C "$GH_TEST_REPO" -c core.hooksPath=/dev/null reset --hard "$COMMIT_BEFORE" >/dev/null 2>&1 &&
@@ -92,7 +92,7 @@ function resetTestRepo() {
     }
 }
 
-function unsetEnvironment() {
+function unset_environment() {
     # Unset mock settings
     git config --global --unset githooks.testingTreatFileProtocolAsRemote
 
@@ -145,8 +145,8 @@ for STEP in "$GH_TESTS/steps"/step-*.sh; do
     echo "> Executing $STEP_NAME"
     echo "  :: $STEP_DESC"
 
-    cleanDirs
-    cleanDocker
+    clean_dirs
+    clean_docker
 
     TEST_RUNS=$((TEST_RUNS + 1))
 
@@ -182,8 +182,8 @@ for STEP in "$GH_TESTS/steps"/step-*.sh; do
         break
     fi
 
-    cleanDirs
-    resetTestRepo
+    clean_dirs
+    reset_test_repo
 
     UNINSTALL_OUTPUT=$(printf "n\\n" | "$GH_TEST_BIN/cli" uninstaller --stdin 2>&1)
     # shellcheck disable=SC2181
@@ -194,7 +194,7 @@ for STEP in "$GH_TESTS/steps"/step-*.sh; do
         break # Fail es early as possible
     fi
 
-    unsetEnvironment || break
+    unset_environment || break
 
     echo
 

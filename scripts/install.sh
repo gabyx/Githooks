@@ -6,20 +6,20 @@ function die() {
     exit 1
 }
 
-function checkTool() {
+function check_tool() {
     if ! command -v "$1" &>/dev/null; then
         echo "!! Required tool '$1' is not installed."
         exit 1
     fi
 }
 
-function checkBash() {
+function check_bash() {
     if ! declare -n _DUMMY &>/dev/null; then
         die "You need bash at least 4.3 to run this script."
     fi
 }
 
-function getPlatformOS() {
+function get_platform_o_s() {
     local -n _platformOS="$1"
     local platformOSDist=""
     local platformOSVersion=""
@@ -105,7 +105,7 @@ function getPlatformOS() {
     return 0
 }
 
-function getPlatformArch() {
+function get_platform_arch() {
     local -n _arch="$1"
 
     _arch=""
@@ -122,14 +122,14 @@ function getPlatformArch() {
     fi
 }
 
-checkBash
-checkTool "grep"
-checkTool "jq"
-checkTool "curl"
-checkTool "sha256sum"
-checkTool "tar"
-checkTool "unzip"
-checkTool "uname"
+check_bash
+check_tool "grep"
+check_tool "jq"
+check_tool "curl"
+check_tool "sha256sum"
+check_tool "tar"
+check_tool "unzip"
+check_tool "uname"
 
 org=gabyx
 repo=githooks
@@ -145,7 +145,7 @@ versionTag=""
 # R3: op can be '=' '==' '!=' '<' '<=' '>' '>=' (lexicographic).
 # R4: Unrestricted number of digits of any item, i.e., 3.0003 > 3.0000004.
 # R5: Unrestricted number of items.
-function versionCompare() {
+function version_compare() {
     local a=$1 op=$2 b=$3 al=${1##*.} bl=${3##*.}
     while [[ $al =~ ^[[:digit:]] ]]; do al=${al:1}; done
     while [[ $bl =~ ^[[:digit:]] ]]; do bl=${bl:1}; done
@@ -172,7 +172,7 @@ function versionCompare() {
     esac
 }
 
-function printHelp() {
+function print_help() {
     echo -e "Usage: install.sh [options...] [-- <installer-args>...]\n\n" \
         "Options:\n" \
         "  --version <version> : The version to download (if not latest)\n" \
@@ -181,7 +181,7 @@ function printHelp() {
         "all other arguments are forwarded to the installer."
 }
 
-function parseArgs() {
+function parse_args() {
     local toInstaller=false
     local prev=""
 
@@ -189,7 +189,7 @@ function parseArgs() {
         if [ "$toInstaller" = "true" ]; then
             installerArgs+=("$p")
         elif [ "$p" = "--help" ] || [ "$p" = "-h" ]; then
-            printHelp
+            print_help
             exit 0
         elif [ "$p" = "--version" ]; then
             true
@@ -209,7 +209,7 @@ function parseArgs() {
     done
 }
 
-parseArgs "$@"
+parse_args "$@"
 
 if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
     # Find the latest version using the GitHub API
@@ -222,7 +222,7 @@ if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
         jq --raw-output 'map(select((.assets | length) > 0)) | .[0].tag_name')"
 fi
 
-if ! versionCompare "${versionTag##v}" ">=" "2.3.4"; then
+if ! version_compare "${versionTag##v}" ">=" "2.3.4"; then
     echo "!! Can only bootstrap version tags >= 'v2.3.4' with this script. Got tag '$versionTag'."
     exit 1
 fi
@@ -230,8 +230,8 @@ fi
 os=""
 arch=""
 
-getPlatformOS os
-getPlatformArch arch
+get_platform_o_s os
+get_platform_arch arch
 
 # The download used `macos` for `darwin` platform.
 if [ "$os" = "darwin" ]; then
@@ -262,10 +262,10 @@ fi
 
 tempDir="$(mktemp -d)"
 
-function cleanUp() {
+function clean_up() {
     rm -rf "$tempDir" &>/dev/null || true
 }
-trap cleanUp EXIT
+trap clean_up EXIT
 
 githooks="$tempDir/githooks"
 mkdir -p "$githooks"

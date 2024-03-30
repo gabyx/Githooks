@@ -25,7 +25,7 @@ if grep -q 'From githooks' "$GH_TEST_TMP/hooktest" 2>/dev/null; then
     exit 3
 fi
 
-acceptAllTrustPrompts || exit 4
+accept_all_trust_prompts || exit 4
 
 git commit --allow-empty -m 'Test' || exit 5
 SHA_BEFORE=$(git rev-parse HEAD 2>/dev/null)

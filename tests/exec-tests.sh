@@ -25,7 +25,7 @@ function clean_up() {
 
 trap clean_up EXIT
 
-function buildImage() {
+function build_image() {
     local dockerGroupId="$1"
 
     # Build container to only copy to volumes.
@@ -86,11 +86,11 @@ EOF
 # Only works on linux (macOS does not need it)
 dockerGroupId=$(getent group docker 2>/dev/null | cut -d: -f3) || true
 echo "Docker group id: $dockerGroupId"
-buildImage "$dockerGroupId"
+build_image "$dockerGroupId"
 
 # Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
-deleteContainerVolume gh-test-tmp &>/dev/null || true
+delete_container_volume gh-test-tmp &>/dev/null || true
 docker volume create gh-test-tmp
 
 # Privileged --privileged is needed if you want

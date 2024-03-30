@@ -14,15 +14,15 @@ if [ "${1:-}" = "--export-staged-files-as-file" ]; then
     exportStagedFilesAsFile="true"
 fi
 
-if ! isDockerAvailable; then
+if ! is_docker_available; then
     echo "docker is not available"
     exit 249
 fi
 
 "$GH_TEST_BIN/cli" installer || exit 1
 
-acceptAllTrustPrompts || exit 1
-assertNoTestImages
+accept_all_trust_prompts || exit 1
+assert_no_test_images
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
@@ -71,9 +71,9 @@ touch "file.txt" &&
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume,
 # which we dont have.
-storeIntoContainerVolumes "$HOME/.githooks/shared"
-showAllContainerVolumes 3
-setGithooksContainerVolumeEnvs "."
+store_into_container_volumes "$HOME/.githooks/shared"
+show_all_container_volumes 3
+set_githooks_container_volume_envs "."
 
 OUT=$(git commit -m "fix: Add file to format" 2>&1) ||
     {
@@ -112,5 +112,5 @@ if [ "$(find .githooks -name ".githooks-staged.*" | wc -l)" != "0" ]; then
     exit 1
 fi
 
-deleteContainerVolumes
-deleteAllTestImages
+delete_container_volumes
+delete_all_test_images

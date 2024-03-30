@@ -11,7 +11,7 @@ if [ -n "$GH_COVERAGE_DIR" ]; then
     exit 249
 fi
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 # Misuse the 2.1.0 prod build with `benchmark` build to test.
 # but forbid update during commits otherwise the runner is overwritten.
@@ -28,7 +28,7 @@ mkdir -p "$GH_TEST_TMP/test501" &&
     cd "$GH_TEST_TMP/test501" &&
     git init || exit 1
 
-function runCommits() {
+function run_commits() {
     for i in {1..30}; do
         git commit --allow-empty -m "Test $i" 2>&1 | average
     done
@@ -64,6 +64,6 @@ function average() {
     echo "execution time: '$time' ms."
 }
 
-echo -e "Runtime average (no load):\n$(runCommits | average 3)"
+echo -e "Runtime average (no load):\n$(run_commits | average 3)"
 
 exit 250

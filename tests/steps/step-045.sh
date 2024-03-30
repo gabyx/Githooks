@@ -7,7 +7,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     echo "Using core.hooksPath"
@@ -62,7 +62,7 @@ git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null || {
 CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
 cd "$GH_TEST_TMP/test045/001" &&
     git config --global githooks.autoUpdateEnabled true &&
-    setUpdateCheckTimestamp $MOCK_LAST_RUN &&
+    set_update_check_timestamp $MOCK_LAST_RUN &&
     OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
 
 AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"

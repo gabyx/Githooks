@@ -324,7 +324,8 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			// If it would be in /tmp we would need to mount this file to the container
 			// as well.
 			file, err := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
-			relPath := path.Join(hooks.HooksDirName, path.Base(file.Name()))
+			filePath := filepath.ToSlash(file.Name())
+			relPath := path.Join(hooks.HooksDirName, path.Base(filePath))
 
 			// Remove the file on exit.
 			defer file.Close()
@@ -334,7 +335,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 				_, err := file.WriteString(files)
 				log.AssertNoError(err, "Could not write staged files to temp file.")
 
-				settings.StagedFilesFile = file.Name()
+				settings.StagedFilesFile = filePath
 			}
 
 			// Set environment directly.

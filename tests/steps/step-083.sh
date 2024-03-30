@@ -6,7 +6,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
@@ -30,7 +30,7 @@ mkdir -p "$GH_TEST_TMP/test083" &&
     cd "$GH_TEST_TMP/test083" &&
     git init || exit 1
 
-function testShared() {
+function test_shared() {
 
     url1="file://$GH_TEST_TMP/shared/first-shared.git"
     location1=$("$GH_INSTALL_BIN_DIR/cli" shared root-from-url "$url1") || exit 1
@@ -56,10 +56,10 @@ function testShared() {
     ! grep -q "/" "$(pwd)/.githooks/.shared.yaml" || exit 15
 }
 
-testShared
+test_shared
 
 "$GH_INSTALL_BIN_DIR/cli" shared clear --all &&
     "$GH_INSTALL_BIN_DIR/cli" shared purge ||
     exit 16
 
-testShared
+test_shared

@@ -5,20 +5,20 @@ function die() {
     exit 1
 }
 
-function acceptAllTrustPrompts() {
+function accept_all_trust_prompts() {
     export ACCEPT_CHANGES=Y
     return 0
 }
 
-function isDockerAvailable() {
+function is_docker_available() {
     command -v docker &>/dev/null || return 1
 }
 
-function isImageExisting() {
+function is_image_existing() {
     docker image inspect "$1" &>/dev/null || return 1
 }
 
-function assertNoTestImages() {
+function assert_no_test_images() {
     images=$(
         docker images -q --filter "reference=*test-image*" &&
             docker images -q --filter "reference=*/*test-image*" &&
@@ -34,13 +34,13 @@ function assertNoTestImages() {
     fi
 }
 
-function setUpdateCheckTimestamp() {
+function set_update_check_timestamp() {
     mkdir -p "$GH_INSTALL_DIR"
     echo "$1" >"$GH_INSTALL_DIR/.last-update-check-timestamp"
     return 0
 }
 
-function getUpdateCheckTimestamp() {
+function get_update_check_timestamp() {
     file="$GH_INSTALL_DIR/.last-update-check-timestamp"
     if [ -f "$file" ]; then
         cat "$file"
@@ -49,12 +49,12 @@ function getUpdateCheckTimestamp() {
     return 0
 }
 
-function resetUpdateCheckTimestamp() {
+function reset_update_check_timestamp() {
     rm "$GH_INSTALL_DIR/.last-update-check-timestamp" || return 0
 }
 
-function deleteAllTestImages() {
-    if ! isDockerAvailable; then
+function delete_all_test_images() {
+    if ! is_docker_available; then
         return 0
     fi
 
@@ -75,12 +75,12 @@ function deleteAllTestImages() {
     fi
 }
 
-function storeIntoContainerVolumes() {
+function store_into_container_volumes() {
     local shared
     shared=$(cd "$1" && pwd)
 
     # copy content into volume
-    storeIntoContainerVolume "gh-test-shared" "$shared/."
+    store_into_container_volume "gh-test-shared" "$shared/."
 
     # Currently we do not need to store the workspace
     # because its in a volume from the start.
@@ -89,10 +89,10 @@ function storeIntoContainerVolumes() {
     # we need this subfolder when entering
     # the container running in container `test-alpine-user`, if we would not have that
     # the directory (volume) would have root owner ship.
-    # storeIntoContainerVolume "gh-test-workspace" "$workspace" "./repo"
+    # store_into_container_volume "gh-test-workspace" "$workspace" "./repo"
 }
 
-function storeIntoContainerVolume() {
+function store_into_container_volume() {
     local volume="$1"
     local src="$2" # Add a `/.` to copy the content.
     local dest="${3:-.}"
@@ -110,7 +110,7 @@ function storeIntoContainerVolume() {
         }
 }
 
-function restoreFromContainerVolume() {
+function restore_from_container_volume() {
     local volume="$1"
     local base="$2"
     local dest="$3"
@@ -135,7 +135,7 @@ function restoreFromContainerVolume() {
         die "Removing copycontainer failed."
 }
 
-function showContainerVolume() {
+function show_container_volume() {
     local volume="$1"
     local level="$2"
 
@@ -148,12 +148,12 @@ function showContainerVolume() {
         die "Could not show container volume."
 }
 
-function showAllContainerVolumes() {
+function show_all_container_volumes() {
     local level="$1"
-    showContainerVolume "gh-test-shared" "$level"
+    show_container_volume "gh-test-shared" "$level"
 }
 
-function setGithooksContainerVolumeEnvs() {
+function set_githooks_container_volume_envs() {
     local workspaceDest
     workspaceDest="$(cd "$1" && pwd)"
 
@@ -177,12 +177,12 @@ function setGithooksContainerVolumeEnvs() {
     export GITHOOKS_CONTAINER_RUN_CONFIG_FILE="$file"
 }
 
-function deleteContainerVolumes() {
+function delete_container_volumes() {
     echo "Deleting all test container volumes ..."
-    deleteContainerVolume "gh-test-shared"
+    delete_container_volume "gh-test-shared"
 }
 
-function deleteContainerVolume() {
+function delete_container_volume() {
     local volume="$1"
     if docker volume ls | grep "$volume"; then
         docker volume rm "$volume"

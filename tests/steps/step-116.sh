@@ -7,7 +7,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 if ! "$GH_TEST_BIN/cli" installer; then
     echo "! Failed to execute the install script"
@@ -146,7 +146,7 @@ fi
 
 cd "$GH_TEST_TMP/test116.3" &&
     git config --global githooks.autoUpdateEnabled true &&
-    setUpdateCheckTimestamp $MOCK_LAST_RUN &&
+    set_update_check_timestamp $MOCK_LAST_RUN &&
     git commit --allow-empty -m 'Second commit' || exit 1
 
 # Check that all hooks are updated

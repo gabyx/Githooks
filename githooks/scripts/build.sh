@@ -18,7 +18,7 @@ LD_FLAGS=()
 
 export CGO_ENABLED=0
 
-parseArgs() {
+parse_args() {
     prev_p=""
     for p in "$@"; do
         if [ "$p" = "--bin-dir" ]; then
@@ -44,7 +44,7 @@ parseArgs() {
     done
 }
 
-parseArgs "$@" || die "Parsing args failed."
+parse_args "$@" || die "Parsing args failed."
 
 cd "$GO_SRC"
 

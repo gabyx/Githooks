@@ -18,18 +18,18 @@ temp=""
 . "$DIR/general.sh"
 
 [ "${GH_SHOW_DIFFS:-false}" == "false" ] || echo "INFO: SHOWING DIFFS"
-trap cleanUp EXIT
+trap clean_up EXIT
 
 # shellcheck disable=SC2317
-function cleanUp() {
-    deleteContainerVolumes || true
+function clean_up() {
+    delete_container_volumes || true
 
     if [ -d "$temp" ]; then
         rm -rf "$temp" || true
     fi
 }
 
-function installGithooks() {
+function install_githooks() {
     just build &&
         "$REPO_DIR/githooks/bin/cli" installer --non-interactive --build-from-source --clone-url "file://$REPO_DIR" &&
         git clean -fX &&
@@ -39,7 +39,7 @@ function installGithooks() {
         git hooks install
 }
 
-function copyToTemp() {
+function copy_to_temp() {
     local temp="$1"
 
     echo "Copy whole repo to temp and make one commit with all files."
@@ -62,14 +62,14 @@ function copyToTemp() {
         git tag v9.9.9
 }
 
-function generateAllFiles() {
+function generate_all_files() {
     local src="$REPO_DIR/githooks"
 
     (cd "$src" && go mod vendor) || die "Go vendor failed."
     (cd "$src" && go generate -mod vendor ./...) || die "Could not generate."
 }
 
-function runAllHooks() {
+function run_all_hooks() {
     # Run all hooks.
     git checkout -b create-diffs &&
         git reset --soft HEAD~1 || die "Could not copy repo."
@@ -102,20 +102,20 @@ function diff() {
     fi
 }
 
-cleanUp
+clean_up
 
 git config --global githooks.exportStagedFilesAsFile true
 temp=$(mktemp -d)
 
-copyToTemp "$temp"
-installGithooks
-generateAllFiles
+copy_to_temp "$temp"
+install_githooks
+generate_all_files
 
-deleteContainerVolumes
-storeIntoContainerVolumes "$HOME/.githooks/shared"
-setGithooksContainerVolumeEnvs "$temp/repo"
-showAllContainerVolumes 2
+delete_container_volumes
+store_into_container_volumes "$HOME/.githooks/shared"
+set_githooks_container_volume_envs "$temp/repo"
+show_all_container_volumes 2
 
-runAllHooks
+run_all_hooks
 
 diff

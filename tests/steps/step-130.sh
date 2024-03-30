@@ -19,7 +19,7 @@ if command -v git-lfs; then
     exit 249
 fi
 
-acceptAllTrustPrompts || exit 1
+accept_all_trust_prompts || exit 1
 
 mkdir -p ~/.githooks/templates/hooks
 git config --global init.templateDir ~/.githooks/templates
