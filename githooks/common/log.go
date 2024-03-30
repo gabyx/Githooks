@@ -279,14 +279,14 @@ func (c *LogContext) IsErrorATerminal() bool {
 
 // Debug logs a debug message.
 func (c *LogContext) Debug(lines ...string) {
-	if c.level <= debugLevel {
+	if DebugLog && c.level <= debugLevel {
 		fmt.Fprint(c.debug, FormatMessage(debugSuffix, indent, lines...), "\n")
 	}
 }
 
 // DebugF logs a debug message.
 func (c *LogContext) DebugF(format string, args ...interface{}) {
-	if c.level <= debugLevel {
+	if DebugLog && c.level <= debugLevel {
 		fmt.Fprint(c.debug, FormatMessageF(debugSuffix, indent, format, args...), "\n")
 	}
 }

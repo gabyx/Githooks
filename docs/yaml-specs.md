@@ -32,6 +32,25 @@ urls:
 version: 1
 ```
 
+## Environment Variables Configuration `.env.yaml`
+
+### Version 1
+
+```yaml
+envs:
+  mystuff:
+    # All these variables are exported
+    # for shared hook namespace `mystuff`.
+    - "MYSTUFF_CHECK_DEAD_CODE=1"
+    - "MYSTUFF_STAGE_ON_FORMAT=1"
+
+  sharedA:
+    # All these variables are exported
+    # for shared hook namespace `sharedA`.
+    - "SHAREDA_ABC=1"
+    - "SHAREDA_TWEET=1"
+```
+
 ## Hook Run Configuration `<hookName>.yaml`
 
 Variable `hookName` refers to one of the supported [Git hooks](/README.md).

@@ -555,6 +555,7 @@ func collectHooks(
 	// Load common env. file if existing.
 	namespaceEnvs, err := hooks.LoadNamespaceEnvs(settings.RepositoryHooksDir)
 	cm.AssertNoErrorPanic(err, "Could not load env. file")
+	log.DebugF("Namespace envs: %v", namespaceEnvs)
 
 	// Local hooks in repository
 	// No parsing of local includes because already happened.
