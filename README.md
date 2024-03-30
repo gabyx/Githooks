@@ -1134,9 +1134,8 @@ tools used in shared hook repositories.
 
 There are generally two scenarios how you would use Githooks in CI.:
 
-1. Run functionality in hook repositories (local and shared repos): You want to
-   run containerized custom functionality. This can be done by using
-   `git hooks exec --containerized ...`. The following
+1. Run functionality in hook repositories (local and shared repos): This can be
+   done by using `git hooks exec --containerized ...`. The following
 
    ```shell
    git hooks exec --containerized \
