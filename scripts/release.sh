@@ -15,7 +15,7 @@ if git tag --list "v*" | grep -q "$tag"; then
     echo "Git tag '$tag' already exists."
 fi
 
-update_info="${1:-}"
+update_info="${2:-}"
 
 if [ -z "$update_info" ]; then
     git tag "prepare-$tag"
