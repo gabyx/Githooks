@@ -1170,7 +1170,7 @@ Githooks will launch a container with two mounts
 inside the hook container.
 
 These mounts can be influenced with the env. variable
-`GITHOOKS_CONTAINER_RUN_CONFIG`, see below.
+`GITHOOKS_CONTAINER_RUN_CONFIG_FILE`, see below.
 
 ##### Nested Containers
 
@@ -1192,10 +1192,12 @@ The mounts might still not work because the paths cannot be mounted further into
 a nested container `N` due to restrictions what you can mount to nested
 containers - if the path comes from a bind mount from the host (VM) into `C` it
 does not work (AFAIK). In that case you can workaround this by
-`GITHOOKS_CONTAINER_RUN_CONFIG` which is the path to a YAML file which modifies
-the mounts:
+`GITHOOKS_CONTAINER_RUN_CONFIG_FILE` which is the path to a YAML file which
+modifies the mounts:
 
 ```yaml
+version: 1
+
 # Tell Githooks where the workspace will be in the nested container.
 # (optional, default `/mnt/workspace`)
 workspace-path-dest: /tmp/ci-job-1/build/repo

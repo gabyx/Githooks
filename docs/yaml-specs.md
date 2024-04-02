@@ -99,3 +99,32 @@ image: # optional
   reference: mycontainerimage:1.2.0
 version: 3 # optional
 ```
+
+## Container Run Configuration
+
+The file can be set for the Githooks runner or `git hooks exec` invocation with
+the env. variable `GITHOOKS_CONTAINER_RUN_CONFIG_FILE` which is the path to a
+YAML file which modifies the mounts:
+
+### Version 1
+
+```yaml
+version: 1
+
+# Tell Githooks where the workspace will be in the nested container.
+# (optional, default `/mnt/workspace`)
+workspace-path-dest: /tmp/ci-job-1/build/repo
+# Tell Githooks where the shared repository checkouts are in the nested container.
+# (optional, default: `/mnt/shared`)
+shared-path-dest: /tmp/ci-job-1/githooks-install/.githooks/shared
+
+# Do not auto-mount the workspace (bind mount), do it yourself with args.
+# (optional, default: true)
+auto-mount-workspace: false
+# Do not auto-mount the shared (bind mount), do it yourself with args.
+# (optional, default: true)
+auto-mount-shared: false
+
+# Additional arguments to `docker run` or `podman run`.
+args: ["-v", "gh-test-tmp:/tmp"]
+```
