@@ -216,6 +216,11 @@ function main() {
     endT=$(date +%s)
     local elapsed=$((endT - startT))
 
+    if [ "$test_run" = "0" ]; then
+        echo "No tests have been run which is a failure." >&2
+        exit 1
+    fi
+
     echo "$test_run tests run: $failed failed and $skipped skipped"
     echo "Run time: $elapsed seconds"
     echo

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
-#   Run a single-repo install and try the auto-update
+#   Run a single-repo install and try the update
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -34,9 +34,9 @@ if ! "$GH_TEST_BIN/cli" install; then
     exit 1
 fi
 
-ARE_UPDATES_ENABLED=$(git config --global --get githooks.autoUpdateEnabled)
-if [ "$ARE_UPDATES_ENABLED" != "true" ]; then
-    echo "! Auto updates were expected to be enabled"
+ARE_UPDATES_CHECKS_ENABLED=$(git config --global --get githooks.autoUpdateEnabled)
+if [ "$ARE_UPDATES_CHECKS_ENABLED" != "true" ]; then
+    echo "! Update checks were expected to be enabled"
     exit 1
 fi
 
@@ -57,6 +57,14 @@ reset_update_check_timestamp
 OUTPUT=$(
     "$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
 )
+
+if ! echo "$OUTPUT" | grep -q "There is a new Githooks update available"; then
+    echo "! Expected update-check output not found"
+    echo "$OUTPUT"
+    exit 1
+fi
+
+OUTPUT=$(git hooks update 2>&1)
 
 if ! echo "$OUTPUT" | grep -q "All done! Enjoy!"; then
     echo "! Expected installation output not found"

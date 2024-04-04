@@ -7,7 +7,7 @@ import (
 
 // SetAutomaticUpdateCheckSettings set the automatic update settings.
 func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
-	opt := hooks.GitCKAutoUpdateEnabled
+	opt := hooks.GitCKUpdateCheckEnabled
 	gitx := git.NewCtx()
 
 	switch {
@@ -22,7 +22,7 @@ func SetAutomaticUpdateCheckSettings(enable bool, reset bool) error {
 
 // GetAutomaticUpdateCheckSettings gets the automatic update settings.
 func GetAutomaticUpdateCheckSettings(gitx *git.Context) (enabled bool, isSet bool) {
-	conf := gitx.GetConfig(hooks.GitCKAutoUpdateEnabled, git.GlobalScope)
+	conf := gitx.GetConfig(hooks.GitCKUpdateCheckEnabled, git.GlobalScope)
 	switch {
 	case conf == git.GitCVTrue:
 		return true, true

@@ -65,6 +65,19 @@ cd "$GH_TEST_TMP/test045/001" &&
     set_update_check_timestamp $MOCK_LAST_RUN &&
     OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
 
+if ! echo "$OUT" | grep -q "There is a new Githooks update available"; then
+    echo "! Expected to have a new update available"
+    echo "$OUT"
+    exit 1
+fi
+
+OUT=$(git hooks update 2>&1)
+if ! echo "$OUT" | grep -q "All done! Enjoy!"; then
+    echo "! Expected installation output not found"
+    echo "$OUT"
+    exit 1
+fi
+
 AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
 if [ "$CURRENT" = "$AFTER" ] ||
     [ "$(git -C "$GH_TEST_REPO" rev-parse v9.9.1)" != "$AFTER" ]; then
