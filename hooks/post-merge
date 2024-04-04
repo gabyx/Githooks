@@ -6,15 +6,20 @@
 #
 # This file is auto-generated, do not edit!
 
-# Read the runner script from the local/global or system config
 GITHOOKS_RUNNER="$(cd "$(dirname "$0")/../" && pwd)/githooks/bin/runner"
 
-if [ ! -x "$GITHOOKS_RUNNER" ]; then
-    echo "! Githooks runner points to a non existing location" >&2
-    echo "   \`$GITHOOKS_RUNNER\`" >&2
-    echo " or it is not executable!" >&2
-    echo " Please run the Githooks install script again to fix it." >&2
-    exit 1
+# shellcheck disable=SC2181
+if [ $? -ne 0 ]; then
+    GITHOOKS_RUNNER="$(cd "$(dirname "$0")/../" && pwd)/githooks/bin/runner"
+
+    if [ ! -x "$GITHOOKS_RUNNER" ]; then
+        echo "! Executable 'githooks-runner' is not in your path." >&2
+        echo "! Also the optional Git config value in 'githooks.runner' points to " >&2
+        echo "   \`$GITHOOKS_RUNNER\`" >&2
+        echo " which is not existing or it is not executable!" >&2
+        echo " Please run the Githooks install script again to fix it." >&2
+        exit 1
+    fi
 fi
 
 exec "$GITHOOKS_RUNNER" "$0" "$@"
