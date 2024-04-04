@@ -225,7 +225,7 @@ func CleanTemporaryDir(installDir string) (string, error) {
 
 // GetRunnerExecutable gets the installed Githooks runner executable.
 func GetRunnerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "runner")
+	p = path.Join(GetBinaryDir(installDir), "githooks-runner")
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
@@ -244,7 +244,7 @@ func SetRunnerExecutableAlias(path string) error {
 
 // GetDialogExecutable gets the installed Githooks dialog executable.
 func GetDialogExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "dialog")
+	p = path.Join(GetBinaryDir(installDir), "githooks-dialog")
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}

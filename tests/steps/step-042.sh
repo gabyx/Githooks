@@ -24,12 +24,12 @@ mkdir -p "$GH_TEST_TMP/start/dir" &&
     cd "$GH_TEST_TMP/start/dir" &&
     git init || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Installation failed"
     exit 1
 fi
 
-if ! "$GH_TEST_BIN/cli" install; then
+if ! "$GH_TEST_BIN/githooks-cli" install; then
     echo "! Install into current repo failed"
     exit 1
 fi

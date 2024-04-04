@@ -16,7 +16,7 @@ cd ~/.githooks/mytemplates/hooks &&
     chmod +x pre-commit ||
     exit 1
 
-"$GH_TEST_BIN/cli" installer --template-dir ~/.githooks/mytemplates || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --template-dir ~/.githooks/mytemplates || exit 1
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test8" &&

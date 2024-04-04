@@ -12,7 +12,7 @@ mkdir -p "$GH_TEST_TMP/test33/a" &&
     cd "$GH_TEST_TMP/test33/a" &&
     git init || exit 1
 
-"$GH_TEST_BIN/cli" installer --dry-run --non-interactive || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --dry-run --non-interactive || exit 1
 
 mkdir -p "$GH_TEST_TMP/test33/b" &&
     cd "$GH_TEST_TMP/test33/b" &&

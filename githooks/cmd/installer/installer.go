@@ -321,7 +321,7 @@ func buildFromSource(
 	binaries := updates.Binaries{BinDir: binPath}
 	strs.Map(bins, func(s string) string {
 		if cm.IsExecutable(s) {
-			if strings.HasPrefix(path.Base(s), "cli") {
+			if strings.HasPrefix(path.Base(s), "githooks-cli") {
 				binaries.Cli = s
 			} else {
 				binaries.Others = append(binaries.Others, s)

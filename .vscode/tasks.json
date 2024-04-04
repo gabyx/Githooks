@@ -61,7 +61,7 @@
         "--listen=127.0.0.1:2345",
         "--log",
         "--api-version=2",
-        "./apps/cli",
+        "./apps/githooks-cli",
         "--",
         "installer",
         "--config",
@@ -98,7 +98,7 @@
         "--listen=127.0.0.1:2345",
         "--log",
         "--api-version=2",
-        "./apps/cli",
+        "./apps/githooks-cli",
         "--",
         "uninstaller"
       ],
@@ -133,7 +133,7 @@
         "--listen=127.0.0.1:2345",
         "--log",
         "--api-version=2",
-        "./apps/cli",
+        "./apps/githooks-cli",
         "--",
         "install",
         "--non-interactive"

@@ -24,7 +24,7 @@ mkdir -p "$GH_TEST_TMP/test18" &&
 
 mkdir -p .githooks &&
     echo "urls: - file://$GH_TEST_TMP/shared/hooks-018.git" >.githooks/.shared.yaml &&
-    "$GH_TEST_BIN/cli" shared update ||
+    "$GH_TEST_BIN/githooks-cli" shared update ||
     exit 1
 
 "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit

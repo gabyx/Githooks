@@ -11,7 +11,7 @@ accept_all_trust_prompts || exit 1
 TEST_PREFIX_DIR=""$GH_TEST_TMP/githooks""
 GH_INSTALL_BIN_DIR="$TEST_PREFIX_DIR/.githooks/bin"
 
-"$GH_TEST_BIN/cli" installer --prefix "$TEST_PREFIX_DIR" || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --prefix "$TEST_PREFIX_DIR" || exit 1
 
 if [ ! -d "$TEST_PREFIX_DIR/.githooks" ]; then
     echo "! Expected the install directory to be in \`$TEST_PREFIX_DIR\`"
@@ -26,9 +26,9 @@ fi
 # Set a wrong install
 git config --global githooks.installDir "$TEST_PREFIX_DIR/.githooks-notexisting"
 
-if ! "$GH_INSTALL_BIN_DIR/cli" --help 2>&1 | grep -q "Githooks installation is corrupt"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" --help 2>&1 | grep -q "Githooks installation is corrupt"; then
     echo "! Expected the installation to be corrupt"
-    "$GH_INSTALL_BIN_DIR/cli" --help
+    "$GH_INSTALL_BIN_DIR/githooks-cli" --help
     exit 4
 fi
 

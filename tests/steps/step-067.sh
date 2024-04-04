@@ -10,12 +10,12 @@ accept_all_trust_prompts || exit 1
 
 mkdir "$GH_TEST_TMP/not-a-git-repo" && cd "$GH_TEST_TMP/not-a-git-repo" || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Expected to succeed"
     exit 1
 fi
 
-if "$GH_TEST_BIN/cli" install; then
+if "$GH_TEST_BIN/githooks-cli" install; then
     echo "! Install into current repo should have failed"
     exit 1
 fi

@@ -74,6 +74,10 @@ if [ -z "$BUILD_COVERAGE" ]; then
     go generate -mod=vendor ./...
     # shellcheck disable=SC2086
     go install -mod=vendor -tags "$BUILD_TAGS" "${LD_FLAGS[@]}" ./...
+
+    mv "$GOBIN/cli" "$GOBIN/githooks-cli"
+    mv "$GOBIN/runner" "$GOBIN/githooks-runner"
+    mv "$GOBIN/dialog" "$GOBIN/githooks-dialog"
 else
     echo "Build coverage ..."
     BUILD_TAGS="$BUILD_TAGS,coverage"
@@ -81,9 +85,9 @@ else
     echo "go test ..."
     go generate -mod=vendor ./...
     # shellcheck disable=SC2086
-    go test ./apps/cli -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/cli"
+    go test ./apps/cli -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/githooks-cli"
     # shellcheck disable=SC2086
-    go test ./apps/dialog -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/dialog"
+    go test ./apps/dialog -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/githooks-dialog"
     # shellcheck disable=SC2086
-    go test ./apps/runner -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/runner"
+    go test ./apps/runner -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/githooks-runner"
 fi

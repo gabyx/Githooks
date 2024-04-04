@@ -27,7 +27,7 @@ echo "n
 y
 $GH_TEST_TMP/test045
 s
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if ! grep -q "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/001/.git/hooks/pre-commit"; then
     echo "! Hooks were not installed into 001"

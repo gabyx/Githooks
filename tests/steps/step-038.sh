@@ -18,7 +18,7 @@ mkdir -p "$GH_TEST_TMP/start/dir" || exit 1
 echo "n
 y
 $GH_TEST_TMP/start
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if [ "$(git config --global --get githooks.previousSearchDir)" != "$GH_TEST_TMP/start" ]; then
     echo "! The search start directory is not recorded"
@@ -28,7 +28,7 @@ fi
 cd "$GH_TEST_TMP/start/dir" &&
     git init || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
     echo "! Hooks were not installed"

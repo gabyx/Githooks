@@ -15,7 +15,7 @@ fi
 
 rm -rf "$GH_TEST_GIT_CORE/templates/hooks" || exit 1
 
-"$GH_TEST_BIN/cli" installer --non-interactive || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --non-interactive || exit 1
 
 if [ -n "$(git config init.templateDir)" ]; then
     echo "! Expected to have init.templateDir not set!" >&2

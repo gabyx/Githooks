@@ -11,7 +11,7 @@ import (
 
 // GetCLIExecutable gets the global Githooks CLI executable.
 func GetCLIExecutable(installDir string) cm.Executable {
-	p := path.Join(GetBinaryDir(installDir), "cli")
+	p := path.Join(GetBinaryDir(installDir), "githooks-cli")
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}

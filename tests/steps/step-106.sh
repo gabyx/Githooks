@@ -65,7 +65,7 @@ else
     export PATH="$GH_TEST_TMP/test106-lfs:$PATH" || exit 4
 fi
 
-"$GH_TEST_BIN/cli" installer || exit 5
+"$GH_TEST_BIN/githooks-cli" installer || exit 5
 
 cd "$GH_TEST_TMP/test106" &&
     git init &&
@@ -98,7 +98,7 @@ fi
 
 # Test LFS invocation if git hooks are disabled
 rm lfs.out && rm hook.out &&
-    "$GH_INSTALL_BIN_DIR/cli" config disable --set &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config disable --set &&
     ACCEPT_CHANGES=Y git commit --allow-empty -m "Second commit" ||
     exit 12
 

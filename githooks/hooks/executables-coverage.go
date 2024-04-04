@@ -14,12 +14,12 @@ import (
 
 // GetCLIExecutable gets the global Githooks CLI executable.
 func GetCLIExecutable(installDir string) cm.Executable {
-	p := path.Join(GetBinaryDir(installDir), "cli")
+	p := path.Join(GetBinaryDir(installDir), "githooks-cli")
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
 
-	coverDir, _, covData := coverage.ReadCoverData("cli")
+	coverDir, _, covData := coverage.ReadCoverData("githooks-cli")
 
 	if _, exists := os.LookupEnv("GH_DEPLOY_SOURCE_IS_PROD"); exists {
 		return cm.Executable{Cmd: p}
@@ -27,7 +27,7 @@ func GetCLIExecutable(installDir string) cm.Executable {
 		return cm.Executable{
 			Cmd: p,
 			Args: []string{"-test.coverprofile",
-				path.Join(coverDir, strs.Fmt("cli-%v.cov", covData.Counter)),
+				path.Join(coverDir, strs.Fmt("githooks-cli-%v.cov", covData.Counter)),
 				"githooksCoverage"}}
 	}
 }

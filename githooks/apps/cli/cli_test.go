@@ -10,7 +10,7 @@ import (
 )
 
 func TestCoverage(t *testing.T) {
-	if coverage.Setup("cli") {
+	if coverage.Setup("githooks-cli") {
 		// Careful if you print to much stuff, certain tests might fail
 		// fmt.Printf("Forward args: %q\n", os.Args)
 
