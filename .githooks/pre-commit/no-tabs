@@ -11,23 +11,23 @@ assertStaged
 success=0
 
 checkTab() {
-    local lines
-    lines=$(grep -rnH "$(printf '\t')" "$1") || true
+  local lines
+  lines=$(grep -rnH "$(printf '\t')" "$1") || true
 
-    if [ -n "$lines" ]; then
-        echo "! Tab character found in: $lines" >&2
-        success=1
-    fi
+  if [ -n "$lines" ]; then
+    echo "! Tab character found in: $lines" >&2
+    success=1
+  fi
 }
 
 for file in $STAGED_FILES; do
-    if echo "$file" | grep -qvE "(githooks|docs)/.*$"; then
-        checkTab "$file"
-    fi
+  if echo "$file" | grep -qvE "(githooks|docs)/.*$"; then
+    checkTab "$file"
+  fi
 done
 
 if [ "$success" = "0" ]; then
-    echo "* No tab characters detected" >&2
+  echo "* No tab characters detected" >&2
 else
-    exit "$success"
+  exit "$success"
 fi

@@ -29,6 +29,9 @@ func runUpdate(
 			promptx = ctx.PromptCtx
 		}
 
+		err := updates.RecordUpdateCheckTimestamp(ctx.InstallDir)
+		ctx.Log.AssertNoError(err, "Could not record update check time.")
+
 		updateAvailable, accepted, err := updates.RunUpdate(
 			ctx.InstallDir,
 			updates.DefaultAcceptUpdateCallback(ctx.Log, promptx, nonInteractiveAccept),
