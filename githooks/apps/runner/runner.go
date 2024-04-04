@@ -359,38 +359,21 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 }
 
 func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
-
 	if !shouldRunUpdateCheck(settings) {
 		return
-	}
-
-	opts := []string{"--internal-auto-update"}
-	if settings.NonInteractive {
-		opts = append(opts, "--non-interactive")
 	}
 
 	var usePreRelease bool
 	if settings.GitX.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue {
 		usePreRelease = true
-		opts = append(opts, "--use-pre-release")
 	}
 
-	updateAvailable, accepted, err := updates.RunUpdate(
-		settings.InstallDir,
-		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, updates.AcceptNonInteractiveNone),
-		usePreRelease,
-		func() error {
-			return updates.RunUpdateOverExecutable(settings.InstallDir,
-				&settings.ExecX,
-				cm.UseStreams(nil, os.Stderr, os.Stderr), // Must not use stdout, because Git hooks.
-				opts...)
-		})
+	cloneDir := hooks.GetReleaseCloneDir(settings.InstallDir)
+	status, err := updates.FetchUpdates(cloneDir, "", "", build.BuildTag, true, updates.ErrorOnWrongRemote, usePreRelease)
 
 	if err != nil {
 		m := strs.Fmt(
-			"Running update failed. See latest log '%s' !",
-			path.Join(os.TempDir(),
-				"githooks-installer-*.log"))
+			"Running update check failed.")
 
 		log.AssertNoError(err, m)
 		err = uiSettings.PromptCtx.ShowMessage(m, true)
@@ -399,20 +382,10 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		return
 	}
 
-	switch {
-	case updateAvailable:
-		if accepted {
-			log.Info("Update successfully dispatched.")
-		} else {
-			log.Info("Update declined.")
-		}
-	default:
-		log.InfoF("Githooks is at the latest version '%s'",
-			build.GetBuildVersion().String())
-	}
-
+	versionText, _ := updates.FormatUpdateText(&status, true)
+	log.Info(versionText)
 	log.Info(
-		"If you would like to disable auto-updates, run:",
+		"If you would like to disable auto-update checks, run:",
 		"  $ git hooks update disable")
 }
 

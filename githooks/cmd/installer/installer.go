@@ -415,8 +415,12 @@ func runInstallDispatched(
 		cm.PanicIfF(!status.IsUpdateAvailable,
 			"An autoupdate should only be triggered when and update is found.")
 
+		cm.PanicIfF(!updates.Enabled,
+			"An autoupdate should only be triggered when Githooks\n"+
+				"is built with updates enabled.")
+
 	} else {
-		log.Info("Fetching update in Githooks clone...")
+		log.Info("Fetching Githooks clone...")
 
 		status, err = updates.FetchUpdates(
 			settings.CloneDir,
@@ -441,7 +445,12 @@ func runInstallDispatched(
 	log.InfoF("Githooks installer existing: '%v'", haveInstaller)
 
 	// We download/build the binaries always.
-	doUpdate := status.IsUpdateAvailable && (args.Update || args.InternalAutoUpdate)
+	// Only do an update if enabled and we either have
+	// given the update flag or its an auto-update
+	// call.
+	doUpdate := updates.Enabled &&
+		status.IsUpdateAvailable && (args.Update || args.InternalAutoUpdate)
+
 	tag := ""
 	commit := ""
 
@@ -1306,7 +1315,7 @@ func runInstaller(
 	args *Arguments) {
 
 	if strs.IsEmpty(args.InternalUpdateFromVersion) {
-		log.InfoF("Running install to version '%s' ...", build.BuildVersion)
+		log.InfoF("Running install at current version '%s' ...", build.BuildVersion)
 	} else {
 		log.InfoF("Running install from '%s' -> '%s' ...", args.InternalUpdateFromVersion, build.BuildVersion)
 	}
@@ -1351,7 +1360,7 @@ func runInstaller(
 		args.DryRun,
 		uiSettings)
 
-	if !args.InternalAutoUpdate {
+	if !args.InternalAutoUpdate && updates.Enabled {
 		setupAutomaticUpdate(log, gitx, args.NonInteractive, args.DryRun, uiSettings.PromptCtx)
 	}
 
@@ -1483,7 +1492,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 		setInstallDir(log, ctx.GitX, settings.InstallDir)
 	}
 
-	if !args.InternalPostDispatch {
+	if updates.Enabled && !args.InternalPostDispatch {
 		assertOneInstallerRunning(log, ctx.CleanupX)
 
 		// Dispatch from an old installer to a new one.
