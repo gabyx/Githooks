@@ -42,7 +42,8 @@ if [ $ELAPSED_TIME -gt 5 ]; then
     exit 1
 fi
 
-if ! echo "$OUTPUT" | grep -i "If you would like to disable update checks"; then
+if ! echo "$OUTPUT" | grep -i "Githooks is at the latest version" ||
+    ! echo "$OUTPUT" | grep -i "If you would like to disable update checks"; then
     echo -e "! Update check should have been executed.\n$OUTPUT"
     exit 1
 fi

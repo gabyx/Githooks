@@ -147,10 +147,23 @@ fi
 cd "$GH_TEST_TMP/test116.3" &&
     git config --global githooks.autoUpdateEnabled true &&
     set_update_check_timestamp $MOCK_LAST_RUN &&
-    git commit --allow-empty -m 'Second commit' || exit 1
+    OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
+
+if ! echo "$OUT" | grep -q "There is a new Githooks update available"; then
+    echo "! Expected update-check output not found"
+    echo "$OUT"
+    exit 1
+fi
+
+OUT=$(git hooks update 2>&1)
+
+if ! echo "$OUT" | grep -q "All done! Enjoy!"; then
+    echo "! Expected installation output not found"
+    echo "$OUT"
+    exit 1
+fi
 
 # Check that all hooks are updated
-
 find "$GH_TEST_TMP" -type f -path "*/.git/hooks/*" \
     -and -not -name "*disabled*" \
     -and -not -path "*githooks-tmp*" |
