@@ -388,7 +388,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	versionText, _ := updates.FormatUpdateText(&status, true)
 	log.Info(versionText)
 	log.Info(
-		"If you would like to disable auto-update checks, run:",
+		"If you would like to disable update checks, run:",
 		"  $ git hooks update disable")
 }
 

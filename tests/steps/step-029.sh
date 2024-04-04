@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test:
-#   Direct runner execution: execute auto-update check
+#   Direct runner execution: execute update check
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -18,7 +18,10 @@ mkdir -p "$GH_TEST_TMP/test29" &&
 
 git config --global githooks.autoUpdateEnabled true || exit 1
 
-ACCEPT_CHANGES=A "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-commit
+OUTPUT=$(
+    ACCEPT_CHANGES=A \
+        "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
+)
 
 if ! git -C ~/.githooks/release rev-parse HEAD; then
     echo "! Release clone was not updated, but it should have!"
@@ -36,5 +39,10 @@ ELAPSED_TIME=$((CURRENT_TIME - LAST_UPDATE))
 
 if [ $ELAPSED_TIME -gt 5 ]; then
     echo "! Update check did not execute properly"
+    exit 1
+fi
+
+if ! echo "$OUTPUT" | grep -i "If you would like to disable update checks"; then
+    echo -e "! Update check should have been executed.\n$OUTPUT"
     exit 1
 fi
