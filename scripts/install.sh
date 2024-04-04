@@ -44,7 +44,8 @@ function get_platform_os() {
 
     if [ "$_platform_os" = "linux" ]; then
 
-        if [ "$(lsb_release -si 2>/dev/null)" = "Ubuntu" ]; then
+        if [ "$(lsb_release -si 2>/dev/null)" = "Ubuntu" ] ||
+            grep -qE 'ID="?ubuntu' "/etc/os-release"; then
             platform_os_dist="ubuntu"
             platform_os_version=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
                 sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
