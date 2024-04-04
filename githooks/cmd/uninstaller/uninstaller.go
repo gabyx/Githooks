@@ -271,6 +271,16 @@ func cleanBinaries(
 	installDir string,
 	tempDir string) {
 
+	if cm.PackageManagerEnabled {
+		// Cannot uninstall binaries because this is done
+		// through the package manager
+		log.Warn(
+			"Not installing Githook binaries.",
+			"This must be done through your package manager.")
+
+		return
+	}
+
 	binDir := hooks.GetBinaryDir(installDir)
 
 	if cm.IsDirectory(binDir) {
