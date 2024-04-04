@@ -1467,7 +1467,7 @@ below.
 
 ```shell
 # enable with:
-$ git hooks update --enable # `Config: githooks.autoUpdateEnabled`
+$ git hooks update --enable # `Config: githooks.updateCheckEnabled`
 
 # disable with:
 $ git hooks update --disable
@@ -1480,7 +1480,7 @@ install time) which is checked out in `<installDir>/release`. Normally, if there
 are new tags (versions) available, the newest tag (version) is installed.
 However, [prerelease version](https://semver.org) tags (e.g. `v1.0.0-rc1`) are
 generally skipped. You can disable this behavior by setting the global Git
-config value `githooks.autoUpdateUsePrerelease = true`. Major version updates
+config value `githooks.updateCheckUsePrerelease = true`. Major version updates
 are **never** automatically installed an need the consent of the user.
 
 If the annotated version tag or the commit message it points to

@@ -397,7 +397,7 @@ func shouldRunUpdateCheck(settings *HookSettings) bool {
 		return false
 	}
 
-	enabled, _ := updates.GetAutomaticUpdateCheckSettings(settings.GitX)
+	enabled, _ := updates.GetUpdateCheckSettings(settings.GitX)
 	if !enabled {
 		return false
 	}

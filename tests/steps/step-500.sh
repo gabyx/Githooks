@@ -15,5 +15,7 @@ GH_DEPLOY_SOURCE_IS_PROD=true \
     "$GH_TEST_BIN/cli" installer --clone-url "https://github.com/gabyx/Githooks.git" --clone-branch "main" ||
     exit 1
 
+git hooks uninstaller
+
 # Remove this installation, such that the uninstall in exec-steps works.
 rm -rf "$GH_INSTALL_DIR" || exit 1

@@ -145,7 +145,7 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
 fi
 
 cd "$GH_TEST_TMP/test116.3" &&
-    git config --global githooks.autoUpdateEnabled true &&
+    git config --global githooks.updateCheckEnabled true &&
     set_update_check_timestamp $MOCK_LAST_RUN &&
     OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
 

@@ -21,6 +21,6 @@ git init || exit 5
 
 "$GH_INSTALL_BIN_DIR/cli" config update --enable || exit 7
 "$GH_INSTALL_BIN_DIR/cli" config list
-"$GH_INSTALL_BIN_DIR/cli" config list | grep -q -i 'githooks.autoUpdateEnabled' || exit 8
-"$GH_INSTALL_BIN_DIR/cli" config list --global | grep -q -i 'githooks.autoUpdateEnabled' || exit 9
-! "$GH_INSTALL_BIN_DIR/cli" config list --local | grep -q -i 'githooks.autoUpdateEnabled' || exit 10
+"$GH_INSTALL_BIN_DIR/cli" config list | grep -q -i 'githooks.updateCheckEnabled' || exit 8
+"$GH_INSTALL_BIN_DIR/cli" config list --global | grep -q -i 'githooks.updateCheckEnabled' || exit 9
+! "$GH_INSTALL_BIN_DIR/cli" config list --local | grep -q -i 'githooks.updateCheckEnabled' || exit 10

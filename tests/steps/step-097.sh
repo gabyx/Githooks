@@ -20,7 +20,7 @@ mkdir -p "$GH_TEST_TMP/test097/.git/hooks" &&
     cd "$GH_TEST_TMP/test097" &&
     git init &&
     "$GH_TEST_BIN/cli" installer &&
-    git config githooks.autoUpdateEnabled false ||
+    git config githooks.updateCheckEnabled false ||
     exit 1
 
 if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then

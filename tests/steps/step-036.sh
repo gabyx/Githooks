@@ -11,7 +11,7 @@ accept_all_trust_prompts || exit 1
 echo 'y
 ' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
 
-if [ "$(git config --global --get githooks.autoUpdateEnabled)" != "true" ]; then
+if [ "$(git config --global --get githooks.updateCheckEnabled)" != "true" ]; then
     echo "! Automatic update checks are not enabled"
     exit 1
 fi

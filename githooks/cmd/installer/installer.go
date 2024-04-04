@@ -1008,7 +1008,7 @@ func setupAutomaticUpdate(
 	dryRun bool,
 	promptx prompt.IContext) {
 
-	enabled, isSet := updates.GetAutomaticUpdateCheckSettings(gitx)
+	enabled, isSet := updates.GetUpdateCheckSettings(gitx)
 	promptMsg := ""
 
 	switch {
@@ -1043,7 +1043,7 @@ func setupAutomaticUpdate(
 			log.Info("[dry run] Would enable automatic update checks.")
 		} else {
 
-			err := updates.SetAutomaticUpdateCheckSettings(true, false)
+			err := updates.SetUpdateCheckSettings(true, false)
 			if log.AssertNoErrorF(err, "Failed to enable automatic update checks.") {
 				log.Info("Automatic update checks are now enabled.")
 			}
@@ -1525,6 +1525,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 }
 
 func transformLegacyGitConfigSettings(log cm.ILogContext, gitx *git.Context) {
+	// Server hooks.
 	useOnlyServerHooks := gitx.GetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
 	if useOnlyServerHooks == git.GitCVTrue {
 		err := hooks.SetMaintainedHooks(gitx, []string{"server"}, git.GlobalScope)
@@ -1532,4 +1533,13 @@ func transformLegacyGitConfigSettings(log cm.ILogContext, gitx *git.Context) {
 	}
 
 	_ = git.NewCtx().UnsetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
+
+	// AutoUpdate to UpdateCheck
+	autoUpdateEnabled := gitx.GetConfig("githooks.autoUpdateEnabled", git.GlobalScope)
+	if strs.IsNotEmpty(autoUpdateEnabled) {
+		err := updates.SetUpdateCheckSettings(autoUpdateEnabled == git.GitCVTrue, false)
+		log.AssertNoError(err, "Could not set automatic update check.")
+	}
+	_ = git.NewCtx().UnsetConfig("githooks.autoUpdateEnabled", git.GlobalScope)
+
 }

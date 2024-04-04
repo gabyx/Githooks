@@ -32,7 +32,8 @@ parse_args() {
         elif [ "$p" = "--coverage" ]; then
             BUILD_COVERAGE="true"
         elif [ "$p" = "--benchmark" ]; then
-            DEBUG_TAG="${DEBUG_TAG}${DEBUG_TAG+,}benchmark"
+            DEBUG_TAG="${DEBUG_TAG}${DEBUG_TAG+,}benchmark,download_mock"
+            BUILD
         elif [ "$p" = "--prod" ]; then
             DEBUG_TAG=""
             LD_FLAGS+=("-ldflags" "-s -w") # strip debug information

@@ -10,7 +10,7 @@ mkdir -p "$GH_TEST_TMP/test30" &&
     cd "$GH_TEST_TMP/test30" &&
     git init || exit 1
 
-git config --global githooks.autoUpdateEnabled false || exit 1
+git config --global githooks.updateCheckEnabled false || exit 1
 
 ACCEPT_CHANGES=A "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-commit
 
