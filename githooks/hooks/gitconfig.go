@@ -8,8 +8,8 @@ const (
 
 	GitCKDisable = "githooks.disable"
 
-	GitCKUpdateCheckEnabled       = "githooks.autoUpdateEnabled"
-	GitCKUpdateCheckUsePrerelease = "githooks.autoUpdateUsePrerelease"
+	GitCKUpdateCheckEnabled       = "githooks.updateCheckEnabled"
+	GitCKUpdateCheckUsePrerelease = "githooks.updateCheckUsePrerelease"
 
 	GitCKBugReportInfo = "githooks.bugReportInfo"
 

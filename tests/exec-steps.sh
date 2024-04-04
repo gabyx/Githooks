@@ -205,6 +205,7 @@ function main() {
         fi
 
         unset_environment || {
+            echo -e "! Unset env. failed: uninstall output was:\n $uninstall_out" >&2
             failed=$((failed + 1))
             break
         }

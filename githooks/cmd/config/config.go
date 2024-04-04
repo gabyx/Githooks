@@ -429,28 +429,28 @@ func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
 }
 
-// RunUpdate enables/disables automatic Githooks update.
-func RunUpdate(ctx *ccm.CmdContext, opts *SetOptions) {
-	const text = "Automatic Githooks update"
+// RunUpdateCheck enables/disables Githooks update checks.
+func RunUpdateCheck(ctx *ccm.CmdContext, opts *SetOptions) {
+	const text = "Githooks update"
 
 	switch {
 	case opts.Set:
-		err := updates.SetAutomaticUpdateCheckSettings(true, false)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not enable automatic update settings.")
+		err := updates.SetUpdateCheckSettings(true, false)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not enable update settings.")
 		ctx.Log.InfoF("%s checks are now enabled.", text)
 
 	case opts.Unset:
-		err := updates.SetAutomaticUpdateCheckSettings(false, false)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not disable automatic update settings.")
+		err := updates.SetUpdateCheckSettings(false, false)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not disable update settings.")
 		ctx.Log.InfoF("%s checks are now disabled.", text)
 
 	case opts.Reset:
-		err := updates.SetAutomaticUpdateCheckSettings(false, true)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not reset automatic update settings.")
+		err := updates.SetUpdateCheckSettings(false, true)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not reset update settings.")
 		ctx.Log.InfoF("%s setting is now unset.", text)
 
 	case opts.Print:
-		enabled, _ := updates.GetAutomaticUpdateCheckSettings(ctx.GitX)
+		enabled, _ := updates.GetUpdateCheckSettings(ctx.GitX)
 		switch {
 		case enabled:
 			ctx.Log.InfoF("%s checks are enabled.", text)
@@ -861,7 +861,7 @@ func configUpdateCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *Set
 		Short: "Change Githooks update settings.",
 		Long:  `Enable or disable automatic Githooks updates.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			RunUpdate(ctx, setOpts)
+			RunUpdateCheck(ctx, setOpts)
 		}}
 
 	optsPSUR := createOptionMap(true, true, true)

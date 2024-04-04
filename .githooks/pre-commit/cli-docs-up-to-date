@@ -34,8 +34,6 @@ for file in $STAGED_FILES; do
           exit 1
         }
 
-        git add "$repoDir/docs/cli/"*
-
         echo "* Docs regenerated." >&2
       else
         echo "! You need to regenerate the CLI docs (its too old)!" >&2

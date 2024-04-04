@@ -1,15 +1,16 @@
-//go:build mock
+//go:build mock || download_mock
 
 package installer
 
 import (
+	"os"
+	"path"
+	"runtime"
+
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
 	"github.com/gabyx/githooks/githooks/updates"
 	"github.com/gabyx/githooks/githooks/updates/download"
-	"os"
-	"path"
-	"runtime"
 )
 
 // IsRunningCoverage returns if we are running coverage.

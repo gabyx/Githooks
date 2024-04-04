@@ -1,4 +1,4 @@
-//go:build !mock
+//go:build !mock && !download_mock
 
 package installer
 
