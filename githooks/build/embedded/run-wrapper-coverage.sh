@@ -5,13 +5,16 @@
 # its hooks to execute on various Git triggers.
 
 # Read the runner script from the local/global or system config
-GITHOOKS_RUNNER=$(git config githooks.runner)
+GITHOOKS_RUNNER=$(command -v "githooks-runner" 2>/dev/null || git config githooks.runner)
 
+# shellcheck disable=SC2181
 if [ ! -x "$GITHOOKS_RUNNER" ]; then
-    echo "! Githooks runner points to a non existing location" >&2
-    echo "   \`$GITHOOKS_RUNNER\`" >&2
-    echo " or it is not executable!" >&2
-    echo " Please run the Githooks install script again to fix it." >&2
+    echo "! Either 'githooks-runner' must be in your path or" >&2
+    echo "  Git config value in 'githooks.runner' must point to an " >&2
+    echo "  executable. The value:" >&2
+    echo "   '$GITHOOKS_RUNNER" >&2
+    echo "  is not existing or is not executable!" >&2
+    echo "  Please run the Githooks install script again to fix it." >&2
     exit 1
 fi
 
@@ -20,8 +23,8 @@ fi
     exit 1
 }
 
-COV_DATA="$GH_COVERAGE_DIR/runner.yaml"
-COUNTER=$(head -1 "$COV_DATA" | sed -E 's@counter: ([0-9]+)@\1@')
+COV_DATA="$GH_COVERAGE_DIR/githooks-runner.yaml"
+COUNTER=$(head -1 "$COV_DATA" 2>&1 | sed -E 's@counter: ([0-9]+)@\1@')
 [ -z "$COUNTER" ] && COUNTER="0"
 COV_FILE="$GH_COVERAGE_DIR/runner-$COUNTER.cov"
 [ -f "$COV_FILE" ] && {
