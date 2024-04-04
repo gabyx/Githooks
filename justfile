@@ -10,6 +10,10 @@ build *args:
   cd "{{root_dir}}" && \
     githooks/scripts/build.sh "$@"
 
+doc *args:
+  cd "{{root_dir}}" && \
+    githooks/scripts/build-doc.sh "$@"
+
 test-user *args:
   cd "{{root_dir}}" && \
     tests/test-alpine-user.sh "$@"
