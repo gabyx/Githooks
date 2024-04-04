@@ -475,14 +475,6 @@ func RunUpdate(
 	usePreRelease bool,
 	run func() error) (updateAvailable bool, accepted bool, err error) {
 
-	err = RecordUpdateCheckTimestamp(installDir)
-
-	if err != nil {
-		err = cm.Error("Could not record update check timestamp.")
-
-		return
-	}
-
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
 	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease)
 	if err != nil {

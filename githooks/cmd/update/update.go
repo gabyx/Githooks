@@ -20,7 +20,7 @@ func runUpdate(
 
 	switch {
 	case setOpts.Set || setOpts.Unset:
-		config.RunUpdate(ctx, setOpts)
+		config.RunUpdateCheck(ctx, setOpts)
 
 	default:
 
