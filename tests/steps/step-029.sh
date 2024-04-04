@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test:
-#   Direct runner execution: execute auto-update
+#   Direct runner execution: execute auto-update check
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -35,6 +35,6 @@ CURRENT_TIME=$(date +%s)
 ELAPSED_TIME=$((CURRENT_TIME - LAST_UPDATE))
 
 if [ $ELAPSED_TIME -gt 5 ]; then
-    echo "! Update did not execute properly"
+    echo "! Update check did not execute properly"
     exit 1
 fi

@@ -8,8 +8,8 @@ const (
 
 	GitCKDisable = "githooks.disable"
 
-	GitCKAutoUpdateEnabled       = "githooks.autoUpdateEnabled"
-	GitCKAutoUpdateUsePrerelease = "githooks.autoUpdateUsePrerelease"
+	GitCKUpdateCheckEnabled       = "githooks.autoUpdateEnabled"
+	GitCKUpdateCheckUsePrerelease = "githooks.autoUpdateUsePrerelease"
 
 	GitCKBugReportInfo = "githooks.bugReportInfo"
 
@@ -72,8 +72,8 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKMaintainedHooks,
 		GitCKPreviousSearchDir,
 
-		GitCKAutoUpdateEnabled,
-		GitCKAutoUpdateUsePrerelease,
+		GitCKUpdateCheckEnabled,
+		GitCKUpdateCheckUsePrerelease,
 
 		GitCKBugReportInfo,
 

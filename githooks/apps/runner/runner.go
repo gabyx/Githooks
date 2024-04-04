@@ -363,8 +363,11 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		return
 	}
 
+	err := updates.RecordUpdateCheckTimestamp(settings.InstallDir)
+	log.AssertNoError(err, "Could not record update check time.")
+
 	var usePreRelease bool
-	if settings.GitX.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue {
+	if settings.GitX.GetConfig(hooks.GitCKUpdateCheckUsePrerelease, git.GlobalScope) == git.GitCVTrue {
 		usePreRelease = true
 	}
 
