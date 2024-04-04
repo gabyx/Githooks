@@ -188,3 +188,12 @@ function delete_container_volume() {
         docker volume rm "$volume"
     fi
 }
+
+# Run the container manager which is defined.
+function container_mgr() {
+    if command -v podman &>/dev/null; then
+        podman "$@"
+    else
+        docker "$@"
+    fi
+}

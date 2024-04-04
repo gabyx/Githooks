@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 
 set -e
 set -u
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
+. "$ROOT_DIR/tests/general.sh"
+
+cd "$ROOT_DIR"
 
 # shellcheck disable=SC2317
 function clean_up() {
