@@ -14,7 +14,7 @@ mkdir -p "$GH_TEST_TMP/test13" &&
 
 mkdir -p .githooks &&
     echo 'exit 1' >.githooks/pre-commit &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if [ $? -ne 1 ]; then
     echo "! Expected the hooks to fail"
@@ -24,7 +24,7 @@ fi
 rm .githooks/pre-commit &&
     mkdir .githooks/pre-commit &&
     echo 'exit 1' >.githooks/pre-commit/test &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if [ $? -ne 1 ]; then
     echo "! Expected the hooks to fail"
@@ -32,5 +32,5 @@ if [ $? -ne 1 ]; then
 fi
 
 echo 'exit 0' >.githooks/pre-commit/test &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit ||
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit ||
     exit 1

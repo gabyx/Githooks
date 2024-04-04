@@ -8,7 +8,7 @@ GITHOOKS_RUNNER=$(command -v "githooks-runner" 2>/dev/null || git config githook
 
 # shellcheck disable=SC2181
 if [ ! -x "$GITHOOKS_RUNNER" ]; then
-    echo "! Either 'githooks-runner' must be in in your path or" >&2
+    echo "! Either 'githooks-runner' must be in your path or" >&2
     echo "  Git config value in 'githooks.runner' must point to an " >&2
     echo "  executable. The value:" >&2
     echo "   '$GITHOOKS_RUNNER" >&2

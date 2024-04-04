@@ -18,11 +18,11 @@ accept_all_trust_prompts || exit 1
 git -C "$GH_TEST_REPO" reset --hard v2.1.0 >/dev/null 2>&1 || exit 1
 
 # run the default install
-"$GH_TEST_BIN/githooks-cli" installer &>/dev/null || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 # Overwrite runner.
 git config --global githooks.updateCheckEnabled false
-git config --global githooks.runner "$GH_TEST_BIN/runner"
+git config --global githooks.runner "$GH_TEST_BIN/githooks-runner"
 
 mkdir -p "$GH_TEST_TMP/test501" &&
     cd "$GH_TEST_TMP/test501" &&
@@ -44,7 +44,7 @@ function average() {
     local input
     input=$(cat | grep "execution time:" | sed -E "s/.*'([0-9\.]+)'.*/\1/g")
     [ -n "$input" ] || {
-        echo "no time extracted"
+        echo "no time extracted" >&2
         exit 1
     }
 
@@ -64,6 +64,11 @@ function average() {
     echo "execution time: '$time' ms."
 }
 
-echo -e "Runtime average (no load):\n$(run_commits | average 3)"
+# shellcheck disable=SC2015
+OUT=$(run_commits | average 3) || {
+    echo "Benchmark not successful."
+}
+
+echo -e "Runtime average (no load):\n$OUT"
 
 exit 250

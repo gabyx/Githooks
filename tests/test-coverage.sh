@@ -94,9 +94,9 @@ RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | g
 RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
     "\$GH_TESTS/steps"/step-* && \\
-    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
+    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-runner"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
-    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/dialog"@g' \\
+    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-dialog"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
     sed -i -E 's@".DIALOG"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1"@g' \\
     "\$GH_TESTS/steps"/step-* && \\

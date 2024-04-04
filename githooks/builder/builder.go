@@ -147,8 +147,10 @@ func Build(gitx *git.Context, buildTags []string, cleanUpX *cm.InterruptContext)
 	// Compile everything.
 	cmd := []string{"install", "-mod=vendor"}
 
+	ext := ""
 	if runtime.GOOS == cm.WindowsOsName {
 		buildTags = append(buildTags, cm.WindowsOsName)
+		ext = ".exe"
 	}
 
 	if len(buildTags) != 0 {
@@ -157,6 +159,16 @@ func Build(gitx *git.Context, buildTags []string, cleanUpX *cm.InterruptContext)
 
 	cmd = append(cmd, "./...")
 	out, err = gox.GetCombined(cmd...)
+
+	for _, name := range []string{"cli", "runner", "dialog"} {
+		src := path.Join(goBinPath, name+ext)
+		dest := path.Join(goBinPath, "githooks-"+name+ext)
+
+		err = os.Rename(src, dest)
+		if err != nil {
+			return "", cm.ErrorF("Could not rename executable '%s'.", name)
+		}
+	}
 
 	if err != nil {
 		return goBinPath,

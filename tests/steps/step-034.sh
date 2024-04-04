@@ -14,7 +14,7 @@ mkdir -p .githooks/pre-commit &&
     touch .githooks/trust-all &&
     echo "echo 'Trusted hook' > '$GH_TEST_TMP/test34.out'" >.githooks/pre-commit/test &&
     TRUST_ALL_HOOKS=Y ACCEPT_CHANGES=N \
-        "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+        "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if ! grep -q "Trusted hook" "$GH_TEST_TMP/test34.out"; then
     echo "! Expected hook was not run"
@@ -23,7 +23,7 @@ fi
 
 echo "echo 'Changed hook' > '$GH_TEST_TMP/test34.out'" >.githooks/pre-commit/test &&
     TRUST_ALL_HOOKS="" ACCEPT_CHANGES=N \
-        "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+        "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if ! grep -q "Changed hook" "$GH_TEST_TMP/test34.out"; then
     echo "! Changed hook was not run"

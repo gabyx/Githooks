@@ -45,6 +45,7 @@ AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
 if [ "$CURRENT" = "$AFTER" ] ||
     [ "$(git -C "$GH_TEST_REPO" rev-parse v9.9.1)" != "$AFTER" ]; then
     echo "! Release clone was not updated, but it should have!"
+    echo "$OUT"
     exit 1
 fi
 

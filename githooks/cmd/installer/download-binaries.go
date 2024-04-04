@@ -4,6 +4,7 @@ package installer
 
 import (
 	"net/url"
+	"os"
 	"path"
 	"runtime"
 	"strings"
@@ -119,10 +120,23 @@ func downloadBinaries(
 		ext = cm.WindowsExecutableSuffix
 	}
 
-	all := []string{
-		path.Join(tempDir, "githooks-cli"+ext),
-		path.Join(tempDir, "githooks-runner"+ext),
-		path.Join(tempDir, "githooks-dialog"+ext)}
+	cli := path.Join(tempDir, "githooks-cli"+ext)
+	dialog := path.Join(tempDir, "githooks-dialog"+ext)
+	runner := path.Join(tempDir, "githooks-runner"+ext)
+
+	// Handle old binary names.
+	if exists, _ := cm.IsPathExisting(path.Join(tempDir, "runner")); exists {
+		err := os.Rename(path.Join(tempDir, "cli"+ext), cli)
+		log.AssertNoErrorPanic(err, "Could not rename excutable 'cli'.")
+
+		err = os.Rename(path.Join(tempDir, "runner"+ext), runner)
+		log.AssertNoErrorPanic(err, "Could not rename excutable 'runner'.")
+
+		err = os.Rename(path.Join(tempDir, "dialog"+ext), dialog)
+		log.AssertNoErrorPanic(err, "Could not rename excutable 'dialog'.")
+	}
+
+	all := []string{cli, runner, dialog}
 
 	return updates.Binaries{All: all, Cli: all[0], Others: all[1:]}
 }

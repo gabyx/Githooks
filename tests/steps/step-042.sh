@@ -55,7 +55,7 @@ fi
 reset_update_check_timestamp
 
 OUTPUT=$(
-    "$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
+    "$GH_INSTALL_BIN_DIR/githooks-runner" "$(pwd)"/.git/hooks/post-commit 2>&1
 )
 
 if ! echo "$OUTPUT" | grep -q "There is a new Githooks update available"; then

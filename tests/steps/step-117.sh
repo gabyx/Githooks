@@ -64,7 +64,7 @@ fi
 echo "urls: - file:////$GH_TEST_TMP/shared/shared-cloned.git" >.githooks/.shared.yaml || exit 1
 
 # Invoke shared hooks update
-OUT=$("$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
 # shellcheck disable=SC2181
 if echo "$OUT" | grep -q "Shared hook: test1" ||
     ! echo "$OUT" | grep -q "Update will be skipped" ||
