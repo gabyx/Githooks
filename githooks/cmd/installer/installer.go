@@ -960,7 +960,6 @@ func setupHookTemplates(
 func installBinaries(
 	log cm.ILogContext,
 	installDir string,
-	cloneDir string,
 	tempDir string,
 	binaries []string,
 	dryRun bool) {
@@ -976,6 +975,12 @@ func installBinaries(
 	}
 
 	log.InfoF("Installing binaries:\n%s\n"+"to '%s'.", strings.Join(msg, "\n"), binDir)
+
+	// Remove old legacy binaries, just in case if they are still there.
+	for _, name := range []string{"runner", "cli", "dialog"} {
+		_ = os.Remove(path.Join(binDir, name))
+		_ = os.Remove(path.Join(binDir, name+".exe"))
+	}
 
 	for _, binary := range binaries {
 		dest := path.Join(binDir, path.Base(binary))
@@ -1342,7 +1347,6 @@ func runInstaller(
 		installBinaries(
 			log,
 			settings.InstallDir,
-			settings.CloneDir,
 			settings.TempDir,
 			args.InternalBinaries,
 			args.DryRun)
