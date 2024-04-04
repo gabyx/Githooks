@@ -16,7 +16,7 @@ mkdir -p "$GH_TEST_TMP/test29" &&
     cd "$GH_TEST_TMP/test29" &&
     git init || exit 1
 
-git config --global githooks.autoUpdateEnabled true || exit 1
+git config --global githooks.updateCheckEnabled true || exit 1
 
 OUTPUT=$(
     ACCEPT_CHANGES=A \

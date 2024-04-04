@@ -8,10 +8,10 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-git config --global githooks.autoUpdateEnabled false || exit 1
+git config --global githooks.updateCheckEnabled false || exit 1
 "$GH_TEST_BIN/cli" installer --non-interactive || exit 1
 
-if [ "$(git config --global --get githooks.autoUpdateEnabled)" != "false" ]; then
+if [ "$(git config --global --get githooks.updateCheckEnabled)" != "false" ]; then
     echo "! Automatic update checks were unexpectedly enabled"
     exit 1
 fi

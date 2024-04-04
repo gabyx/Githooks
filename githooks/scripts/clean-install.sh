@@ -5,7 +5,7 @@ git config --global --unset githooks.runner
 git config --global --unset-all githooks.shared
 git config --global --unset githooks.failOnNonExistingSharedHooks
 git config --global --unset githooks.maintainedHooks
-git config --global --unset githooks.autoUpdateEnabled
+git config --global --unset githooks.updateCheckEnabled
 git config --global --unset githooks.cloneUrl
 git config --global --unset githooks.cloneBranch
 git config --global --unset githooks.previousSearchDir

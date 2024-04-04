@@ -34,7 +34,7 @@ if ! "$GH_TEST_BIN/cli" install; then
     exit 1
 fi
 
-ARE_UPDATES_CHECKS_ENABLED=$(git config --global --get githooks.autoUpdateEnabled)
+ARE_UPDATES_CHECKS_ENABLED=$(git config --global --get githooks.updateCheckEnabled)
 if [ "$ARE_UPDATES_CHECKS_ENABLED" != "true" ]; then
     echo "! Update checks were expected to be enabled"
     exit 1

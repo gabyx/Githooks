@@ -11,7 +11,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$GH_TEST_TMP/test099/.git/hooks" &&
     cd "$GH_TEST_TMP/test099" &&
     git init &&
-    git config githooks.autoUpdateEnabled false ||
+    git config githooks.updateCheckEnabled false ||
     exit 1
 
 if ! git worktree list >/dev/null 2>/dev/null; then
