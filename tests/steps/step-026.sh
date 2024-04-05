@@ -13,7 +13,7 @@ mkdir -p "$GH_TEST_TMP/test26" &&
 mkdir -p .githooks &&
     mkdir -p .githooks/pre-commit &&
     echo "echo 'First execution' >> '$GH_TEST_TMP/test026.out'" >.githooks/pre-commit/test &&
-    ACCEPT_CHANGES=N "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    ACCEPT_CHANGES=N "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if grep -q "First execution" "$GH_TEST_TMP/test026.out"; then
     echo "! Expected to refuse executing the hook"

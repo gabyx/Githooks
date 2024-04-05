@@ -24,12 +24,12 @@ mkdir -p "$GH_TEST_TMP/start/dir" &&
     cd "$GH_TEST_TMP/start/dir" &&
     git init || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Installation failed"
     exit 1
 fi
 
-if ! "$GH_TEST_BIN/cli" install; then
+if ! "$GH_TEST_BIN/githooks-cli" install; then
     echo "! Install into current repo failed"
     exit 1
 fi
@@ -55,7 +55,7 @@ fi
 reset_update_check_timestamp
 
 OUTPUT=$(
-    "$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
+    "$GH_INSTALL_BIN_DIR/githooks-runner" "$(pwd)"/.git/hooks/post-commit 2>&1
 )
 
 if ! echo "$OUTPUT" | grep -q "There is a new Githooks update available"; then

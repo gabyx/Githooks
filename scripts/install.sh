@@ -271,7 +271,7 @@ trap clean_up EXIT
 githooks="$tempDir/githooks"
 mkdir -p "$githooks"
 
-cliExe="cli"
+cliExe="githooks-cli"
 if [ "$os" = "windows" ]; then
     cliExe="$cliExe.exe"
 fi

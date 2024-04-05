@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
 fi
@@ -67,7 +67,7 @@ mkdir -p "$GH_TEST_TMP/test116.3" && cd "$GH_TEST_TMP/test116.3" && git init
 
 echo "Y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if ! grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
     ! grep -qE ".+/test *116.2/.git$" "$REGISTER_FILE" ||
@@ -79,7 +79,7 @@ fi
 
 # Test uninstall to only repo 1
 cd "$GH_TEST_TMP/test116.1" || exit 1
-if ! "$GH_TEST_BIN/cli" uninstall; then
+if ! "$GH_TEST_BIN/githooks-cli" uninstall; then
     echo "! Uninstall from current repo failed"
     exit 1
 fi
@@ -100,15 +100,15 @@ fi
 # Test total uninstall to all repos
 echo "Y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" uninstaller --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin || exit 1
 
 if [ -f "$REGISTER_FILE" ]; then
     echo "! Expected registered list to not exist"
     exit 1
 fi
 
-if [ -f "$GH_INSTALL_BIN_DIR/runner" ] ||
-    [ -f "$GH_INSTALL_BIN_DIR/cli" ]; then
+if [ -f "$GH_INSTALL_BIN_DIR/githooks-runner" ] ||
+    [ -f "$GH_INSTALL_BIN_DIR/githooks-cli" ]; then
     echo "! Expected that all binaries are deleted."
     exit 1
 fi
@@ -120,7 +120,7 @@ rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"* || exit 1
 echo "Y
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 # Update Test
 # Set all other hooks to dirty by adding something

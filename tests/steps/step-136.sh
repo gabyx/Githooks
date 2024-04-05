@@ -13,7 +13,7 @@ if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
     exit 249
 fi
 
-"$GH_TEST_BIN/cli" installer --use-manual || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --use-manual || exit 1
 
 mkdir -p "$GH_TEST_TMP/test136" &&
     cd "$GH_TEST_TMP/test136" &&
@@ -35,7 +35,7 @@ if grep -Rq 'github.com/gabyx/githooks' .git/hooks; then
 fi
 
 # Reinstall and check that it fails (uninstall first)
-out=$("$GH_TEST_BIN/cli" installer --use-core-hookspath 2>&1)
+out=$("$GH_TEST_BIN/githooks-cli" installer --use-core-hookspath 2>&1)
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ] ||
@@ -62,5 +62,5 @@ if [ -n "$(git config init.templateDir)" ]; then
 fi
 
 # Uninstall and reinstall normally.
-"$GH_TEST_BIN/cli" uninstaller || exit 1
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" uninstaller || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1

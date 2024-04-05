@@ -9,13 +9,13 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test062" &&
     cd "$GH_TEST_TMP/test062" &&
     git init || exit 1
 
-OUT=$("$GH_INSTALL_BIN_DIR/cli" update --no)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" update --no)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] || ! echo "$OUT" | grep -qi "is at the latest version"; then
     echo "! Failed to run the update with --no"
@@ -29,7 +29,7 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
     exit 1
 fi
 
-OUT=$("$GH_INSTALL_BIN_DIR/cli" update --no)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" update --no)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] || ! echo "$OUT" | grep -qi "update declined"; then
     echo "! Failed to run the update with --no"

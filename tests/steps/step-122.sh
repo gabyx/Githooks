@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 DIALOG=$(git config --global githooks.dialog)
 
@@ -17,17 +17,17 @@ if [ ! -f "$DIALOG" ]; then
     exit 2
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/dialog" --version >/dev/null 2>&1; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-dialog" --version >/dev/null 2>&1; then
     echo "! Dialog tool not working properly."
     exit 3
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/dialog" --version 2>&1 | grep -q "dialog version"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-dialog" --version 2>&1 | grep -q "dialog version"; then
     echo "! Dialog tool not working properly"
     exit 4
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/dialog" options --help 2>&1 | grep -q "dialog"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-dialog" options --help 2>&1 | grep -q "dialog"; then
     echo "! Dialog tool not working properly"
     exit 5
 fi

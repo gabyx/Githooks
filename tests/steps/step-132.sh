@@ -42,7 +42,7 @@ mkdir -p .githooks &&
     exit 1
 
 # Trigger the shared hooks update
-OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
 echo "$OUT"
 if ! echo "$OUT" | grep -q "Updating shared hooks from" ||
     ! echo "$OUT" | grep -q "Build/pull images for repository"; then

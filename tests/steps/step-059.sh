@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test059/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test059/.githooks/pre-commit/first" &&
@@ -18,12 +18,12 @@ mkdir -p "$GH_TEST_TMP/test059/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test059" &&
     git init || exit 1
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "first" | grep -q "'ignored'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "first" | grep -q "'ignored'"; then
     echo "! Unexpected cli list output (1)"
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "second" | grep -q "'ignored'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "second" | grep -q "'ignored'"; then
     echo "! Unexpected cli list output (2)"
     exit 1
 fi

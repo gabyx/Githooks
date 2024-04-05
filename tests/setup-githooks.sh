@@ -32,7 +32,7 @@ cd "$GH_TEST_REPO/githooks" &&
     git tag "v2.1.0" &&
     ./scripts/clean.sh &&
     ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --prod --benchmark &&
-    ./bin/cli "${CLI_ADD_ARGS[@]}" --version || exit 1
+    ./bin/githooks-cli "${CLI_ADD_ARGS[@]}" --version || exit 1
 echo "Commit build v2.1.0 to repo (for test download) ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
@@ -48,7 +48,7 @@ cd "$GH_TEST_REPO/githooks" &&
     git tag "v9.9.0" &&
     ./scripts/clean.sh &&
     ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --build-tags "mock" &&
-    ./bin/cli $"${CLI_ADD_ARGS[@]}" --version || exit 1
+    ./bin/githooks-cli $"${CLI_ADD_ARGS[@]}" --version || exit 1
 echo "Commit build v9.9.0 to repo ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
@@ -62,7 +62,7 @@ cd "$GH_TEST_REPO/githooks" &&
     git tag -f "v9.9.1" &&
     ./scripts/clean.sh &&
     ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --build-tags "mock" &&
-    ./bin/cli "${CLI_ADD_ARGS[@]}" --version || exit 1
+    ./bin/githooks-cli "${CLI_ADD_ARGS[@]}" --version || exit 1
 echo "Commit build v9.9.1 to repo (no-skip)..." &&
     cd "$GH_TEST_REPO" &&
     git commit -a --allow-empty -m "Version 9.9.1" -m "Update-NoSkip: true" >/dev/null 2>&1 &&

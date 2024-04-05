@@ -41,9 +41,9 @@ func downloadBinaries(
 	}
 
 	all := []string{
-		path.Join(tempDir, "cli"+ext),
-		path.Join(tempDir, "runner"+ext),
-		path.Join(tempDir, "dialog"+ext)}
+		path.Join(tempDir, "githooks-cli"+ext),
+		path.Join(tempDir, "githooks-runner"+ext),
+		path.Join(tempDir, "githooks-dialog"+ext)}
 
 	for _, exe := range all {
 		src := path.Join(bin, path.Base(exe))

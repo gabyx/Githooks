@@ -41,7 +41,7 @@ $GH_TEST_TMP
 y
 
 s
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if [ -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be deleted (1)'
@@ -67,7 +67,7 @@ if grep 'Previous3' "$GH_TEST_TMP/test-109.out"; then
     exit 1
 fi
 
-out=$("$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --print)
+out=$("$GH_INSTALL_BIN_DIR/githooks-cli" config delete-detected-lfs-hooks --print)
 if ! echo "$out" | grep -q "but instead backed up"; then
     echo "! Expected the correct config behavior (5)"
     echo "$out"
@@ -75,8 +75,8 @@ if ! echo "$out" | grep -q "but instead backed up"; then
 fi
 
 # For coverage
-"$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --reset || exit 1
-out=$("$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --print)
+"$GH_INSTALL_BIN_DIR/githooks-cli" config delete-detected-lfs-hooks --reset || exit 1
+out=$("$GH_INSTALL_BIN_DIR/githooks-cli" config delete-detected-lfs-hooks --print)
 if ! echo "$out" | grep -q "left to the user"; then
     echo "! Expected the correct config behavior (6)"
     echo "$out"
@@ -97,7 +97,7 @@ $GH_TEST_TMP
 N
 
 a
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if [ ! -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be moved (7)'

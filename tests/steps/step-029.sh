@@ -20,7 +20,7 @@ git config --global githooks.updateCheckEnabled true || exit 1
 
 OUTPUT=$(
     ACCEPT_CHANGES=A \
-        "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/post-commit 2>&1
+        "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/post-commit 2>&1
 )
 
 if ! git -C ~/.githooks/release rev-parse HEAD; then
