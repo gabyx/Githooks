@@ -22,6 +22,10 @@ test *args:
   cd "{{root_dir}}" && \
     tests/test-alpine.sh "$@"
 
+coverage *args:
+  cd "{{root_dir}}" && \
+    COVERALLS_TOKEN=non-existing tests/test-coverage.sh "$@"
+
 lint fix="false":
   cd "{{root_dir}}" && \
     GH_FIX="{{fix}}" tests/test-lint.sh || \

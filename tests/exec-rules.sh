@@ -31,7 +31,7 @@ function clean_up() {
 
 function install_githooks() {
     just build &&
-        "$REPO_DIR/githooks/bin/cli" installer --non-interactive --build-from-source --clone-url "file://$REPO_DIR" &&
+        "$REPO_DIR/githooks/bin/githooks-cli" installer --non-interactive --build-from-source --clone-url "file://$REPO_DIR" &&
         git clean -fX &&
         git hooks config trust-all --accept &&
         git hooks config enable-containerized-hooks --set &&

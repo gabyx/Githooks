@@ -37,7 +37,7 @@ func MakeDialogCtl(ctx *dcm.CmdContext) (rootCmd *cobra.Command) {
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())
 
 	rootCmd = &cobra.Command{
-		Use:   "dialog",
+		Use:   "githooks-dialog",
 		Short: "Githooks dialog application similar to 'zenity'.",
 		Long:  "See further information at https://github.com/gabyx/githooks/blob/main/README.md"}
 

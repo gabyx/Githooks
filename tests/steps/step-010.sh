@@ -15,7 +15,7 @@ mkdir -p "$GH_TEST_TMP/test10/a" &&
 echo "n
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" installer --stdin --dry-run || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin --dry-run || exit 1
 
 mkdir -p "$GH_TEST_TMP/test10/b" &&
     cd "$GH_TEST_TMP/test10/b" &&

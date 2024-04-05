@@ -20,7 +20,7 @@ rm -rf "$GH_TEST_GIT_CORE/templates" || exit 1
 echo "n
 y
 $GH_TEST_TMP/.test-020-templates
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 mkdir -p "$GH_TEST_TMP/test20" &&
     cd "$GH_TEST_TMP/test20" &&

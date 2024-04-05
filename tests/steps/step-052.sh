@@ -8,9 +8,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
-if ! "$GH_TEST_BIN/cli" --help | grep -q "See further information at"; then
+if ! "$GH_TEST_BIN/githooks-cli" --help | grep -q "See further information at"; then
     echo "! Unexpected cli help output"
     exit 1
 fi

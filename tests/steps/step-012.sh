@@ -18,7 +18,7 @@ mkdir -p .githooks &&
     echo "echo \"GITHOOKS_OS=\$GITHOOKS_OS\" >> '$GH_TEST_TMP/test012env.out'" >>.githooks/pre-commit &&
     echo "echo \"GITHOOKS_ARCH=\$GITHOOKS_ARCH\" >> '$GH_TEST_TMP/test012env.out'" >>.githooks/pre-commit &&
     export GLOBAL_ENV_VAR="monkeyshit" &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit ||
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit ||
     exit 1
 
 # From https://github.com/golang/go/blob/master/src/go/build/syslist.go

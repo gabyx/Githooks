@@ -8,9 +8,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
-if ! "$GH_INSTALL_BIN_DIR/cli" --version; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" --version; then
     echo "! The command line helper tool is not available"
     exit 1
 fi

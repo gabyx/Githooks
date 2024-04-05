@@ -26,7 +26,7 @@ mkdir -p "$GH_TEST_TMP/test9/.githooks/pre-commit" &&
 echo "n
 y
 $GH_TEST_TMP/test9
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 git commit --allow-empty -m 'Test'
 

@@ -29,7 +29,7 @@ fi
 echo 'n
 y
 
-' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if ! grep -r 'github.com/gabyx/githooks' ~/test022/p001/.git/hooks; then
     echo "! Hooks were not installed successfully"

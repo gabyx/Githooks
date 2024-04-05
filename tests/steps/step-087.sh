@@ -8,17 +8,17 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
 fi
 
-! "$GH_INSTALL_BIN_DIR/cli" config update-time || exit 2
+! "$GH_INSTALL_BIN_DIR/githooks-cli" config update-time || exit 2
 
-"$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 3
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update-time --print | grep -q 'never' || exit 3
 
 set_update_check_timestamp 123 &&
-    "$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' && exit 4
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config update-time --print | grep -q 'never' && exit 4
 
-"$GH_INSTALL_BIN_DIR/cli" config update-time --reset &&
-    "$GH_INSTALL_BIN_DIR/cli" config update-time --print | grep -q 'never' || exit 5
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update-time --reset &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config update-time --print | grep -q 'never' || exit 5

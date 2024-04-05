@@ -194,7 +194,7 @@ function main() {
         reset_test_repo "$commit_before"
 
         local uninstall_out
-        uninstall_out=$(printf "n\\n" | "$GH_TEST_BIN/cli" uninstaller --stdin 2>&1)
+        uninstall_out=$(printf "n\\n" | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin 2>&1)
 
         # shellcheck disable=SC2181
         if [ $? -ne 0 ]; then

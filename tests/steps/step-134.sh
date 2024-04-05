@@ -19,7 +19,7 @@ if ! is_docker_available; then
     exit 249
 fi
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 accept_all_trust_prompts || exit 1
 assert_no_test_images
@@ -59,9 +59,9 @@ GITHOOKS_DISABLE=1 git add . &&
 # Enable containerized hooks.
 export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
 
-"$GH_TEST_BIN/cli" shared update
+"$GH_TEST_BIN/githooks-cli" shared update
 # The above already does the below
-# "$GH_TEST_BIN/cli" images update
+# "$GH_TEST_BIN/githooks-cli" images update
 
 # Make changes to be formatted.
 touch "file.txt" &&

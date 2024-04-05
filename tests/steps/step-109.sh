@@ -30,7 +30,7 @@ git config --global init.templateDir ~/.githooks/templates
 echo "n
 y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 if ! grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
     ! grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then
@@ -63,7 +63,7 @@ done
 
 echo "y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/cli" uninstaller --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin || exit 1
 
 if grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
     grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then

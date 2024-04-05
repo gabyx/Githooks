@@ -8,17 +8,17 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Failed to execute the install script"
     exit 1
 fi
 
 git config --global --unset githooks.updateCheckEnabled &&
-    "$GH_INSTALL_BIN_DIR/cli" update --enable &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" update --enable &&
     [ "$(git config --get githooks.updateCheckEnabled)" = "true" ] ||
     exit 1
 
 git config --global --unset githooks.updateCheckEnabled &&
-    "$GH_INSTALL_BIN_DIR/cli" update --disable &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" update --disable &&
     [ "$(git config --get githooks.updateCheckEnabled)" = "false" ] ||
     exit 1

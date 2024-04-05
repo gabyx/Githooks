@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer || exit 1
 
 mkdir -p "$GH_TEST_TMP/test054/.githooks/pre-commit" &&
     mkdir -p "$GH_TEST_TMP/test054/.githooks/post-commit" &&
