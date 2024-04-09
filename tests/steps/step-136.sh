@@ -8,8 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 . "$TEST_DIR/general.sh"
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -35,7 +35,7 @@ if grep -Rq 'github.com/gabyx/githooks' .git/hooks; then
 fi
 
 # Reinstall and check that it fails (uninstall first)
-out=$("$GH_TEST_BIN/githooks-cli" installer --use-core-hookspath 2>&1)
+out=$("$GH_TEST_BIN/githooks-cli" installer --centralized 2>&1)
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ] ||

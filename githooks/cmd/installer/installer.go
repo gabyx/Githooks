@@ -120,8 +120,9 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 			MaintainedHooksDesc)
 
 	cmd.PersistentFlags().Bool(
-		"use-core-hookspath", false,
-		"If the install mode 'core.hooksPath' should be used.")
+		"centralized", false,
+		"If the install mode 'centralized' should be used which\n"+
+			"sets the global 'core.hooksPath'.")
 	cmd.PersistentFlags().Bool(
 		"use-manual", false,
 		"If the install mode 'manual' should be used.")
@@ -177,7 +178,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("maintainedHooks", cmd.PersistentFlags().Lookup("maintained-hooks")))
 	cm.AssertNoErrorPanic(
-		vi.BindPFlag("useCoreHooksPath", cmd.PersistentFlags().Lookup("use-core-hookspath")))
+		vi.BindPFlag("useCoreHooksPath", cmd.PersistentFlags().Lookup("centralized")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("useManual", cmd.PersistentFlags().Lookup("use-manual")))
 	cm.AssertNoErrorPanic(
@@ -789,7 +790,7 @@ func setDirectoryForInstallMode(
 				"These hooks might get installed but\n"+
 				"ignored because '%s' is also set.\n"+
 				"It is recommended to either remove the files or run\n"+
-				"the Githooks installation without the '--use-core-hookspath'\n"+
+				"the Githooks installation without the '--centralized'\n"+
 				"parameter.", git.GitCKCoreHooksPath)
 
 	case install.InstallModeTypeV.Manual:

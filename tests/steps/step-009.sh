@@ -8,8 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    echo "Using centralized install"
     exit 249
 fi
 

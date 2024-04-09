@@ -16,7 +16,7 @@ fi
 ref="${CIRCLE_SHA1:-main}"
 # Install with script.
 curl -sL "https://raw.githubusercontent.com/gabyx/Githooks/$ref/scripts/install.sh" | bash -s -- -- \
-    --use-core-hookspath
+    --centralized
 
 mkdir -p "$GH_TEST_TMP/test137" &&
     cd "$GH_TEST_TMP/test137" &&

@@ -18,7 +18,7 @@ if ! "$GH_TEST_BIN/githooks-cli" installer; then
     exit 1
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     OUT=$("$GH_TEST_BIN/githooks-cli" install 2>&1)
     # shellcheck disable=SC2181
     if [ $? -eq 0 ] || ! echo "$OUT" | grep -q "has no effect"; then

@@ -27,8 +27,8 @@ mkdir -p "$GH_TEST_TMP/test116.1" && cd "$GH_TEST_TMP/test116.1" &&
     git commit --allow-empty -m 'Initial commit' ||
     exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    echo "Using centralized install"
     if grep -q "/" "$README_FILE"; then
         echo "Expected the file to contain any paths"
         exit 1

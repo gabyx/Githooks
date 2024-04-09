@@ -18,7 +18,7 @@ if ! grep -q 'https://github.com/gabyx/githooks' "$path/pre-commit"; then
     exit 1
 fi
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     mkdir -p "$GH_TEST_TMP/test1" &&
         cd "$GH_TEST_TMP/test1" &&
         git init || exit 1

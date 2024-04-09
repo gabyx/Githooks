@@ -18,7 +18,7 @@ cd "$GH_TEST_TMP/shared/hooks-005.git" &&
     git commit -m 'Initial commit'
 
 # run the install, and set up shared repos
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     echo "n
 y
 $GH_TEST_TMP/shared/hooks-005.git

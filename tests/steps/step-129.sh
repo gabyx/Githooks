@@ -11,8 +11,8 @@ if ! command -v git-lfs; then
     exit 249
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    echo "Using centralized install"
     exit 249
 fi
 

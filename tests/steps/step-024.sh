@@ -12,7 +12,7 @@ accept_all_trust_prompts || exit 1
 git config --global githooks.shared "$GH_TEST_TMP/shared/some-previous-example"
 
 # run the install, and set up shared repos
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     echo 'n
 y
 

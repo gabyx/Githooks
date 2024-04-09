@@ -8,8 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if [ "$(id -u)" != "0" ] || ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "! Test needs root access and --use-core-hookspath."
+if [ "$(id -u)" != "0" ] || ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    echo "! Test needs root access and --centralized."
     exit 249
 fi
 

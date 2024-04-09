@@ -1056,7 +1056,7 @@ command below.
 
 ```shell
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
-    --use-core-hookspath
+    --centralized
 ```
 
 Optionally, you can also pass the template directory to which you want to
@@ -1065,7 +1065,7 @@ command above, for example:
 
 ```shell
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
-    --use-core-hookspath
+    --centralized
     --template-dir /home/public/.githooks
 ```
 
@@ -1389,8 +1389,8 @@ repository, you might consider disabling shared hooks updates by
 This installer command can work in one of 2 ways:
 
 - Using the git template folder `init.templateDir` (default behavior)
-- Using the git `core.hooksPath` variable (set by passing the
-  `--use-core-hookspath` parameter to the install script)
+- Using the git `core.hooksPath` variable (set by passing the `--centralized`
+  parameter to the install script)
 
 Read about the differences between these 2 approaches below.
 
