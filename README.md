@@ -1384,55 +1384,48 @@ repository on the server. If you use shared hook repositories in you bare
 repository, you might consider disabling shared hooks updates by
 [`git hooks config disable-shared-hooks-update --set`](docs/cli/git_hooks_config_disable-shared-hooks-update).
 
-### Templates or Global Hooks
+### Global Hooks or No Global Hooks
 
-This installer command can work in one of 2 ways:
+This installer can install Githooks in one of 2 ways:
 
-- Using the git template folder `init.templateDir` (default behavior)
-- Using the git `core.hooksPath` variable (set by passing the `--centralized`
-  parameter to the install script)
+- **Manual**: To use Githooks in a repo, it must be installed (default behavior)
+  with `git hooks install`.
+
+- **Centralized**: Using the Git `core.hooksPath` **global** variable (set by
+  passing the `--centralized` parameter to the install script). All repositories
+  will use Githooks by default.
 
 Read about the differences between these 2 approaches below.
 
 In both cases, the installer command will make sure Git will find the Githooks
 run-wrappers.
 
-#### Template Folder (`init.templateDir`)
+#### Manual: Use Githooks Selectively
 
-In this approach, the install script creates hook templates (global Git config
-`init.templateDir`) that are installed into the `.git/hooks` folders
-automatically on `git init` and `git clone`. For bare repositories, the hooks
-are installed into the `./hooks` folder on `git init --bare`. This is the
-recommended approach, especially if you want to selectively control which
-repositories use Githooks or not.
+In this approach, the install script installs the hook run-wrapper into a common
+location (`~/.githooks/templates/` by default).
 
-The install script offers to search for repositories to which it will install
-the run-wrappers, and any new repositories you clone will have these hooks
-configured.
-
-You can disable installing Githooks run-wrappers by using:
+To make Githooks available inside a repository, you must install it with
 
 ```shell
-git clone --template= <url> <repoPath>
-git lfs install # Important if you use Git LFS!. It never hurts doing this.
+cd repo
+git hooks install
 ```
 
-**Note**: It's recommended that you do `git lfs install` again. However, with
-the latest `git` version 2.30, and `git lfs` version 2.9.2, `--template=` will
-not result in **no** LFS hooks inside `${GIT_DIR}/hooks` if your repository
-**contains** LFS objects.
+which will simply set the `core.hooksPath` to the common location where Githooks
+its run-wrappers.
 
-#### Global Hooks Location (`core.hooksPath`)
+#### Centralized: Use Githooks For All Repositories
 
-In this approach, the install script installs the hook templates into a
-centralized location (`~/.githooks/templates/` by default) and sets the global
+In this approach, the install script installs the hook run-wrapper into a common
+location (`~/.githooks/templates/` by default) and sets the global
 `core.hooksPath` variable to that location. Git will then, for all relevant
 actions, check the `core.hooksPath` location, instead of the default
 `${GIT_DIR}/hooks` location.
 
 This approach works more like a _blanket_ solution, where **all
-repositories**<span id="a2">[<sup>2</sup>](#2)</span> will start using the hook
-templates, regardless of their location.
+repositories**<span id="a2">[<sup>2</sup>](#2)</span> will start using the
+Githooks run-wrappers (thus launching Githooks), regardless of their location.
 
 **<span id="2"><sup>2</sup></span>[⏎](#a2) Note:** It is possible to override
 the behavior for a specific repository, by setting a local `core.hooksPath`
