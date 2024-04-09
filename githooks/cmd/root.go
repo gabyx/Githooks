@@ -108,7 +108,7 @@ func initArgs(ctx *ccm.CmdContext) {
 	// Initialize from config , ENV -> viper
 	// not yet needed...
 
-	ctx.Log.AssertNoErrorF(hooks.CheckGithooksSetup(ctx.GitX),
+	ctx.Log.AssertNoErrorF(ccm.CheckGithooksSetup(ctx.GitX),
 		"Githooks setup is corrupt.")
 }
 

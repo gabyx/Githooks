@@ -10,20 +10,26 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-// InstallIntoRepo installs run-wrappers into a repositories
+// InstallIntoRepo set the `core.hooksPath` or
+// installs run-wrappers into a repositories.
+//
+// Setting `core.hooksPath` with `useCoreHooksPath` to use the
+// Githooks maintained hooks directory is the
+// preferred way. It can not be combined with `hookNames`
+// since this only works with installing run-wrappers directly.
+// Otherwise we install run-wrappers directly.
 // It prompts for disabling detected LFS hooks and offers to
 // setup a README file.
-//nolint
 func InstallIntoRepo(
 	log cm.ILogContext,
-	gitx *git.Context,
 	repoGitDir string,
 	lfsHooksCache hooks.LFSHooksCache,
 	hookNames []string,
 	nonInteractive bool,
 	dryRun bool,
 	skipReadme bool,
-	uiSettings *UISettings) bool {
+	uiSettings *UISettings,
+) bool {
 
 	hookDir := path.Join(repoGitDir, "hooks")
 	if !cm.IsDirectory(hookDir) {
@@ -31,12 +37,17 @@ func InstallIntoRepo(
 		log.AssertNoErrorPanic(err,
 			"Could not create hook directory in '%s'.", repoGitDir)
 	}
-	gitxR := git.NewCtxAt(repoGitDir)
-	isBare := gitxR.IsBareRepo()
+	gitx := git.NewCtxAt(repoGitDir)
+	isBare := gitx.IsBareRepo()
+
+	// Check if this repository is setup to install only run-wrappers.
+	// We switch to run-wrappers if we install a set of maintained hooks.
+	installRunWrappers, _ := cm.IsPathExisting(path.Join(hookDir, ".githooks-contains-run-wrappers"))
+	installRunWrappers = installRunWrappers || len(hookNames) != 0
 
 	var err error
 	if len(hookNames) == 0 {
-		hookNames, _, err = hooks.GetMaintainedHooks(gitxR, git.Traverse)
+		hookNames, _, err = hooks.GetMaintainedHooks(gitx, git.LocalScope)
 		log.AssertNoErrorF(err, "Could not get maintained hooks.")
 	}
 
@@ -50,7 +61,11 @@ func InstallIntoRepo(
 	if dryRun {
 		log.InfoF("[dry run] Hooks would have been installed into\n'%s'.",
 			repoGitDir)
-	} else {
+
+		return false
+	}
+
+	if installRunWrappers {
 
 		nLFSHooks, err := hooks.InstallRunWrappers(
 			hookDir, hookNames,
@@ -68,6 +83,10 @@ func InstallIntoRepo(
 			log.InfoF("Installed '%v' Githooks run-wrapper(s) into '%s'",
 				len(hookNames), hookDir)
 		}
+
+	} else {
+		err := hooks.InstallLinkRunWrappers(gitx, hookDir)
+		log.AssertNoErrorPanicF(err, "Could not install run-wrapper link into '%s'.", repoGitDir)
 	}
 
 	// Offer to setup the intro README if running in interactive mode
@@ -77,7 +96,7 @@ func InstallIntoRepo(
 		setupReadme(log, repoGitDir, dryRun, uiSettings)
 	}
 
-	return !dryRun
+	return true
 }
 
 func cleanArtefactsInRepo(log cm.ILogContext, gitDir string) {

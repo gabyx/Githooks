@@ -124,31 +124,6 @@ func GetBugReportingInfo() (info string) {
 	return
 }
 
-// CheckGithooksSetup tests if 'core.hooksPath' is in alignment with 'git.GitCKUseCoreHooksPath'.
-func CheckGithooksSetup(gitx *git.Context) (err error) {
-	useCoreHooksPath := gitx.GetConfig(GitCKUseCoreHooksPath, git.Traverse)
-	coreHooksPath, coreHooksPathSet := gitx.LookupConfig(git.GitCKCoreHooksPath, git.Traverse)
-
-	if coreHooksPathSet {
-		if useCoreHooksPath != git.GitCVTrue {
-			err = cm.ErrorF(
-				"Git config 'core.hooksPath' is set and has value:\n"+
-					"'%s',\n"+
-					"but Githooks is not configured to use that folder.\n"+
-					"This could mean the hooks in this repository are not run by Githooks.", coreHooksPath)
-		}
-	} else {
-		if useCoreHooksPath == git.GitCVTrue {
-			err = cm.ErrorF(
-				"Githooks is configured to consider Git config 'core.hooksPath'\n" +
-					"but that setting is not currently set.\n" +
-					"This could mean the hooks in this repository are not run by Githooks.")
-		}
-	}
-
-	return
-}
-
 // GetGithooksDir gets the hooks directory for Githooks inside a repository (bare, non-bare).
 func GetGithooksDir(repoDir string) string {
 	return path.Join(repoDir, HooksDirName)

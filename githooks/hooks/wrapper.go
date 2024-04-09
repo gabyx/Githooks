@@ -4,11 +4,11 @@ import (
 	"os"
 	"path"
 	"regexp"
-	"runtime"
 	"strings"
 
 	"github.com/gabyx/githooks/githooks/build"
 	cm "github.com/gabyx/githooks/githooks/common"
+	"github.com/gabyx/githooks/githooks/git"
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
@@ -164,10 +164,21 @@ func DeleteHookDirTemp(hookDir string) (err error) {
 	return nil
 }
 
-// Cleans the temporary director inside the Git's hook directory.
-func assertHookDirTemp(hookDir string) (dir string, err error) {
-	dir = getHookDirTemp(hookDir)
-	err = os.MkdirAll(dir, cm.DefaultFileModeDirectory)
+// InstallLinkRunWrappers installs a link with `core.hooksPath`
+// to the maintained run-wrappers by Githooks
+// and thus installs Githooks into the Git context, the local repository.
+func InstallLinkRunWrappers(
+	gitx *git.Context,
+	dir string,
+) (err error) {
+	pathForUseCoreHooksPath := gitx.GetConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
+	err = gitx.SetConfig(git.GitCKCoreHooksPath, pathForUseCoreHooksPath, git.LocalScope)
+	if err != nil {
+		return
+	}
+
+	// Remove the use of run-wrappers as install method in this repository.
+	_ = os.Remove(path.Join(dir, ".githooks-contains-run-wrappers"))
 
 	return
 }
@@ -177,6 +188,7 @@ func assertHookDirTemp(hookDir string) (dir string, err error) {
 // All deleted hooks by this function get moved to the `tempDir` directory, because
 // we should not delete them yet.
 // Missing LFS hooks are reinstalled.
+// Git context can be `nil` if its the global install into a directory.
 func InstallRunWrappers(
 	dir string,
 	hookNames []string,
@@ -206,47 +218,6 @@ func InstallRunWrappers(
 			beforeSaveCallback(dest)
 		}
 
-		if cm.IsFile(dest) {
-			// If still existing, it is a run-wrapper:
-
-			// The file `dest` could be currently running,
-			// therefore we move it to the temporary directly.
-			// On Unix we could simply remove the file.
-			// But on Windows, an opened file (mostly) cannot be deleted.
-			// it might work, but is ugly.
-
-			if runtime.GOOS == cm.WindowsOsName {
-				backupDir, e := assertHookDirTemp(dir)
-				if e != nil {
-					err = cm.CombineErrors(e,
-						cm.ErrorF("Could not create temp. dir in '%s'.", dir))
-
-					return
-				}
-
-				moveDest := cm.GetTempPath(backupDir, "-"+path.Base(dest))
-				err = os.Rename(dest, moveDest)
-				if err != nil {
-					err = cm.CombineErrors(err,
-						cm.ErrorF("Could not move file '%s' to '%s'.", dest, moveDest))
-
-					return
-				}
-
-			} else {
-				// On Unix we simply delete the file, because that works even if the file is
-				// open at the moment.
-				err = os.Remove(dest)
-				if err != nil {
-					err = cm.CombineErrors(err,
-						cm.ErrorF("Could not delete file '%s'.", dest))
-
-					return
-				}
-			}
-
-		}
-
 		err = WriteRunWrapper(dest)
 		if err != nil {
 			err = cm.CombineErrors(err,
@@ -254,6 +225,17 @@ func InstallRunWrappers(
 
 			return
 		}
+	}
+
+	// If we do this inside a repository:
+	// Set the use of run-wrappers instead of `core.hooksPath`.
+	// Remove the use of run-wrappers as install method in this repository.
+	err = cm.TouchFile(path.Join(dir, ".githooks-contains-run-wrappers"), true)
+	if err != nil {
+		err = cm.CombineErrors(err,
+			cm.ErrorF("Could not create marker that directory '%s' contains run-wrappers.", dir))
+
+		return
 	}
 
 	return nLFSHooks, nil
@@ -315,6 +297,8 @@ func uninstallRunWrappers(
 				cm.ErrorF("Could not reinstall LFS hooks into '%s'.", dir))
 		}
 	}
+
+	_ = os.Remove(path.Join(dir, ".githooks-contains-run-wrappers"))
 
 	return
 }

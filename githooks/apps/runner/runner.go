@@ -389,7 +389,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	log.Info(versionText)
 	log.Info(
 		"If you would like to disable update checks, run:",
-		"  $ git hooks update disable")
+		"  $ git hooks update --disable")
 }
 
 func shouldRunUpdateCheck(settings *HookSettings) bool {

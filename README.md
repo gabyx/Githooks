@@ -979,45 +979,37 @@ The installer will:
 
 1. Verify the checksums and signature of the downloaded binaries.
 
-1. Launch the current (or new if `--update` is given) installer which proceeds
-   with the next steps.
+1. Launch the current installer which proceeds with the next steps. If
+   `--update` is given the newest Githooks is downloaded and installed directly.
 
-1. Find the install mode relevant directory:
+1. Find the install mode relevant hooks directory `<hooksDir>`:
 
-   - For `Template Dir` install mode: Use the Git template directory
+   - Use the directory given with `--hooks-dir <dir>` on the command line.
 
-     1. from `--template-dir` if given or
-     1. from the `$GIT_TEMPLATE_DIR` environment variable or
-     1. use the `git config --get init.templateDir` or
-     1. use the Git default `/usr/share/git-core/templates` folder or
-     1. search on the file system for matching directories or
-     1. offer to set up a new one.
+   - Or if we already have an installation use
+     `git config --get githooks.pathForUseCoreHooksPath` or
 
-   - For `Centralized Hooks` install mode: Use the hooks directory
+   - Or if we don't have an installation:
 
-     1. from `--template-dir` if given, or
-     1. use `git config --get core.hooksPath` command if set or
-     1. otherwise use `<install-dir>/templates`.
+     1. use `GIT_TEPMLATE_DIR` if set and add `/hooks`
+     1. use Git config value `init.templateDir` if set and add `/hooks`
+     1. use `<install-dir>/templates/hooks`.
 
-   - For `Manual` install mode use the directory
+1. Write all Githooks run-wrappers into the hooks directory `<hooksDir>` and
 
-     1. from `--template-dir` if given or
-     1. otherwise use `<install-dir>/templates`.
-
-1. Write all Githooks run-wrappers into the hooks directory and set
-
-   - either `init.templateDir` for `Normal` install mode or
-   - `core.hooksPath` for `Centralized Hooks` install mode
-     (`--use-core-hooks-path`) or
-   - `githooks.manualTemplateDir` for `Manual` install mode (`--use-manual`)
+   - set `core.hooksPath` for `Centralized Hooks` install mode
+     (`--use-core-hooks-path`).
 
 1. Offer to enable automatic update checks.
 
 1. Offer to find existing Git repositories on the file system (disable with
    `--skip-install-into-existing`)
 
-   1. Install run-wrappers into them (`.git/hooks`).
-   2. Offer to add an intro README in their `.githooks` folder.
+   1. Make them use Githooks by either setting `core.hooksPath` (or install
+      run-wrappers if `<repo-git-dir>/hooks/.githooks-contains-run-wrappers`
+      exists).
+
+   1. Offer to add an intro README in their `.githooks` folder.
 
 1. Install/update run-wrappers into all registered repositories: Repositories
    using Githooks get registered in the install folders `registered.yaml` file
@@ -1451,16 +1443,26 @@ any `git clone/init`.
 
 ### Updates
 
-You can update the Githooks any time by running one of the install commands
-above. It will update itself and simply overwrite the template run-wrappers with
-the new ones, and if you opt-in to install into existing or registered local
-repositories, those will get overwritten too.
+You can update the Githooks any time by running
+
+```shell
+git hooks update
+```
+
+or one of the install commands above with `--update`.
+
+It then downloads the binaries (GPG signed + checksummed) and dispatches to the
+new installer to install the new version. It will update itself and simply
+overwrite the template run-wrappers with the new ones, and if you opt-in to
+install into existing or registered local repositories, those will get
+overwritten too.
+
+#### Automatic Update Checks
 
 You can also enable automatic update checks during the installation, that is
 executed **once a day after a successful commit**. It checks for a new version
-and asks whether you want to install it. It then downloads the binaries (GPG
-signed + checksummed) and dispatches to the new installer to install the new
-version.
+where you can then call `git hooks update` your-self (\*previous to version `3`
+this was automatic which was removed).
 
 Automatic updates can be enabled or disabled at any time by running the command
 below.

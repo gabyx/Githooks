@@ -11,14 +11,32 @@ accept_all_trust_prompts || exit 1
 # run the default install
 "$GH_TEST_BIN/githooks-cli" installer --non-interactive || exit 1
 
-mkdir -p "$GH_TEST_TMP/test1" &&
-    cd "$GH_TEST_TMP/test1" &&
-    git init || exit 1
+# Verify that hooks are installed.
+path=$(git config --global githooks.pathForUseCoreHooksPath)
+if ! grep -q 'https://github.com/gabyx/githooks' "$path/pre-commit"; then
+    echo "Did not find hooks"
+    exit 1
+fi
 
-# verify that the pre-commit is installed
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+    mkdir -p "$GH_TEST_TMP/test1" &&
+        cd "$GH_TEST_TMP/test1" &&
+        git init || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    grep -q 'https://github.com/gabyx/githooks' "$(git config core.hooksPath)/pre-commit"
+    # Install hooks
+    git hooks install || {
+        echo "Could not install hooks into repo."
+        exit 1
+    }
+
+    if [ "$path" != "$(git config --local core.hooksPath)" ]; then
+        echo "Config 'core.hooksPath' does not point to the same directory."
+        exit 1
+    fi
+
 else
-    grep -q 'https://github.com/gabyx/githooks' .git/hooks/pre-commit
+    if [ "$path" != "$(git config --global core.hooksPath)" ]; then
+        echo "Config 'core.hooksPath' does not point to the same directory."
+        exit 1
+    fi
 fi
