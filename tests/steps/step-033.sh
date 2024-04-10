@@ -18,12 +18,5 @@ mkdir -p "$GH_TEST_TMP/test33/b" &&
     cd "$GH_TEST_TMP/test33/b" &&
     git init || exit 1
 
-if grep -q 'https://github.com/gabyx/githooks' "$GH_TEST_TMP/test33/a/.git/hooks/pre-commit"; then
-    echo "! Hooks are unexpectedly installed in A"
-    exit 1
-fi
-
-if grep -q 'https://github.com/gabyx/githooks' "$GH_TEST_TMP/test33/b/.git/hooks/pre-commit"; then
-    echo "! Hooks are unexpectedly installed in B"
-    exit 1
-fi
+check_no_local_install_correct "$GH_TEST_TMP/test33/a"
+check_no_local_install_correct "$GH_TEST_TMP/test33/b"

@@ -22,12 +22,14 @@ y
 y
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
+check_install_correct
+
 if ! [ -f "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit" ]; then
-    # verify that a new hook file was installed
     echo "! Expected hook is not installed"
     exit 1
-elif ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit"; then
-    # verify that the new hook is ours
+fi
+
+if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit"; then
     echo "! Expected hook doesn't have the expected contents"
     exit 1
 fi
@@ -36,18 +38,9 @@ mkdir -p "$GH_TEST_TMP/test6" &&
     cd "$GH_TEST_TMP/test6" &&
     git init || exit 1
 
-path=$(git config --global githooks.pathForUseCoreHooksPath)
-
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    if [ "$path" != "$(git config --global core.hooksPath)" ]; then
-        echo "Config 'core.hooksPath' does not point to the same directory."
-        exit 1
-    fi
+    check_global_install_correct
 else
     git hooks install
-
-    if [ "$path" != "$(git config --local core.hooksPath)" ]; then
-        echo "Config 'core.hooksPath' does not point to the same directory."
-        exit 1
-    fi
+    check_local_install_correct
 fi

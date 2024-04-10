@@ -20,28 +20,11 @@ mkdir -p "$GH_TEST_TMP/test7" &&
     cd "$GH_TEST_TMP/test7" &&
     git init || exit 1
 
-path=$(git config --global githooks.pathForUseCoreHooksPath)
-
-[ -d "$path" ] || {
-    echo "! Path '$path' does not exist."
-    exit 1
-}
-
-if [ "$path" != "$HOME/.githooks/templates/hooks" ]; then
-    echo "Install into wrong directory."
-    exit 1
-fi
+check_install_correct "$HOME/.githooks/templates/hooks"
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    if [ "$path" != "$(git config --global core.hooksPath)" ]; then
-        echo "Config 'core.hooksPath' does not point to the same directory."
-        exit 1
-    fi
+    check_global_install_correct
 else
     git hooks install
-
-    if [ "$path" != "$(git config --local core.hooksPath)" ]; then
-        echo "Config 'core.hooksPath' does not point to the same directory."
-        exit 1
-    fi
+    check_local_install_correct
 fi

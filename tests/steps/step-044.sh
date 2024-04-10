@@ -29,22 +29,14 @@ n
 y
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-find "$GH_TEST_TMP/test044"
-
-if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test044/001/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed into 001"
-    exit 1
-fi
+check_local_install_correct "$GH_TEST_TMP/test044/001"
 
 if grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test044/001/.githooks/README.md"; then
     echo "! README was unexpectedly installed into 001"
     exit 1
 fi
 
-if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test044/002/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed into 002"
-    exit 1
-fi
+check_local_install_correct "$GH_TEST_TMP/test044/002"
 
 if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test044/002/.githooks/README.md"; then
     echo "! README was not installed into 002"

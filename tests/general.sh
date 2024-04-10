@@ -197,3 +197,88 @@ function container_mgr() {
         docker "$@"
     fi
 }
+
+function check_global_install_correct() {
+    local pathToUse
+    local expected="${1:-}"
+
+    pathToUse=$(git config --global githooks.pathForUseCoreHooksPath)
+    [ -d "$pathToUse" ] || {
+        echo "! Path '$pathToUse' does not exist."
+        exit 1
+    }
+
+    if [ "$pathToUse" != "$(git config --global core.hooksPath)" ]; then
+        echo "! Config 'core.hooksPath' does not point to the same directory."
+        git -C "$repo" config --global core.hooksPath
+        exit 1
+    fi
+
+    if [ -n "$expected" ] && [ "$pathToUse" != "$expected" ]; then
+        echo "! Path '$pathToUse' is not '$expected'"
+        exit 1
+    fi
+
+}
+
+function check_no_local_install_correct() {
+    local dir
+    dir=$(git -C "$1" rev-parse --git-common-dir) || {
+        echo "! Failed to get Git dir."
+        exit 1
+    }
+
+    if grep -rq 'github.com/gabyx/githooks' "$dir"; then
+        echo "! Githooks were installed into '$dir' but should not have."
+        exit 1
+    fi
+
+    if [ -n "$(git -C "$dir" config --local core.hooksPath)" ]; then
+        echo "! Config 'core.hooksPath' is set but should not."
+        exit 1
+    fi
+}
+
+function check_local_install_correct() {
+    local repo="${1:-.}"
+    local expected="${2:-}"
+
+    local pathToUse
+    pathToUse=$(git config --global githooks.pathForUseCoreHooksPath)
+    [ -d "$pathToUse" ] || {
+        echo "! Path '$pathToUse' does not exist."
+        exit 1
+    }
+
+    if [ "$pathToUse" != "$(git -C "$repo" config --local core.hooksPath)" ]; then
+        echo "! Config 'core.hooksPath' in '$repo' does not point to the same directory."
+        git -C "$repo" config --local core.hooksPath
+        exit 1
+    fi
+
+    if [ -n "$expected" ] && [ "$pathToUse" != "$expected" ]; then
+        echo "! Path '$pathToUse' is not '$expected'"
+        exit 1
+    fi
+}
+
+function check_install_correct() {
+    local expected="${1:-}"
+
+    local pathToUse
+    pathToUse=$(git config --global githooks.pathForUseCoreHooksPath)
+    [ -d "$pathToUse" ] || {
+        echo "! Path '$pathToUse' does not exist."
+        exit 1
+    }
+
+    if ! grep -rq 'github.com/gabyx/githooks' "$pathToUse"; then
+        echo "! Githooks were not installed into '$pathToUse'."
+        exit 1
+    fi
+
+    if [ -n "$expected" ] && [ "$pathToUse" != "$expected" ]; then
+        echo "! Path '$pathToUse' is not '$expected'"
+        exit 1
+    fi
+}

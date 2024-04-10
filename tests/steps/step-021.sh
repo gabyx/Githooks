@@ -27,17 +27,7 @@ y
 ~/test021
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-path=$(git config --global githooks.pathForUseCoreHooksPath)
-[ -d "$path" ] || {
-    echo "! Path '$path' does not exist."
-    exit 1
-}
-
-if [ "$path" != "$(cd ~/test021/p001 && git config --local core.hooksPath)" ] ||
-    [ "$path" != "$(cd ~/test021/p002 && git config --local core.hooksPath)" ]; then
-
-    echo "! Config 'core.hooksPath' does not point to the same directory."
-    exit 1
-fi
+check_local_install_correct ~/test021/p001
+check_local_install_correct ~/test021/p002
 
 rm -rf ~/test021

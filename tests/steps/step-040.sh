@@ -22,12 +22,18 @@ if ! "$GH_TEST_BIN/githooks-cli" installer --non-interactive; then
     exit 1
 fi
 
+# Install
 if ! "$GH_TEST_BIN/githooks-cli" install --non-interactive; then
     echo "! Install into current repo failed"
     exit 1
 fi
 
-if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
-    echo "! Hooks were not installed"
+check_local_install_correct
+
+# Uninstall
+if ! "$GH_TEST_BIN/githooks-cli" uninstall; then
+    echo "! Uninstall into current repo failed"
     exit 1
 fi
+
+check_no_local_install_correct

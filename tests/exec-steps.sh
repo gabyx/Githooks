@@ -193,11 +193,14 @@ function main() {
         clean_dirs
         reset_test_repo "$commit_before"
 
-        local uninstall_out
+        local uninstall_out uninstall_exit
+        set +e
         uninstall_out=$(printf "n\\n" | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin 2>&1)
+        uninstall_exit="$?"
+        set -e
 
         # shellcheck disable=SC2181
-        if [ $? -ne 0 ]; then
+        if [ "$uninstall_exit" -ne 0 ]; then
             echo "! Uninstall failed in $step, output:" >&2
             echo "$uninstall_out" >&2
             failed=$((failed + 1))

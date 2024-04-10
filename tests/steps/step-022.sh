@@ -26,26 +26,7 @@ y
 
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-path=$(git config --global githooks.pathForUseCoreHooksPath)
-[ -d "$path" ] || {
-    echo "! Path '$path' does not exist."
-    exit 1
-}
-
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    if [ "$path" != "$(git config --global core.hooksPath)" ]; then
-        echo "! Config 'core.hooksPath' does not point to the same directory."
-        git config --global core.hooksPath
-        exit 1
-    fi
-else
-    git hooks install
-
-    if [ "$path" != "$(git config --local core.hooksPath)" ]; then
-        echo "! Config 'core.hooksPath' does not point to the same directory."
-        git config --local core.hooksPath
-        exit 1
-    fi
-fi
+check_local_install_correct ~/test022/p001
+check_local_install_correct ~/test022/p002
 
 rm -rf ~/test022

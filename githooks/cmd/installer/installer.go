@@ -537,6 +537,15 @@ func findHookTemplateDir(
 		return hooksDir
 	}
 
+	// If we have an installation, and have not found
+	// the template folder by now -> panic.
+	log.PanicIfF(haveInstall && strs.IsEmpty(hooksDir),
+		"Your installation is corrupt.\n"+
+			"You seem to have installed Githooks but the corresponding\n"+
+			"hook directory is not found.\n"+
+			"Is '%s' unset or points to a read-only directory?",
+		hooks.GitCKPathForUseCoreHooksPath)
+
 	// No folder found: Try setup a new folder.
 	if nonInteractive {
 		return setupNewHooksDir(log, installDir, nil)

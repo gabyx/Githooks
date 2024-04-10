@@ -27,17 +27,8 @@ if grep -q 'github.com/gabyx/githooks' "$GH_TEST_TMP/test20/.git/hooks/pre-commi
 fi
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    if [ "$GH_TEST_TMP/.test-020/hooks" != "$(git config --global core.hooksPath)" ]; then
-        echo "! Config 'core.hooksPath' does not point to the same directory."
-        git config --global core.hooksPath
-        exit 1
-    fi
+    check_global_install_correct "$GH_TEST_TMP/.test-020/hooks"
 else
     git hooks install
-
-    if [ "$GH_TEST_TMP/.test-020/hooks" != "$(git config --local core.hooksPath)" ]; then
-        echo "! Config 'core.hooksPath' does not point to the same directory."
-        git config --local core.hooksPath
-        exit 1
-    fi
+    check_local_install_correct "." "$GH_TEST_TMP/.test-020/hooks"
 fi

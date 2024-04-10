@@ -87,6 +87,9 @@ func InstallIntoRepo(
 	} else {
 		err := hooks.InstallLinkRunWrappers(gitx, hookDir)
 		log.AssertNoErrorPanicF(err, "Could not install run-wrapper link into '%s'.", repoGitDir)
+
+		log.InfoF("Installed Githooks run-wrapper link ('%s') into '%s'",
+			git.GitCKCoreHooksPath, hookDir)
 	}
 
 	// Offer to setup the intro README if running in interactive mode

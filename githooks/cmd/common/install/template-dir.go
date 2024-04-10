@@ -33,18 +33,9 @@ func CheckDirAccess(targetDir string, subFolderIfExists string) (string, error) 
 // use the defaults `GIT_TEMPLATE_DIR` or `init.templateDir` or the default directory.
 func FindHooksDir(log cm.ILogContext, gitx *git.Context, haveInstall bool) (hooksDir string, err error) {
 	if haveInstall {
+		log.Info("Check Githooks installation.")
 		path := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
 		hooksDir, err = CheckDirAccess(path, "")
-
-		// If we have an installation, and have not found
-		// the template folder by now -> panic.
-		log.PanicIfF(strs.IsEmpty(hooksDir),
-			"Your installation is corrupt.\n"+
-				"You seem to have installed Githooks but the corresponding\n"+
-				"hook directory is not found.\n"+
-				"Is '%s=%s' is unset or points to a read-only directory?",
-			hooks.GitCKPathForUseCoreHooksPath, path)
-
 	} else {
 
 		// 1. Try setup from environment variables

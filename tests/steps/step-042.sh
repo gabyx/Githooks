@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 # Test:
-#   Run a single-repo install and try the update
+#   Run an install and try the update
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
