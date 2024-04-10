@@ -372,7 +372,14 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	}
 
 	cloneDir := hooks.GetReleaseCloneDir(settings.InstallDir)
-	status, err := updates.FetchUpdates(cloneDir, "", "", build.BuildTag, true, updates.ErrorOnWrongRemote, usePreRelease)
+	status, err := updates.FetchUpdates(
+		cloneDir,
+		"",
+		"",
+		build.BuildTag,
+		true,
+		updates.ErrorOnWrongRemote,
+		usePreRelease, true)
 
 	if err != nil {
 		m := strs.Fmt(

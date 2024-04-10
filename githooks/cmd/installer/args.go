@@ -5,6 +5,7 @@ type Arguments struct {
 	Config string
 
 	Log                  string // The log file.
+	InternalTempDir      string // The temporary directory to use.
 	InternalPostDispatch bool   // If the installer has already dispatched itself to the downloaded/build installer.
 
 	InternalUpdateFromVersion string   // Build version we are updating from.
@@ -23,7 +24,7 @@ type Arguments struct {
 	MaintainedHooks []string // Maintain hooks by Githooks.
 
 	// Use install mode with the global `core.hooksPath` for the hook run wrappers.
-	UseGlobalCoreHooksPath bool
+	Centralized bool
 
 	InstallPrefix string // Install prefix for Githooks.
 	HooksDir      string // The directory to use to install the global maintained run-wrappers.

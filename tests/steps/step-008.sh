@@ -16,15 +16,28 @@ cd ~/.githooks/mytemplates/hooks &&
     chmod +x pre-commit ||
     exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer --template-dir ~/.githooks/mytemplates || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --hooks-dir ~/.githooks/mytemplates/hooks || exit 1
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test8" &&
     echo "echo 'In-repo' >> '$GH_TEST_TMP/test-008.out'" >.githooks/pre-commit/test &&
-    git init ||
+    git init &&
+    git add .githooks/pre-commit/test ||
     exit 1
 
-git commit -m 'Test'
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    git commit -m 'Test'
+
+    if grep 'Previous' "$GH_TEST_TMP/test-008.out" ||
+        grep 'In-repo' "$GH_TEST_TMP/test-008.out"; then
+        echo '! No hooks should have been run.'
+        exit 1
+    fi
+
+    git hooks install
+fi
+
+git commit --allow-empty -m 'Test'
 
 if ! grep 'Previous' "$GH_TEST_TMP/test-008.out"; then
     echo '! Saved hook was not run'

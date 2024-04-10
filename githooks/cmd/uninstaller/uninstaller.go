@@ -77,7 +77,11 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	setupMockFlags(cmd, vi)
 }
 
-func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Settings, UISettings) {
+func setupSettings(
+	log cm.ILogContext,
+	gitx *git.Context,
+	args *Arguments,
+	tempDir string) (Settings, UISettings) {
 
 	var promptx prompt.IContext
 	var err error
@@ -94,11 +98,6 @@ func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Sett
 	// Safety check.
 	log.PanicIfF(!strings.Contains(installDir, ".githooks"),
 		"Uninstall path at '%s' needs to contain '.githooks'.")
-
-	// Remove temporary directory if existing
-	tempDir, err := hooks.CleanTemporaryDir(installDir)
-	log.AssertNoErrorPanicF(err,
-		"Could not clean temporary directory in '%s'", installDir)
 
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(installDir))
 	log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
@@ -394,7 +393,13 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
+	dir := os.TempDir()
+	tempDir, err := os.MkdirTemp(dir, "githooks-uninstaller-*")
+	log.AssertNoErrorPanicF(err, "Could not create temp. dir in '%s'.", dir)
+	ctx.CleanupX.AddHandler(func() { _ = os.Remove(tempDir) })
+	defer os.Remove(tempDir)
+
+	settings, uiSettings := setupSettings(log, ctx.GitX, &args, tempDir)
 
 	if !args.InternalPostDispatch {
 		if isDispatched := runDispatchedInstall(log, &settings, &args); isDispatched {

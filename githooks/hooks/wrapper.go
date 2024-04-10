@@ -171,16 +171,25 @@ func InstallLinkRunWrappers(
 	gitx *git.Context,
 	dir string,
 ) (err error) {
-	pathForUseCoreHooksPath := gitx.GetConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
-	err = gitx.SetConfig(git.GitCKCoreHooksPath, pathForUseCoreHooksPath, git.LocalScope)
-	if err != nil {
-		return
+	pathForUseCoreHooksPath, exists := gitx.LookupConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
+
+	if !exists || strs.IsEmpty(pathForUseCoreHooksPath) {
+		return cm.ErrorF(
+			"Githooks has not been installed.\n"+
+				"The Git config variable '%s' does not exist or is empty.",
+			GitCKPathForUseCoreHooksPath)
 	}
 
-	// Remove the use of run-wrappers as install method in this repository.
-	_ = os.Remove(path.Join(dir, ".githooks-contains-run-wrappers"))
+	return gitx.SetConfig(git.GitCKCoreHooksPath, pathForUseCoreHooksPath, git.LocalScope)
+}
 
-	return
+// UninstallLinkRunWrappers uninstalls the link with `core.hooksPath`
+// to the maintained run-wrappers by Githooks
+// and thus installs Githooks into the Git context, the local repository.
+func UninstallLinkRunWrappers(
+	gitx *git.Context,
+) (err error) {
+	return gitx.UnsetConfig(git.GitCKCoreHooksPath, git.LocalScope)
 }
 
 // InstallRunWrappers installs run-wrappers for the given `hookNames` in `dir`.
@@ -227,9 +236,6 @@ func InstallRunWrappers(
 		}
 	}
 
-	// If we do this inside a repository:
-	// Set the use of run-wrappers instead of `core.hooksPath`.
-	// Remove the use of run-wrappers as install method in this repository.
 	err = cm.TouchFile(path.Join(dir, ".githooks-contains-run-wrappers"), true)
 	if err != nil {
 		err = cm.CombineErrors(err,

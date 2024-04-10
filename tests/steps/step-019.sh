@@ -8,14 +8,6 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    echo "Using centralized install"
-    exit 249
-fi
-
-# delete the built-in git template folder
-rm -rf "$GH_TEST_GIT_CORE/templates" || exit 1
-
 # shellcheck disable=SC2088
 mkdir -p ~/.test-019/hooks &&
     git config --global init.templateDir '~/.test-019' ||
@@ -28,7 +20,21 @@ mkdir -p "$GH_TEST_TMP/test19" &&
     git init || exit 1
 
 # verify that the hooks are installed and are working
-if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/test19/.git/hooks/pre-commit"; then
+if ! grep -q 'github.com/gabyx/githooks' "$GH_TEST_TMP/test19/.git/hooks/pre-commit"; then
     echo "! Githooks were not installed into a new repo"
     exit 1
+fi
+
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    if [ "$HOME/.test-019/hooks" != "$(git config --global core.hooksPath)" ]; then
+        echo "Config 'core.hooksPath' does not point to the same directory."
+        exit 1
+    fi
+else
+    git hooks install
+
+    if [ "$HOME/.test-019/hooks" != "$(git config --local core.hooksPath)" ]; then
+        echo "Config 'core.hooksPath' does not point to the same directory."
+        exit 1
+    fi
 fi

@@ -14,6 +14,12 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 	_, gitDir, _ := ccm.AssertRepoRoot(ctx)
 	uiSettings := inst.UISettings{PromptCtx: ctx.PromptCtx}
 
+	_, installMode := inst.GetInstallMode(ctx.GitX)
+	ctx.Log.PanicIfF(installMode == inst.InstallModeTypeV.UseGlobalCoreHooksPath,
+		"Githooks is installed in '%s' mode and\n"+
+			"installing into the current repository has no effect.",
+		inst.InstallModeTypeV.UseGlobalCoreHooksPath)
+
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
 
@@ -42,6 +48,12 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 
 func runUninstallFromRepo(ctx *ccm.CmdContext) {
 	_, gitDir, _ := ccm.AssertRepoRoot(ctx)
+
+	_, installMode := inst.GetInstallMode(ctx.GitX)
+	ctx.Log.WarnIfF(installMode == inst.InstallModeTypeV.UseGlobalCoreHooksPath,
+		"Githooks is installed in '%s' mode and\n"+
+			"uninstalling from the current repository has no effect.",
+		inst.InstallModeTypeV.UseGlobalCoreHooksPath.Name())
 
 	// Read registered file if existing.
 	var registeredGitDirs hooks.RegisterRepos

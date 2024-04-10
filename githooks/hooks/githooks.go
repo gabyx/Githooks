@@ -195,7 +195,7 @@ func CleanTemporaryDir(installDir string) (string, error) {
 		return "", err
 	}
 
-	return AssertTemporaryDir(installDir)
+	return GetTemporaryDir(installDir), nil
 }
 
 // GetRunnerExecutable gets the installed Githooks runner executable.

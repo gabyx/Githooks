@@ -31,12 +31,15 @@ y
 $GH_TEST_TMP/test4
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test4/p001/.git/hooks"; then
-    echo "! Hooks were not installed successfully"
+if grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test4/p001/.git/hooks" ||
+    grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test4/p002/.git/hooks"; then
+    echo "Hooks were installed which should not happen"
     exit 1
 fi
 
-if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test4/p002/.git/hooks"; then
-    echo "! Hooks were not installed successfully"
+path=$(git config --global githooks.pathForUseCoreHooksPath)
+if [ "$path" != "$(cd "$GH_TEST_TMP/test4/p001/.git/hooks" && git config --local core.hooksPath)" ] ||
+    [ "$path" != "$(cd "$GH_TEST_TMP/test4/p002/.git/hooks" && git config --local core.hooksPath)" ]; then
+    echo "Config 'core.hooksPath' does not point to the same directory."
     exit 1
 fi

@@ -15,18 +15,20 @@ mkdir -p "$GH_TEST_TMP/test10/a" &&
 echo "n
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin --dry-run || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --stdin --dry-run --hooks-dir ~/.githooks/mytemplates || exit 1
 
-mkdir -p "$GH_TEST_TMP/test10/b" &&
-    cd "$GH_TEST_TMP/test10/b" &&
-    git init || exit 1
+if git config --global --get-regexp "^githooks.*" | grep -qv "deletedetectedlfshooks" ||
+    [ -n "$(git config --global alias.hooks)" ]; then
 
-if grep -q 'https://github.com/gabyx/githooks' "$GH_TEST_TMP/test10/a/.git/hooks/pre-commit"; then
-    echo "! Hooks are unexpectedly installed in A"
+    echo "Should not have set Git config variables."
+    git config --global --get-regexp "^githooks.*" | grep -v "deletedetectedlfshooks"
+
     exit 1
 fi
 
-if grep -q 'https://github.com/gabyx/githooks' "$GH_TEST_TMP/test10/b/.git/hooks/pre-commit"; then
-    echo "! Hooks are unexpectedly installed in B"
+if [ -d ~/.githooks/mytemplates ] || [ -d ~/.githooks/release ]; then
+    echo "No folders should have been created".
+    ls -al ~/.githooks/mytemplates
+    ls -al ~/.githooks/release
     exit 1
 fi

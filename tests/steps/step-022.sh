@@ -20,25 +20,32 @@ mkdir -p ~/test022/p002 &&
     cd ~/test022/p002 &&
     git init || exit 1
 
-if grep -r 'github.com/gabyx/githooks' ~/test022/; then
-    echo "! Hooks were installed ahead of time"
-    exit 1
-fi
-
 # run the install, and select installing the hooks into existing repos
 echo 'n
 y
 
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-if ! grep -r 'github.com/gabyx/githooks' ~/test022/p001/.git/hooks; then
-    echo "! Hooks were not installed successfully"
+path=$(git config --global githooks.pathForUseCoreHooksPath)
+[ -d "$path" ] || {
+    echo "! Path '$path' does not exist."
     exit 1
-fi
+}
 
-if ! grep -r 'github.com/gabyx/githooks' ~/test022/p002/.git/hooks; then
-    echo "! Hooks were not installed successfully"
-    exit 1
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    if [ "$path" != "$(git config --global core.hooksPath)" ]; then
+        echo "! Config 'core.hooksPath' does not point to the same directory."
+        git config --global core.hooksPath
+        exit 1
+    fi
+else
+    git hooks install
+
+    if [ "$path" != "$(git config --local core.hooksPath)" ]; then
+        echo "! Config 'core.hooksPath' does not point to the same directory."
+        git config --local core.hooksPath
+        exit 1
+    fi
 fi
 
 rm -rf ~/test022

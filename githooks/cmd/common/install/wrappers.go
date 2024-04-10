@@ -142,18 +142,24 @@ func UninstallFromRepo(
 	cleanArtefacts bool) bool {
 
 	hookDir := path.Join(gitDir, "hooks")
+	gitx := git.NewCtxAt(gitDir)
 
 	var err error
 	var nLfsCount int
 
 	if cm.IsDirectory(hookDir) {
 
+		// We always uninstasll run-wrappers if any are existing.
+		// no need to check the marker file `.githooks-contains-run-wrappers`.
 		nLfsCount, err = hooks.UninstallRunWrappers(hookDir, lfsHooksCache)
 
 		log.AssertNoErrorF(err,
 			"Could not uninstall Githooks run-wrappers from\n'%s'.",
 			hookDir)
 	}
+
+	err = hooks.UninstallLinkRunWrappers(gitx)
+	log.AssertNoErrorPanicF(err, "Could not uninstall run-wrapper link in '%s'.", gitDir)
 
 	// Always unregister repo.
 	unregisterRepo(log, gitDir)

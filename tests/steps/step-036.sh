@@ -16,6 +16,12 @@ if [ "$(git config --global --get githooks.updateCheckEnabled)" != "true" ]; the
     exit 1
 fi
 
+path=$(git config --global githooks.pathForUseCoreHooksPath)
+[ -d "$path" ] || {
+    echo "! Path '$path' does not exist."
+    exit 1
+}
+
 OUTPUT=$("$GH_TEST_BIN/githooks-cli" installer 2>&1)
 
 # shellcheck disable=SC2181
