@@ -114,5 +114,9 @@ it again next time, if the repository is marked as trusted.`,
 		ccm.SetCommandDefaults(ctx.Log, trustDeleteCmd),
 		ccm.SetCommandDefaults(ctx.Log, NewTrustHooksCmd(ctx)))
 
+	trustCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, trustCmd)
 }

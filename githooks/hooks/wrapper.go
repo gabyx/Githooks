@@ -72,16 +72,40 @@ const (
 
 func disableHookIfLFSDetected(
 	filePath string,
-	disableCallBack func(file string) HookDisableOption) (disabled bool, deleted bool, err error) {
+	lfsHooksCache LFSHooksCache,
+	disableCallBack func(file string) HookDisableOption,
+	log cm.ILogContext,
+) (disabled bool, deleted bool, err error) {
 
-	found, err := cm.MatchLineRegexInFile(filePath, lfsDetectionRe)
+	found := false
+	disableOption := BackupHook
+
+	// Check first the checksum.
+	isLFSHook, err := lfsHooksCache.IsIdentical(filePath)
 	if err != nil {
+		err = cm.CombineErrors(err,
+			cm.ErrorF("Could not detect if '%s' is a `git lfs` hook.", filePath))
+
 		return
 	}
 
-	if found {
-		disableOption := disableCallBack(filePath)
+	if isLFSHook {
+		if log != nil {
+			log.InfoF("Disabling detected original LFS Hook '%s'.", filePath)
+		}
+		found = true
+	} else {
+		// Fallback find with regex match
+		found, err = cm.MatchLineRegexInFile(filePath, lfsDetectionRe)
+		if err != nil {
+			return
+		}
+		if found {
+			disableOption = disableCallBack(filePath)
+		}
+	}
 
+	if found {
 		switch disableOption {
 		default:
 			fallthrough
@@ -106,8 +130,10 @@ func disableHookIfLFSDetected(
 // If it is a run-wrapper dont do anything.
 func moveExistingHooks(
 	dest string,
+	lfsHooksCache LFSHooksCache,
 	disableHookIfLFS func(file string) HookDisableOption,
-	log cm.ILogContext) error {
+	log cm.ILogContext,
+) error {
 
 	// Check there is already a Git hook in place and replace it.
 	if !cm.IsFile(dest) {
@@ -115,7 +141,6 @@ func moveExistingHooks(
 	}
 
 	isRunWrapper, err := IsRunWrapper(dest)
-
 	if err != nil {
 		return cm.CombineErrors(err,
 			cm.ErrorF("Could not detect if '%s' is a Githooks run-wrapper.", dest))
@@ -126,7 +151,7 @@ func moveExistingHooks(
 	// Try to detect a potential LFS statements and
 	// disable the hook (backup or delete).
 	if disableHookIfLFS != nil {
-		_, _, err := disableHookIfLFSDetected(dest, disableHookIfLFS)
+		_, _, err := disableHookIfLFSDetected(dest, lfsHooksCache, disableHookIfLFS, log)
 		if err != nil {
 			return err
 		}
@@ -164,13 +189,13 @@ func DeleteHookDirTemp(hookDir string) (err error) {
 	return nil
 }
 
-// InstallLinkRunWrappers installs a link with `core.hooksPath`
+// InstallRunWrappersLink installs a link with `core.hooksPath`
 // to the maintained run-wrappers by Githooks
 // and thus installs Githooks into the Git context, the local repository.
-func InstallLinkRunWrappers(
+func InstallRunWrappersLink(
 	gitx *git.Context,
-	dir string,
-) (err error) {
+	hookDir string,
+) error {
 	pathForUseCoreHooksPath, exists := gitx.LookupConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
 
 	if !exists || strs.IsEmpty(pathForUseCoreHooksPath) {
@@ -180,15 +205,45 @@ func InstallLinkRunWrappers(
 			GitCKPathForUseCoreHooksPath)
 	}
 
+	if exists, _ := cm.IsPathExisting(path.Join(hookDir, "githooks-contains-run-wrappers")); exists {
+		return cm.ErrorF(
+			"Hooks directory '%s' seems to contain run-wrappers.\n"+
+				"Please uninstall them first with 'git hooks uninstall'.", hookDir)
+	}
+
 	return gitx.SetConfig(git.GitCKCoreHooksPath, pathForUseCoreHooksPath, git.LocalScope)
 }
 
-// UninstallLinkRunWrappers uninstalls the link with `core.hooksPath`
+// UninstallRunWrappersLink uninstalls the link with `core.hooksPath`
 // to the maintained run-wrappers by Githooks
-// and thus installs Githooks into the Git context, the local repository.
-func UninstallLinkRunWrappers(
+// and thus uninstalls Githooks.
+func UninstallRunWrappersLink(
 	gitx *git.Context,
 ) (err error) {
+	lcp, lcpSet := gitx.LookupConfig(git.GitCKCoreHooksPath, git.LocalScope)
+	if !lcpSet {
+		return
+	}
+
+	pathForUseCoreHooksPath, exists := gitx.LookupConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
+
+	if !exists || strs.IsEmpty(pathForUseCoreHooksPath) {
+		return cm.ErrorF(
+			"Githooks has not been installed.\n"+
+				"The Git config variable '%s' does not exist or is empty.",
+			GitCKPathForUseCoreHooksPath)
+	}
+
+	if lcp != pathForUseCoreHooksPath {
+		err = cm.ErrorF("Local '%s=%s' is set (probably manually?)\n"+
+			"and does not correspond to the maintained hooks directory:\n'%s'\n"+
+			"Not going to uninstall run-wrappers link due to this.\n"+
+			"Resolve this by deleting the config entry.",
+			git.GitCKCoreHooksPath, lcp, pathForUseCoreHooksPath)
+
+		return
+	}
+
 	return gitx.UnsetConfig(git.GitCKCoreHooksPath, git.LocalScope)
 }
 
@@ -218,7 +273,7 @@ func InstallRunWrappers(
 
 		dest := path.Join(dir, hookName)
 
-		err = moveExistingHooks(dest, disableHookIfLFS, log)
+		err = moveExistingHooks(dest, lfsHooksCache, disableHookIfLFS, log)
 		if err != nil {
 			return
 		}
@@ -236,7 +291,7 @@ func InstallRunWrappers(
 		}
 	}
 
-	err = cm.TouchFile(path.Join(dir, ".githooks-contains-run-wrappers"), true)
+	err = cm.TouchFile(path.Join(dir, "githooks-contains-run-wrappers"), true)
 	if err != nil {
 		err = cm.CombineErrors(err,
 			cm.ErrorF("Could not create marker that directory '%s' contains run-wrappers.", dir))
@@ -304,7 +359,7 @@ func uninstallRunWrappers(
 		}
 	}
 
-	_ = os.Remove(path.Join(dir, ".githooks-contains-run-wrappers"))
+	_ = os.Remove(path.Join(dir, "githooks-contains-run-wrappers"))
 
 	return
 }

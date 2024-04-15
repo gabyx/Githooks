@@ -71,7 +71,8 @@ func writeArgs(log cm.ILogContext, file string, args *Arguments) {
 var MaintainedHooksDesc = "Any argument can be a hook name '<hookName>', 'all' or 'server'.\n" +
 	"An optional prefix '!' means subtraction from the current set.\n" +
 	"The initial value of the internally built set defaults\n" +
-	"to all hook names if 'all' or 'server' is not given as first argument:\n" +
+	"to all hook names if 'all' or 'server' (or negated) is not given\n" +
+	"as first argument:\n" +
 	"  - 'all' : All hooks supported by Githooks.\n" +
 	"  - 'server' : Only server hooks supported by Githooks.\n" +
 	"You can list them separately or comma-separated in one argument."
@@ -731,7 +732,7 @@ func setDirectoryForInstallMode(
 			if len(files) > 0 {
 				msg = strs.Fmt(
 					"The 'init.templateDir' setting is currently set to\n"+
-						"'%s'\n"+ // nolint: gGetInstallModeNameoconst
+						"'%s'\n"+
 						"and contains '%v' potential hooks.\n", tD, len(files))
 			}
 		}
@@ -830,7 +831,7 @@ func setupHookTemplates(
 	var err error
 	var hookNames []string
 	if len(maintainedHooks) == 0 {
-		hookNames, maintainedHooks, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
+		hookNames, maintainedHooks, _, err = hooks.GetMaintainedHooks(gitx, git.GlobalScope)
 		log.AssertNoError(err, "Could not get maintained hooks config.")
 	} else {
 		hookNames, err = hooks.UnwrapHookNames(maintainedHooks)
@@ -967,7 +968,7 @@ func setupAutomaticUpdateChecks(
 	} else {
 		log.Info(
 			"If you change your mind in the future, you can enable it by running:",
-			"  $ git hooks update --enable")
+			"  $ git hooks update --enable-check")
 	}
 }
 

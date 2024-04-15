@@ -29,14 +29,14 @@ n
 y
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-check_local_install_correct "$GH_TEST_TMP/test044/001"
+check_local_install "$GH_TEST_TMP/test044/001"
 
 if grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test044/001/.githooks/README.md"; then
     echo "! README was unexpectedly installed into 001"
     exit 1
 fi
 
-check_local_install_correct "$GH_TEST_TMP/test044/002"
+check_local_install "$GH_TEST_TMP/test044/002"
 
 if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test044/002/.githooks/README.md"; then
     echo "! README was not installed into 002"

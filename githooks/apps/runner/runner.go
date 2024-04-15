@@ -232,8 +232,7 @@ func getInstallDir(gitx *git.Context) string {
 
 func assertRegistered(gitx *git.Context, installDir string) {
 
-	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) &&
-		!gitx.IsConfigSet(git.GitCKCoreHooksPath, git.Traverse) {
+	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) {
 
 		gitDir, err := gitx.GetGitDirCommon()
 		log.AssertNoErrorPanicF(err, "Could not get Git common dir.")
@@ -396,7 +395,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	log.Info(versionText)
 	log.Info(
 		"If you would like to disable update checks, run:",
-		"  $ git hooks update --disable")
+		"  $ git hooks update --disable-check")
 }
 
 func shouldRunUpdateCheck(settings *HookSettings) bool {

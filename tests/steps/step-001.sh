@@ -10,7 +10,7 @@ accept_all_trust_prompts || exit 1
 
 # run the default install
 "$GH_TEST_BIN/githooks-cli" installer --non-interactive || exit 1
-check_install_correct
+check_install
 
 if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     mkdir -p "$GH_TEST_TMP/test1" &&
@@ -21,8 +21,8 @@ if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     git hooks install ||
         die "Could not install hooks into repo."
 
-    check_local_install_correct
+    check_local_install
 
 else
-    check_global_install_correct
+    check_centralized_install
 fi

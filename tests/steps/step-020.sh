@@ -27,8 +27,8 @@ if grep -q 'github.com/gabyx/githooks' "$GH_TEST_TMP/test20/.git/hooks/pre-commi
 fi
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    check_global_install_correct "$GH_TEST_TMP/.test-020/hooks"
+    check_centralized_install "$GH_TEST_TMP/.test-020/hooks"
 else
     git hooks install
-    check_local_install_correct "." "$GH_TEST_TMP/.test-020/hooks"
+    check_local_install "." "$GH_TEST_TMP/.test-020/hooks"
 fi

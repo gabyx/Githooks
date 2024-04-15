@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test:
-#   Run a single-repo, non-interactive install successfully
+#   Run a non-interactive install successfully
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -28,7 +28,7 @@ if ! "$GH_TEST_BIN/githooks-cli" install --non-interactive; then
     exit 1
 fi
 
-check_local_install_correct
+check_local_install
 
 # Uninstall
 if ! "$GH_TEST_BIN/githooks-cli" uninstall; then
@@ -36,4 +36,4 @@ if ! "$GH_TEST_BIN/githooks-cli" uninstall; then
     exit 1
 fi
 
-check_no_local_install_correct
+check_no_local_install

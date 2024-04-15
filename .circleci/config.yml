@@ -43,7 +43,7 @@ workflows:
                   "test-alpine",
                   "test-alpine-nolfs",
                   "test-alpine-user",
-                  "test-corehookspath",
+                  "test-centralized",
                   "test-whitespace",
                   "test-unittests",
                   "test-unittests-podman",

@@ -20,11 +20,11 @@ mkdir -p "$GH_TEST_TMP/test7" &&
     cd "$GH_TEST_TMP/test7" &&
     git init || exit 1
 
-check_install_correct "$HOME/.githooks/templates/hooks"
+check_install "$HOME/.githooks/templates/hooks"
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    check_global_install_correct
+    check_centralized_install
 else
     git hooks install
-    check_local_install_correct
+    check_local_install
 fi

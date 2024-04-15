@@ -31,5 +31,5 @@ else
         exit 1
     fi
 
-    check_local_install_correct "$GH_TEST_TMP/start/dir"
+    check_local_install "$GH_TEST_TMP/start/dir"
 fi

@@ -30,4 +30,4 @@ cd "$GH_TEST_TMP/start/dir" &&
 
 "$GH_TEST_BIN/githooks-cli" installer || exit 1
 
-check_local_install_correct "$GH_TEST_TMP/start/dir"
+check_local_install "$GH_TEST_TMP/start/dir"

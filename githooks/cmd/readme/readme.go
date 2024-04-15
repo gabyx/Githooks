@@ -69,5 +69,9 @@ It overwrite the file if it exists already.`,
 	readmeCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, updateReadmeCmd))
 	readmeCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, addReadmeCmd))
 
+	readmeCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, readmeCmd)
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Cli tool: run an installation
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -25,15 +25,9 @@ if ! "$GH_INSTALL_BIN_DIR/githooks-cli" installer; then
 fi
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    if [ -f "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit" ]; then
-        echo "! Expected hooks not installed"
-        exit 1
-    fi
+    check_centralized_install
 else
-    if ! grep 'gabyx/githooks' "$GH_TEST_TMP/test094/a/.git/hooks/pre-commit"; then
-        echo "! Expected hooks installed"
-        exit 1
-    fi
+    check_local_install
 fi
 
 if (cd "$GH_TEST_TMP/test094/c" && "$GH_INSTALL_BIN_DIR/githooks-cli" install); then

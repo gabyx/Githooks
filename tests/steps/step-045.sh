@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Run an install, skipping the intro README files
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
@@ -29,20 +29,14 @@ $GH_TEST_TMP/test045
 s
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-if ! grep -q "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/001/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed into 001"
-    exit 1
-fi
+check_local_install "$GH_TEST_TMP/test045/001"
 
 if [ -f "$GH_TEST_TMP/test045/001/.githooks/README.md" ]; then
     echo "! README was unexpectedly installed into 001"
     exit 1
 fi
 
-if ! grep -q "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/002/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed into 002"
-    exit 1
-fi
+check_local_install "$GH_TEST_TMP/test045/002"
 
 if [ -f "$GH_TEST_TMP/test045/002/.githooks/README.md" ]; then
     echo "! README was unexpectedly installed into 002"

@@ -19,7 +19,7 @@ mkdir -p "$GH_TEST_TMP/test086" && cd "$GH_TEST_TMP/test086" || exit 3
 
 git init || exit 5
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --enable || exit 7
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update --enable-check || exit 7
 "$GH_INSTALL_BIN_DIR/githooks-cli" config list
 "$GH_INSTALL_BIN_DIR/githooks-cli" config list | grep -q -i 'githooks.updateCheckEnabled' || exit 8
 "$GH_INSTALL_BIN_DIR/githooks-cli" config list --global | grep -q -i 'githooks.updateCheckEnabled' || exit 9

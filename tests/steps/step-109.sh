@@ -13,60 +13,47 @@ fi
 
 accept_all_trust_prompts || exit 1
 
-mkdir -p "$GH_TEST_TMP/test109/p001" && mkdir -p "$GH_TEST_TMP/test109/p002" && mkdir -p "$GH_TEST_TMP/test109/p003" || exit 1
+mkdir -p "$GH_TEST_TMP/test109/p001" &&
+    mkdir -p "$GH_TEST_TMP/test109/p002" &&
+    mkdir -p "$GH_TEST_TMP/test109/p003" || exit 1
 
 cd "$GH_TEST_TMP/test109/p001" && git init --bare || exit 1
 cd "$GH_TEST_TMP/test109/p002" && git init --bare || exit 1
 
-if grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/"; then
-    echo "! Hooks were installed ahead of time"
-    exit 1
-fi
+check_no_local_install "$GH_TEST_TMP/test109/p001"
+check_no_local_install "$GH_TEST_TMP/test109/p002"
 
-mkdir -p ~/.githooks/templates/hooks
-git config --global init.templateDir ~/.githooks/templates
+mkdir -p "$GH_TEST_TMP/.githooks/templates/hooks"
+git config --global init.templateDir "$GH_TEST_TMP/.githooks/templates"
 
 # run the install, and select installing hooks into existing repos
 echo "n
 y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --maintained-hooks server --stdin || exit 1
 
-if ! grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
-    ! grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then
-    echo "! Hooks were not installed successfully"
-    exit 1
-fi
+check_local_install "$GH_TEST_TMP/test109/p001"
+check_local_install "$GH_TEST_TMP/test109/p002"
 
 # check if only server hooks are installed.
-for hook in pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc; do
-    if [ ! -f "$GH_TEST_TMP/test109/p001/hooks/"$hook ]; then
-        echo "! Server hooks were not installed successfully ('$hook')"
-        exit 1
-    fi
-done
-# shellcheck disable=SC2012
-count=$(find "$GH_TEST_TMP/test109/p001/hooks/" -type f | wc -l)
-if [ "$count" != "8" ]; then
-    echo "! Expected only server hooks to be installed ($count)"
-    exit 1
-fi
+# + 3 missing LFS hooks (are always installed due to safety, also not needed)
+check_install_hooks \
+    11 \
+    pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc
 
-cd "$GH_TEST_TMP/test109/p003" && git init --bare || exit 1
-# check if only server hooks are installed.
-for hook in pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc; do
-    if [ ! -f "$GH_TEST_TMP/test109/p003/hooks/"$hook ]; then
-        echo "! Server hooks were not installed successfully ('$hook')"
-        exit 1
-    fi
-done
+cd "$GH_TEST_TMP/test109/p003" &&
+    git init --bare || exit 1
+
+# we should have run-wrappers installed due to template dir above.
+check_local_install_run_wrappers "$GH_TEST_TMP/test109/p003"
+git hooks install
+# Install should not have changed (still runwrappers)
+check_local_install_run_wrappers "$GH_TEST_TMP/test109/p003"
 
 echo "y
 $GH_TEST_TMP/test109
 " | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin || exit 1
 
-if grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p001/hooks" ||
-    grep -qr 'github.com/gabyx/githooks' "$GH_TEST_TMP/test109/p002/hooks"; then
-    echo "! Hooks were not uninstalled successfully"
-    exit 1
-fi
+check_no_local_install "$GH_TEST_TMP/test109/p001"
+check_no_local_install "$GH_TEST_TMP/test109/p002"
+check_no_local_install "$GH_TEST_TMP/test109/p003"

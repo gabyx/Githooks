@@ -10,7 +10,7 @@ TEST_DIR="$ROOT_DIR/tests"
 
 cd "$ROOT_DIR"
 
-cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-corehookspath-base -
+cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-centralized-base -
 FROM golang:1.20-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
@@ -21,4 +21,4 @@ RUN git config --system protocol.file.allow always
 ENV EXTRA_INSTALL_ARGS --centralized
 EOF
 
-exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-corehookspath' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-centralized' "$@"

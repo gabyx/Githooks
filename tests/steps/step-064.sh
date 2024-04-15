@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Cli tool: run an update by building from source
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091

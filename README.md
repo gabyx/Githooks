@@ -938,7 +938,7 @@ following cases:
 1. **Trust prompt**: The user is required to trust/untrust a new/changed hook:
    **fatal**.
 2. **Update prompts**: The user is requested to accept a new update if automatic
-   updates are enabled (`git hooks update --enable`): **non-fatal**.
+   updates are enabled (`git hooks update --enable-check`): **non-fatal**.
    - Various other prompts when the updater is launched: **non-fatal**.
 
 User prompts during `runner` execution are sometimes not desirable (server
@@ -1006,7 +1006,7 @@ The installer will:
    `--skip-install-into-existing`)
 
    1. Make them use Githooks by either setting `core.hooksPath` (or install
-      run-wrappers if `<repo-git-dir>/hooks/.githooks-contains-run-wrappers`
+      run-wrappers if `<repo-git-dir>/hooks/githooks-contains-run-wrappers`
       exists).
 
    1. Offer to add an intro README in their `.githooks` folder.
@@ -1376,7 +1376,7 @@ git hooks config trust-all-hooks --accept
 
 # Don't do global automatic updates, since the Githooks updater
 # might get invoked in parallel on a server.
-git hooks config update --disable
+git hooks config update --disable-check
 ```
 
 Note: A user cannot change bare repository Githooks by pushing changes to a bare
@@ -1462,10 +1462,10 @@ below.
 
 ```shell
 # enable with:
-$ git hooks update --enable # `Config: githooks.updateCheckEnabled`
+$ git hooks update --enable-check # `Config: githooks.updateCheckEnabled`
 
 # disable with:
-$ git hooks update --disable
+$ git hooks update --disable-check
 ```
 
 #### Update Mechanics

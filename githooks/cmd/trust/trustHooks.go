@@ -159,5 +159,9 @@ by '--patterns' or '--paths'.` + "\n\n" +
 	trustHooks.Flags().BoolVar(&reset, "reset", false,
 		"If the matched hooks are set 'untrusted'.")
 
+	trustHooks.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, trustHooks)
 }

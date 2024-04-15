@@ -15,11 +15,11 @@ fi
 
 ! "$GH_INSTALL_BIN_DIR/githooks-cli" config update || exit 2
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --disable &&
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update --disable-check &&
     "$GH_INSTALL_BIN_DIR/githooks-cli" config update --print | grep -q 'disabled' || exit 3
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --enable &&
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update --enable-check &&
     "$GH_INSTALL_BIN_DIR/githooks-cli" config update --print | grep -q 'enabled' || exit 4
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --disable &&
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update --disable-check &&
     "$GH_INSTALL_BIN_DIR/githooks-cli" config update --print | grep -q 'disabled' || exit 5

@@ -30,10 +30,8 @@ y
 
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin --skip-install-into-existing || exit 1
 
-if grep -r 'github.com/gabyx/githooks' ~/test100/; then
-    echo "! Hooks were installed but shouldn't have"
-    exit 1
-fi
+check_no_local_install ~/test100/p001
+check_no_local_install ~/test100/p002
 
 # run the install, and let it install into existing repos
 echo 'n
@@ -41,14 +39,7 @@ y
 
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin
 
-if ! grep -r 'github.com/gabyx/githooks' ~/test100/p001/.git/hooks; then
-    echo "! Hooks were not installed successfully"
-    exit 1
-fi
-
-if ! grep -r 'github.com/gabyx/githooks' ~/test100/p002/.git/hooks; then
-    echo "! Hooks were not installed successfully"
-    exit 1
-fi
+check_local_install ~/test100/p001
+check_local_install ~/test100/p002
 
 rm -rf ~/test100

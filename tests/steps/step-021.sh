@@ -27,7 +27,7 @@ y
 ~/test021
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-check_local_install_correct ~/test021/p001
-check_local_install_correct ~/test021/p002
+check_local_install ~/test021/p001
+check_local_install ~/test021/p002
 
 rm -rf ~/test021

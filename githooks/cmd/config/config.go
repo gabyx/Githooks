@@ -1143,5 +1143,9 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	configDetectedLFSCmd(ctx, configCmd, &setOpts, &gitOpts)
 
+	configCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, configCmd)
 }

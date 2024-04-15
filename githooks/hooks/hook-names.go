@@ -120,6 +120,7 @@ func SetMaintainedHooks(
 }
 
 // getMaintainedHooksFromString gets all maintained hooks.
+// By default it returns `all`.
 func getMaintainedHooksFromString(maintainedHooks string) (hookNamesUnwrapped []string,
 	maintHooks []string, err error) {
 
@@ -146,10 +147,13 @@ func getMaintainedHooksFromString(maintainedHooks string) (hookNamesUnwrapped []
 // If an error occurs, all Githooks supported hooks are returned by default.
 func GetMaintainedHooks(
 	gitx *git.Context,
-	scope git.ConfigScope) (hookNames []string, maintainedHooks []string, err error) {
+	scope git.ConfigScope) (hookNames []string, maintainedHooks []string, isSet bool, err error) {
 	h := git.NewCtx().GetConfig(GitCKMaintainedHooks, scope)
 
-	return getMaintainedHooksFromString(h)
+	hookNames, maintainedHooks, err = getMaintainedHooksFromString(h)
+	isSet = strs.IsNotEmpty(h)
+
+	return
 }
 
 // Get all other hooks from `ManagedHookNames` which are not in `hookNames`.

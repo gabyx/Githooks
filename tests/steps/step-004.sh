@@ -31,6 +31,6 @@ y
 $GH_TEST_TMP/test4
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-check_install_correct
-check_local_install_correct "$GH_TEST_TMP/test4/p001/.git/hooks"
-check_local_install_correct "$GH_TEST_TMP/test4/p002/.git/hooks"
+check_install
+check_local_install "$GH_TEST_TMP/test4/p001/.git/hooks"
+check_local_install "$GH_TEST_TMP/test4/p002/.git/hooks"

@@ -18,5 +18,5 @@ mkdir -p "$GH_TEST_TMP/test33/b" &&
     cd "$GH_TEST_TMP/test33/b" &&
     git init || exit 1
 
-check_no_local_install_correct "$GH_TEST_TMP/test33/a"
-check_no_local_install_correct "$GH_TEST_TMP/test33/b"
+check_no_local_install "$GH_TEST_TMP/test33/a"
+check_no_local_install "$GH_TEST_TMP/test33/b"

@@ -22,7 +22,7 @@ y
 y
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-check_install_correct
+check_install
 
 if ! [ -f "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit" ]; then
     echo "! Expected hook is not installed"
@@ -39,8 +39,8 @@ mkdir -p "$GH_TEST_TMP/test6" &&
     git init || exit 1
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    check_global_install_correct
+    check_centralized_install
 else
     git hooks install
-    check_local_install_correct
+    check_local_install
 fi

@@ -368,5 +368,9 @@ To ensure run 'git hooks shared update'.`,
 	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedRootCmd))
 	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedRootFromUrlCmd))
 
+	sharedCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, sharedCmd)
 }

@@ -18,7 +18,7 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 	ctx.Log.PanicIfF(installMode == inst.InstallModeTypeV.UseGlobalCoreHooksPath,
 		"Githooks is installed in '%s' mode and\n"+
 			"installing into the current repository has no effect.",
-		inst.InstallModeTypeV.UseGlobalCoreHooksPath)
+		inst.InstallModeTypeV.UseGlobalCoreHooksPath.Name())
 
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
@@ -28,16 +28,18 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 		ctx.Log.AssertNoErrorPanic(err, "Maintained hooks are not valid.")
 
 		err = hooks.SetMaintainedHooks(ctx.GitX, maintainedHooks, git.LocalScope)
-		ctx.Log.AssertNoErrorPanic(err, "Could not set maintined hooks config value.")
+		ctx.Log.AssertNoErrorPanic(err, "Could not set maintained hooks config value.")
 
 		maintainedHooks, err = hooks.UnwrapHookNames(maintainedHooks)
 		ctx.Log.AssertNoErrorPanic(err, "Maintained hooks are not valid.")
 	}
 
-	inst.InstallIntoRepo(
+	installed := inst.InstallIntoRepo(
 		ctx.Log, gitDir,
 		lfsHooksCache, maintainedHooks,
 		nonInteractive, false, false, &uiSettings)
+
+	ctx.Log.PanicIf(!installed, "Install had errors.")
 
 	err = hooks.RegisterRepo(gitDir, ctx.InstallDir, false, false)
 	ctx.Log.AssertNoError(err, "Could not register repository '%s'.", gitDir)
@@ -111,6 +113,14 @@ into the current repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			runUninstall(ctx)
 		},
+	}
+
+	installCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
+	uninstallCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
 	}
 
 	return []*cobra.Command{installCmd, uninstallCmd}

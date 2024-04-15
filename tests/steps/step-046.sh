@@ -26,10 +26,7 @@ $GH_TEST_TMP/test046
 y
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
-if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test046/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed"
-    exit 1
-fi
+check_local_install "$GH_TEST_TMP/test046"
 
 if ! grep "github.com/gabyx/githooks" "$GH_TEST_TMP/test046/.githooks/README.md"; then
     echo "! README was not installed"

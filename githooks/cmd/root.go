@@ -107,8 +107,6 @@ func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
 func initArgs(ctx *ccm.CmdContext) {
 	// Initialize from config , ENV -> viper
 	// not yet needed...
-
-	ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
 }
 
 // Run executes the main CLI function.
