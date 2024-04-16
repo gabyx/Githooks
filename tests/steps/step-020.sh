@@ -12,8 +12,7 @@ accept_all_trust_prompts || exit 1
 rm -rf "$GH_TEST_GIT_CORE/templates" || exit 1
 
 # run the install, and let it search for the hooks dir and the chose the given one
-echo "n
-y
+echo "y
 $GH_TEST_TMP/.test-020/hooks
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 

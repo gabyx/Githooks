@@ -22,7 +22,9 @@ mkdir -p ~/test021/p002 &&
     git init || exit 1
 
 # run the install, and select installing the hooks into existing repos
-echo 'n
+echo 'y
+
+n
 y
 ~/test021
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1

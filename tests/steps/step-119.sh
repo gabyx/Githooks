@@ -36,6 +36,7 @@ mkdir -p "$GH_TEST_TMP/test119/.githooks/pre-commit" &&
     echo 'echo "-step 12.2"' >".githooks/pre-commit/step-12/step-12.2" &&
     echo 'echo "-step 13.1"' >".githooks/pre-commit/step-13" &&
     git init &&
+    install_hooks_if_not_centralized &&
     git add . &&
     git commit --no-verify -m 'Initial commit' ||
     exit 3

@@ -16,7 +16,9 @@ fi
 rm -rf /does/not/exist
 
 OUTPUT=$(
-    echo 'n
+    echo 'y
+
+n
 y
 /does/not/exist
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin 2>&1

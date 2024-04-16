@@ -13,7 +13,8 @@ accept_all_trust_prompts || exit 1
 mkdir -p "$GH_TEST_TMP/test053/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test053/.githooks/pre-commit/example" &&
     cd "$GH_TEST_TMP/test053" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "example" | grep "'untrusted'" | grep "'active'"; then
     echo "! Unexpected cli list output"

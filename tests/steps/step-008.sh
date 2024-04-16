@@ -34,7 +34,7 @@ if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
         exit 1
     fi
 
-    git hooks install
+    git hooks install || exit 1
 fi
 
 git commit --allow-empty -m 'Test'

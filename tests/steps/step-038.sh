@@ -15,7 +15,9 @@ fi
 
 mkdir -p "$GH_TEST_TMP/start/dir" || exit 1
 
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/start
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
@@ -25,9 +27,10 @@ if [ "$(git config --global --get githooks.previousSearchDir)" != "$GH_TEST_TMP/
     exit 1
 fi
 
-cd "$GH_TEST_TMP/start/dir" &&
-    git init || exit 1
-
 "$GH_TEST_BIN/githooks-cli" installer || exit 1
+
+cd "$GH_TEST_TMP/start/dir" &&
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 check_local_install "$GH_TEST_TMP/start/dir"

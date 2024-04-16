@@ -8,5 +8,7 @@ type Arguments struct {
 
 	NonInteractive bool
 
+	FullUninstallFromRepos bool
+
 	UseStdin bool
 }

@@ -30,7 +30,8 @@ git config --global init.templateDir "$GH_TEST_TMP/.githooks/templates"
 echo "n
 y
 $GH_TEST_TMP/test109
-" | "$GH_TEST_BIN/githooks-cli" installer --maintained-hooks server --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer --hooks-dir-use-template-dir \
+    --maintained-hooks server --stdin || exit 1
 
 check_local_install "$GH_TEST_TMP/test109/p001"
 check_local_install "$GH_TEST_TMP/test109/p002"

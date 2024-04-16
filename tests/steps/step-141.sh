@@ -85,9 +85,9 @@ check_local_install_no_run_wrappers .
 echo "- Install local partially (reject)"
 git config --global core.hooksPath "/this-is-a-test"
 OUT=$(git hooks install --maintained-hooks "pre-commit" 2>&1)
-exitCode="$?"
+EXIT_CODE="$?"
 # shellcheck disable=SC2181
-if [ "$exitCode" -eq "0" ] ||
+if [ "$EXIT_CODE" -eq "0" ] ||
     ! echo "$OUT" | grep -qiE "Global Git config 'core\.hooksPath.* is set" ||
     ! echo "$OUT" | grep -qiE "which circumvents Githooks run-wrappers"; then
     echo "! Partial install with run-wrappers and global core.hooksPath should error out."

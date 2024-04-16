@@ -15,10 +15,10 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 	uiSettings := inst.UISettings{PromptCtx: ctx.PromptCtx}
 
 	_, installMode := inst.GetInstallMode(ctx.GitX)
-	ctx.Log.PanicIfF(installMode == inst.InstallModeTypeV.UseGlobalCoreHooksPath,
+	ctx.Log.PanicIfF(installMode == inst.InstallModeTypeV.Centralized,
 		"Githooks is installed in '%s' mode and\n"+
 			"installing into the current repository has no effect.",
-		inst.InstallModeTypeV.UseGlobalCoreHooksPath.Name())
+		inst.InstallModeTypeV.Centralized.Name())
 
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
@@ -48,14 +48,14 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 
 }
 
-func runUninstallFromRepo(ctx *ccm.CmdContext) {
+func runUninstallFromRepo(ctx *ccm.CmdContext, fullUninstall bool) {
 	_, gitDir, _ := ccm.AssertRepoRoot(ctx)
 
 	_, installMode := inst.GetInstallMode(ctx.GitX)
-	ctx.Log.WarnIfF(installMode == inst.InstallModeTypeV.UseGlobalCoreHooksPath,
+	ctx.Log.WarnIfF(installMode == inst.InstallModeTypeV.Centralized,
 		"Githooks is installed in '%s' mode and\n"+
 			"uninstalling from the current repository has no effect.",
-		inst.InstallModeTypeV.UseGlobalCoreHooksPath.Name())
+		inst.InstallModeTypeV.Centralized.Name())
 
 	// Read registered file if existing.
 	var registeredGitDirs hooks.RegisterRepos
@@ -66,7 +66,7 @@ func runUninstallFromRepo(ctx *ccm.CmdContext) {
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
 
-	if inst.UninstallFromRepo(ctx.Log, gitDir, lfsHooksCache, false) {
+	if inst.UninstallFromRepo(ctx.Log, gitDir, lfsHooksCache, fullUninstall) {
 
 		registeredGitDirs.Remove(gitDir)
 		err := registeredGitDirs.Store(ctx.InstallDir)
@@ -75,8 +75,8 @@ func runUninstallFromRepo(ctx *ccm.CmdContext) {
 	}
 }
 
-func runUninstall(ctx *ccm.CmdContext) {
-	runUninstallFromRepo(ctx)
+func runUninstall(ctx *ccm.CmdContext, fullUninstall bool) {
+	runUninstallFromRepo(ctx, fullUninstall)
 }
 
 func runInstall(ctx *ccm.CmdContext, maintainedHooks []string, nonInteractive bool) {
@@ -105,15 +105,19 @@ into the current repository.`,
 		"A set of hook names which are maintained in this repository.\n"+
 			installer.MaintainedHooksDesc)
 
+	fullUninstall := false
 	uninstallCmd := &cobra.Command{
 		Use:   "uninstall",
 		Short: "Uninstalls Githooks run-wrappers into the current repository.",
 		Long: `Uninstall the Githooks run-wrappers and Git config settings
 into the current repository.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			runUninstall(ctx)
+			runUninstall(ctx, fullUninstall)
 		},
 	}
+
+	installCmd.Flags().BoolVar(&fullUninstall, "full-uninstall", false,
+		"Install also Git config values from Githook and cached settings (checksums etc.).")
 
 	installCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
 		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)

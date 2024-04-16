@@ -1,6 +1,8 @@
 package ccm
 
 import (
+	"path"
+
 	"github.com/gabyx/githooks/githooks/cmd/common/install"
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
@@ -29,28 +31,40 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 	}
 
 	if insideRepo {
-		hasHooksDir, _ := cm.IsPathExisting(hooks.GetGithooksDir(repoRoot))
+		hasHooksConfigured, _ := cm.IsPathExisting(hooks.GetGithooksDir(repoRoot))
 
-		if hasHooksDir && localCoreHooksPathSet && localCoreHooksPath != pathToUse {
+		if hasHooksConfigured && localCoreHooksPathSet && localCoreHooksPath != pathToUse {
 			log.WarnF(
 				"Local Git config 'core.hooksPath' is set to:\n"+
 					"'%s',\n"+
 					"Githooks however uses the maintained run-wrappers in path:\n"+
-					"'%s'\n."+
-					"Hooks configured for Githooks in this repository will not run.",
+					"'%s'.\n"+
+					"Hooks configured for Githooks in this repository will not run!",
 				localCoreHooksPath, pathToUse)
+		}
+
+		gitDir, err := gitx.GetGitDirCommon()
+		log.AssertNoErrorF(err, "Could not determine common Git dir.")
+		hasRunWrappers, _ := cm.IsPathExisting(path.Join(gitDir, "githooks-contains-run-wrappers"))
+
+		if hasHooksConfigured &&
+			!localCoreHooksPathSet && !globalCoreHooksPathSet &&
+			!hasRunWrappers {
+			log.WarnF("Githooks are configured but Githooks seems not installed in '%v'.\n"+
+				"Neither 'core.hooksPath' set nor run-wrappers installed.\n"+
+				"Hooks might not run!", gitDir)
 		}
 	}
 
-	if installMode == install.InstallModeTypeV.UseGlobalCoreHooksPath &&
+	if installMode == install.InstallModeTypeV.Centralized &&
 		globalCoreHooksPathSet && globalCoreHooksPath != pathToUse {
 
 		log.ErrorF("Githooks install is corrupt: \n"+
-			"Global 'core.hooksPath' is set to:\n"+
+			"Global Git config 'core.hooksPath' is set to:\n"+
 			"'%s'\n"+
 			"Githooks however uses the maintained run-wrappers in path:\n"+
-			"'%s'\n."+
-			"Hooks configured for Githooks might not run.",
+			"'%s'.\n"+
+			"Hooks configured for Githooks might not run!",
 			globalCoreHooksPath, pathToUse)
 	}
 }

@@ -35,7 +35,8 @@ fi
 mkdir -p "$GH_TEST_TMP/test108/.githooks/pre-commit" &&
     echo 'echo "Hello"' >"$GH_TEST_TMP/test108/.githooks/pre-commit/testing" &&
     cd "$GH_TEST_TMP/test108" &&
-    git init || exit 5
+    git init &&
+    install_hooks_if_not_centralized || exit 5
 
 echo A >A.txt
 git add A.txt

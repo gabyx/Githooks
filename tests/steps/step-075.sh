@@ -14,6 +14,8 @@ mkdir -p "$GH_TEST_TMP/test074/.githooks/pre-commit" &&
     git init || exit 1
 
 echo "y
+
+y
 y
 $GH_TEST_TMP
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1

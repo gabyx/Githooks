@@ -22,7 +22,9 @@ mkdir -p "$GH_TEST_TMP/test043/002" &&
 
 cd "$GH_TEST_TMP/test043" || exit 1
 
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/test043
 a

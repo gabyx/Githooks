@@ -17,25 +17,34 @@ mkdir -p "$GH_TEST_TMP/test109.1/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test109.1" &&
     echo "echo 'In-repo' >> '$GH_TEST_TMP/test-109.out'" >.githooks/pre-commit/test &&
     git init && mkdir -p .git/hooks &&
+    # simulate that this repo contains wrappers, such that the install
+    # installs run-wrappers below.
+    touch .git/hooks/githooks-contains-run-wrappers &&
     echo "echo 'Previous1' >> '$GH_TEST_TMP/test-109.out' ; # git lfs arg1 arg2" >.git/hooks/pre-commit &&
     chmod +x .git/hooks/pre-commit ||
     exit 1
 
 mkdir -p "$GH_TEST_TMP/test109.2/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test109.2" && git init && mkdir -p .git/hooks &&
+    # simulate that this repo contains wrappers, such that the install
+    # installs run-wrappers below.
+    touch .git/hooks/githooks-contains-run-wrappers &&
     echo "echo 'Previous2' >> '$GH_TEST_TMP/test-109.out' ; # git-lfs arg1 arg2" >.git/hooks/pre-commit &&
     chmod +x .git/hooks/pre-commit ||
     exit 1
 
 mkdir -p "$GH_TEST_TMP/test109.3/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test109.3" && git init && mkdir -p .git/hooks &&
+    # simulate that this repo contains wrappers, such that the install
+    # installs run-wrappers below.
+    touch .git/hooks/githooks-contains-run-wrappers &&
     echo "echo 'Previous3' >> '$GH_TEST_TMP/test-109.out' ; # git  lfs arg1 arg2" >.git/hooks/pre-commit &&
     chmod +x .git/hooks/pre-commit ||
     exit 1
 
-git config --global --unset githooks.deleteDetectedLFSHooks
+echo "y
 
-echo "n
+n
 y
 $GH_TEST_TMP
 y

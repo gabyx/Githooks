@@ -46,9 +46,9 @@ func InstallIntoRepo(
 	// We switch to run-wrappers if we install a set of maintained hooks.
 	// or repository settings have maintained hooks set.
 	installRunWrappers, _ := cm.IsPathExisting(path.Join(hookDir, "githooks-contains-run-wrappers"))
+	log.DebugF("Marker file for run-wrappers detected: '%v'.", installRunWrappers)
 	installRunWrappers = installRunWrappers || len(hookNames) != 0
 
-	log.InfoF("Installing: %v", hookNames)
 	var isSet bool
 	if len(hookNames) == 0 {
 		// Will default to all hooks if unset or wrong.
@@ -57,7 +57,10 @@ func InstallIntoRepo(
 
 		// If maintained hooks are set we install run-wrappers.
 		installRunWrappers = installRunWrappers || isSet
+		log.DebugF("Detected customized maintained hooks: '%v'.", isSet)
 	}
+
+	log.DebugF("Install run-wrappers: '%v'.", installRunWrappers)
 
 	if dryRun {
 		log.InfoF("[dry run] Hooks would have been installed into\n'%s'.",
@@ -160,14 +163,19 @@ func cleanArtefactsInRepo(log cm.ILogContext, gitDir string) {
 	}
 }
 
-func cleanGitConfigInRepo(log cm.ILogContext, gitDir string) {
+func cleanGitConfigInRepo(log cm.ILogContext, gitDir string, minimal bool) {
 	gitx := git.NewCtxAt(gitDir)
 
-	for _, k := range hooks.GetLocalGitConfigKeys() {
+	var names []string
+	if !minimal {
+		names = hooks.GetLocalGitConfigKeys()
+	} else {
+		names = hooks.GetLocalGitConfigKeysNonMinUninstall()
+	}
 
+	for _, k := range names {
 		log.AssertNoErrorF(gitx.UnsetConfig(k, git.LocalScope),
 			"Could not unset Git config '%s' in '%s'.", k, gitDir)
-
 	}
 }
 
@@ -184,7 +192,7 @@ func UninstallFromRepo(
 	log cm.ILogContext,
 	gitDir string,
 	lfsHooksCache hooks.LFSHooksCache,
-	cleanArtefacts bool) bool {
+	fullUninstall bool) bool {
 
 	hooksDir := path.Join(gitDir, "hooks")
 	err := os.MkdirAll(hooksDir, cm.DefaultFileModeDirectory)
@@ -210,9 +218,11 @@ func UninstallFromRepo(
 	// Always unregister repo.
 	unregisterRepo(log, gitDir)
 
-	if cleanArtefacts {
+	if fullUninstall {
 		cleanArtefactsInRepo(log, gitDir)
-		cleanGitConfigInRepo(log, gitDir)
+		cleanGitConfigInRepo(log, gitDir, false)
+	} else {
+		cleanGitConfigInRepo(log, gitDir, true)
 	}
 
 	if nLfsCount != 0 {

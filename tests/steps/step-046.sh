@@ -20,7 +20,9 @@ mkdir -p "$GH_TEST_TMP/test046/.githooks/pre-commit" &&
 
 git init || exit 1
 
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/test046
 y

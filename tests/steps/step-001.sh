@@ -17,11 +17,13 @@ if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
         cd "$GH_TEST_TMP/test1" &&
         git init || exit 1
 
+    check_no_local_install .
+
     # Install hooks
     git hooks install ||
         die "Could not install hooks into repo."
 
-    check_local_install
+    check_local_install .
 
 else
     check_centralized_install

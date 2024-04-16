@@ -26,7 +26,8 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-103.git/pre-commit" &&
 # Install shared hook url into a repo.
 mkdir -p "$GH_TEST_TMP/test103" &&
     cd "$GH_TEST_TMP/test103" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 mkdir -p .githooks && echo "urls: - file://$GH_TEST_TMP/shared/hooks-103.git" >.githooks/.shared.yaml || exit 1
 git add .githooks/.shared.yaml
@@ -103,10 +104,19 @@ if [ ! "$(git config --global --get githooks.skipNonExistingSharedHooks)" = "fal
     exit 1
 fi
 
-# Clone a new one
+# Clone a new one, set template dir
 echo "Cloning"
 cd "$GH_TEST_TMP" || exit 1
-git clone "$GH_TEST_TMP/test103" test103-clone && cd test103-clone || exit 1
+
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    # Set templateDir such that shared hooks update gets triggered on clone.
+    git -c "init.templateDir=$(git config githooks.pathForUseCoreHooksPath)/.." \
+        clone "$GH_TEST_TMP/test103" test103-clone &&
+        cd test103-clone || exit 1
+else
+    git clone "$GH_TEST_TMP/test103" test103-clone &&
+        cd test103-clone || exit 1
+fi
 
 # shellcheck disable=SC2012
 RESULT=$(find ~/.githooks/shared/ -type f 2>/dev/null | wc -l)
@@ -118,7 +128,7 @@ fi
 # Remove all shared hooks
 "$GH_INSTALL_BIN_DIR/githooks-cli" shared purge || exit 1
 
-echo "Commiting"
+echo "Committing"
 # Make a commit
 echo A >A || exit 1
 git add A || exit 1

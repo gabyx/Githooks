@@ -15,12 +15,30 @@ mkdir -p "$GH_TEST_TMP/git-templates" &&
     touch "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit.sample" ||
     exit 1
 
+export GIT_TEMPLATE_DIR="$GH_TEST_TMP/git-templates/templates"
+
 # run the install, and let it search for the templates
-echo 'y
-y
-y
-y
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+OUT=$("$GH_TEST_BIN/githooks-cli" installer --hooks-dir-use-template-dir 2>&1)
+EXIT_CODE="$?"
+
+if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    if [ "$EXIT_CODE" -eq "0" ] || ! echo "$OUT" |
+        grep -C 10 "You cannot use 'centralized'" |
+        grep -C 10 "duplicating run-wrappers" |
+        grep -q "is nonsense"; then
+        echo "! Expected install to fail."
+        echo "$OUT"
+        exit 1
+    fi
+
+    # Further test are not useful for centralized install.
+    exit 0
+else
+    if [ "$EXIT_CODE" -ne "0" ]; then
+        echo "! Expected install to succeed."
+        exit 1
+    fi
+fi
 
 check_install
 
@@ -38,9 +56,8 @@ mkdir -p "$GH_TEST_TMP/test6" &&
     cd "$GH_TEST_TMP/test6" &&
     git init || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    check_centralized_install
-else
-    git hooks install
-    check_local_install
-fi
+check_local_install_run_wrappers
+
+# Reinstall and check again.
+git hooks install
+check_local_install_run_wrappers

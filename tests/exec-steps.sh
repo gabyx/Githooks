@@ -195,7 +195,9 @@ function main() {
 
         local uninstall_out uninstall_exit
         set +e
-        uninstall_out=$(printf "n\\n" | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin 2>&1)
+        uninstall_out=$(printf "n\\n" | "$GH_TEST_BIN/githooks-cli" uninstaller \
+            --full-uninstall-from-repos \
+            --stdin 2>&1)
         uninstall_exit="$?"
         set -e
 

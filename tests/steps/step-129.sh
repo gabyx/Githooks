@@ -16,16 +16,16 @@ if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     exit 249
 fi
 
-function check_lfs_hook() {
-    local repo="$1"
+function check_lfs_hook_dir() {
+    local dir="$1"
     shift 1
     local hooks=("$@")
     for hook in "${hooks[@]}"; do
-        grep -qE "^git lfs" "$repo/.git/hooks/$hook" ||
+        grep -qE "^git lfs" "$dir/$hook" ||
             {
                 echo "Hook '$hook' should be a Git LFS hook."
-                cat "$repo/.git/hooks/$hook"
-                ls -al "$repo/.git/hooks"
+                cat "$dir/$hook"
+                ls -al "$dir"
                 exit 1
             }
     done
@@ -33,12 +33,16 @@ function check_lfs_hook() {
     # All other hooks need to be Githooks
     local list
     list=$(printf '%s\n' "${hooks[@]}")
-    for path in "$repo/.git/hooks"/*; do
+    for path in "$dir"/*; do
         basename=$(basename "$path")
         if ! echo "$list" | grep -Fxq "$basename"; then
 
-            # Skip custom hooks.
-            if grep -q "custom-to-survive" "$path"; then
+            # Skip custom hooks or marker file.
+            if grep -qE "custom-to-survive|" "$path"; then
+                continue
+            fi
+
+            if echo "$path" | grep -q "githooks-contains-run-wrappers"; then
                 continue
             fi
 
@@ -51,39 +55,56 @@ function check_lfs_hook() {
                 {
                     echo "Hook '$path' should be a Githooks run-wrapper."
                     cat "$path"
-                    ls -al "$repo/.git/hooks"
+                    ls -al "$dir"
                     exit 1
                 }
         fi
     done
 }
 
-function check_hooks() {
-    local repo="$1"
+function check_hooks_dir() {
+    local dir="$1"
     shift 1
     local hooks=("$@")
     local count="${#hooks[@]}"
 
     for hook in "${hooks[@]}"; do
-        [ -f "$repo/.git/hooks/$hook" ] ||
+        [ -f "$dir/$hook" ] ||
             {
-                echo "Hook '$hook' should be existing in repo '$repo'"
-                ls -al "$repo/.git/hooks"
+                echo "Hook '$hook' should be existing in repo '$dir'"
+                ls -al "$dir"
                 exit 1
             }
     done
 
     [ -n "$ADD_COUNT" ] && count=$((count + ADD_COUNT))
 
-    countCurrent=$(find "$repo/.git/hooks" -type f -not -name "*.replaced.*" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l)
+    countCurrent=$(
+        find "$dir" -type f \
+            -not -name "*.replaced.*" -and \
+            -not -name "githooks-contains-run-wrappers" \
+            -mindepth 1 -maxdepth 1 2>/dev/null | wc -l
+    )
 
     [ "$countCurrent" = "$count" ] ||
         {
-            echo "Repo '$repo' should contain '$count' hooks (current: '$countCurrent')."
-            ls -al "$repo/.git/hooks"
+            echo "Dir '$dir' should contain '$count' hooks (current: '$countCurrent')."
+            ls -al "$dir"
             exit 1
         }
 
+}
+
+function check_hook() {
+    local dir="$1"
+    shift 1
+    check_hooks_dir "$dir/.git/hooks" "$@"
+}
+
+function check_lfs_hook() {
+    local dir="$1"
+    shift 1
+    check_lfs_hook_dir "$dir/.git/hooks" "$@"
 }
 
 allLFSHooks=(
@@ -116,6 +137,15 @@ accept_all_trust_prompts || exit 1
     exit 1
 }
 
+check_hooks_dir ~/.githooks/templates/hooks "${maintainedHooksRef1[@]}"
+check_lfs_hook_dir ~/.githooks/templates/hooks "${lfsHooks1[@]}"
+
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    # Testing further local install stuff is non-sense with
+    # centralized install.
+    exit 0
+fi
+
 # Check init works
 mkdir -p "$GH_TEST_TMP/test129" &&
     cd "$GH_TEST_TMP/test129" &&
@@ -127,6 +157,11 @@ if [ -n "$(git config githooks.registered)" ]; then
     exit 1
 fi
 
+git hooks install --maintained-hooks "$maintainedHooks1" || exit 1
+if [ "$(git config githooks.registered)" != "true" ]; then
+    echo "Repository should be registered."
+    exit 1
+fi
 check_hooks "." "${maintainedHooksRef1[@]}"
 check_lfs_hook "." "${lfsHooks1[@]}"
 
@@ -139,14 +174,9 @@ maintainedHooksRef2=(
     "post-merge"
     "pre-push")
 
-"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "$maintainedHooks2" || exit 1
+git hooks install --maintained-hooks "$maintainedHooks2" || exit 1
 if [ "$(git config githooks.maintainedHooks)" != "!all, commit-msg" ]; then
     echo "Maintained hooks is not set"
-    exit 1
-fi
-
-if [ "$(git config githooks.registered)" != "true" ]; then
-    echo "Repository should be registered."
     exit 1
 fi
 
@@ -154,7 +184,7 @@ check_hooks "." "${maintainedHooksRef2[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Uninstall and place a custom hook which should survive."
-"$GH_TEST_BIN/githooks-cli" uninstall || exit 1
+git hooks uninstall || exit 1
 check_hooks "." "${allLFSHooks[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 echo "echo 'custom-to-survive'" >.git/hooks/commit-msg
@@ -168,7 +198,7 @@ maintainedHooksRef3=(
     "pre-push")
 lfsHooks3=()
 
-"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "$maintainedHooks3" || exit 1
+git hooks install --maintained-hooks "$maintainedHooks3" || exit 1
 echo "Delete disabled LFS hooks."
 find .git/hooks -type f -name "*.disabled.*" -exec rm -f {} \; || exit 1
 grep -q "custom-to-survive" .git/hooks/commit-msg || {
@@ -203,7 +233,7 @@ lfsHooks4=(
     "post-merge")
 
 git config githooks.maintainedHooks "$maintainedHooks4"
-"$GH_TEST_BIN/githooks-cli" install || exit 1
+git hooks install || exit 1
 
 check_hooks "." "${maintainedHooksRef4[@]}"
 check_lfs_hook "." "${lfsHooks4[@]}"
@@ -222,18 +252,18 @@ grep -q "overwritten LFS hooks" .git/hooks/post-checkout || {
 
 echo "Delete the polluted LFS hook an run again"
 rm .git/hooks/post-checkout || exit 1
-"$GH_TEST_BIN/githooks-cli" install || exit 1
+git hooks install || exit 1
 check_hooks "." "${maintainedHooksRef4[@]}"
 check_lfs_hook "." "${lfsHooks4[@]}"
 
 echo "Uninstall all hooks, check that all LFS hooks are installed."
-"$GH_TEST_BIN/githooks-cli" uninstall || exit 1
+git hooks uninstall || exit 1
 check_hooks "." "${allLFSHooks[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Unset git config githooks.maintainedHooks and check that original setup is maintained."
 git config --unset githooks.maintainedHooks
-"$GH_TEST_BIN/githooks-cli" install || exit 1
+git hooks install || exit 1
 check_hooks "." "${maintainedHooksRef1[@]}"
 check_lfs_hook "." "${lfsHooks1[@]}"
 grep -q "custom-to-survive" .git/hooks/commit-msg.replaced.githook || {

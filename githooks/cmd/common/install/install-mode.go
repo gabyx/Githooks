@@ -7,14 +7,14 @@ import (
 
 type InstallModeType int
 type installModeType struct {
-	None                   InstallModeType
-	Manual                 InstallModeType
-	UseGlobalCoreHooksPath InstallModeType
+	None        InstallModeType
+	Manual      InstallModeType
+	Centralized InstallModeType
 }
 
 // InstallModeTypeV enumerates all types of install modes.
 // Manual is the default install mode.
-var InstallModeTypeV = &installModeType{None: 0, Manual: 0, UseGlobalCoreHooksPath: 1} // nolint:gomnd
+var InstallModeTypeV = &installModeType{None: 0, Manual: 0, Centralized: 1} // nolint:gomnd
 
 // GetInstallMode returns the current set install mode of Githooks.
 // Return `none`-value if not installed.
@@ -29,7 +29,7 @@ func GetInstallMode(gitx *git.Context) (haveInstall bool, mode InstallModeType) 
 	case "manual":
 		mode = InstallModeTypeV.Manual
 	case "centralized":
-		mode = InstallModeTypeV.UseGlobalCoreHooksPath
+		mode = InstallModeTypeV.Centralized
 	}
 
 	return
@@ -40,7 +40,7 @@ func getInstallModeName(installMode InstallModeType) string {
 	switch installMode {
 	case InstallModeTypeV.Manual:
 		return "manual"
-	case InstallModeTypeV.UseGlobalCoreHooksPath:
+	case InstallModeTypeV.Centralized:
 		return "centralized"
 	default:
 		return "none"
@@ -56,7 +56,7 @@ func (i *InstallModeType) Name() string {
 func MapInstallerArgsToInstallMode(useGlobalCoreHooksPath bool) InstallModeType {
 	switch {
 	case useGlobalCoreHooksPath:
-		return InstallModeTypeV.UseGlobalCoreHooksPath
+		return InstallModeTypeV.Centralized
 	default:
 		return InstallModeTypeV.Manual
 	}

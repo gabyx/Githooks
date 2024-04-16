@@ -31,14 +31,18 @@ git config --global githooks.shared "$GH_TEST_TMP/shared/some-previous-example"
 
 # run the install, and set up shared repos
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    echo "n
+    echo "y
+
+n
 y
 $GH_TEST_TMP/shared/hooks-023-a.git
 $GH_TEST_TMP/shared/hooks-023-b.git
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 else
-    echo "n
+    echo "y
+
+n
 n
 y
 $GH_TEST_TMP/shared/hooks-023-a.git
@@ -51,7 +55,8 @@ git config --global --get-all githooks.shared | grep -v 'some-previous-example' 
 
 mkdir -p "$GH_TEST_TMP/test023" &&
     cd "$GH_TEST_TMP/test023" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 # verify that the hooks are installed and are working
 git commit -m 'Test' 2>/dev/null

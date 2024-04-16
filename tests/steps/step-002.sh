@@ -13,6 +13,10 @@ mkdir -p "$GH_TEST_TMP/test2" &&
     cd "$GH_TEST_TMP/test2" &&
     git init || exit 1
 
+if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    git hooks install
+fi
+
 # add a pre-commit hook, execute and verify that it worked
 mkdir -p .githooks/pre-commit &&
     echo "echo 'From githooks' > '$GH_TEST_TMP/hooktest'" >.githooks/pre-commit/test ||

@@ -73,6 +73,7 @@ mkdir -p "$GH_TEST_TMP/test055" &&
 
 cd "$GH_TEST_TMP/test055" &&
     git init &&
+    install_hooks_if_not_centralized &&
     mkdir -p .git/hooks &&
     echo 'echo "Hello"' >.git/hooks/pre-commit.replaced.githook &&
     chmod +x .git/hooks/pre-commit.replaced.githook &&

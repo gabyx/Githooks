@@ -21,12 +21,12 @@ fi
 # Not sure yet if it makes sense. Its more work...
 # Checking if any added pattern has an effect.
 
-if "$GH_INSTALL_BIN_DIR/githooks-cli" trust hooks --path not-found; then
+if git hooks trust hooks --path not-found; then
     echo "! Unexpected accept result"
     exit 1
 fi
 
-if "$GH_INSTALL_BIN_DIR/githooks-cli" trust hooks --pattern not-found; then
+if git hooks trust hooks --pattern not-found; then
     echo "! Unexpected accept result"
     exit 1
 fi

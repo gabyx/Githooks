@@ -25,18 +25,17 @@ if grep -r 'github.com/gabyx/githooks' ~/test100/; then
 fi
 
 # run the install, and skip installing the hooks into existing repos
-echo 'n
-y
+echo 'y
 
+n
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin --skip-install-into-existing || exit 1
 
 check_no_local_install ~/test100/p001
 check_no_local_install ~/test100/p002
 
-# run the install, and let it install into existing repos
+# run the install again, and let it install into existing repos
 echo 'n
 y
-
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin
 
 check_local_install ~/test100/p001

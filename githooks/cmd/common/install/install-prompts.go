@@ -32,6 +32,7 @@ func PromptExistingRepos(
 	log cm.ILogContext,
 	gitx *git.Context,
 	nonInteractive bool,
+	dryRun bool,
 	uninstall bool,
 	promptx prompt.IContext,
 	callback func(string)) {
@@ -91,8 +92,10 @@ func PromptExistingRepos(
 		return
 	}
 
-	err = gitx.SetConfig(hooks.GitCKPreviousSearchDir, searchDir, git.GlobalScope)
-	log.AssertNoError(err, "Could not set git config 'githooks.previousSearchDir'")
+	if !dryRun {
+		err = gitx.SetConfig(hooks.GitCKPreviousSearchDir, searchDir, git.GlobalScope)
+		log.AssertNoError(err, "Could not set git config 'githooks.previousSearchDir'")
+	}
 
 	log.InfoF("Searching for Git directories in '%s'...", searchDir)
 

@@ -15,13 +15,17 @@ mkdir -p "$GH_TEST_TMP/test10/a" &&
 echo "n
 y
 $GH_TEST_TMP
+y
+/tmp/test
+
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin --dry-run --hooks-dir ~/.githooks/mytemplates || exit 1
 
-if git config --global --get-regexp "^githooks.*" | grep -qv "deletedetectedlfshooks" ||
+# Check for all githooks config vars set (local and global)
+if git config --get-regexp "^githooks.*" ||
     [ -n "$(git config --global alias.hooks)" ]; then
 
     echo "Should not have set Git config variables."
-    git config --global --get-regexp "^githooks.*" | grep -v "deletedetectedlfshooks"
+    git config --get-regexp "^githooks.*"
 
     exit 1
 fi

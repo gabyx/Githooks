@@ -42,6 +42,7 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-134-a.git" &&
 mkdir -p "$GH_TEST_TMP/test134" &&
     cd "$GH_TEST_TMP/test134" &&
     git init &&
+    install_hooks_if_not_centralized &&
     mkdir -p .githooks &&
     echo -e "envs:\n  sharedhooks:\n    - MONKEY=gaga" >.githooks/.envs.yaml &&
     echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml

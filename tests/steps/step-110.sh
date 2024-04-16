@@ -25,9 +25,12 @@ cd "$GH_TEST_TMP/test110/hooks" &&
 "$GH_INSTALL_BIN_DIR/githooks-cli" config disable --set || exit 1
 
 # Server
-cd "$GH_TEST_TMP/test110/server" && git init --bare || exit 1
+cd "$GH_TEST_TMP/test110/server" && git init --bare &&
+    install_hooks_if_not_centralized || exit 1
+
 # Repo
-git clone "$GH_TEST_TMP/test110/server" "$GH_TEST_TMP/test110/local" || exit 1
+git clone "$GH_TEST_TMP/test110/server" "$GH_TEST_TMP/test110/local" &&
+    install_hooks_if_not_centralized || exit 1
 
 echo "Setup hooks"
 cd "$GH_TEST_TMP/test110/hooks" || exit 1

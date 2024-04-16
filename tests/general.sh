@@ -196,6 +196,16 @@ function container_mgr() {
     else
         docker "$@"
     fi
+
+}
+
+function install_hooks_if_not_centralized() {
+    if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+        git hooks install "$@" || {
+            echo "! Could not install hooks (not centralized)."
+            exit 1
+        }
+    fi
 }
 
 function check_normal_install {
@@ -219,8 +229,8 @@ function check_centralized_install() {
     }
 
     if [ "$path_to_use" != "$(git config --global core.hooksPath)" ]; then
-        echo "! Config 'core.hooksPath' does not point to the same directory."
-        git config --global core.hooksPath
+        echo "! Global config 'core.hooksPath' does not point to the same directory:" \
+            "'$(git config --global core.hooksPath)' != '$path_to_use'"
         exit 1
     fi
 
@@ -233,18 +243,32 @@ function check_centralized_install() {
 
 function check_no_local_install() {
     local dir
-    dir=$(git -C "$1" rev-parse --git-common-dir) || {
+    local repo="$1"
+
+    dir=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir) || {
         echo "! Failed to get Git dir."
         exit 1
     }
 
+    if [ ! -d "$dir" ]; then
+        echo "! Dir '$dir' does not exist."
+        exit 1
+    fi
+
     if grep -rq 'github.com/gabyx/githooks' "$dir"; then
-        echo "! Githooks were installed into '$dir' but should not have."
+        echo "! Githooks were installed into '$dir' but should not have:"
+        grep -r 'github.com/gabyx/githooks' "$dir"
+        exit 1
+    fi
+
+    if [ -f "$dir/githooks-contains-run-wrappers" ]; then
+        echo "! Run-wrapper marker file is existing in '%dir'."
         exit 1
     fi
 
     if [ -n "$(git -C "$dir" config --local core.hooksPath)" ]; then
-        echo "! Local config 'core.hooksPath' is set but should not."
+        echo "! Local config 'core.hooksPath' is set but should not:" \
+            "'$(git -C "$dir" config --local core.hooksPath)'"
         exit 1
     fi
 }
@@ -253,10 +277,15 @@ function check_local_install() {
     local repo="${1:-.}"
     local expected="${2:-}"
 
-    dir=$(git -C "$repo" rev-parse --git-common-dir) || {
+    dir=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir) || {
         echo "! Failed to get Git dir."
         exit 1
     }
+
+    if [ ! -d "$dir" ]; then
+        echo "! Dir '$dir' does not exist."
+        exit 1
+    fi
 
     local path_to_use
     path_to_use=$(git config --global githooks.pathForUseCoreHooksPath)
@@ -266,8 +295,8 @@ function check_local_install() {
     }
 
     if [ "$path_to_use" != "$(git -C "$dir" config --local core.hooksPath)" ]; then
-        echo "! Local config 'core.hooksPath' in '$repo' does not point to the same directory."
-        git -C "$dir" config --local core.hooksPath
+        echo "! Local config 'core.hooksPath' in '$repo' does not point" \
+            "to the same directory: '$(git -C "$dir" config --local core.hooksPath)' != '$path_to_use'"
         exit 1
     fi
 
@@ -280,10 +309,15 @@ function check_local_install() {
 function check_local_install_no_run_wrappers() {
     local repo="${1:-.}"
 
-    dir=$(git -C "$repo" rev-parse --git-common-dir) || {
+    dir=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir) || {
         echo "! Failed to get Git dir."
         exit 1
     }
+
+    if [ ! -d "$dir" ]; then
+        echo "Dir '$dir' does not exist."
+        exit 1
+    fi
 
     if grep -rq 'github.com/gabyx/githooks' "$dir"; then
         echo "! Githooks were installed into '$dir'."
@@ -300,10 +334,15 @@ function check_local_install_no_run_wrappers() {
 function check_local_install_run_wrappers() {
     local repo="${1:-.}"
 
-    dir=$(git -C "$repo" rev-parse --git-common-dir) || {
+    dir=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir) || {
         echo "! Failed to get Git dir."
         exit 1
     }
+
+    if [ ! -d "$dir" ]; then
+        echo "! Dir '$dir' does not exist."
+        exit 1
+    fi
 
     if ! grep -rq 'github.com/gabyx/githooks' "$dir"; then
         echo "! Githooks were not installed into '$dir'."
@@ -313,6 +352,16 @@ function check_local_install_run_wrappers() {
     if [ -n "$(git -C "$dir" config --local core.hooksPath)" ]; then
         echo "! Config 'core.hooksPath' in '$repo' should not be set."
         git -C "$dir" config --local core.hooksPath
+        exit 1
+    fi
+}
+function check_no_install() {
+    if git config --get-regexp "^githooks.*" ||
+        [ -n "$(git config --global alias.hooks)" ]; then
+
+        echo "Should not have set Git config variables."
+        git config --get-regexp "^githooks.*"
+
         exit 1
     fi
 }
@@ -350,10 +399,15 @@ function check_install_hooks_local() {
     shift 2
     local hook_names=("$@")
 
-    dir=$(git -C "$repo" rev-parse --git-common-dir) || {
+    dir=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir) || {
         echo "! Failed to get Git dir."
         exit 1
     }
+
+    if [ ! -d "$dir" ]; then
+        echo "! Dir '$dir' does not exist."
+        exit 1
+    fi
 
     local path_to_use="$dir/hooks"
 

@@ -30,6 +30,8 @@ git hooks installer [flags]
                                                 `<prefix>/.githooks` will be the installation directory.
       --hooks-dir ~/.githooks/templates/hooks   The preferred directory to use for maintaining Githook's hook run-wrappers
                                                 e.g. ~/.githooks/templates/hooks.
+      --hooks-dir-use-template-dir              If the `GIT_TEMPLATE_DIR` env. variable or `init.templateDir`
+                                                or the Git default template directory is used in place of `--hooks-dir`.
       --maintained-hooks strings                A set of hook names which are maintained in the template directory.
                                                 Any argument can be a hook name `<hookName>`, `all` or `server`.
                                                 An optional prefix '!' means subtraction from the current set.

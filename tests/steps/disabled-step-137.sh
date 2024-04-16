@@ -20,7 +20,8 @@ curl -sL "https://raw.githubusercontent.com/gabyx/Githooks/$ref/scripts/install.
 
 mkdir -p "$GH_TEST_TMP/test137" &&
     cd "$GH_TEST_TMP/test137" &&
-    git init
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 if [ -z "$(git config core.hooksPath)" ]; then
     echo "Git core.hooskPath is not set but should."

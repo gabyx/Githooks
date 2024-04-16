@@ -29,6 +29,9 @@ type Arguments struct {
 	InstallPrefix string // Install prefix for Githooks.
 	HooksDir      string // The directory to use to install the global maintained run-wrappers.
 
+	// If the hooks directory from `GIT_TEMPLATE_DIR` or `init.templateDir` or the Git default is taken.
+	HooksDirUseTemplateDir bool
+
 	CloneURL       string // Clone URL of the Githooks repository.
 	CloneBranch    string // Clone branch for Githooks repository.
 	DeployAPI      string // Deploy API to use for auto detection of deploy settings.

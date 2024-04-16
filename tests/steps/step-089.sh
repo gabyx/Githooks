@@ -13,13 +13,13 @@ if ! "$GH_TEST_BIN/githooks-cli" installer; then
     exit 1
 fi
 
-! "$GH_INSTALL_BIN_DIR/githooks-cli" config update || exit 2
+! "$GH_INSTALL_BIN_DIR/githooks-cli" config update-check || exit 2
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --disable-check &&
-    "$GH_INSTALL_BIN_DIR/githooks-cli" config update --print | grep -q 'disabled' || exit 3
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update-check --disable &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config update-check --print | grep -q 'disabled' || exit 3
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --enable-check &&
-    "$GH_INSTALL_BIN_DIR/githooks-cli" config update --print | grep -q 'enabled' || exit 4
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update-check --enable &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config update-check --print | grep -q 'enabled' || exit 4
 
-"$GH_INSTALL_BIN_DIR/githooks-cli" config update --disable-check &&
-    "$GH_INSTALL_BIN_DIR/githooks-cli" config update --print | grep -q 'disabled' || exit 5
+"$GH_INSTALL_BIN_DIR/githooks-cli" config update-check --disable &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config update-check --print | grep -q 'disabled' || exit 5

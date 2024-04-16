@@ -131,6 +131,14 @@ func GetLocalGitConfigKeys() []string {
 	}
 }
 
+// GetLocalGitConfigKeysNonMinUninstall gets all local keys which should always be uninstalled
+// in registered repos.
+func GetLocalGitConfigKeysNonMinUninstall() []string {
+	return []string{
+		GitCKRegistered,
+	}
+}
+
 // var filterRegex = regexp.MustCompile(`^(githooks\.|alias.hooks|core.hook|init.template)`)
 
 // FilterGitConfigCache filters  for filtering the Git config cache.

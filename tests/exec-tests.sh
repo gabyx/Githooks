@@ -69,9 +69,6 @@ RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
         sed -i -E 's|(.*)/githooks-cli\" installer|\1/githooks-cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/steps/step-* ; \\
     fi
 
-# Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
-RUN git config --global githooks.deleteDetectedLFSHooks "n"
-
 # Git-Core folder must be existing.
 RUN [ -d "\$GH_TEST_GIT_CORE/templates/hooks" ]
 

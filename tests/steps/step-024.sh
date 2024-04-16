@@ -13,13 +13,17 @@ git config --global githooks.shared "$GH_TEST_TMP/shared/some-previous-example"
 
 # run the install, and set up shared repos
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    echo 'n
+    echo 'y
+
+n
 y
 
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 else
-    echo 'n
+    echo 'y
+
+n
 n
 y
 

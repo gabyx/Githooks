@@ -231,7 +231,6 @@ func getInstallDir(gitx *git.Context) string {
 }
 
 func assertRegistered(gitx *git.Context, installDir string) {
-
 	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) {
 
 		gitDir, err := gitx.GetGitDirCommon()
@@ -246,7 +245,7 @@ func assertRegistered(gitx *git.Context, installDir string) {
 
 	} else {
 		log.Debug(
-			"Repository already registered or using 'core.hooksPath'.")
+			"Repository already registered.")
 	}
 }
 

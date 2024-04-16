@@ -854,12 +854,12 @@ This command needs to be run at the root of a repository.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, trustCmd))
 }
 
-func configUpdateCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
+func configUpdateCheckCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
 	updateCmd := &cobra.Command{
-		Use:   "update [flags]",
-		Short: "Change Githooks update settings.",
-		Long:  `Enable or disable automatic Githooks updates.`,
+		Use:   "update-check [flags]",
+		Short: "Change Githooks update-check settings.",
+		Long:  `Enable or disable automatic Githooks update checks.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			RunUpdateCheck(ctx, setOpts)
 		}}
@@ -1125,7 +1125,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configTrustAllHooksCmd(ctx, configCmd, &setOpts)
 
 	configSearchDirCmd(ctx, configCmd, &setOpts)
-	configUpdateCmd(ctx, configCmd, &setOpts)
+	configUpdateCheckCmd(ctx, configCmd, &setOpts)
 	configUpdateTimeCmd(ctx, configCmd, &setOpts)
 	configCloneURLCmd(ctx, configCmd, &setOpts)
 	configCloneBranchCmd(ctx, configCmd, &setOpts)

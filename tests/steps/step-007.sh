@@ -12,8 +12,7 @@ accept_all_trust_prompts || exit 1
 rm -rf "$GH_TEST_GIT_CORE/templates" || exit 1
 
 # run the install, and let it search for the templates
-echo 'n
-y
+echo 'y
 ' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
 
 mkdir -p "$GH_TEST_TMP/test7" &&
@@ -25,6 +24,6 @@ check_install "$HOME/.githooks/templates/hooks"
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     check_centralized_install
 else
-    git hooks install
+    git hooks install || exit 1
     check_local_install
 fi

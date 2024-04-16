@@ -14,6 +14,7 @@ fi
 # Make repo
 mkdir -p "$GH_TEST_TMP/test117" && cd "$GH_TEST_TMP/test117" || exit 1
 git init &&
+    install_hooks_if_not_centralized &&
     mkdir ".githooks" &&
     touch ".githooks/trust-all" &&
     git add . &&

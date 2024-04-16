@@ -28,43 +28,41 @@ func CheckDirAccess(targetDir string, subFolderIfExists string) (string, error) 
 	return "", nil
 }
 
-// FindHooksDir finds the hook directory.
-// either set in `GitCKPathForUseCoreHooksPath` or if no install
-// use the defaults `GIT_TEMPLATE_DIR` or `init.templateDir` or the default directory.
-func FindHooksDir(log cm.ILogContext, gitx *git.Context, haveInstall bool) (hooksDir string, err error) {
-	if haveInstall {
-		log.Info("Check Githooks installation.")
-		path := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
-		hooksDir, err = CheckDirAccess(path, "")
-	} else {
+// FindHooksDir finds the hook directory from the install.
+func FindHooksDirInstall(log cm.ILogContext, gitx *git.Context) (hooksDir string, err error) {
+	log.Info("Check Githooks installation.")
+	path := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
 
-		// 1. Try setup from environment variables
-		log.Info("Check env. variable 'GIT_TEMPLATE_DIR'.")
-		gitTempDir, exists := os.LookupEnv("GIT_TEMPLATE_DIR")
-		if exists {
-			if hooksDir, err = CheckDirAccess(gitTempDir, "hooks"); err != nil {
-				return
-			} else if strs.IsNotEmpty(hooksDir) {
-				return
-			}
-		}
+	return CheckDirAccess(path, "")
+}
 
-		// 2. Try setup from git config
-		log.InfoF("Check Git config '%s'.", git.GitCKInitTemplateDir)
-		hooksDir, err = CheckDirAccess(
-			gitx.GetConfig(git.GitCKInitTemplateDir, git.GlobalScope), "hooks")
+// FindHooksDirTemplateDir finds the hooks directory from the template dir
+// used by Git hooks.
+func FindHooksDirTemplateDir(gitx *git.Context) (hooksDir string, err error) {
 
-		if err != nil {
+	// 1. Try setup from environment variables
+	gitTempDir, exists := os.LookupEnv("GIT_TEMPLATE_DIR")
+	if exists {
+		if hooksDir, err = CheckDirAccess(gitTempDir, "hooks"); err != nil {
 			return
 		} else if strs.IsNotEmpty(hooksDir) {
 			return
 		}
-
-		// 3. Try setup from the default location
-		d := git.GetDefaultTemplateDir()
-		log.InfoF("Check Git default template directory '%s'.", d)
-		hooksDir, err = CheckDirAccess(path.Join(d, "hooks"), "")
 	}
+
+	// 2. Try setup from git config
+	hooksDir, err = CheckDirAccess(
+		gitx.GetConfig(git.GitCKInitTemplateDir, git.GlobalScope), "hooks")
+
+	if err != nil {
+		return
+	} else if strs.IsNotEmpty(hooksDir) {
+		return
+	}
+
+	// 3. Try setup from the default location
+	d := git.GetDefaultTemplateDir()
+	hooksDir, err = CheckDirAccess(path.Join(d, "hooks"), "")
 
 	return
 }

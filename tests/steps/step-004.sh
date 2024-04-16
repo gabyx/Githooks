@@ -26,7 +26,9 @@ if grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/test4/"; then
 fi
 
 # run the install, and select installing the hooks into existing repos
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/test4
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1

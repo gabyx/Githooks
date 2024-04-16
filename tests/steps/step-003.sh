@@ -13,7 +13,8 @@ accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test3" &&
     cd "$GH_TEST_TMP/test3" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 # set up 2 pre-commit hooks, execute them and verify that they worked
 mkdir -p .githooks/pre-commit &&

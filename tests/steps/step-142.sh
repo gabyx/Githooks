@@ -68,9 +68,9 @@ check_centralized_install
 
 echo "- Install local again (fail)"
 OUT=$(git hooks install --maintained-hooks "!all, pre-commit" 2>&1)
-exitCode="$?"
+EXIT_CODE="$?"
 # shellcheck disable=SC2181
-if [ "$exitCode" -eq "0" ] ||
+if [ "$EXIT_CODE" -eq "0" ] ||
     ! echo "$OUT" | grep -qiE "Githooks is installed in 'centralized' mode and" ||
     ! echo "$OUT" | grep -qiE "installing into the current.* has no effect"; then
     echo "! Partial install with run-wrappers and global core.hooksPath should error out."

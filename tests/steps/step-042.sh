@@ -9,30 +9,20 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    echo "Using centralized install"
-    exit 249
-fi
-
 LAST_UPDATE=$(get_update_check_timestamp)
 if [ -n "$LAST_UPDATE" ]; then
     echo "! Update already marked as run"
     exit 1
 fi
 
-mkdir -p "$GH_TEST_TMP/start/dir" &&
-    cd "$GH_TEST_TMP/start/dir" &&
-    git init || exit 1
-
 if ! "$GH_TEST_BIN/githooks-cli" installer; then
     echo "! Installation failed"
     exit 1
 fi
 
-if ! "$GH_TEST_BIN/githooks-cli" install; then
-    echo "! Install into current repo failed"
-    exit 1
-fi
+mkdir -p "$GH_TEST_TMP/start/dir" &&
+    cd "$GH_TEST_TMP/start/dir" &&
+    git init && install_hooks_if_not_centralized || exit 1
 
 ARE_UPDATES_CHECKS_ENABLED=$(git config --global --get githooks.updateCheckEnabled)
 if [ "$ARE_UPDATES_CHECKS_ENABLED" != "true" ]; then

@@ -83,9 +83,6 @@ RUN bash "\$GH_TESTS/setup-githooks.sh" --coverage
 
 ADD tests "\$GH_TESTS"
 
-# Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
-RUN git config --global githooks.deleteDetectedLFSHooks "n"
-
 # Replace some statements which rely on proper CLI output
 # The built instrumented executable output test&coverage shit...
 RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | grep "^/")@g' \\

@@ -15,7 +15,8 @@ mkdir -p "$GH_TEST_TMP/test056/.githooks/pre-commit" &&
     echo 'echo "Hello"' >".githooks/pre-commit/first" &&
     echo 'echo "Hello"' >".githooks/pre-commit/second" &&
     echo "test" >".githooks/.namespace" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 if ! "$GH_INSTALL_BIN_DIR/githooks-cli" ignore add --pattern "**/first"; then
     echo "! Failed to disable a hook"

@@ -14,6 +14,7 @@ git hooks install [flags]
 ### Options
 
 ```
+      --full-uninstall             Install also Git config values from Githook and cached settings (checksums etc.).
   -h, --help                       help for install
       --maintained-hooks strings   A set of hook names which are maintained in this repository.
                                    Any argument can be a hook name `<hookName>`, `all` or `server`.
