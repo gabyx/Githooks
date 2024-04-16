@@ -26,7 +26,7 @@ mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
 check_normal_install
 
 echo "- Install local"
-git hooks install || exit 1
+"$GH_TEST_BIN/githooks-cli" install || exit 1
 
 echo "- Check that pre-commit runs."
 git commit -m 'Test' &>/dev/null || exit 1
@@ -70,7 +70,7 @@ echo "- Installer 2"
 check_centralized_install
 
 echo "- Install local again (fail)"
-OUT=$(git hooks install --maintained-hooks "!all, pre-commit" 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-cli" install --maintained-hooks "!all, pre-commit" 2>&1)
 EXIT_CODE="$?"
 # shellcheck disable=SC2181
 if [ "$EXIT_CODE" -eq "0" ] ||
@@ -94,7 +94,7 @@ check_normal_install
 check_no_local_install .
 
 echo "- Install local partially"
-git hooks install --maintained-hooks "!all, pre-commit" || exit 1
+"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "!all, pre-commit" || exit 1
 if command -v git-lfs &>/dev/null; then
     check_install_hooks_local . 5 "pre-commit"
 else

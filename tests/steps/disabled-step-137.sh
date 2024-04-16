@@ -38,4 +38,4 @@ if grep -Rq 'github.com/gabyx/githooks' .git/hooks; then
     exit 1
 fi
 
-git hooks uninstaller || exit 1
+"$GH_TEST_BIN/githooks-cli" uninstaller || exit 1

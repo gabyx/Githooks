@@ -95,6 +95,7 @@ RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | g
 RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
     "\$GH_TESTS/steps"/step-* && \\
+    "\$GH_TESTS/general.sh" && \\
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-runner"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-dialog"@g' \\
@@ -118,6 +119,7 @@ fi
 
 # Run the normal tests to add to the coverage
 # inside the current repo
+echo "Run unit tests..."
 docker run --rm \
     -a stdout -a stderr \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
@@ -128,6 +130,7 @@ docker run --rm \
     ./exec-unittests.sh ||
     exit $?
 
+echo "Run integration tests..."
 # Run the integration tests# Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
 delete_container_volume gh-test-tmp &>/dev/null || true

@@ -17,16 +17,16 @@ if ! "$GH_TEST_BIN/githooks-cli" installer; then
     exit 1
 fi
 
-# @todo maybe add a test for "git hooks ignore".
+# @todo maybe add a test for ""$GH_TEST_BIN/githooks-cli" ignore".
 # Not sure yet if it makes sense. Its more work...
 # Checking if any added pattern has an effect.
 
-if git hooks trust hooks --path not-found; then
+if "$GH_TEST_BIN/githooks-cli" trust hooks --path not-found; then
     echo "! Unexpected accept result"
     exit 1
 fi
 
-if git hooks trust hooks --pattern not-found; then
+if "$GH_TEST_BIN/githooks-cli" trust hooks --pattern not-found; then
     echo "! Unexpected accept result"
     exit 1
 fi

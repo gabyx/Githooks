@@ -53,7 +53,7 @@ cd "$GH_TEST_TMP/test109/p003" &&
 
 # we should have run-wrappers installed due to template dir above.
 check_local_install_run_wrappers "$GH_TEST_TMP/test109/p003"
-git hooks install
+"$GH_TEST_BIN/githooks-cli" install
 # Install should not have changed (still runwrappers)
 check_local_install_run_wrappers "$GH_TEST_TMP/test109/p003"
 

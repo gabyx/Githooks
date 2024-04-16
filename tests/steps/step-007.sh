@@ -24,6 +24,6 @@ check_install "$HOME/.githooks/templates/hooks"
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     check_centralized_install
 else
-    git hooks install || exit 1
+    "$GH_TEST_BIN/githooks-cli" install || exit 1
     check_local_install
 fi

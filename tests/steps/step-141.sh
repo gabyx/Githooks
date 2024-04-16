@@ -33,7 +33,7 @@ if ! grep 'In-repo' "$GH_TEST_TMP/test-009.out"; then
 fi
 
 # Install into current repo should fail.
-OUT=$(git hooks install 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-cli" install 2>&1)
 # shellcheck disable=SC2181
 if [ "$?" -eq "0" ] ||
     ! echo "$OUT" | grep -iqE "installing into the current repository has no effect"; then
@@ -76,7 +76,7 @@ check_normal_install
 
 # Install into current
 echo "- Install local"
-git hooks install
+"$GH_TEST_BIN/githooks-cli" install
 check_local_install .
 check_local_install_no_run_wrappers .
 
@@ -84,7 +84,7 @@ check_local_install_no_run_wrappers .
 # Check for failure.
 echo "- Install local partially (reject)"
 git config --global core.hooksPath "/this-is-a-test"
-OUT=$(git hooks install --maintained-hooks "pre-commit" 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-cli" install --maintained-hooks "pre-commit" 2>&1)
 EXIT_CODE="$?"
 # shellcheck disable=SC2181
 if [ "$EXIT_CODE" -eq "0" ] ||
@@ -96,7 +96,7 @@ if [ "$EXIT_CODE" -eq "0" ] ||
 fi
 echo "- Install local partially (success)"
 git config --global --unset core.hooksPath
-git hooks install --maintained-hooks "!all, pre-commit" || exit 1
+"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "!all, pre-commit" || exit 1
 check_local_install_run_wrappers .
 check_install_hooks_local . 5 "pre-commit"
 

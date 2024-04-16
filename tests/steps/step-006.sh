@@ -59,5 +59,5 @@ mkdir -p "$GH_TEST_TMP/test6" &&
 check_local_install_run_wrappers
 
 # Reinstall and check again.
-git hooks install
+"$GH_TEST_BIN/githooks-cli" install
 check_local_install_run_wrappers

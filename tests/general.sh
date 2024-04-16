@@ -201,7 +201,7 @@ function container_mgr() {
 
 function install_hooks_if_not_centralized() {
     if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-        git hooks install "$@" || {
+        "$GH_TEST_BIN/githooks-cli" install "$@" || {
             echo "! Could not install hooks (not centralized)."
             exit 1
         }
