@@ -38,9 +38,15 @@ check_local_install "$GH_TEST_TMP/test109/p002"
 
 # check if only server hooks are installed.
 # + 3 missing LFS hooks (are always installed due to safety, also not needed)
-check_install_hooks \
-    11 \
-    pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc
+if command -v git-lfs; then
+    check_install_hooks \
+        11 \
+        pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc
+else
+    check_install_hooks \
+        8 \
+        pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc
+fi
 
 cd "$GH_TEST_TMP/test109/p003" &&
     git init --bare || exit 1

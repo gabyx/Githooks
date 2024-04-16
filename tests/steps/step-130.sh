@@ -30,7 +30,9 @@ mkdir -p "$GH_TEST_TMP/test130" &&
     git init --bare || exit 1
 
 # run the install, and select installing only server hooks into existing repos
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/test130
 " | "$GH_TEST_BIN/githooks-cli" installer --stdin --maintained-hooks "server" || exit 1
@@ -43,7 +45,7 @@ for hook in pre-push pre-receive update post-receive post-update push-to-checkou
     fi
 done
 # shellcheck disable=SC2012
-count="$(find "$templateDir/hooks/" -type f | wc -l)"
+count="$(find "$templateDir/hooks/" -type f -and -not -name "githooks-contains-run-wrappers" | wc -l)"
 if [ "$count" != "8" ]; then
     echo "! Expected only server hooks to be installed ($count)"
     exit 1

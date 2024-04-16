@@ -986,19 +986,24 @@ The installer will:
 
    - Use the directory given with `--hooks-dir <dir>` on the command line.
 
-   - Or if we already have an installation use
-     `git config --get githooks.pathForUseCoreHooksPath` or
+   - Use `git config --get githooks.pathForUseCoreHooksPath` if Githooks is
+     already installed.
 
-   - Or if we don't have an installation:
+   - Use the following template directory if `--hooks-dir-use-template-dir` is
+     given:
 
      1. use `GIT_TEPMLATE_DIR` if set and add `/hooks`
      1. use Git config value `init.templateDir` if set and add `/hooks`
      1. use `<install-dir>/templates/hooks`.
 
+     **Note:** This will silenty make all new repositories with `git init` or
+     `git clone` directly use Githooks, this is similar to the
+     [`centralized`](#install-mode-centralized-hooks) install mode.
+
 1. Write all Githooks run-wrappers into the hooks directory `<hooksDir>` and
 
-   - set `core.hooksPath` for `Centralized Hooks` install mode
-     (`--use-core-hooks-path`).
+   - set `core.hooksPath` for [`centralized`](#install-mode-centralized-hooks)
+     install mode (`--use-core-hooks-path`).
 
 1. Offer to enable automatic update checks.
 
@@ -1017,9 +1022,31 @@ The installer will:
 
 1. Offer to set up shared hook repositories.
 
-### Install Mode - Template Dir
+### Instal Modes
+
+This installer can install Githooks in one of 2 ways:
+
+- **Manual**: To use Githooks in a repo, it must be installed (default behavior)
+  with `git hooks install`.
+
+- **Centralized**: Using the Git `core.hooksPath` **global** variable (set by
+  passing the `--centralized` parameter to the install script). All repositories
+  will use Githooks by default.
+
+Read the details about the differences between these 2 approaches
+[below](#global-hooks-or-no-global-hooks).
+
+### Install Mode - Manual
 
 **This is the default installation mode.**
+
+In this mode, you decide yourself when to use Githooks in a repository simply by
+doing one of the following with the same effect:
+
+- Run `git hooks install` or `git hooks uninstall` to install run wrappers
+  explicitly.
+
+This means that Githooks might not run if you forget to install the hooks.
 
 To install Githooks on your system, simply execute `cli installer`. It will
 guide you through the installation process. Check the `cli installer --help` for
@@ -1034,8 +1061,7 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
     --maintained-hooks "pre-rebase, post-checkout, post-merge, pre-push"
 ```
 
-This will only support the mentioned hooks in the template directory (e.g. for
-new clones). You can still overwrite selectively for a repository by
+You can still overwrite selectively for a repository by
 [installing another set of hooks](#installing-or-removing-run-wrappers). Missing
 Git LFS hooks will always be placed if necessary.
 
@@ -1047,46 +1073,25 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
     --dry-run
 ```
 
+Optionally, you can also pass the hooks directory to which you want to install
+the Githooks run-wrappers by appending `--hook-dir <path>` to the command above,
+for example:
+
+```shell
+curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
+    --hooks-dir /home/public/myhooks
+```
+
 ### Install Mode - Centralized Hooks
 
-Lastly, you have the option to install the templates to a centralized location
-(`core.hooksPath`). You can read more about the difference between this option
-and the default one [below](#templates-or-global-hooks). For this, run the
-command below.
+You have the option to install Githooks centralized which will use the
+run-wrappers globally by setting the global `core.hooksPath` additionally. For
+this, run the command below.
 
 ```shell
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --centralized
 ```
-
-Optionally, you can also pass the template directory to which you want to
-install the centralized hooks by appending `--template-dir <path>` to the
-command above, for example:
-
-```shell
-curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
-    --centralized
-    --template-dir /home/public/.githooks
-```
-
-### Install Mode - Manual
-
-You also have the option for none of the two above methods and to use Githooks
-in _manual_ mode. This means that hook run wrappers are not injected by the
-`init.templateDir` Git config setting into new cloned repositories, nor does it
-set `core.hooksPath`. This means, you decide yourself when to use Githooks in a
-repository simply by doing one of the following with the same effect:
-
-- Run `git hooks install` or `git hooks uninstall` to install run wrappers
-  explicitly.
-- Set `core.hooksPath` inside the repository you want to use Githooks with to
-  the template directory Githooks maintains, e.g.
-
-  ```shell
-  git config core.hooksPath "$(git config githooks.manualTemplateDir)"
-  ```
-
-This also means that Githooks might not run if you forget to install the hooks.
 
 ### Install from different URL and Branch
 
@@ -1386,20 +1391,6 @@ repository, you might consider disabling shared hooks updates by
 
 ### Global Hooks or No Global Hooks
 
-This installer can install Githooks in one of 2 ways:
-
-- **Manual**: To use Githooks in a repo, it must be installed (default behavior)
-  with `git hooks install`.
-
-- **Centralized**: Using the Git `core.hooksPath` **global** variable (set by
-  passing the `--centralized` parameter to the install script). All repositories
-  will use Githooks by default.
-
-Read about the differences between these 2 approaches below.
-
-In both cases, the installer command will make sure Git will find the Githooks
-run-wrappers.
-
 #### Manual: Use Githooks Selectively
 
 In this approach, the install script installs the hook run-wrapper into a common
@@ -1413,7 +1404,16 @@ git hooks install
 ```
 
 which will simply set the `core.hooksPath` to the common location where Githooks
-its run-wrappers.
+maintaines its run-wrappers. If you want a partial maintained hooks set with
+`git hooks install --maintained-hooks ...`, it will switch to install Githooks
+run-wrappers inside this sole repository.
+
+You have the possibility to install the Githooks run-wrappers into a Git
+template directory (e.g. `GIT_TEMPLATE_DIR` or `init.templateDir` or the default
+Git template directory from the Git install) by specifying
+`--hooks-dir-use-template-dir`. This option is discouraged and only available
+for backward compatibility and is not really needed and can be covered with the
+below `centralized` install mode.
 
 #### Centralized: Use Githooks For All Repositories
 
@@ -1432,7 +1432,8 @@ the behavior for a specific repository, by setting a local `core.hooksPath`
 variable with value `${GIT_DIR}/hooks`, which will revert Git back to its
 default behavior for that specific repository. You don't need to initialize
 `git lfs install`, because they presumably be already in `${GIT_DIR}/hooks` from
-any `git clone/init`.
+any `git clone/init`. **This does NOT work when using this inside a Git
+worktree**.
 
 ### Updates
 

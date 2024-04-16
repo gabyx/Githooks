@@ -52,11 +52,14 @@ echo "- Uninstaller 1"
     echo "! Uninstall should have worked"
     exit 1
 }
-if ! [ -f .git/hooks/pre-push ]; then
+
+if command -v git-lfs &>/dev/null &&
+    ! [ -f .git/hooks/pre-push ]; then
     echo "! Git LFS was not reinstalled."
     ls -al .git/hooks
     exit 1
 fi
+
 check_no_local_install .
 
 echo "- Installer 2"
@@ -92,7 +95,11 @@ check_no_local_install .
 
 echo "- Install local partially"
 git hooks install --maintained-hooks "!all, pre-commit" || exit 1
-check_install_hooks_local . 5 "pre-commit"
+if command -v git-lfs &>/dev/null; then
+    check_install_hooks_local . 5 "pre-commit"
+else
+    check_install_hooks_local . 1 "pre-commit"
+fi
 
 echo "- Check that pre-commit runs."
 rm -rf "$GH_TEST_TMP/test-009.out" || true
