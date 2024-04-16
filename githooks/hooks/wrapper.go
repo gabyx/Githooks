@@ -77,16 +77,19 @@ func disableHookIfLFSDetected(
 	log cm.ILogContext,
 ) (disabled bool, deleted bool, err error) {
 
+	isLFSHook := false
 	found := false
 	disableOption := BackupHook
 
 	// Check first the checksum.
-	isLFSHook, err := lfsHooksCache.IsIdentical(filePath)
-	if err != nil {
-		err = cm.CombineErrors(err,
-			cm.ErrorF("Could not detect if '%s' is a `git lfs` hook.", filePath))
+	if lfsHooksCache != nil {
+		isLFSHook, err = lfsHooksCache.IsIdentical(filePath)
+		if err != nil {
+			err = cm.CombineErrors(err,
+				cm.ErrorF("Could not detect if '%s' is a `git lfs` hook.", filePath))
 
-		return
+			return
+		}
 	}
 
 	if isLFSHook {
