@@ -116,8 +116,9 @@ into the current repository.`,
 		},
 	}
 
-	installCmd.Flags().BoolVar(&fullUninstall, "full-uninstall", false,
-		"Install also Git config values from Githook and cached settings (checksums etc.).")
+	installCmd.Flags().BoolVar(&fullUninstall, "full", false,
+		"Uninstall also Git config values of Githooks and cached\n"+
+			"settings (checksums etc.) inside the repository.")
 
 	installCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
 		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
