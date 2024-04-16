@@ -157,7 +157,7 @@ if [ -n "$(git config githooks.registered)" ]; then
     exit 1
 fi
 
-"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "$maintainedHooks1" || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "$maintainedHooks1" || exit 1
 if [ "$(git config githooks.registered)" != "true" ]; then
     echo "Repository should be registered."
     exit 1
@@ -174,7 +174,7 @@ maintainedHooksRef2=(
     "post-merge"
     "pre-push")
 
-"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "$maintainedHooks2" || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "$maintainedHooks2" || exit 1
 if [ "$(git config githooks.maintainedHooks)" != "!all, commit-msg" ]; then
     echo "Maintained hooks is not set"
     exit 1
@@ -184,7 +184,7 @@ check_hooks "." "${maintainedHooksRef2[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Uninstall and place a custom hook which should survive."
-"$GH_TEST_BIN/githooks-cli" uninstall || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" uninstall || exit 1
 check_hooks "." "${allLFSHooks[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 echo "echo 'custom-to-survive'" >.git/hooks/commit-msg
@@ -198,7 +198,7 @@ maintainedHooksRef3=(
     "pre-push")
 lfsHooks3=()
 
-"$GH_TEST_BIN/githooks-cli" install --maintained-hooks "$maintainedHooks3" || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "$maintainedHooks3" || exit 1
 echo "Delete disabled LFS hooks."
 find .git/hooks -type f -name "*.disabled.*" -exec rm -f {} \; || exit 1
 grep -q "custom-to-survive" .git/hooks/commit-msg || {
@@ -233,7 +233,7 @@ lfsHooks4=(
     "post-merge")
 
 git config githooks.maintainedHooks "$maintainedHooks4"
-"$GH_TEST_BIN/githooks-cli" install || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
 
 check_hooks "." "${maintainedHooksRef4[@]}"
 check_lfs_hook "." "${lfsHooks4[@]}"
@@ -252,18 +252,18 @@ grep -q "overwritten LFS hooks" .git/hooks/post-checkout || {
 
 echo "Delete the polluted LFS hook an run again"
 rm .git/hooks/post-checkout || exit 1
-"$GH_TEST_BIN/githooks-cli" install || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
 check_hooks "." "${maintainedHooksRef4[@]}"
 check_lfs_hook "." "${lfsHooks4[@]}"
 
 echo "Uninstall all hooks, check that all LFS hooks are installed."
-"$GH_TEST_BIN/githooks-cli" uninstall || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" uninstall || exit 1
 check_hooks "." "${allLFSHooks[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Unset git config githooks.maintainedHooks and check that original setup is maintained."
 git config --unset githooks.maintainedHooks
-"$GH_TEST_BIN/githooks-cli" install || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
 check_hooks "." "${maintainedHooksRef1[@]}"
 check_lfs_hook "." "${lfsHooks1[@]}"
 grep -q "custom-to-survive" .git/hooks/commit-msg.replaced.githook || {

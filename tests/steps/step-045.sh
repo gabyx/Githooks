@@ -67,7 +67,7 @@ if ! echo "$OUT" | grep -q "There is a new Githooks update available"; then
     exit 1
 fi
 
-OUT=$("$GH_TEST_BIN/githooks-cli" update 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" update 2>&1)
 if ! echo "$OUT" | grep -q "All done! Enjoy!"; then
     echo "! Expected installation output not found"
     echo "$OUT"

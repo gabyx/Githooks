@@ -34,7 +34,7 @@ if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
         exit 1
     fi
 
-    "$GH_TEST_BIN/githooks-cli" install || exit 1
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
 fi
 
 git commit --allow-empty -m 'Test'

@@ -28,6 +28,6 @@ fi
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     check_centralized_install "$GH_TEST_TMP/.test-020/hooks"
 else
-    "$GH_TEST_BIN/githooks-cli" install
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install
     check_local_install "." "$GH_TEST_TMP/.test-020/hooks"
 fi

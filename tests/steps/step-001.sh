@@ -20,7 +20,7 @@ if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
     check_no_local_install .
 
     # Install hooks
-    "$GH_TEST_BIN/githooks-cli" install ||
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install ||
         die "Could not install hooks into repo."
 
     check_local_install .

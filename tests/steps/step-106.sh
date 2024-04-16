@@ -97,7 +97,7 @@ if ! grep -q 'post-commit' lfs.out; then
     exit 11
 fi
 
-# Test LFS invocation if "$GH_TEST_BIN/githooks-cli" are disabled
+# Test LFS invocation if "$GH_INSTALL_BIN_DIR/githooks-cli" are disabled
 rm lfs.out && rm hook.out &&
     "$GH_INSTALL_BIN_DIR/githooks-cli" config disable --set &&
     ACCEPT_CHANGES=Y git commit --allow-empty -m "Second commit" ||

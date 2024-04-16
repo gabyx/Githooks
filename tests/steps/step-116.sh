@@ -29,7 +29,7 @@ fi
 # Test that first git action registers repo 1
 mkdir -p "$GH_TEST_TMP/test116.1" && cd "$GH_TEST_TMP/test116.1" &&
     git init &&
-    "$GH_TEST_BIN/githooks-cli" install --maintained-hooks "all" &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "all" &&
     git commit --allow-empty -m 'Initial commit' &>/dev/null ||
     exit 1
 
@@ -48,7 +48,7 @@ fi
 # and repo 1 is still registered
 mkdir -p "$GH_TEST_TMP/test116.2" && cd "$GH_TEST_TMP/test116.2" &&
     git init &&
-    "$GH_TEST_BIN/githooks-cli" install --maintained-hooks "all" &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "all" &&
     git commit --allow-empty -m 'Initial commit' &>/dev/null ||
     exit 1
 
@@ -165,7 +165,7 @@ if ! echo "$OUT" | grep -q "There is a new Githooks update available"; then
     exit 1
 fi
 
-OUT=$("$GH_TEST_BIN/githooks-cli" update 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" update 2>&1)
 
 if ! echo "$OUT" | grep -q "All done! Enjoy!"; then
     echo "! Expected installation output not found"

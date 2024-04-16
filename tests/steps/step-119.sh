@@ -41,8 +41,8 @@ mkdir -p "$GH_TEST_TMP/test119/.githooks/pre-commit" &&
     git commit --no-verify -m 'Initial commit' ||
     exit 3
 
-"$GH_TEST_BIN/githooks-cli" shared add --local "file://$GH_TEST_TMP/shared-119.git" || exit 4
-"$GH_TEST_BIN/githooks-cli" shared update || exit 5
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared add --local "file://$GH_TEST_TMP/shared-119.git" || exit 4
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared update || exit 5
 
 OUT=$(git commit --allow-empty -m "test" 2>&1)
 

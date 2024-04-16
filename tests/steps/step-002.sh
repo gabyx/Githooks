@@ -14,7 +14,7 @@ mkdir -p "$GH_TEST_TMP/test2" &&
     git init || exit 1
 
 if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    "$GH_TEST_BIN/githooks-cli" install
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install
 fi
 
 # add a pre-commit hook, execute and verify that it worked

@@ -28,5 +28,5 @@ check_normal_install "$HOME/.test-019/hooks"
 check_local_install_run_wrappers "."
 
 # Reinstall and check again
-"$GH_TEST_BIN/githooks-cli" install
+"$GH_INSTALL_BIN_DIR/githooks-cli" install
 check_local_install_run_wrappers "."
