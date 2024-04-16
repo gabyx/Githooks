@@ -10,6 +10,12 @@ TEST_DIR="$ROOT_DIR/tests"
 
 cd "$ROOT_DIR"
 
+SHOW_REPLACEMENTS=false
+[ "${1:-}" != "--show" ] || {
+    shift 1
+    SHOW_REPLACEMENTS=true
+}
+
 IMAGE_TYPE="alpine-coverage"
 
 if echo "$IMAGE_TYPE" | grep -q "\-user"; then
@@ -94,7 +100,7 @@ RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | g
 # Forward over 'coverage/forwarder'.
 RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
-    "\$GH_TESTS/steps"/step-* && \\
+    "\$GH_TESTS/steps"/step-* \\
     "\$GH_TESTS/general.sh" && \\
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-runner"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
@@ -115,6 +121,14 @@ EOF
 # Clean all coverage data
 if [ -d "$TEST_DIR/cover" ]; then
     rm -rf "$TEST_DIR/cover"/*
+fi
+
+if [ "$SHOW_REPLACEMENTS" = "true" ]; then
+    docker container rm copy-test || true
+    docker container create --name copy-test "githooks:$IMAGE_TYPE"
+    docker cp "copy-test:/var/lib/githooks-tests/." "$TEST_DIR"
+    docker container rm copy-test
+    exit 0
 fi
 
 # Run the normal tests to add to the coverage
