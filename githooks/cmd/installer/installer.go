@@ -128,6 +128,14 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"If the install mode 'centralized' should be used which\n"+
 			"sets the global 'core.hooksPath'.")
 
+	if !cm.PackageManagerEnabled {
+		cmd.PersistentFlags().Bool(
+			"git-config-no-abs-path", false,
+			"Make certain Githooks Git config values"+
+				"not use abs. paths. Useful to have the Git config not change.\n"+
+				"This means you need to have the Githooks binaries in your path.")
+	}
+
 	cmd.PersistentFlags().String(
 		"clone-url", "",
 		"The clone url from which Githooks should clone\n"+
@@ -198,6 +206,10 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("hooksDir", cmd.PersistentFlags().Lookup("hooks-dir")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("hooksDirUseTemplateDir", cmd.PersistentFlags().Lookup("hooks-dir-use-template-dir")))
+	if !cm.PackageManagerEnabled {
+		cm.AssertNoErrorPanic(
+			vi.BindPFlag("gitConfigNoAbsPath", cmd.PersistentFlags().Lookup("git-config-no-abs-path")))
+	}
 
 	setupMockFlags(cmd, vi)
 }
@@ -751,6 +763,46 @@ func setDirectoryForInstallMode(
 	}
 }
 
+func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath bool, dryRun bool) {
+	var cli, runner, dialog string
+
+	msg := ""
+	if dryRun {
+		msg = "[dry run] "
+	}
+	log.InfoF("%sSetting Git config executable settings (absolute: %v).", msg, !noAbsPath)
+
+	if dryRun {
+		return
+	}
+
+	if cm.PackageManagerEnabled || noAbsPath {
+		cli = hooks.CLIName
+		runner = hooks.RunnerName
+		dialog = hooks.DialogName
+	} else {
+		cli = hooks.GetCLIExecutable(installDir).Cmd
+		runner = hooks.GetRunnerExecutable(installDir)
+		dialog = hooks.GetDialogExecutable(installDir)
+
+		log.PanicIfF(!cm.IsFile(cli), "CLI executable '%s' does not exist.", cli)
+		log.PanicIfF(!cm.IsFile(runner), "Runner executable '%s' does not exist.", runner)
+		log.PanicIfF(!cm.IsFile(dialog), "Runner executable '%s' does not exist.", dialog)
+	}
+
+	err := hooks.SetCLIExecutableAlias(cli)
+	log.AssertNoErrorPanicF(err,
+		"Could not set Git config 'alias.hooks' to '%s'.", cli)
+
+	err = hooks.SetRunnerExecutableAlias(runner)
+	log.AssertNoErrorPanic(err,
+		"Could not set runner executable alias '%s'.", runner)
+
+	err = hooks.SetDialogExecutableConfig(dialog)
+	log.AssertNoErrorPanic(err,
+		"Could not set dialog executable to '%s'.", dialog)
+}
+
 func setupHookTemplates(
 	log cm.ILogContext,
 	gitx *git.Context,
@@ -843,21 +895,6 @@ func installBinaries(
 			"Could not move file '%s' to '%s'.", binary, dest)
 	}
 
-	// Set CLI executable alias.
-	cli := hooks.GetCLIExecutable(installDir)
-	err = hooks.SetCLIExecutableAlias(cli.Cmd)
-	log.AssertNoErrorPanicF(err,
-		"Could not set Git config 'alias.hooks' to '%s'.", cli.Cmd)
-
-	runner := hooks.GetRunnerExecutable(installDir)
-	err = hooks.SetRunnerExecutableAlias(runner)
-	log.AssertNoErrorPanic(err,
-		"Could not set runner executable alias '%s'.", runner)
-
-	dialog := hooks.GetDialogExecutable(installDir)
-	err = hooks.SetDialogExecutableConfig(dialog)
-	log.AssertNoErrorPanic(err,
-		"Could not set dialog executable to '%s'.", dialog)
 }
 
 func setupAutomaticUpdateChecks(
@@ -1212,6 +1249,12 @@ func runInstaller(
 			args.InternalBinaries,
 			args.DryRun)
 	}
+
+	setupGithooksExecutables(
+		log,
+		settings.InstallDir,
+		args.GitConfigNoAbsPath,
+		args.DryRun)
 
 	setupHookTemplates(
 		log,

@@ -43,6 +43,8 @@ git hooks installer [flags]
                                                 You can list them separately or comma-separated in one argument.
       --centralized                             If the install mode `centralized` should be used which
                                                 sets the global `core.hooksPath`.
+      --git-config-no-abs-path                  Make certain Githooks Git config valuesnot use abs. paths. Useful to have the Git config not change.
+                                                This means you need to have the Githooks binaries in your path.
       --clone-url string                        The clone url from which Githooks should clone
                                                 and install/update itself. Githooks tries to
                                                 auto-detect the deploy setting for downloading binaries.

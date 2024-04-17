@@ -11,6 +11,10 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+const RunnerName = "githooks-runner"
+const CLIName = "githooks-cli"
+const DialogName = "githooks-dialog"
+
 // HooksDirName denotes the directory name used for repository specific hooks.
 const HooksDirName = ".githooks"
 const HooksDirNameShared = "githooks"
@@ -232,7 +236,7 @@ func CleanTemporaryDir(installDir string) (string, error) {
 
 // GetRunnerExecutable gets the installed Githooks runner executable.
 func GetRunnerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "githooks-runner")
+	p = path.Join(GetBinaryDir(installDir), RunnerName)
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
@@ -242,16 +246,12 @@ func GetRunnerExecutable(installDir string) (p string) {
 
 // SetRunnerExecutableAlias sets the global Githooks runner executable.
 func SetRunnerExecutableAlias(path string) error {
-	if !cm.IsFile(path) {
-		return cm.ErrorF("Runner executable '%s' does not exist.", path)
-	}
-
 	return git.NewCtx().SetConfig(GitCKRunner, path, git.GlobalScope)
 }
 
 // GetDialogExecutable gets the installed Githooks dialog executable.
 func GetDialogExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "githooks-dialog")
+	p = path.Join(GetBinaryDir(installDir), DialogName)
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
@@ -261,19 +261,11 @@ func GetDialogExecutable(installDir string) (p string) {
 
 // SetDialogExecutableConfig sets the global Githooks dialog executable.
 func SetDialogExecutableConfig(path string) error {
-	if !cm.IsFile(path) {
-		return cm.ErrorF("Dialog executable '%s' does not exist.", path)
-	}
-
 	return git.NewCtx().SetConfig(GitCKDialog, path, git.GlobalScope)
 }
 
 // SetCLIExecutableAlias sets the global Githooks runner executable.
 func SetCLIExecutableAlias(path string) error {
-	if !cm.IsFile(path) {
-		return cm.ErrorF("CLI executable '%s' does not exist.", path)
-	}
-
 	return git.NewCtx().SetConfig(GitCKAliasHooks, strs.Fmt("!\"%s\"", path), git.GlobalScope)
 }
 
