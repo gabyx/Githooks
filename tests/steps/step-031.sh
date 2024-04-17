@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 CURRENT_TIME=$(date +%s)
 MOCK_LAST_RUN=$((CURRENT_TIME - 5))
 

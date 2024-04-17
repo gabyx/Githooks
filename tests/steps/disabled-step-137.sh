@@ -8,6 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if [ -n "${GH_COVERAGE_DIR:-}" ]; then
     echo "Test cannot run for coverage."
     exit 249

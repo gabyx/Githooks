@@ -8,6 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 # Test can be run with staged files exported as file too.
 exportStagedFilesAsFile="false"
 if [ "${1:-}" = "--export-staged-files-as-file" ]; then

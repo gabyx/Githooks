@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if [ -n "$GH_ON_WINDOWS" ]; then
     echo "On Windows."
     exit 249
