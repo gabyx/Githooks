@@ -6,7 +6,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+init_step
+
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi
@@ -14,6 +16,7 @@ fi
 # Make repo
 mkdir -p "$GH_TEST_TMP/test117" && cd "$GH_TEST_TMP/test117" || exit 1
 git init &&
+    install_hooks_if_not_centralized &&
     mkdir ".githooks" &&
     touch ".githooks/trust-all" &&
     git add . &&

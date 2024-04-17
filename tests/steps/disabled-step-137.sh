@@ -8,6 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if [ -n "${GH_COVERAGE_DIR:-}" ]; then
     echo "Test cannot run for coverage."
     exit 249
@@ -16,11 +18,12 @@ fi
 ref="${CIRCLE_SHA1:-main}"
 # Install with script.
 curl -sL "https://raw.githubusercontent.com/gabyx/Githooks/$ref/scripts/install.sh" | bash -s -- -- \
-    --use-core-hookspath
+    --centralized
 
 mkdir -p "$GH_TEST_TMP/test137" &&
     cd "$GH_TEST_TMP/test137" &&
-    git init
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 if [ -z "$(git config core.hooksPath)" ]; then
     echo "Git core.hooskPath is not set but should."
@@ -37,4 +40,4 @@ if grep -Rq 'github.com/gabyx/githooks' .git/hooks; then
     exit 1
 fi
 
-git hooks uninstaller || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" uninstaller || exit 1

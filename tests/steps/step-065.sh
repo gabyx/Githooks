@@ -6,8 +6,10 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+init_step
+
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -16,7 +18,7 @@ accept_all_trust_prompts || exit 1
 rm -rf "$GH_TEST_GIT_CORE/templates/hooks"
 
 echo 'n
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ]; then

@@ -1,13 +1,13 @@
-## git hooks config update
+## git hooks config update-check
 
-Change Githooks update settings.
+Change Githooks update-check settings.
 
 ### Synopsis
 
-Enable or disable automatic Githooks updates.
+Enable or disable automatic Githooks update checks.
 
 ```
-git hooks config update [flags]
+git hooks config update-check [flags]
 ```
 
 ### Options
@@ -17,7 +17,7 @@ git hooks config update [flags]
       --enable    Enables automatic update checks for Githooks.
       --disable   Disables automatic update checks for Githooks.
       --reset     Reset the setting.
-  -h, --help      help for update
+  -h, --help      help for update-check
 ```
 
 ### SEE ALSO

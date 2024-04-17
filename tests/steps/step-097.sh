@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 MANAGED_HOOK_NAMES="
     applypatch-msg pre-applypatch post-applypatch
     pre-commit pre-merge-commit prepare-commit-msg commit-msg post-commit
@@ -19,11 +21,11 @@ MANAGED_HOOK_NAMES="
 mkdir -p "$GH_TEST_TMP/test097/.git/hooks" &&
     cd "$GH_TEST_TMP/test097" &&
     git init &&
-    "$GH_TEST_BIN/githooks-cli" installer &&
+    "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" &&
     git config githooks.updateCheckEnabled false ||
     exit 1
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+if ! is_centralized_tests; then
     # When not using core.hooksPath we install into the current repository.
     if ! "$GH_TEST_BIN/githooks-cli" install --non-interactive; then
         echo "! Install into current repo failed"

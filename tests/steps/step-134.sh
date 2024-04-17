@@ -8,6 +8,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 # Test can be run with staged files exported as file too.
 exportStagedFilesAsFile="false"
 if [ "${1:-}" = "--export-staged-files-as-file" ]; then
@@ -19,7 +21,7 @@ if ! is_docker_available; then
     exit 249
 fi
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 accept_all_trust_prompts || exit 1
 assert_no_test_images
@@ -42,6 +44,7 @@ mkdir -p "$GH_TEST_TMP/shared/hooks-134-a.git" &&
 mkdir -p "$GH_TEST_TMP/test134" &&
     cd "$GH_TEST_TMP/test134" &&
     git init &&
+    install_hooks_if_not_centralized &&
     mkdir -p .githooks &&
     echo -e "envs:\n  sharedhooks:\n    - MONKEY=gaga" >.githooks/.envs.yaml &&
     echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-134-a.git" >.githooks/.shared.yaml

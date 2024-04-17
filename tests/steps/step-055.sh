@@ -6,9 +6,11 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 url1="ssh://git@github.com/test/repo1.git"
 location1=$("$GH_INSTALL_BIN_DIR/githooks-cli" shared root-from-url "$url1") || exit 1
@@ -73,6 +75,7 @@ mkdir -p "$GH_TEST_TMP/test055" &&
 
 cd "$GH_TEST_TMP/test055" &&
     git init &&
+    install_hooks_if_not_centralized &&
     mkdir -p .git/hooks &&
     echo 'echo "Hello"' >.git/hooks/pre-commit.replaced.githook &&
     chmod +x .git/hooks/pre-commit.replaced.githook &&

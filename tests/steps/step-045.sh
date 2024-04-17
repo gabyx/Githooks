@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Run an install, skipping the intro README files
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -23,26 +25,22 @@ mkdir -p "$GH_TEST_TMP/test045/002" &&
 
 cd "$GH_TEST_TMP/test045" || exit 1
 
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/test045
 s
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
-if ! grep -q "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/001/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed into 001"
-    exit 1
-fi
+check_local_install "$GH_TEST_TMP/test045/001"
 
 if [ -f "$GH_TEST_TMP/test045/001/.githooks/README.md" ]; then
     echo "! README was unexpectedly installed into 001"
     exit 1
 fi
 
-if ! grep -q "github.com/gabyx/githooks" "$GH_TEST_TMP/test045/002/.git/hooks/pre-commit"; then
-    echo "! Hooks were not installed into 002"
-    exit 1
-fi
+check_local_install "$GH_TEST_TMP/test045/002"
 
 if [ -f "$GH_TEST_TMP/test045/002/.githooks/README.md" ]; then
     echo "! README was unexpectedly installed into 002"
@@ -71,7 +69,7 @@ if ! echo "$OUT" | grep -q "There is a new Githooks update available"; then
     exit 1
 fi
 
-OUT=$(git hooks update 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" update 2>&1)
 if ! echo "$OUT" | grep -q "All done! Enjoy!"; then
     echo "! Expected installation output not found"
     echo "$OUT"

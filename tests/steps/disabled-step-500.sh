@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Download from deploy url and install latest version
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
+
+init_step
 
 git -C "$GH_TEST_REPO" reset --hard v2.1.0 >/dev/null 2>&1 || exit 1
 
@@ -15,7 +17,7 @@ GH_DEPLOY_SOURCE_IS_PROD=true \
     "$GH_TEST_BIN/githooks-cli" installer --clone-url "https://github.com/gabyx/Githooks.git" --clone-branch "main" ||
     exit 1
 
-git hooks uninstaller
+"$GH_INSTALL_BIN_DIR/githooks-cli" uninstaller
 
 # Remove this installation, such that the uninstall in exec-steps works.
 rm -rf "$GH_INSTALL_DIR" || exit 1

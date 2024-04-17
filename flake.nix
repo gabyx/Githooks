@@ -1,5 +1,5 @@
 {
-  description = "Homepage Dev";
+  description = "Githooks Dev";
 
   nixConfig = {
     substituters = [
@@ -48,7 +48,7 @@
 
         # Things needed only at compile-time.
         nativeBuildInputs = with pkgs; [
-          go_1_20
+          go_1_21
         ];
 
         # Things needed at runtime.

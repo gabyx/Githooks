@@ -29,6 +29,7 @@ jobs:
     steps:
       - checkout
       - run:
+          no_output_timeout: 30m
           command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
 
 workflows:
@@ -43,7 +44,7 @@ workflows:
                   "test-alpine",
                   "test-alpine-nolfs",
                   "test-alpine-user",
-                  "test-corehookspath",
+                  "test-centralized",
                   "test-whitespace",
                   "test-unittests",
                   "test-unittests-podman",

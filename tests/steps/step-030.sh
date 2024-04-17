@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 mkdir -p "$GH_TEST_TMP/test30" &&
     cd "$GH_TEST_TMP/test30" &&
     git init || exit 1
