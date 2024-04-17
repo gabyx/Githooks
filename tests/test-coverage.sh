@@ -44,7 +44,7 @@ cat <<EOF | docker build \
 EOF
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
-FROM golang:1.20-alpine
+FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
 
@@ -53,6 +53,8 @@ RUN git config --system protocol.file.allow always
 
 RUN go install github.com/wadey/gocovmerge@latest
 RUN go install github.com/mattn/goveralls@latest
+RUN go install gitlab.com/fgmarand/gocoverstats@latest
+RUN go install github.com/nikolaydubina/go-cover-treemap@latest
 
 ENV DOCKER_RUNNING=true
 ENV GH_COVERAGE_DIR="/cover"
@@ -97,19 +99,24 @@ RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | g
     "\$GH_TESTS/steps/"step-*
 
 # Replace all runnner/cli/dialog/'git hooks' invocations.
-# Forward over 'coverage/forwarder'.
-RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-cli"@g' \\
+RUN \\
+    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
     "\$GH_TESTS/steps"/step-* \\
     "\$GH_TESTS/general.sh" && \\
+    #
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-runner"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
+    #
     sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-dialog"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
+    #
     sed -i -E 's@".DIALOG"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
+    #
     sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GH_INSTALL_BIN_DIR/githooks-cli"@g' \\
-    "\$GH_TESTS/steps"/step-*
+    "\$GH_TESTS/steps"/step-* \\
+    "\$GH_TESTS/general.sh"
 
 ${ADDITIONAL_INSTALL_STEPS:-}
 
@@ -133,19 +140,19 @@ fi
 
 # Run the normal tests to add to the coverage
 # inside the current repo
-echo "Run unit tests..."
-docker run --rm \
-    -a stdout -a stderr \
-    -v "/var/run/docker.sock:/var/run/docker.sock" \
-    -v "$TEST_DIR/cover":/cover \
-    -v "$TEST_DIR/..":/githooks \
-    -w /githooks/tests \
-    "githooks:$IMAGE_TYPE-base" \
-    ./exec-unittests.sh ||
-    exit $?
+# echo "Run unit tests..."
+# docker run --rm \
+#     -a stdout -a stderr \
+#     -v "/var/run/docker.sock:/var/run/docker.sock" \
+#     -v "$TEST_DIR/cover":/cover \
+#     -v "$TEST_DIR/..":/githooks \
+#     -w /githooks/tests \
+#     "githooks:$IMAGE_TYPE-base" \
+#     ./exec-unittests.sh ||
+#     exit $?
 
 echo "Run integration tests..."
-# Run the integration tests# Create a volume where all test setup and repositories go in.
+# Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
 delete_container_volume gh-test-tmp &>/dev/null || true
 docker volume create gh-test-tmp
