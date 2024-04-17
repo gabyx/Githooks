@@ -8,14 +8,14 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 init_step
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    echo "Not using centralized install"
+if is_centralized_tests; then
+    echo "Already covered in normal mode"
     exit 249
 fi
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --prefix ~ || exit 1
+"$GH_TEST_BIN/githooks-cli" installer --prefix ~ || exit 1
 check_install
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&

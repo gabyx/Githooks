@@ -110,7 +110,7 @@ fi
 echo "Cloning"
 cd "$GH_TEST_TMP" || exit 1
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     # Set templateDir such that shared hooks update gets triggered on clone.
     git -c "init.templateDir=$(git config githooks.pathForUseCoreHooksPath)/.." \
         clone "$GH_TEST_TMP/test103" test103-clone &&

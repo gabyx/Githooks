@@ -156,6 +156,8 @@ echo "Run integration tests..."
 # Is mounted to `/tmp`.
 delete_container_volume gh-test-tmp &>/dev/null || true
 docker volume create gh-test-tmp
+
+# Normal install
 docker run --rm \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
@@ -164,10 +166,18 @@ docker run --rm \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?
 
-CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
+# Centralized install
+docker run --rm \
+    -a stdout -a stderr \
+    -v "gh-test-tmp:/tmp" \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -v "$TEST_DIR/cover":/cover \
+    "githooks:$IMAGE_TYPE" \
+    ./exec-steps.sh --test-centralized-install "$@" || exit $?
 
 # Upload the produced coverage
 # inside the current repo
+CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
 docker run --rm \
     -a stdout -a stderr \
     -v "$TEST_DIR/cover":/cover \

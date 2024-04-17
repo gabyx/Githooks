@@ -20,7 +20,7 @@ cd "$GH_TEST_TMP/shared/hooks-005.git" &&
     git commit -m 'Initial commit'
 
 # run the install, and set up shared repos
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     echo "y
 
 n

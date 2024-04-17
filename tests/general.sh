@@ -10,6 +10,10 @@ function init_step() {
     fi
 }
 
+function is_centralized_tests() {
+    [ "${GH_TEST_CENTRALIZED_INSTALL:-}" = "true" ] || return 1
+}
+
 function die() {
     echo -e "! ERROR:" "$@" >&2
     exit 1
@@ -207,10 +211,6 @@ function container_mgr() {
         docker "$@"
     fi
 
-}
-
-function is_centralized_tests() {
-    [ "${GH_TEST_CENTRALIZED_INSTALL:-}" = "true" ] || return 1
 }
 
 function install_hooks_if_not_centralized() {

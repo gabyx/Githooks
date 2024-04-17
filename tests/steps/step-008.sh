@@ -27,7 +27,7 @@ mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
     git add .githooks/pre-commit/test ||
     exit 1
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     git commit -m 'Test'
 
     if grep 'Previous' "$GH_TEST_TMP/test-008.out" ||

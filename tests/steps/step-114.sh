@@ -11,7 +11,7 @@ init_step
 
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     echo "Using centralized install"
     exit 249
 fi

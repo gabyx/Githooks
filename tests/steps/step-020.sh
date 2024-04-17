@@ -27,7 +27,7 @@ if grep -q 'github.com/gabyx/githooks' "$GH_TEST_TMP/test20/.git/hooks/pre-commi
     exit 1
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     check_centralized_install "$GH_TEST_TMP/.test-020/hooks"
 else
     "$GH_INSTALL_BIN_DIR/githooks-cli" install

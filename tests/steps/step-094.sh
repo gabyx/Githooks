@@ -26,7 +26,7 @@ if ! "$GH_INSTALL_BIN_DIR/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; th
     exit 1
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     check_centralized_install
 else
     check_local_install

@@ -14,7 +14,7 @@ accept_all_trust_prompts || exit 1
 "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --non-interactive || exit 1
 check_install
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     mkdir -p "$GH_TEST_TMP/test1" &&
         cd "$GH_TEST_TMP/test1" &&
         git init || exit 1

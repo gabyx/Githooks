@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 init_step
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     echo "Not using centralized install"
     exit 249
 fi

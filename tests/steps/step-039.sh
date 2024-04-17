@@ -19,7 +19,7 @@ if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     exit 1
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     OUT=$("$GH_TEST_BIN/githooks-cli" install 2>&1)
     # shellcheck disable=SC2181
     if [ $? -eq 0 ] || ! echo "$OUT" | grep -q "has no effect"; then

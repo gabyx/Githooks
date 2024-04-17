@@ -13,11 +13,6 @@ if ! command -v git-lfs; then
     exit 249
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
-    echo "Using centralized install"
-    exit 249
-fi
-
 function check_lfs_hook_dir() {
     local dir="$1"
     shift 1
@@ -94,10 +89,9 @@ function check_hooks_dir() {
             ls -al "$dir"
             exit 1
         }
-
 }
 
-function check_hook() {
+function check_hooks() {
     local dir="$1"
     shift 1
     check_hooks_dir "$dir/.git/hooks" "$@"
@@ -142,7 +136,7 @@ accept_all_trust_prompts || exit 1
 check_hooks_dir ~/.githooks/templates/hooks "${maintainedHooksRef1[@]}"
 check_lfs_hook_dir ~/.githooks/templates/hooks "${lfsHooks1[@]}"
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     # Testing further local install stuff is non-sense with
     # centralized install.
     exit 0
@@ -210,8 +204,9 @@ grep -q "custom-to-survive" .git/hooks/commit-msg || {
     exit 1
 }
 
-export ADD_COUNT=1 # commit-msg
-check_hooks "." "${maintainedHooksRef3[@]}"
+# Add a count because of commit-msg hook which is not managed.
+ADD_COUNT=1 \
+    check_hooks "." "${maintainedHooksRef3[@]}"
 check_lfs_hook "." "${lfsHooks3[@]}"
 
 echo "Change maintainable hooks, locally. again"
@@ -237,7 +232,8 @@ lfsHooks4=(
 git config githooks.maintainedHooks "$maintainedHooks4"
 "$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
 
-check_hooks "." "${maintainedHooksRef4[@]}"
+ADD_COUNT=1 \
+    check_hooks "." "${maintainedHooksRef4[@]}"
 check_lfs_hook "." "${lfsHooks4[@]}"
 
 echo "Pollute an LFS hook and reinstall again."
@@ -255,18 +251,31 @@ grep -q "overwritten LFS hooks" .git/hooks/post-checkout || {
 echo "Delete the polluted LFS hook an run again"
 rm .git/hooks/post-checkout || exit 1
 "$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
-check_hooks "." "${maintainedHooksRef4[@]}"
+ADD_COUNT=1 \
+    check_hooks "." "${maintainedHooksRef4[@]}"
 check_lfs_hook "." "${lfsHooks4[@]}"
 
 echo "Uninstall all hooks, check that all LFS hooks are installed."
 "$GH_INSTALL_BIN_DIR/githooks-cli" uninstall || exit 1
-check_hooks "." "${allLFSHooks[@]}"
+ADD_COUNT=1 \
+    check_hooks "." "${allLFSHooks[@]}"
 check_lfs_hook "." "${allLFSHooks[@]}"
 
 echo "Unset git config githooks.maintainedHooks and check that original setup is maintained."
 git config --unset githooks.maintainedHooks
-"$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1
-check_hooks "." "${maintainedHooksRef1[@]}"
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" install)
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ||
+    ! echo "$OUT" | grep -qiE "Hook '.*/commit-msg' is neither an original Git LFS hook nor" ||
+    ! echo "$OUT" | grep -qiE "will not run"; then
+    echo "! Expected warning for custom 'commit-msg' hook."
+fi
+check_local_install
+
+echo "Install the first set finally."
+"$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "${maintainedHooks1[@]}"
+ADD_COUNT=1 \
+    check_hooks "." "${maintainedHooksRef1[@]}"
 check_lfs_hook "." "${lfsHooks1[@]}"
 grep -q "custom-to-survive" .git/hooks/commit-msg.replaced.githook || {
     echo "Replaced hook should still exist."

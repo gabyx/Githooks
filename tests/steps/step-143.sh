@@ -21,7 +21,7 @@ mkdir -p "$GH_TEST_TMP/test143/.githooks/pre-commit" &&
     git config --local githooks.trustAll true ||
     exit 1
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list 2>&1 |
         grep -q "but Githooks seems not installed"; then
         echo "! Warning should appear since we did not install."

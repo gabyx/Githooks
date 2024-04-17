@@ -21,6 +21,38 @@ const GithooksWebpage = "https://github.com/gabyx/githooks"
 // DefaultBugReportingURL is the default url to report errors.
 const DefaultBugReportingURL = "https://github.com/gabyx/githooks/issues"
 
+// All Git hook names.
+var AllHookNames = []string{
+	"applypatch-msg",
+	"commit-msg",
+	"fsmonitor-watchman",
+	"p4-changelist",
+	"p4-post-changelist",
+	"p4-prepare-changelist",
+	"p4-pre-submit",
+	"post-applypatch",
+	"post-checkout",
+	"post-commit",
+	"post-index-change",
+	"post-merge",
+	"post-receive",
+	"post-rewrite",
+	"post-update",
+	"pre-applypatch",
+	"pre-auto-gc",
+	"pre-commit",
+	"pre-merge-commit",
+	"prepare-commit-msg",
+	"pre-push",
+	"pre-rebase",
+	"pre-receive",
+	"proc-receive",
+	"push-to-checkout",
+	"reference-transaction",
+	"sendemail-validate",
+	"update",
+}
+
 // ManagedHookNames are hook names managed by Githooks for normal repositories.
 var ManagedHookNames = []string{
 	"applypatch-msg",

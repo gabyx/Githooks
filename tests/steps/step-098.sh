@@ -16,7 +16,7 @@ mkdir -p "$GH_TEST_TMP/test098/.git/hooks" &&
     git config githooks.updateCheckEnabled false ||
     exit 1
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     # When not using core.hooksPath we install into the current repository.
     if ! "$GH_TEST_BIN/githooks-cli" install --non-interactive; then
         echo "! Install into current repo failed"

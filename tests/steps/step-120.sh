@@ -10,7 +10,7 @@ init_step
 
 accept_all_trust_prompts || exit 1
 
-if [ "$(id -u)" != "0" ] || ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if [ "$(id -u)" != "0" ] || ! is_centralized_tests; then
     echo "! Test needs root access and --centralized."
     exit 249
 fi

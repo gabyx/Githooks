@@ -23,7 +23,7 @@ mkdir -p "$GH_TEST_TMP/test7" &&
 
 check_install "$HOME/.githooks/templates/hooks"
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     check_centralized_install
 else
     "$GH_INSTALL_BIN_DIR/githooks-cli" install || exit 1

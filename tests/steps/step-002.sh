@@ -15,7 +15,7 @@ mkdir -p "$GH_TEST_TMP/test2" &&
     cd "$GH_TEST_TMP/test2" &&
     git init || exit 1
 
-if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if ! is_centralized_tests; then
     "$GH_INSTALL_BIN_DIR/githooks-cli" install
 fi
 

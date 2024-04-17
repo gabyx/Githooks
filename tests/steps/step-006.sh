@@ -23,7 +23,7 @@ export GIT_TEMPLATE_DIR="$GH_TEST_TMP/git-templates/templates"
 OUT=$("$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --hooks-dir-use-template-dir 2>&1)
 EXIT_CODE="$?"
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+if is_centralized_tests; then
     if [ "$EXIT_CODE" -eq "0" ] || ! echo "$OUT" |
         grep -C 10 "You cannot use 'centralized'" |
         grep -C 10 "duplicating run-wrappers" |

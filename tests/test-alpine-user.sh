@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 
 cat <<EOF | docker build \
     --force-rm -t githooks:alpine-user-base -
-FROM golang:1.20-alpine
+FROM golang:1.21-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl
 

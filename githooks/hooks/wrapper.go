@@ -196,8 +196,10 @@ func DeleteHookDirTemp(hookDir string) (err error) {
 // to the maintained run-wrappers by Githooks
 // and thus installs Githooks into the Git context, the local repository.
 func InstallRunWrappersLink(
+	log cm.ILogContext,
 	gitx *git.Context,
 	hookDir string,
+	lfsHooksCache LFSHooksCache,
 ) error {
 	pathForUseCoreHooksPath, exists := gitx.LookupConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
 
@@ -212,6 +214,33 @@ func InstallRunWrappersLink(
 		return cm.ErrorF(
 			"Hooks directory '%s' seems to contain run-wrappers.\n"+
 				"Please uninstall them first with 'git hooks uninstall'.", hookDir)
+	}
+
+	for i := range AllHookNames {
+		hookFile := path.Join(hookDir, AllHookNames[i])
+		if exists, _ := cm.IsPathExisting(hookFile); !exists {
+			continue
+		}
+
+		if lfsHooksCache != nil {
+			identical, err := lfsHooksCache.IsIdentical(hookFile)
+			log.AssertNoError(err, "Could not detect if '%s' is a original LFS hook.", hookFile)
+			if identical {
+				continue
+			}
+		}
+
+		isWrapper, _ := IsRunWrapper(hookFile)
+		if isWrapper {
+			continue
+		}
+
+		log.WarnF(
+			"Hook '%s' is neither an original Git LFS hook nor a Githooks run-wrapper.\n"+
+				"This custom hook will not run due to the local '%s' link.\n"+
+				"You should remove this hook or integrate it into a 'replaced' hook in the\n"+
+				"hooks directory maintained by Githooks.",
+			hookFile, git.GitCKCoreHooksPath)
 	}
 
 	return gitx.SetConfig(git.GitCKCoreHooksPath, pathForUseCoreHooksPath, git.LocalScope)

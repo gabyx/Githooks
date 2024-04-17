@@ -130,7 +130,7 @@ func InstallIntoRepo(
 			return false
 		}
 
-		err := hooks.InstallRunWrappersLink(gitx, hookDir)
+		err := hooks.InstallRunWrappersLink(log, gitx, hookDir, lfsHooksCache)
 		log.AssertNoErrorPanicF(err, "Could not install run-wrapper link into '%s'.", repoGitDir)
 
 		log.InfoF("Installed Githooks run-wrapper link ('%s') into '%s'",
