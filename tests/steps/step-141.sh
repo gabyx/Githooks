@@ -82,22 +82,53 @@ echo "- Install local"
 check_local_install .
 check_local_install_no_run_wrappers .
 
-# Install some manual run-wrappers.
-# Check for failure.
-echo "- Install local partially (reject)"
+echo "Check for failure with run-wrapper install (local)."
+git config --local core.hooksPath "/this-is-a-test"
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "!all, pre-commit" 2>&1)
+EXIT_CODE="$?"
+# shellcheck disable=SC2181
+if [ "$EXIT_CODE" -eq "0" ] ||
+    ! echo "$OUT" | grep -qiE "Local Git config 'core\.hooksPath.* is set" ||
+    ! echo "$OUT" | grep -qiE "circumvents Githooks run-wrappers" ||
+    [ -n "$(git config --local githooks.maintainedHooks)" ]; then
+    echo "! Partial install with run-wrappers and local core.hooksPath should error out."
+    echo "$OUT"
+    git config --local githooks.maintainedHooks
+    exit 1
+fi
+
+echo "Check for failure with run-wrapper install (global)."
+git config --local --unset core.hooksPath
 git config --global core.hooksPath "/this-is-a-test"
-OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "pre-commit" 2>&1)
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "!all,pre-commit" 2>&1)
 EXIT_CODE="$?"
 # shellcheck disable=SC2181
 if [ "$EXIT_CODE" -eq "0" ] ||
     ! echo "$OUT" | grep -qiE "Global Git config 'core\.hooksPath.* is set" ||
-    ! echo "$OUT" | grep -qiE "which circumvents Githooks run-wrappers"; then
-    echo "! Partial install with run-wrappers and global core.hooksPath should error out."
+    ! echo "$OUT" | grep -qiE "circumvents Githooks run-wrappers" ||
+    [ -n "$(git config --local githooks.maintainedHooks)" ]; then
+    echo "! Partial install with run-wrappers and local core.hooksPath should error out."
+    echo "$OUT"
+    git config --local githooks.maintainedHooks
+    exit 1
+fi
+git config --global --unset core.hooksPath
+
+echo "Check for failure with normal install (run-wrappers detected)"
+cp ~/.githooks/templates/hooks/pre-commit .git/hooks/pre-commit
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" install 2>&1)
+EXIT_CODE="$?"
+# shellcheck disable=SC2181
+if [ "$EXIT_CODE" -eq "0" ] ||
+    ! echo "$OUT" | grep -qiE "Hook.*seems to be a Githooks run-wrapper" ||
+    ! echo "$OUT" | grep -qiE "not going to install"; then
+    echo "! Install when run-wrappers are still placed should error out."
     echo "$OUT"
     exit 1
 fi
+rm .git/hooks/pre-commit
+
 echo "- Install local partially (success)"
-git config --global --unset core.hooksPath
 "$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "!all, pre-commit" || exit 1
 check_local_install_run_wrappers .
 check_install_hooks_local . 5 "pre-commit"

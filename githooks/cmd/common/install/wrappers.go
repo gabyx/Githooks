@@ -20,6 +20,8 @@ import (
 // Otherwise we install run-wrappers directly.
 // It prompts for disabling detected LFS hooks and offers to
 // setup a README file.
+// If `hookNames` is given (not nil, but can be empty), run-wrappers
+// are installed.
 func InstallIntoRepo(
 	log cm.ILogContext,
 	repoGitDir string,
@@ -31,9 +33,9 @@ func InstallIntoRepo(
 	uiSettings *UISettings,
 ) bool {
 
-	hookDir := path.Join(repoGitDir, "hooks")
-	if !cm.IsDirectory(hookDir) {
-		err := os.MkdirAll(hookDir, cm.DefaultFileModeDirectory)
+	hooksDir := path.Join(repoGitDir, "hooks")
+	if !cm.IsDirectory(hooksDir) {
+		err := os.MkdirAll(hooksDir, cm.DefaultFileModeDirectory)
 		log.AssertNoErrorPanic(err,
 			"Could not create hook directory in '%s'.", repoGitDir)
 	}
@@ -45,12 +47,12 @@ func InstallIntoRepo(
 	// a link `core.hooksPath`.
 	// We switch to run-wrappers if we install a set of maintained hooks.
 	// or repository settings have maintained hooks set.
-	installRunWrappers, _ := cm.IsPathExisting(path.Join(hookDir, "githooks-contains-run-wrappers"))
+	installRunWrappers, _ := cm.IsPathExisting(path.Join(hooksDir, "githooks-contains-run-wrappers"))
 	log.DebugF("Marker file for run-wrappers detected: '%v'.", installRunWrappers)
-	installRunWrappers = installRunWrappers || len(hookNames) != 0
+	installRunWrappers = installRunWrappers || hookNames != nil
 
 	var isSet bool
-	if len(hookNames) == 0 {
+	if hookNames == nil {
 		// Will default to all hooks if unset or wrong.
 		hookNames, _, isSet, err = hooks.GetMaintainedHooks(gitx, git.LocalScope)
 		log.AssertNoErrorF(err, "Could not get maintained hooks.")
@@ -75,7 +77,7 @@ func InstallIntoRepo(
 			log.WarnF("Global Git config '%s=%s' is set\n"+
 				"which circumvents Githooks run-wrappers.\n"+
 				"Not going to install run-wrappers in '%s'.\n"+
-				"Did you install Githooks in 'centralized' mode?", git.GitCKCoreHooksPath, gcp, hookDir)
+				"Did you install Githooks in 'centralized' mode?", git.GitCKCoreHooksPath, gcp, hooksDir)
 
 			return false
 		}
@@ -86,7 +88,7 @@ func InstallIntoRepo(
 			log.WarnF("Local Git config '%s=%s' is set\n"+
 				"and not maintained by Githooks ('%s').\n"+
 				"This circumvents Githooks run-wrappers.\n"+
-				"Not going to install run-wrappers in '%s'.", git.GitCKCoreHooksPath, lcp, pathToUse, hookDir)
+				"Not going to install run-wrappers in '%s'.", git.GitCKCoreHooksPath, lcp, pathToUse, hooksDir)
 
 			return false
 		} else if lcpSet {
@@ -103,38 +105,29 @@ func InstallIntoRepo(
 		}
 
 		nLFSHooks, err := hooks.InstallRunWrappers(
-			hookDir, hookNames,
+			hooksDir, hookNames,
 			nil,
 			GetHookDisableCallback(log, gitx, nonInteractive, uiSettings),
 			lfsHooksCache,
 			nil)
 
-		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hookDir)
+		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hooksDir)
 
 		if nLFSHooks != 0 {
 			log.InfoF("Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks into '%s'.",
-				len(hookNames), nLFSHooks, hookDir)
+				len(hookNames), nLFSHooks, hooksDir)
 		} else {
 			log.InfoF("Installed '%v' Githooks run-wrapper(s) into '%s'",
-				len(hookNames), hookDir)
+				len(hookNames), hooksDir)
 		}
 
 	} else {
 
-		if exists, _ := cm.IsPathExisting(path.Join(hookDir, "githooks-contains-run-wrappers")); exists {
-			log.WarnF(
-				"Hooks directory '%s' seems to contain run-wrappers.\n"+
-					"Please uninstall them first with 'git hooks uninstall'.\n"+
-					"Not going to install run-wrapper link ('%s') into '%s'.", hookDir)
-
-			return false
-		}
-
-		err := hooks.InstallRunWrappersLink(log, gitx, hookDir, lfsHooksCache)
+		err := hooks.InstallRunWrappersLink(log, gitx, hooksDir, lfsHooksCache)
 		log.AssertNoErrorPanicF(err, "Could not install run-wrapper link into '%s'.", repoGitDir)
 
 		log.InfoF("Installed Githooks run-wrapper link ('%s') into '%s'",
-			git.GitCKCoreHooksPath, hookDir)
+			git.GitCKCoreHooksPath, hooksDir)
 	}
 
 	// Offer to setup the intro README if running in interactive mode

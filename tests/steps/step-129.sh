@@ -171,8 +171,9 @@ maintainedHooksRef2=(
     "pre-push")
 
 "$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "$maintainedHooks2" || exit 1
-if [ "$(git config githooks.maintainedHooks)" != "!all, commit-msg" ]; then
+if [ "$(git config --local githooks.maintainedHooks)" != "!all, commit-msg" ]; then
     echo "Maintained hooks is not set"
+    git config --local githooks.maintainedHooks
     exit 1
 fi
 
@@ -266,7 +267,7 @@ git config --unset githooks.maintainedHooks
 OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" install)
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ||
-    ! echo "$OUT" | grep -qiE "Hook '.*/commit-msg' is neither an original Git LFS hook nor" ||
+    ! echo "$OUT" | grep -qiE "Hook '.*/commit-msg' seems to be a custom hook" ||
     ! echo "$OUT" | grep -qiE "will not run"; then
     echo "! Expected warning for custom 'commit-msg' hook."
 fi

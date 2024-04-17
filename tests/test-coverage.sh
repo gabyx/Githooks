@@ -32,6 +32,7 @@ fi
 function cleanup() {
     docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
     docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
+    docker volume rm gh-test-tmp &>/dev/null || true
 }
 
 trap cleanup EXIT
@@ -127,7 +128,12 @@ EOF
 
 # Clean all coverage data
 if [ -d "$TEST_DIR/cover" ]; then
-    rm -rf "$TEST_DIR/cover"/*
+    echo "Delete coverage folder."
+    # Do this over container due to user permissions.
+    docker run --rm \
+        -v "$TEST_DIR/cover":/cover \
+        "githooks:$IMAGE_TYPE" \
+        find /cover -mindepth 1 -delete
 fi
 
 if [ "$SHOW_REPLACEMENTS" = "true" ]; then
@@ -140,16 +146,16 @@ fi
 
 # Run the normal tests to add to the coverage
 # inside the current repo
-# echo "Run unit tests..."
-# docker run --rm \
-#     -a stdout -a stderr \
-#     -v "/var/run/docker.sock:/var/run/docker.sock" \
-#     -v "$TEST_DIR/cover":/cover \
-#     -v "$TEST_DIR/..":/githooks \
-#     -w /githooks/tests \
-#     "githooks:$IMAGE_TYPE-base" \
-#     ./exec-unittests.sh ||
-#     exit $?
+echo "Run unit tests..."
+docker run --rm \
+    -a stdout -a stderr \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -v "$TEST_DIR/cover":/cover \
+    -v "$TEST_DIR/..":/githooks \
+    -w /githooks/tests \
+    "githooks:$IMAGE_TYPE-base" \
+    ./exec-unittests.sh ||
+    exit $?
 
 echo "Run integration tests..."
 # Create a volume where all test setup and repositories go in.
@@ -157,7 +163,7 @@ echo "Run integration tests..."
 delete_container_volume gh-test-tmp &>/dev/null || true
 docker volume create gh-test-tmp
 
-# Normal install
+# Run coverage with normal install
 docker run --rm \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
@@ -166,7 +172,7 @@ docker run --rm \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?
 
-# Centralized install
+# Run coverage with centralized install
 docker run --rm \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \

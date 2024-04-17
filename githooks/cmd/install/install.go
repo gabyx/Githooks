@@ -23,29 +23,29 @@ func runInstallIntoRepo(ctx *ccm.CmdContext, maintainedHooks []string, nonIntera
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(ctx.InstallDir))
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
 
+	var hooksToMaintain []string
 	if maintainedHooks != nil {
 		maintainedHooks, err = hooks.CheckHookNames(maintainedHooks)
 		ctx.Log.AssertNoErrorPanic(err, "Maintained hooks are not valid.")
-
-		err = hooks.SetMaintainedHooks(ctx.GitX, maintainedHooks, git.LocalScope)
-		ctx.Log.AssertNoErrorPanic(err, "Could not set maintained hooks config value.")
-
-		maintainedHooks, err = hooks.UnwrapHookNames(maintainedHooks)
+		hooksToMaintain, err = hooks.UnwrapHookNames(maintainedHooks)
 		ctx.Log.AssertNoErrorPanic(err, "Maintained hooks are not valid.")
 	}
 
 	installed := inst.InstallIntoRepo(
 		ctx.Log, gitDir,
-		lfsHooksCache, maintainedHooks,
+		lfsHooksCache, hooksToMaintain,
 		nonInteractive, false, false, &uiSettings)
-
 	ctx.Log.PanicIf(!installed, "Install had errors.")
+
+	if maintainedHooks != nil {
+		err = hooks.SetMaintainedHooks(ctx.GitX, maintainedHooks, git.LocalScope)
+		ctx.Log.AssertNoErrorPanic(err, "Could not set maintained hooks config value.")
+	}
 
 	err = hooks.RegisterRepo(gitDir, ctx.InstallDir, false, false)
 	ctx.Log.AssertNoError(err, "Could not register repository '%s'.", gitDir)
 	err = hooks.MarkRepoRegistered(ctx.GitX)
 	ctx.Log.AssertNoError(err, "Could not mark repository '%s' as registered.", gitDir)
-
 }
 
 func runUninstallFromRepo(ctx *ccm.CmdContext, fullUninstall bool) {
