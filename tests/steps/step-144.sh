@@ -14,7 +14,7 @@ fi
 
 accept_all_trust_prompts || exit 1
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi
@@ -115,7 +115,7 @@ echo "y
 Y
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 # Trigger the update only from repo 3
 CURRENT_TIME=$(date +%s)

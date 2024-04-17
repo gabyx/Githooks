@@ -8,7 +8,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 url1="ssh://git@github.com/test/repo1.git"
 location1=$("$GH_INSTALL_BIN_DIR/githooks-cli" shared root-from-url "$url1") || exit 1

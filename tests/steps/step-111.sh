@@ -50,7 +50,7 @@ $GH_TEST_TMP
 y
 
 s
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if [ -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be deleted (1)'
@@ -106,7 +106,7 @@ $GH_TEST_TMP
 N
 
 a
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if [ ! -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be moved (7)'

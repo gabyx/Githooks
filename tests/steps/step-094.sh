@@ -15,11 +15,11 @@ mkdir -p "$GH_TEST_TMP/test094/a" "$GH_TEST_TMP/test094/b" "$GH_TEST_TMP/test094
     cd "$GH_TEST_TMP/test094/b" &&
     git init || exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 git config --global githooks.previousSearchDir "$GH_TEST_TMP"
 
-if ! "$GH_INSTALL_BIN_DIR/githooks-cli" installer; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to run the global installation"
     exit 1
 fi
@@ -42,7 +42,7 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1; then
 fi
 
 CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
-if ! "$GH_INSTALL_BIN_DIR/githooks-cli" installer; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Expected global installation to succeed"
     exit 1
 fi

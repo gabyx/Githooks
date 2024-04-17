@@ -9,7 +9,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 accept_all_trust_prompts || exit 1
 
 # run the default install
-"$GH_TEST_BIN/githooks-cli" installer --non-interactive || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --non-interactive || exit 1
 check_install
 
 if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then

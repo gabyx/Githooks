@@ -128,7 +128,7 @@ lfsHooks1=(
     "pre-push")
 
 mkdir -p ~/.githooks/templates
-"$GH_TEST_BIN/githooks-cli" installer --maintained-hooks "$maintainedHooks1" \
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --maintained-hooks "$maintainedHooks1" \
     --hooks-dir ~/.githooks/templates/hooks || exit 1
 accept_all_trust_prompts || exit 1
 

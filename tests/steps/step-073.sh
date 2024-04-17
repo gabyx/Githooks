@@ -2,7 +2,7 @@
 # Test:
 #   Run the cli tool trying to list a not yet trusted repo
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi

@@ -2,7 +2,7 @@
 # Test:
 #   Run the cli tool trying to list hooks of invalid type
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi

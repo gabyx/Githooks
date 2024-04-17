@@ -12,7 +12,7 @@ mkdir "$GH_TEST_TMP/test070" &&
     cd "$GH_TEST_TMP/test070" &&
     git init || exit 1
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi

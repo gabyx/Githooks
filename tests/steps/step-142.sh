@@ -13,7 +13,7 @@ fi
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer --prefix ~ || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --prefix ~ || exit 1
 check_install
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
@@ -88,7 +88,7 @@ echo "- Uninstaller 2"
 }
 
 echo "- Installer 3"
-"$GH_TEST_BIN/githooks-cli" installer --prefix ~
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --prefix ~
 
 check_normal_install
 check_no_local_install .

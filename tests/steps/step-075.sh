@@ -18,7 +18,7 @@ echo "y
 y
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 echo 'y
 

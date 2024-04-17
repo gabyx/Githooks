@@ -18,7 +18,7 @@ mkdir -p "$GH_TEST_TMP/git-templates" &&
 export GIT_TEMPLATE_DIR="$GH_TEST_TMP/git-templates/templates"
 
 # run the install, and let it search for the templates
-OUT=$("$GH_TEST_BIN/githooks-cli" installer --hooks-dir-use-template-dir 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --hooks-dir-use-template-dir 2>&1)
 EXIT_CODE="$?"
 
 if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then

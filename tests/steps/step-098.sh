@@ -10,7 +10,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$GH_TEST_TMP/test098/.git/hooks" &&
     cd "$GH_TEST_TMP/test098" &&
     git init &&
-    "$GH_TEST_BIN/githooks-cli" installer &&
+    "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" &&
     git config githooks.updateCheckEnabled false ||
     exit 1
 

@@ -31,7 +31,7 @@ echo "y
 n
 y
 $GH_TEST_TMP/test4
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 check_install
 check_local_install "$GH_TEST_TMP/test4/p001/.git/hooks"

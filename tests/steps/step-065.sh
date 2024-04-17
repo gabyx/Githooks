@@ -16,7 +16,7 @@ accept_all_trust_prompts || exit 1
 rm -rf "$GH_TEST_GIT_CORE/templates/hooks"
 
 echo 'n
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin
 
 # shellcheck disable=SC2181
 if [ $? -eq 0 ]; then

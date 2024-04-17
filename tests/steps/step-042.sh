@@ -15,7 +15,7 @@ if [ -n "$LAST_UPDATE" ]; then
     exit 1
 fi
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Installation failed"
     exit 1
 fi

@@ -27,7 +27,7 @@ echo 'y
 n
 y
 ~/test021
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 check_local_install ~/test021/p001
 check_local_install ~/test021/p002

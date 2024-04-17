@@ -7,7 +7,7 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 . "$TEST_DIR/general.sh"
 
 # run the default install
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test2-clone" || exit 1
 

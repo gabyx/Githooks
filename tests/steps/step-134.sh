@@ -19,7 +19,7 @@ if ! is_docker_available; then
     exit 249
 fi
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 accept_all_trust_prompts || exit 1
 assert_no_test_images

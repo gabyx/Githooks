@@ -35,7 +35,7 @@ echo "y
 n
 y
 $GH_TEST_TMP/test130
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin --maintained-hooks "server" || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin --maintained-hooks "server" || exit 1
 
 # check if only server hooks are inside the template folder.
 for hook in pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc; do

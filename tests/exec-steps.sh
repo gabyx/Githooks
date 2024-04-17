@@ -30,6 +30,13 @@ function parse_args() {
         TEST_SHOW="true"
     fi
 
+    if [ "${1:-}" = "--test-centralized-install" ]; then
+        shift
+        # All steps use a centralized install mode
+        # the ones who can...
+        export GH_TEST_CENTRALIZED_INSTALL=true
+    fi
+
     if [ "${1:-}" = "--seq" ]; then
         shift
         SEQUENCE=$(for f in "$@"; do echo "step-$f"; done)

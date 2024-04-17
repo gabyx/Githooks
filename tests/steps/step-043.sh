@@ -28,7 +28,7 @@ n
 y
 $GH_TEST_TMP/test043
 a
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 check_local_install "$GH_TEST_TMP/test043/001"
 check_local_install "$GH_TEST_TMP/test043/002"

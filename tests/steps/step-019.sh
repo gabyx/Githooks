@@ -18,7 +18,7 @@ mkdir -p ~/.test-019/hooks &&
     git config --global init.templateDir '~/.test-019' ||
     exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer --hooks-dir-use-template-dir || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --hooks-dir-use-template-dir || exit 1
 
 mkdir -p "$GH_TEST_TMP/test19" &&
     cd "$GH_TEST_TMP/test19" &&

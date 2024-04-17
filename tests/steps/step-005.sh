@@ -24,7 +24,7 @@ if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
 n
 y
 $GH_TEST_TMP/shared/hooks-005.git
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 else
     echo "y
@@ -33,7 +33,7 @@ n
 n
 y
 $GH_TEST_TMP/shared/hooks-005.git
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 fi
 
 mkdir -p "$GH_TEST_TMP/test5" &&

@@ -28,7 +28,7 @@ fi
 echo 'y
 
 n
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin --skip-install-into-existing || exit 1
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin --skip-install-into-existing || exit 1
 
 check_no_local_install ~/test100/p001
 check_no_local_install ~/test100/p002
@@ -36,7 +36,7 @@ check_no_local_install ~/test100/p002
 # run the install again, and let it install into existing repos
 echo 'n
 y
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin
 
 check_local_install ~/test100/p001
 check_local_install ~/test100/p002

@@ -21,7 +21,7 @@ OUTPUT=$(
 n
 y
 /does/not/exist
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin 2>&1
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin 2>&1
 )
 
 if ! echo "$OUTPUT" | grep "Answer must be an existing directory"; then

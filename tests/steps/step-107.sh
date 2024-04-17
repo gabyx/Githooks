@@ -18,7 +18,7 @@ fi
 mkdir -p "$GH_TEST_TMP/templates" &&
     git config --global init.templateDir "$GH_TEST_TMP/templates"
 
-"$GH_TEST_BIN/githooks-cli" installer \
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" \
     --hooks-dir-use-template-dir || exit 1
 
 # setup the first repository

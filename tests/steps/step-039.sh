@@ -12,7 +12,7 @@ accept_all_trust_prompts || exit 1
 mkdir -p "$GH_TEST_TMP/start/dir" && cd "$GH_TEST_TMP/start/dir" &&
     git init --template=/dev/null || exit 1
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Installation failed"
     exit 1
 fi

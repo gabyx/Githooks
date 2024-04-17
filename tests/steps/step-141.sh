@@ -13,7 +13,7 @@ fi
 
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/githooks-cli" installer --prefix ~ || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --prefix ~ || exit 1
 check_install
 
 mkdir -p "$GH_TEST_TMP/test8/.githooks/pre-commit" &&
@@ -111,7 +111,7 @@ check_no_local_install .
 echo "- Install 3"
 # Install again which should have installed run-wrappers into registered
 # repo.
-"$GH_TEST_BIN/githooks-cli" installer \
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" \
     --prefix ~ \
     --centralized
 

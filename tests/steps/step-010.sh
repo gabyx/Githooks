@@ -18,7 +18,7 @@ $GH_TEST_TMP
 y
 /tmp/test
 
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin --dry-run --hooks-dir ~/.githooks/mytemplates || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin --dry-run --hooks-dir ~/.githooks/mytemplates || exit 1
 
 # Check for all githooks config vars set (local and global)
 if git config --get-regexp "^githooks.*" ||

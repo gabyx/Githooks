@@ -17,8 +17,6 @@ RUN apk add bash jq curl docker
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
-
-ENV EXTRA_INSTALL_ARGS --centralized
 EOF
 
-exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-centralized' "$@"
+exec "$TEST_DIR/exec-tests.sh" 'alpine-lfs-centralized' --test-centralized-install "$@"

@@ -13,7 +13,7 @@ rm -rf "$GH_TEST_GIT_CORE/templates" || exit 1
 
 # run the install, and let it search for the templates
 echo 'y
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 mkdir -p "$GH_TEST_TMP/test7" &&
     cd "$GH_TEST_TMP/test7" &&

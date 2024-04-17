@@ -20,14 +20,14 @@ echo "y
 n
 y
 $GH_TEST_TMP/start
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if [ "$(git config --global --get githooks.previousSearchDir)" != "$GH_TEST_TMP/start" ]; then
     echo "! The search start directory is not recorded"
     exit 1
 fi
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 cd "$GH_TEST_TMP/start/dir" &&
     git init &&

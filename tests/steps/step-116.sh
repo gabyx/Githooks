@@ -14,7 +14,7 @@ fi
 
 accept_all_trust_prompts || exit 1
 
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi
@@ -75,7 +75,7 @@ fi
 echo "- Install into repo 1,2,3 ..."
 echo "Y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if ! grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
     ! grep -qE ".+/test *116.2/.git$" "$REGISTER_FILE" ||
@@ -129,7 +129,7 @@ echo "y
 Y
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 # Update Test
 # Set all other hooks to dirty by adding something

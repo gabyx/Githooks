@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+function init_step() {
+    # Set extra install arguments for all steps.
+    # when running centralized tests.
+    if [ "${GH_TEST_CENTRALIZED_INSTALL:-}" = "true" ]; then
+        echo "Setting extra install args to '--centralized'"
+        # shellcheck disable=SC2034
+        EXTRA_INSTALL_ARGS=(--centralized)
+    fi
+}
+
 function die() {
     echo -e "! ERROR:" "$@" >&2
     exit 1
@@ -199,8 +209,12 @@ function container_mgr() {
 
 }
 
+function is_centralized_tests() {
+    [ "${GH_TEST_CENTRALIZED_INSTALL:-}" = "true" ] || return 1
+}
+
 function install_hooks_if_not_centralized() {
-    if ! echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "centralized"; then
+    if ! is_centralized_tests; then
         "$GH_INSTALL_BIN_DIR/githooks-cli" install "$@" || {
             echo "! Could not install hooks (not centralized)."
             exit 1

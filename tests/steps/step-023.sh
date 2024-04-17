@@ -37,7 +37,7 @@ n
 y
 $GH_TEST_TMP/shared/hooks-023-a.git
 $GH_TEST_TMP/shared/hooks-023-b.git
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 else
     echo "y
@@ -47,7 +47,7 @@ n
 y
 $GH_TEST_TMP/shared/hooks-023-a.git
 $GH_TEST_TMP/shared/hooks-023-b.git
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 fi
 

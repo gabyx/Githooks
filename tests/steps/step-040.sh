@@ -17,7 +17,7 @@ mkdir -p "$GH_TEST_TMP/start/dir" &&
     cd "$GH_TEST_TMP/start/dir" &&
     git init || exit 1
 
-if ! "$GH_TEST_BIN/githooks-cli" installer --non-interactive; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --non-interactive; then
     echo "! Installation failed"
     exit 1
 fi
