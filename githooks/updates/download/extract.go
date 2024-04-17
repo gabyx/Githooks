@@ -2,8 +2,7 @@ package download
 
 import (
 	cm "github.com/gabyx/githooks/githooks/common"
-
-	"github.com/mholt/archiver/v3"
+	archiver "github.com/mholt/archiver/v3"
 )
 
 // Extract extracts a file int dir.

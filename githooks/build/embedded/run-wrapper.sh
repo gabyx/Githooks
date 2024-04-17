@@ -4,7 +4,7 @@
 # It allows you to have a .githooks folder per-project that contains
 # its hooks to execute on various Git triggers.
 
-GITHOOKS_RUNNER=$(command -v "githooks-runner" 2>/dev/null || git config githooks.runner)
+GITHOOKS_RUNNER=$(command -v "githooks-runner" 2>/dev/null || git config githooks.runner 2>/dev/null)
 
 # shellcheck disable=SC2181
 if [ ! -x "$GITHOOKS_RUNNER" ]; then

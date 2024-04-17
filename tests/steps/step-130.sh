@@ -6,8 +6,10 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+init_step
+
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -30,10 +32,12 @@ mkdir -p "$GH_TEST_TMP/test130" &&
     git init --bare || exit 1
 
 # run the install, and select installing only server hooks into existing repos
-echo "n
+echo "y
+
+n
 y
 $GH_TEST_TMP/test130
-" | "$GH_TEST_BIN/githooks-cli" installer --stdin --maintained-hooks "server" || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin --maintained-hooks "server" || exit 1
 
 # check if only server hooks are inside the template folder.
 for hook in pre-push pre-receive update post-receive post-update push-to-checkout pre-auto-gc; do
@@ -43,7 +47,7 @@ for hook in pre-push pre-receive update post-receive post-update push-to-checkou
     fi
 done
 # shellcheck disable=SC2012
-count="$(find "$templateDir/hooks/" -type f | wc -l)"
+count="$(find "$templateDir/hooks/" -type f -and -not -name "githooks-contains-run-wrappers" | wc -l)"
 if [ "$count" != "8" ]; then
     echo "! Expected only server hooks to be installed ($count)"
     exit 1

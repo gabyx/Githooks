@@ -6,23 +6,25 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-mkdir -p "$GH_TEST_TMP/start/dir" && cd "$GH_TEST_TMP/start/dir" || exit 1
+# Place no hooks into the repository
+mkdir -p "$GH_TEST_TMP/start/dir" && cd "$GH_TEST_TMP/start/dir" &&
+    git init --template=/dev/null || exit 1
 
-mkdir -p "$GH_TEST_TMP/empty" &&
-    GIT_TEMPLATE_DIR="$GH_TEST_TMP/empty" git init || exit 1
-
-if ! "$GH_TEST_BIN/githooks-cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Installation failed"
     exit 1
 fi
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
+if is_centralized_tests; then
     OUT=$("$GH_TEST_BIN/githooks-cli" install 2>&1)
     # shellcheck disable=SC2181
     if [ $? -eq 0 ] || ! echo "$OUT" | grep -q "has no effect"; then
         echo "! Install into current should have failed, because using 'core.hooksPath'"
+        echo "$OUT"
         exit 1
     fi
 else
@@ -31,8 +33,5 @@ else
         exit 1
     fi
 
-    if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
-        echo "! Hooks were not installed"
-        exit 1
-    fi
+    check_local_install "$GH_TEST_TMP/start/dir"
 fi

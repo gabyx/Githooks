@@ -74,5 +74,9 @@ hooks by Githooks again.`)
 	disableCmd.Flags().BoolVar(&disableOpts.Global, "global", false,
 		`Enable/disable Githooks globally instead of locally.`)
 
+	disableCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, disableCmd)
 }

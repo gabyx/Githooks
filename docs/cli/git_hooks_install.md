@@ -14,12 +14,15 @@ git hooks install [flags]
 ### Options
 
 ```
+      --full                       Uninstall also Git config values of Githooks and cached
+                                   settings (checksums etc.) inside the repository.
   -h, --help                       help for install
       --maintained-hooks strings   A set of hook names which are maintained in this repository.
                                    Any argument can be a hook name `<hookName>`, `all` or `server`.
                                    An optional prefix '!' means subtraction from the current set.
                                    The initial value of the internally built set defaults
-                                   to all hook names if `all` or `server` is not given as first argument:
+                                   to all hook names if `all` or `server` (or negated) is not given
+                                   as first argument:
                                      - `all` : All hooks supported by Githooks.
                                      - `server` : Only server hooks supported by Githooks.
                                    You can list them separately or comma-separated in one argument.

@@ -14,6 +14,10 @@ import (
 type LFSHooksCache interface {
 	// Returns all LFS paths and file names inside the cache.
 	GetLFSHooks() ([]string, []string, error)
+
+	// Checks if the file `file` is hash-identical to a known
+	// LFS hook.
+	IsIdentical(file string) (bool, error)
 }
 
 type lfsHooksCache struct {
@@ -46,6 +50,28 @@ func (l *lfsHooksCache) GetLFSHooks() ([]string, []string, error) {
 	return lfsHookFiles, l.lfsHookNames, nil
 }
 
+// Checks if the file `file` is checksum-identical with any hook in the cache.
+func (l *lfsHooksCache) IsIdentical(file string) (identical bool, err error) {
+	hooks, names, err := l.GetLFSHooks()
+
+	if err != nil {
+		return
+	}
+
+	basename := path.Base(file)
+	for i := range hooks {
+		if basename != names[i] {
+			continue
+		}
+
+		if identical, err = cm.AreChecksumsIdentical(file, hooks[i]); err != nil || identical {
+			return
+		}
+	}
+
+	return
+}
+
 // Creates a new LFS hooks cache.
 func NewLFSHooksCache(tempDir string) (_ LFSHooksCache, err error) {
 	if !git.IsLFSAvailable() {
@@ -60,7 +86,10 @@ func NewLFSHooksCache(tempDir string) (_ LFSHooksCache, err error) {
 }
 
 func gitLFSInstall(gitx *git.Context) (err error) {
-	err = gitx.Check("lfs", "install")
+	// Attention: `git lfs install` has no way of ignoring `core.hooksPath`, also
+	// `-c core.hooksPath=/dev/null` does not work, so we directly use it do install
+	// it into the directory we want.
+	err = gitx.Check("-c", "core.hooksPath=./hooks", "lfs", "install", "--local")
 
 	if err != nil {
 		err = cm.CombineErrors(err, cm.ErrorF("Could not install Git LFS hooks in\n"+
@@ -120,6 +149,12 @@ func (l *lfsHooksCache) init() (err error) {
 		if cm.IsFile(hook) {
 			l.lfsHookNames = append(l.lfsHookNames, ManagedHookNames[i])
 		}
+	}
+
+	if len(l.lfsHookNames) == 0 {
+		err = cm.CombineErrors(err, cm.ErrorF("No LFS hooks found in '%s'.", l.repoDir))
+
+		return
 	}
 
 	err = os.WriteFile(versionFile, []byte(l.requiredLFSVersion.String()), cm.DefaultFileModeFile)

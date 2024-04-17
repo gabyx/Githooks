@@ -2,6 +2,7 @@ package uninstaller
 
 import (
 	"os"
+	"path"
 	"runtime"
 	"strings"
 
@@ -69,15 +70,27 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"Run the uninstallation non-interactively\n"+
 			"without showing prompts.")
 
+	cmd.PersistentFlags().Bool(
+		"full-uninstall-from-repos", false,
+		"Uninstall completely from all existing and registered repositories.\n"+
+			"If not set, local Git config settings for Githooks and cache files (checksums etc.)\n"+
+			"in repositories remain untouched when uninstalling from them.")
+
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
+	cm.AssertNoErrorPanic(
+		vi.BindPFlag("fullUninstallFromRepos", cmd.PersistentFlags().Lookup("full-uninstall-from-repos")))
 
 	setupMockFlags(cmd, vi)
 }
 
-func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Settings, UISettings) {
+func setupSettings(
+	log cm.ILogContext,
+	gitx *git.Context,
+	args *Arguments,
+	tempDir string) (Settings, UISettings) {
 
 	var promptx prompt.IContext
 	var err error
@@ -94,11 +107,6 @@ func setupSettings(log cm.ILogContext, gitx *git.Context, args *Arguments) (Sett
 	// Safety check.
 	log.PanicIfF(!strings.Contains(installDir, ".githooks"),
 		"Uninstall path at '%s' needs to contain '.githooks'.")
-
-	// Remove temporary directory if existing
-	tempDir, err := hooks.CleanTemporaryDir(installDir)
-	log.AssertNoErrorPanicF(err,
-		"Could not clean temporary directory in '%s'", installDir)
 
 	lfsHooksCache, err := hooks.NewLFSHooksCache(hooks.GetTemporaryDir(installDir))
 	log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
@@ -170,6 +178,7 @@ func uninstallFromExistingRepos(
 	nonInteractive bool,
 	uninstalledRepos UninstallSet,
 	registeredRepos *hooks.RegisterRepos,
+	fullUninstall bool,
 	uiSettings *UISettings) {
 
 	// Show prompt and run callback.
@@ -177,11 +186,12 @@ func uninstallFromExistingRepos(
 		log,
 		gitx,
 		nonInteractive,
+		false,
 		true,
 		uiSettings.PromptCtx,
 		func(gitDir string) {
 
-			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, true) {
+			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, fullUninstall) {
 
 				registeredRepos.Remove(gitDir)
 				uninstalledRepos.Insert(gitDir)
@@ -195,6 +205,7 @@ func uninstallFromRegisteredRepos(
 	nonInteractive bool,
 	uninstalledRepos UninstallSet,
 	registeredRepos *hooks.RegisterRepos,
+	fullUninstall bool,
 	uiSettings *UISettings) {
 
 	if len(registeredRepos.GitDirs) == 0 {
@@ -214,7 +225,7 @@ func uninstallFromRegisteredRepos(
 		true,
 		uiSettings.PromptCtx,
 		func(gitDir string) {
-			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, true) {
+			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, fullUninstall) {
 
 				registeredRepos.Remove(gitDir)
 				uninstalledRepos.Insert(gitDir)
@@ -223,9 +234,7 @@ func uninstallFromRegisteredRepos(
 }
 
 func cleanTemplateDir(log cm.ILogContext, gitx *git.Context, lfsHooksCache hooks.LFSHooksCache) {
-	installMode := install.GetInstallMode(gitx)
-
-	hookTemplateDir, err := install.FindHookTemplateDir(gitx, installMode)
+	hookTemplateDir, err := install.FindHooksDirInstall(log, gitx)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
 
 	if strs.IsEmpty(hookTemplateDir) {
@@ -264,6 +273,14 @@ func deleteDir(log cm.ILogContext, dir string, tempDir string) {
 		err := os.RemoveAll(dir)
 		log.AssertNoErrorF(err, "Could not delete dir '%s'.", dir)
 	}
+}
+
+func cleanHooksDir(
+	log cm.ILogContext,
+	installDir string) {
+	hooksDir := path.Join(installDir, "templates")
+	err := os.RemoveAll(hooksDir)
+	log.AssertNoErrorF(err, "Could not delete dir '%s'.", hooksDir)
 }
 
 func cleanBinaries(
@@ -363,6 +380,7 @@ func runUninstallSteps(
 		args.NonInteractive,
 		settings.UninstalledGitDirs,
 		&settings.RegisteredGitDirs,
+		args.FullUninstallFromRepos,
 		uiSettings)
 
 	uninstallFromRegisteredRepos(
@@ -371,6 +389,7 @@ func runUninstallSteps(
 		args.NonInteractive,
 		settings.UninstalledGitDirs,
 		&settings.RegisteredGitDirs,
+		args.FullUninstallFromRepos,
 		uiSettings)
 
 	cleanTemplateDir(log, settings.Gitx, settings.LFSHooksCache)
@@ -378,6 +397,7 @@ func runUninstallSteps(
 	cleanSharedClones(log, settings.InstallDir)
 	cleanReleaseClone(log, settings.InstallDir)
 	cleanBinaries(log, settings.InstallDir, settings.TempDir)
+	cleanHooksDir(log, settings.InstallDir)
 	cleanRegister(log, settings.InstallDir)
 
 	cleanGitConfig(log, settings.Gitx)
@@ -394,7 +414,13 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 
 	log.DebugF("Arguments: %+v", args)
 
-	settings, uiSettings := setupSettings(log, ctx.GitX, &args)
+	dir := os.TempDir()
+	tempDir, err := os.MkdirTemp(dir, "githooks-uninstaller-*")
+	log.AssertNoErrorPanicF(err, "Could not create temp. dir in '%s'.", dir)
+	ctx.CleanupX.AddHandler(func() { _ = os.Remove(tempDir) })
+	defer os.Remove(tempDir)
+
+	settings, uiSettings := setupSettings(log, ctx.GitX, &args, tempDir)
 
 	if !args.InternalPostDispatch {
 		if isDispatched := runDispatchedInstall(log, &settings, &args); isDispatched {

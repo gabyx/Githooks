@@ -29,10 +29,9 @@ for hook_name in $hook_names; do
     -e "s|echo \"! .*|echo \"! The runner '\$GITHOOKS_RUNNER' is not existing\" \>\&2\n|g" \
     -e "s|\(various Git triggers.*\)|\1\n#\n# This file is auto-generated, do not edit!|" \
     <githooks/build/embedded/run-wrapper.sh >"hooks/$hook_name" &&
-    chmod u+x "hooks/$hook_name" &&
-    git add hooks/* ||
+    chmod u+x "hooks/$hook_name" ||
     {
-      echo "Failed to update \`hooks/$hook_name\`" >&2
+      echo "Failed to update 'hooks/$hook_name'" >&2
       exit 2
     }
 done

@@ -14,9 +14,12 @@ git hooks uninstaller
 ### Options
 
 ```
-      --non-interactive   Run the uninstallation non-interactively
-                          without showing prompts.
-  -h, --help              help for uninstaller
+      --non-interactive             Run the uninstallation non-interactively
+                                    without showing prompts.
+      --full-uninstall-from-repos   Uninstall completely from all existing and registered repositories.
+                                    If not set, local Git config settings for Githooks and cache files (checksums etc.)
+                                    in repositories remain untouched when uninstalling from them.
+  -h, --help                        help for uninstaller
 ```
 
 ### SEE ALSO

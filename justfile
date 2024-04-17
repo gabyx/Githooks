@@ -14,6 +14,13 @@ doc *args:
   cd "{{root_dir}}" && \
     githooks/scripts/build-doc.sh "$@"
 
+list-tests:
+  cd "{{root_dir}}/tests/steps" && \
+    readarray -t files < <(find . -name "*.sh" -name "step-*" | sort) && \
+    for f in "${files[@]}"; do \
+      printf " - %s: %s\n" "$f" "$(head -3 "$f" | tail -1)"; \
+    done
+
 test-user *args:
   cd "{{root_dir}}" && \
     tests/test-alpine-user.sh "$@"

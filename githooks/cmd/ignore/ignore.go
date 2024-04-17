@@ -316,5 +316,9 @@ about the pattern syntax and namespace paths.`,
 
 	ignoreCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, ignoreShowCmd))
 
+	ignoreCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, ignoreCmd)
 }

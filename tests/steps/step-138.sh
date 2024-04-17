@@ -8,12 +8,14 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if ! is_docker_available; then
     echo "docker is not available"
     exit 249
 fi
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 accept_all_trust_prompts || exit 1
 assert_no_test_images
@@ -85,13 +87,13 @@ fi
 
 set +e
 OUT=$("$GH_TEST_BIN/githooks-cli" exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
-exitCode="$?"
+EXIT_CODE="$?"
 set -e
 
 # Coverage cannot report correct exit codes, without wrapping it to a file.
 if [ -z "${GH_COVERAGE_DIR:-}" ] &&
-    [ "$exitCode" != "123" ]; then
-    echo "! Test script should have reported 123 [exit code: $exitCode]"
+    [ "$EXIT_CODE" != "123" ]; then
+    echo "! Test script should have reported 123 [exit code: $EXIT_CODE]"
     exit 1
 fi
 

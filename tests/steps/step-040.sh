@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Test:
-#   Run a single-repo, non-interactive install successfully
+#   Run a non-interactive install successfully
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -17,17 +19,23 @@ mkdir -p "$GH_TEST_TMP/start/dir" &&
     cd "$GH_TEST_TMP/start/dir" &&
     git init || exit 1
 
-if ! "$GH_TEST_BIN/githooks-cli" installer --non-interactive; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --non-interactive; then
     echo "! Installation failed"
     exit 1
 fi
 
+# Install
 if ! "$GH_TEST_BIN/githooks-cli" install --non-interactive; then
     echo "! Install into current repo failed"
     exit 1
 fi
 
-if ! grep -r 'github.com/gabyx/githooks' "$GH_TEST_TMP/start/dir/.git/hooks"; then
-    echo "! Hooks were not installed"
+check_local_install
+
+# Uninstall
+if ! "$GH_TEST_BIN/githooks-cli" uninstall; then
+    echo "! Uninstall into current repo failed"
     exit 1
 fi
+
+check_no_local_install

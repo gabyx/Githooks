@@ -6,10 +6,12 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -25,30 +27,20 @@ if grep -r 'github.com/gabyx/githooks' ~/test100/; then
 fi
 
 # run the install, and skip installing the hooks into existing repos
+echo 'y
+
+n
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin --skip-install-into-existing || exit 1
+
+check_no_local_install ~/test100/p001
+check_no_local_install ~/test100/p002
+
+# run the install again, and let it install into existing repos
 echo 'n
 y
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin
 
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin --skip-install-into-existing || exit 1
-
-if grep -r 'github.com/gabyx/githooks' ~/test100/; then
-    echo "! Hooks were installed but shouldn't have"
-    exit 1
-fi
-
-# run the install, and let it install into existing repos
-echo 'n
-y
-
-' | "$GH_TEST_BIN/githooks-cli" installer --stdin
-
-if ! grep -r 'github.com/gabyx/githooks' ~/test100/p001/.git/hooks; then
-    echo "! Hooks were not installed successfully"
-    exit 1
-fi
-
-if ! grep -r 'github.com/gabyx/githooks' ~/test100/p002/.git/hooks; then
-    echo "! Hooks were not installed successfully"
-    exit 1
-fi
+check_local_install ~/test100/p001
+check_local_install ~/test100/p002
 
 rm -rf ~/test100

@@ -9,8 +9,8 @@ Executes an update check for a newer Githooks version.
 If it finds one and the user accepts the prompt (or `--yes` is used) the
 installer is executed to update to the latest version.
 
-The `--enable` and `--disable` options enable or disable the automatic checks
-that would normally run daily after a successful commit event.
+The `--enable-ckeck` and `--disable-ckeck` options enable or disable the
+automatic checks that would normally run daily after a successful commit event.
 
 ```
 git hooks update
@@ -23,8 +23,8 @@ git hooks update
       --no                Always deny an update and only check for it.
       --yes-all           Always accepts a new update (non-interactive, all versions).
       --use-pre-release   Also discover pre-release versions when updating.
-      --enable            Enable daily Githooks update checks.
-      --disable           Disable daily Githooks update checks.
+      --enable-check      Enable daily Githooks update checks.
+      --disable-check     Disable daily Githooks update checks.
   -h, --help              help for update
 ```
 

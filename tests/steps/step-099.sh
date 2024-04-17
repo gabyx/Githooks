@@ -6,11 +6,14 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+init_step
+
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test099/.git/hooks" &&
     cd "$GH_TEST_TMP/test099" &&
     git init &&
+    install_hooks_if_not_centralized &&
     git config githooks.updateCheckEnabled false ||
     exit 1
 

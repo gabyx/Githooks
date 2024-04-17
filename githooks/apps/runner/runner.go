@@ -231,9 +231,7 @@ func getInstallDir(gitx *git.Context) string {
 }
 
 func assertRegistered(gitx *git.Context, installDir string) {
-
-	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) &&
-		!gitx.IsConfigSet(git.GitCKCoreHooksPath, git.Traverse) {
+	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) {
 
 		gitDir, err := gitx.GetGitDirCommon()
 		log.AssertNoErrorPanicF(err, "Could not get Git common dir.")
@@ -247,7 +245,7 @@ func assertRegistered(gitx *git.Context, installDir string) {
 
 	} else {
 		log.Debug(
-			"Repository already registered or using 'core.hooksPath'.")
+			"Repository already registered.")
 	}
 }
 
@@ -372,7 +370,14 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	}
 
 	cloneDir := hooks.GetReleaseCloneDir(settings.InstallDir)
-	status, err := updates.FetchUpdates(cloneDir, "", "", build.BuildTag, true, updates.ErrorOnWrongRemote, usePreRelease)
+	status, err := updates.FetchUpdates(
+		cloneDir,
+		"",
+		"",
+		build.BuildTag,
+		true,
+		updates.ErrorOnWrongRemote,
+		usePreRelease, true)
 
 	if err != nil {
 		m := strs.Fmt(
@@ -389,7 +394,7 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	log.Info(versionText)
 	log.Info(
 		"If you would like to disable update checks, run:",
-		"  $ git hooks update disable")
+		"  $ git hooks update --disable-check")
 }
 
 func shouldRunUpdateCheck(settings *HookSettings) bool {

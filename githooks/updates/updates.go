@@ -152,7 +152,9 @@ func FetchUpdates(
 	tag string,
 	checkRemote bool,
 	checkRemoteAction RemoteCheckAction,
-	usePreRelease bool) (status ReleaseStatus, err error) {
+	usePreRelease bool,
+	setGitConfig bool,
+) (status ReleaseStatus, err error) {
 
 	cm.AssertOrPanic(strs.IsNotEmpty(cloneDir))
 
@@ -248,8 +250,10 @@ func FetchUpdates(
 	}
 
 	// Set the url/branch back...
-	if err = SetCloneURL(url, branch); err != nil {
-		return
+	if setGitConfig {
+		if err = SetCloneURL(url, branch); err != nil {
+			return
+		}
 	}
 
 	// On a new clone we reset local branch
@@ -476,7 +480,7 @@ func RunUpdate(
 	run func() error) (updateAvailable bool, accepted bool, err error) {
 
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
-	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease)
+	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease, true)
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not fetch updates."), err)
 

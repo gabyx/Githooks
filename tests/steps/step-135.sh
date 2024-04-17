@@ -9,7 +9,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 
 . "$TEST_DIR/general.sh"
 
-"$GH_TEST_BIN/githooks-cli" installer || exit 1
+init_step
+
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test135" &&
     cd "$GH_TEST_TMP/test135" &&
