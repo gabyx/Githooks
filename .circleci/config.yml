@@ -29,6 +29,7 @@ jobs:
     steps:
       - checkout
       - run:
+          no_output_timeout: 30m
           command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
 
 workflows:
