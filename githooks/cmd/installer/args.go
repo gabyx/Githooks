@@ -42,5 +42,6 @@ type Arguments struct {
 
 	UsePreRelease bool // If also pre-release versions should be considered.
 
-	UseStdin bool
+	GitConfigNoAbsPath bool // If certain Githooks Git config values are not using absolute paths.
+	UseStdin           bool
 }
