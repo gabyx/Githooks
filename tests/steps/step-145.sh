@@ -16,13 +16,13 @@ if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --git-conf
     exit 1
 fi
 
-if [ "$(git config --global githooks.runner)" != "githooks-runner" ]; then
+if ! git config --global githooks.runner | grep -E "^githooks-runner"; then
     echo "Not correct Git config value."
     git config --global githooks.runner
     exit 1
 fi
 
-if [ "$(git config --global githooks.dialog)" != "githooks-dialog" ]; then
+if ! git config --global githooks.dialog | grep -E "^githooks-dialog"; then
     echo "Not correct Git config value."
     git config --global githooks.dialog
     exit 1

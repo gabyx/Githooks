@@ -780,8 +780,9 @@ func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath b
 
 	if cm.PackageManagerEnabled || noAbsPath {
 		cli = hooks.GetCLIExecutable("").Cmd
-		dialog = hooks.GetDialogExecutable("")
+		log.InfoF("%v", cli)
 		runner = hooks.GetRunnerExecutable("")
+		dialog = hooks.GetDialogExecutable("")
 
 	} else {
 		cli = hooks.GetCLIExecutable(installDir).Cmd
@@ -790,14 +791,14 @@ func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath b
 
 		log.PanicIfF(!cm.IsFile(cli), "CLI executable '%s' does not exist.", cli)
 		log.PanicIfF(!cm.IsFile(runner), "Runner executable '%s' does not exist.", runner)
-		log.PanicIfF(!cm.IsFile(dialog), "Runner executable '%s' does not exist.", dialog)
+		log.PanicIfF(!cm.IsFile(dialog), "Dialog executable '%s' does not exist.", dialog)
 	}
 
 	err := hooks.SetCLIExecutableAlias(cli)
 	log.AssertNoErrorPanicF(err,
 		"Could not set Git config 'alias.hooks' to '%s'.", cli)
 
-	err = hooks.SetRunnerExecutableAlias(runner)
+	err = hooks.SetRunnerExecutableConfig(runner)
 	log.AssertNoErrorPanic(err,
 		"Could not set runner executable alias '%s'.", runner)
 

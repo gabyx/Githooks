@@ -247,8 +247,8 @@ func GetRunnerExecutable(installDir string) (p string) {
 	return
 }
 
-// SetRunnerExecutableAlias sets the global Githooks runner executable.
-func SetRunnerExecutableAlias(path string) error {
+// SetRunnerExecutableConfig sets the global Githooks runner executable.
+func SetRunnerExecutableConfig(path string) error {
 	return git.NewCtx().SetConfig(GitCKRunner, path, git.GlobalScope)
 }
 
