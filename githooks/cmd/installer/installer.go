@@ -443,7 +443,6 @@ func runInstallDispatched(
 
 	log.DebugF("Status: %v", status)
 
-	installer := hooks.GetInstallerExecutable(settings.InstallDir)
 	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
 
 	if cm.PackageManagerEnabled {
@@ -452,6 +451,8 @@ func runInstallDispatched(
 		// at the correct place
 		return false, nil
 	}
+
+	installer := hooks.GetInstallerExecutable(settings.InstallDir)
 
 	// We download/build the binaries always.
 	// Only do an update if enabled and we either have
@@ -778,9 +779,10 @@ func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath b
 	}
 
 	if cm.PackageManagerEnabled || noAbsPath {
-		cli = hooks.CLIName
-		runner = hooks.RunnerName
-		dialog = hooks.DialogName
+		cli = hooks.GetCLIExecutable("").Cmd
+		dialog = hooks.GetDialogExecutable("")
+		runner = hooks.GetRunnerExecutable("")
+
 	} else {
 		cli = hooks.GetCLIExecutable(installDir).Cmd
 		runner = hooks.GetRunnerExecutable(installDir)
