@@ -18,6 +18,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 	"github.com/gabyx/githooks/githooks/updates"
 	"github.com/gabyx/githooks/githooks/updates/download"
+	"github.com/hashicorp/go-version"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -131,7 +132,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	if !cm.PackageManagerEnabled {
 		cmd.PersistentFlags().Bool(
 			"git-config-no-abs-path", false,
-			"Make certain Githooks Git config values"+
+			"Make certain Githooks Git config values\n"+
 				"not use abs. paths. Useful to have the Git config not change.\n"+
 				"This means you need to have the Githooks binaries in your path.")
 	}
@@ -1221,7 +1222,7 @@ func runInstaller(
 		log.InfoF("Running install from '%s' -> '%s' ...", args.InternalUpdateFromVersion, build.BuildVersion)
 	}
 
-	transformLegacyGitConfigSettings(log, gitx)
+	transformLegacyGitConfigSettings(log, args.InternalUpdateFromVersion)
 
 	err := settings.RegisteredGitDirs.Load(settings.InstallDir, true, true)
 	log.AssertNoErrorPanicF(err, "Could not load register file in '%s'.", settings.InstallDir)
@@ -1445,79 +1446,13 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	return nil
 }
 
-func transformLegacyGitConfigSettings(log cm.ILogContext, gitx *git.Context) {
-	// Server hooks.
-	useOnlyServerHooks := gitx.GetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
-	if useOnlyServerHooks == git.GitCVTrue {
-		err := hooks.SetMaintainedHooks(gitx, []string{"server"}, git.GlobalScope)
-		log.AssertNoError(err, "Could not set maintained hooks to 'server'.")
-	}
-
-	_ = git.NewCtx().UnsetConfig("githooks.maintainOnlyServerHooks", git.GlobalScope)
-
-	// Version 2.X to 3
-	// ================
-
-	// AutoUpdate to UpdateCheck
-	autoUpdateEnabled := gitx.GetConfig("githooks.autoUpdateEnabled", git.GlobalScope)
-	if strs.IsNotEmpty(autoUpdateEnabled) {
-		err := updates.SetUpdateCheckSettings(autoUpdateEnabled == git.GitCVTrue, false)
-		log.AssertNoError(err, "Could not set automatic update check.")
-	}
-	_ = git.NewCtx().UnsetConfig("githooks.autoUpdateEnabled", git.GlobalScope)
-
-	// Transform old install modes from v2 to v3
-	// =========================================
-	hasInstallBeforeV3 := gitx.GetConfig(hooks.GitCKInstallMode, git.GlobalScope) == "" &&
-		gitx.GetConfig(hooks.GitCKRunner, git.GlobalScope) != ""
-
-	if hasInstallBeforeV3 {
-		useCoreHooksPath := gitx.GetConfig("githooks.useCoreHooksPath", git.GlobalScope)
-		useManual := gitx.GetConfig("githooks.useManual", git.GlobalScope)
-
-		switch {
-		case useCoreHooksPath == git.GitCVTrue:
-			log.Warn("Transform old `--use-core-hookspath` install to new `--centralized` install.")
-			err := gitx.SetConfig(
-				hooks.GitCKInstallMode,
-				install.InstallModeTypeV.Centralized.Name(),
-				git.GlobalScope)
-			log.AssertNoError(err, "Could not set install mode.")
-
-		case useManual == git.GitCVTrue:
-			log.Warn("Transform old manual install to new normal install.")
-			err := gitx.SetConfig(
-				hooks.GitCKInstallMode,
-				install.InstallModeTypeV.Manual.Name(),
-				git.GlobalScope)
-			log.AssertNoError(err, "Could not set install mode.")
-
-			manualTemplateDir := gitx.GetConfig("githooks.manualTemplateDir", git.GlobalScope)
-			err = gitx.SetConfig(
-				hooks.GitCKPathForUseCoreHooksPath,
-				path.Join(manualTemplateDir, "hooks"),
-				git.GlobalScope)
-			log.AssertNoError(err, "Could not set path to use for core hooks path.")
-
-		case useManual != git.GitCVTrue && useCoreHooksPath != git.GitCVTrue:
-			log.Warn("Transform old normal (`init.templateDir`) install to new `--manual` install.")
-			// That was template dir mode.
-			// It gets transformed to `manual` mode.
-			err := gitx.SetConfig(hooks.GitCKInstallMode, "manual", git.GlobalScope)
-			log.AssertNoError(err, "Could not set install mode.")
-
-			templateDir := gitx.GetConfig(git.GitCKInitTemplateDir, git.GlobalScope)
-			if strs.IsNotEmpty(templateDir) {
-				err = gitx.SetConfig(hooks.GitCKPathForUseCoreHooksPath, path.Join(templateDir, "hooks"), git.GlobalScope)
-				log.AssertNoError(err, "Could not set path to use for core hooks path.")
-			}
+func transformLegacyGitConfigSettings(log cm.ILogContext, internalUpdateFromVersion string) {
+	if strs.IsNotEmpty(internalUpdateFromVersion) {
+		if v, _ := version.NewSemver(internalUpdateFromVersion); v.Segments()[0] < 3 { // nolint: gomnd
+			log.PanicF("Cannot install new version '%s' over current version '%s' < 3.\n"+
+				"Too much changed. Please uninstall this version fully\n"+
+				"(also in registered repositories) and then install the new version.",
+				build.BuildVersion, internalUpdateFromVersion)
 		}
 	}
-
-	// Delete all
-	_ = git.NewCtx().UnsetConfig("githooks.useCoreHooksPath", git.GlobalScope)
-	_ = git.NewCtx().UnsetConfig("githooks.useManual", git.GlobalScope)
-	_ = git.NewCtx().UnsetConfig("githooks.manualTemplateDir", git.GlobalScope)
-	// =========================
-
 }
