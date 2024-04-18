@@ -11,9 +11,9 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-const RunnerName = "githooks-runner"
-const CLIName = "githooks-cli"
-const DialogName = "githooks-dialog"
+const RunnerExecutableName = "githooks-runner"
+const CLIExecutableName = "githooks-cli"
+const DialogExecutableName = "githooks-dialog"
 
 // HooksDirName denotes the directory name used for repository specific hooks.
 const HooksDirName = ".githooks"
@@ -236,7 +236,10 @@ func CleanTemporaryDir(installDir string) (string, error) {
 
 // GetRunnerExecutable gets the installed Githooks runner executable.
 func GetRunnerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), RunnerName)
+	p = RunnerExecutableName
+	if strs.IsNotEmpty(installDir) {
+		p = path.Join(GetBinaryDir(installDir), p)
+	}
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
@@ -251,7 +254,10 @@ func SetRunnerExecutableAlias(path string) error {
 
 // GetDialogExecutable gets the installed Githooks dialog executable.
 func GetDialogExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), DialogName)
+	p = DialogExecutableName
+	if strs.IsNotEmpty(installDir) {
+		p = path.Join(GetBinaryDir(installDir), p)
+	}
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}

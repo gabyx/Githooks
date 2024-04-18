@@ -13,7 +13,7 @@ import (
 // GetCLIExecutable gets the global Githooks CLI executable.
 // If `installDir` is not given the executable name is returned.
 func GetCLIExecutable(installDir string) cm.Executable {
-	p := CLIName
+	p := CLIExecutableName
 	if strs.IsNotEmpty(installDir) {
 		p = path.Join(GetBinaryDir(installDir), p)
 	}
