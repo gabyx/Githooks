@@ -121,9 +121,15 @@ func setupSettings(
 		UISettings{PromptCtx: promptx}
 }
 
-func runDispatchedInstall(log cm.ILogContext, settings *Settings, args *Arguments) bool {
+func runDispatchedUninstall(log cm.ILogContext, settings *Settings, args *Arguments) bool {
 
-	uninstaller := hooks.GetUninstallerExecutable(settings.InstallDir)
+	var uninstaller cm.Executable
+	if cm.PackageManagerEnabled {
+		uninstaller = hooks.GetUninstallerExecutable(settings.InstallDir)
+	} else {
+		uninstaller = hooks.GetUninstallerExecutable("")
+	}
+
 	if !cm.IsFile(uninstaller.Cmd) {
 		log.WarnF("There is no existing Githooks executable present\n"+
 			"in install dir '%s'.\n"+
@@ -423,7 +429,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args, tempDir)
 
 	if !args.InternalPostDispatch {
-		if isDispatched := runDispatchedInstall(log, &settings, &args); isDispatched {
+		if isDispatched := runDispatchedUninstall(log, &settings, &args); isDispatched {
 			return
 		}
 	}
