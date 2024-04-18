@@ -45,6 +45,7 @@ FROM githooks:$IMAGE_TYPE-base
 ARG DOCKER_GROUP_ID
 
 ENV DOCKER_RUNNING=true
+ENV GH_SCRIPTS="/var/lib/githooks-scripts"
 ENV GH_TESTS="/var/lib/githooks-tests"
 ENV GH_TEST_TMP="/tmp/githooks"
 ENV GH_TEST_REPO="/var/lib/githooks"
@@ -65,6 +66,7 @@ RUN bash "\$GH_TESTS/setup-githooks.sh"
 
 # Add all tests
 ADD tests "\$GH_TESTS"
+ADD scripts "\$GH_SCRIPTS"
 
 # Git-Core folder must be existing.
 RUN [ -d "\$GH_TEST_GIT_CORE/templates/hooks" ]

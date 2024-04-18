@@ -95,10 +95,15 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"non-interactive", false,
 		"Run the installation non-interactively\n"+
 			"without showing prompts.")
-	cmd.PersistentFlags().Bool(
-		"update", false,
-		"Install and update directly to the latest\n"+
-			"possible tag on the clone branch.")
+
+	if !cm.PackageManagerEnabled {
+		// Only allow this when not using a package manager.
+		cmd.PersistentFlags().Bool(
+			"update", false,
+			"Install and update directly to the latest\n"+
+				"possible tag on the clone branch.")
+	}
+
 	cmd.PersistentFlags().Bool(
 		"skip-install-into-existing", false,
 		"Skip installation into existing repositories\n"+
@@ -171,6 +176,9 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		"use-pre-release", false,
 		"When fetching the latest installer, also consider pre-release versions.")
 
+	// The following binds all flags to `viper` config YAML over `--config`.
+	// So anything specified in `--config` gets transferred to the flags, that we only can use the
+	// variables associated in the flags.
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("config", cmd.PersistentFlags().Lookup("config")))
 	cm.AssertNoErrorPanic(
@@ -179,8 +187,12 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("dryRun", cmd.PersistentFlags().Lookup("dry-run")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
-	cm.AssertNoErrorPanic(
-		vi.BindPFlag("update", cmd.PersistentFlags().Lookup("update")))
+
+	if !cm.PackageManagerEnabled {
+		cm.AssertNoErrorPanic(
+			vi.BindPFlag("update", cmd.PersistentFlags().Lookup("update")))
+	}
+
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
 	cm.AssertNoErrorPanic(
@@ -207,6 +219,7 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 		vi.BindPFlag("hooksDir", cmd.PersistentFlags().Lookup("hooks-dir")))
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("hooksDirUseTemplateDir", cmd.PersistentFlags().Lookup("hooks-dir-use-template-dir")))
+
 	if !cm.PackageManagerEnabled {
 		cm.AssertNoErrorPanic(
 			vi.BindPFlag("gitConfigNoAbsPath", cmd.PersistentFlags().Lookup("git-config-no-abs-path")))
@@ -780,7 +793,6 @@ func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath b
 
 	if cm.PackageManagerEnabled || noAbsPath {
 		cli = hooks.GetCLIExecutable("").Cmd
-		log.InfoF("%v", cli)
 		runner = hooks.GetRunnerExecutable("")
 		dialog = hooks.GetDialogExecutable("")
 
