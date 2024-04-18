@@ -5,22 +5,24 @@
   git,
   testers,
   makeWrapper,
-  latest ? false,
+  versionMeta ? "",
 }:
 buildGo122Module rec {
-  pname = "githooks-cli";
-  version = "3.0.0";
+  pname = "githooks";
 
-  src =
-    if latest
-    then ../../.
-    else
-      fetchFromGitHub {
-        owner = "gabyx";
-        repo = "githooks";
-        rev = "v${version}";
-        hash = "sha256-TD6RiZ4Bq8gU444erYDkuGrKkpDrjMTrSH3qZpBwwqk=";
-      };
+  version =
+    if versionMeta != ""
+    then "3.0.0+nix.${versionMeta}"
+    else "3.0.0";
+
+  src = ../../.;
+  # In nixpkgs that should be:
+  # fetchFromGitHub {
+  #   owner = "gabyx";
+  #   repo = "githooks";
+  #   rev = "v${version}";
+  #   hash = "sha256-TD6RiZ4Bq8gU444erYDkuGrKkpDrjMTrSH3qZpBwwqk=";
+  # };
 
   modRoot = "./githooks";
   vendorHash = "sha256-ZcDD4Z/thtyCvXg6GzzKC/FSbh700QEaqXU8FaZaZc4=";

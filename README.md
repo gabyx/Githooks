@@ -969,6 +969,35 @@ See the next sections on different install options.
 script and `bash -s -- -- <options>` to pass arguments to the installer
 (`cli installer`), e.g. `bash -s -- -- -h` to show the help.
 
+### Package Manager `nix`
+
+Install the Githooks derivation at version `<version>` by adding the following
+to your `inputs` in your `flake.nix`:
+
+```nix
+inputs = {
+    githooks = {
+      url = "github:gabyx/githooks?dir=nix&ref=v<version>";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+}
+```
+
+**You should never install a major version upgrade as Githooks should be
+uninstalled completely before. The uninstaller on any version however should
+work backward-compatible.**
+
+and then use it in your packages, e.g. here with home-manager by doing:
+
+```nix
+{ lib, pkgs, inputs, ...}:
+let
+  githooks = inputs.githooks.packages."${pkgs.system}".default;
+in {
+  home.packages = [githooks]
+}
+```
+
 ### Procedure
 
 The installer will:
