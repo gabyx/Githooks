@@ -70,9 +70,15 @@ fi
 if [ -z "$BUILD_COVERAGE" ]; then
     echo "Build normal ..."
     echo "go install ..."
-    go generate -mod=vendor ./...
+
+    cmd=(go generate -mod=vendor ./...)
+    echo -e "Generating with:\n" "${cmd[@]}"
+    "${cmd[@]}"
+
     # shellcheck disable=SC2086
-    go install -mod=vendor -tags "$BUILD_TAGS" "${LD_FLAGS[@]}" ./...
+    cmd=(go install -mod=vendor -tags "$BUILD_TAGS" "${LD_FLAGS[@]}" ./...)
+    echo -e "Building with:\n" "${cmd[@]}"
+    "${cmd[@]}"
 
     mv "$GOBIN/cli" "$GOBIN/githooks-cli"
     mv "$GOBIN/runner" "$GOBIN/githooks-runner"
