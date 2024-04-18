@@ -11,7 +11,7 @@ cd githooks || exit 1
 
 if
   CGO_ENABLED=0 golangci-lint run \
-    --skip-dirs /usr/local/go \
+    --exclude-dirs /usr/local/go \
     -E godot \
     -E gomnd \
     -E goconst \
