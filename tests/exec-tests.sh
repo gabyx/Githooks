@@ -27,6 +27,7 @@ trap clean_up EXIT
 
 function build_image() {
     local docker_group_id="$1"
+    local commit_sha="${CIRCLE_SHA1:-$(git rev-parse HEAD)}"
 
     # Build container to only copy to volumes.
     cat <<EOF | docker build \
@@ -49,6 +50,7 @@ ENV GH_TEST_TMP="/tmp/githooks"
 ENV GH_TEST_REPO="/var/lib/githooks"
 ENV GH_TEST_BIN="/var/lib/githooks/githooks/bin"
 ENV GH_TEST_GIT_CORE="/usr/share/git-core"
+ENV GH_COMMIT_SHA="$commit_sha"
 
 ${ADDITIONAL_PRE_INSTALL_STEPS:-}
 
