@@ -19,6 +19,12 @@ function die() {
     exit 1
 }
 
+function wrap_windows_paths() {
+    # On Windows we need to wrap paths sometimes.
+    # to make them equivalent to the Git bash thing.
+    cat | sed -E "s@[Cc]:/@/c/@g"
+}
+
 function accept_all_trust_prompts() {
     export ACCEPT_CHANGES=Y
     return 0
@@ -223,7 +229,6 @@ function install_hooks_if_not_centralized() {
 }
 
 function check_normal_install {
-    local expected="${1:-}"
     check_install "$@"
 
     if [ -n "$(git config --global core.hooksPath)" ]; then
@@ -232,17 +237,19 @@ function check_normal_install {
         exit 1
     fi
 }
+
 function check_centralized_install() {
     local path_to_use
-    local expected="${1:-}"
+    local expected
+    expected=$(echo "${2:-}" | wrap_windows_paths)
 
-    path_to_use=$(git config --global githooks.pathForUseCoreHooksPath)
+    path_to_use=$(git config --global githooks.pathForUseCoreHooksPath | wrap_windows_paths)
     [ -d "$path_to_use" ] || {
         echo "! Path '$path_to_use' does not exist."
         exit 1
     }
 
-    if [ "$path_to_use" != "$(git config --global core.hooksPath)" ]; then
+    if [ "$path_to_use" != "$(git config --global core.hooksPath | wrap_windows_paths)" ]; then
         echo "! Global config 'core.hooksPath' does not point to the same directory:" \
             "'$(git config --global core.hooksPath)' != '$path_to_use'"
         exit 1
@@ -289,7 +296,8 @@ function check_no_local_install() {
 
 function check_local_install() {
     local repo="${1:-.}"
-    local expected="${2:-}"
+    local expected
+    expected=$(echo "${2:-}" | wrap_windows_paths)
 
     dir=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir) || {
         echo "! Failed to get Git dir."
@@ -302,7 +310,7 @@ function check_local_install() {
     fi
 
     local path_to_use
-    path_to_use=$(git config --global githooks.pathForUseCoreHooksPath)
+    path_to_use=$(git config --global githooks.pathForUseCoreHooksPath | wrap_windows_paths)
     [ -d "$path_to_use" ] || {
         echo "! Path '$path_to_use' does not exist."
         exit 1
@@ -381,10 +389,11 @@ function check_no_install() {
 }
 
 function check_install() {
-    local expected="${1:-}"
+    local expected
+    expected=$(echo "${1:-}" | wrap_windows_paths)
 
     local path_to_use
-    path_to_use=$(git config --global githooks.pathForUseCoreHooksPath)
+    path_to_use=$(git config --global githooks.pathForUseCoreHooksPath | wrap_windows_paths)
     [ -d "$path_to_use" ] || {
         echo "! Path '$path_to_use' does not exist."
         exit 1
