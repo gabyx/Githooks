@@ -443,7 +443,6 @@ func runInstallDispatched(
 
 	log.DebugF("Status: %v", status)
 
-	installer := hooks.GetInstallerExecutable(settings.InstallDir)
 	log.InfoF("Githooks update available: '%v'", status.IsUpdateAvailable)
 
 	if cm.PackageManagerEnabled {
@@ -452,6 +451,8 @@ func runInstallDispatched(
 		// at the correct place
 		return false, nil
 	}
+
+	installer := hooks.GetInstallerExecutable(settings.InstallDir)
 
 	// We download/build the binaries always.
 	// Only do an update if enabled and we either have
@@ -778,9 +779,11 @@ func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath b
 	}
 
 	if cm.PackageManagerEnabled || noAbsPath {
-		cli = hooks.CLIName
-		runner = hooks.RunnerName
-		dialog = hooks.DialogName
+		cli = hooks.GetCLIExecutable("").Cmd
+		log.InfoF("%v", cli)
+		runner = hooks.GetRunnerExecutable("")
+		dialog = hooks.GetDialogExecutable("")
+
 	} else {
 		cli = hooks.GetCLIExecutable(installDir).Cmd
 		runner = hooks.GetRunnerExecutable(installDir)
@@ -788,14 +791,14 @@ func setupGithooksExecutables(log cm.ILogContext, installDir string, noAbsPath b
 
 		log.PanicIfF(!cm.IsFile(cli), "CLI executable '%s' does not exist.", cli)
 		log.PanicIfF(!cm.IsFile(runner), "Runner executable '%s' does not exist.", runner)
-		log.PanicIfF(!cm.IsFile(dialog), "Runner executable '%s' does not exist.", dialog)
+		log.PanicIfF(!cm.IsFile(dialog), "Dialog executable '%s' does not exist.", dialog)
 	}
 
 	err := hooks.SetCLIExecutableAlias(cli)
 	log.AssertNoErrorPanicF(err,
 		"Could not set Git config 'alias.hooks' to '%s'.", cli)
 
-	err = hooks.SetRunnerExecutableAlias(runner)
+	err = hooks.SetRunnerExecutableConfig(runner)
 	log.AssertNoErrorPanic(err,
 		"Could not set runner executable alias '%s'.", runner)
 
