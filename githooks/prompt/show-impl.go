@@ -135,6 +135,7 @@ func showEntryLoopTerminal(
 	text string,
 	defaultAnswer string,
 	emptyCausesDefault bool,
+	answerToLowerCase bool,
 	validator AnswerValidator) (string, bool, error) {
 
 	var err error // all errors
@@ -189,7 +190,10 @@ func showEntryLoopTerminal(
 		}
 
 		// Trim everything.
-		ans = strings.ToLower(strings.TrimSpace(ans))
+		ans = strings.TrimSpace(ans)
+		if answerToLowerCase {
+			ans = strings.ToLower(ans)
+		}
 
 		// Validate the answer if possible.
 		if validator == nil {
@@ -223,13 +227,14 @@ func showEntryLoopTerminal(
 func showMessageTerminal(
 	p *Context,
 	message string,
-	asError bool) (bool, error) {
+	_asError bool) (bool, error) {
 
 	_, isPromptDisplayed, err := showEntryLoopTerminal(
 		p,
 		message,
 		"",
 		true,
+		false,
 		nil)
 
 	return isPromptDisplayed, err
@@ -247,6 +252,7 @@ func showOptionsTerminal(
 		question,
 		defaultAnswer,
 		emptyCausesDefault,
+		true,
 		validator)
 }
 
@@ -300,7 +306,7 @@ func showEntryTerminal(
 	text string,
 	defaultAnswer string,
 	validator AnswerValidator) (string, bool, error) {
-	return showEntryLoopTerminal(p, text, defaultAnswer, true, validator)
+	return showEntryLoopTerminal(p, text, defaultAnswer, true, false, validator)
 }
 
 func showEntryMulti(
