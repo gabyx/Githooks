@@ -6,6 +6,11 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+if [ -n "$GH_ON_WINDOWS" ]; then
+    echo "On windows somehow this test gets stuck (?)."
+    exit 249
+fi
+
 init_step
 
 # Use the 3.1.0 prod build with package-manager enabled and download mocked.

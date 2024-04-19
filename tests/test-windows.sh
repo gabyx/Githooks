@@ -73,10 +73,10 @@ ADD .githooks/README.md "$GH_TEST_REPO/.githooks/README.md"
 ADD examples "$GH_TEST_REPO/examples"
 
 ADD tests/setup-githooks.sh "$GH_TESTS/"
-RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
+RUN & "'C:/Program Files/Git/bin/bash.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
 
 ADD tests "$GH_TESTS"
-ADD scripts "\$GH_SCRIPTS"
+ADD scripts "$GH_SCRIPTS"
 
 WORKDIR C:/githooks-tests/tests
 

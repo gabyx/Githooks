@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Test:
 #   Run install.sh script.
+# shellcheck disable=SC2015
+
 set -u
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -16,7 +18,7 @@ if [ -n "${GH_COVERAGE_DIR:-}" ]; then
 fi
 
 # Install with current script the version 2.10.0 on the `main` branch.
-curl -sL "file://$GH_SCRIPTS/install.sh" | bash -s -- --version 2.10.0 -- || {
+"$GH_SCRIPTS/install.sh" --version 2.10.0 || {
     echo "Could not download install.sh from 'main' and install."
     exit 1
 }
@@ -31,4 +33,4 @@ curl -sL "file://$GH_SCRIPTS/install.sh" | bash -s -- --version 2.10.0 -- || {
 # fi
 
 # Uninstall right away again.
-"$GH_INSTALL_BIN_DIR/cli" uninstaller || exit 1
+"$GH_INSTALL_BIN_DIR"/cli uninstaller || exit 1

@@ -35,7 +35,7 @@ jobs:
       - checkout
       - run:
           no_output_timeout: 30m
-          command: "& 'C:/Program Files/Git/bin/bash.exe' -c 'tests/<<parameters.test>>.sh <<parameters.seq>>'"
+          command: "& 'C:/Program Files/Git/bin/bash.exe' -c 'tests/<<parameters.test>>.sh --seq <<parameters.seq>>'"
 
 workflows:
   version: 2
@@ -75,5 +75,5 @@ workflows:
           matrix:
             parameters:
               test: ["test-windows"]
-              seq: ["--seq {001..070}", "--seq {071..200}"]
+              seq: ["{001..040}", "{041..080}", "{081..120}", "{120..200}"]
           filters: *filters
