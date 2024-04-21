@@ -42,18 +42,48 @@ jobs:
           git config user.name 'githooks-bot'
           git config user.email 'githooks-bot@users.noreply.github.com'
 
+          # Gets the message on the annotated commit:
           deref() { git for-each-ref "refs/tags/$TRIGGER_TAG" --format="%($1)" ; };
+          # Creates a new tag with the same message, including trailing headers.
           git tag "$RELEASE_TAG" -a -m "$(deref contents)"
           git tag "githooks/$RELEASE_TAG"
-      - name: Safety Check
+
+      - name: Define Release Branch
+        id: releaseBranch
         env:
           RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
         run: |
-          git fetch --depth 50 origin main
-          [ -n "$(git rev-list --first-parent --ancestry-path "$RELEASE_TAG^..origin/main")" ] || {
-            echo "Tag is not reachable from main (--first-parent) !" >&2
+          # If we specify another branch we are checking this one,
+          RELEASE_BRANCH="main"
+          RELEASE_VERSION="${RELEASE_TAG##v}"
+
+          regex="^Release-Branch:\s+(.*)$"
+          # Gets the message on the annotated commit:
+          deref() {
+            git for-each-ref "refs/tags/$RELEASE_TAG" --format="%($1)" ;
+          };
+
+          if deref contents | grep -qE "$regex"; then
+            RELEASE_BRANCH=$(deref contents | grep -E "$regex" |
+                     sed -E "s/$regex/\1/") || {
+              echo "Release-Branch trailer is wrong."
+              exit 1
+            }
+          fi
+          # Fetch the branch.
+          git fetch --depth 50 origin "$RELEASE_BRANCH"
+
+          # Check if its reachable.
+          [ -n "$(git rev-list --first-parent \
+                    --ancestry-path
+                    "$RELEASE_TAG^..origin/$RELEASE_BRANCH")" ] || {
+            echo "Tag is not reachable from '$RELEASE_BRANCH' (--first-parent) !" >&2
             exit 1
           }
+
+          echo ::set-output name=releaseVersion ::$RELEASE_VERSION
+          echo ::set-output name=releaseBranch ::$RELEASE_BRANCH
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -72,4 +102,5 @@ jobs:
         run: |
           # go releaser already pushed release tag
           git push origin "githooks/$RELEASE_TAG"
+
           git push -f origin ":$TRIGGER_TAG"
