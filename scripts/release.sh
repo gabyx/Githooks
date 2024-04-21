@@ -34,7 +34,7 @@ function commit_version_file() {
     jq ".version |= \"$version\"" nix/pkgs/version.json >"$temp"
     mv "$temp" nix/pkgs/version.json
 
-    if git diff --quiet --exit-code; then
+    if ! git diff --quiet --exit-code; then
         git add nix/pkgs/version.json
         git commit -m "np: Update version to '$version'"
     fi
