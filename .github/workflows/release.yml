@@ -140,9 +140,7 @@ jobs:
           RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
           TRIGGER_TAG: ${{ steps.getTag.outputs.triggerTag }}
         run: |
-          # go releaser already pushed release tag but it always
-          # does that on `main` which is wrong so we force update to the commit where it was
-          git push origin -f "$RELEASE_TAG"
+          # goreleaser already pushed release tag by the Github API.
           git push origin "githooks/$RELEASE_TAG"
 
           git push -f origin ":$TRIGGER_TAG"
