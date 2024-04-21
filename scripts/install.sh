@@ -213,14 +213,9 @@ function parse_args() {
 parse_args "$@"
 
 if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
-    # Find the latest version using the GitHub API
-    response=$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases") || {
-        echo "Could not get releases info from github.com"
-        exit 1
-    }
-
-    versionTag="$(echo "$response" |
-        jq --raw-output 'map(select((.assets | length) > 0)) | .[0].tag_name')"
+    # Find the latest version using the GitHub API but no pre-release canditates.
+    versionTag="$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases" |
+        jq --raw-output 'map(select((.assets | length) > 0 and (.name | contains("-rc") | not ))) | .[0].tag_name')"
 fi
 
 if ! version_compare "${versionTag##v}" ">=" "2.3.4"; then
