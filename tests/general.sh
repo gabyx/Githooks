@@ -23,7 +23,7 @@ function check_paths_are_equal() {
     local a
     a=$(echo "$1" | wrap_windows_paths)
     local b
-    b=$(echo "$1" | wrap_windows_paths)
+    b=$(echo "$2" | wrap_windows_paths)
     shift 2
 
     [ "$a" = "$b" ] || {

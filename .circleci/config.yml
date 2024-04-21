@@ -23,14 +23,19 @@ jobs:
         description: "The test script name"
         default: "test-alpine"
         type: string
+      seq:
+        description: "The sequence of tests"
+        default: ""
+        type: string
     executor:
+      size: medium
       name: win/server-2022
-      version: 2023.04.1
+      version: 2023.11.1
     steps:
       - checkout
       - run:
           no_output_timeout: 30m
-          command: "& 'C:/Program Files/Git/bin/sh.exe' tests/<<parameters.test>>.sh"
+          command: "& 'C:/Program Files/Git/bin/bash.exe' -c 'tests/<<parameters.test>>.sh --seq <<parameters.seq>>'"
 
 workflows:
   version: 2
@@ -70,4 +75,5 @@ workflows:
           matrix:
             parameters:
               test: ["test-windows"]
+              seq: ["{001..040}", "{041..080}", "{081..120}", "{120..200}"]
           filters: *filters

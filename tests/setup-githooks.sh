@@ -24,20 +24,36 @@ echo "Make test Git repo to clone from ..." &&
     git add . >/dev/null 2>&1 &&
     git commit -a -m "Before build" >/dev/null 2>&1 || exit 1
 
-# Make a build which exists on the server on branch "test-download"
+# Make a build which exists on the server on branch test-download.
 cd "$GH_TEST_REPO/githooks" &&
     git checkout -b "test-download" &&
     git commit -a --allow-empty \
-        -m "Build version 2.1.0 for download test over Github" >/dev/null 2>&1 &&
-    git tag "v2.1.0" &&
+        -m "Build version 3.0.0 for download test over Github" >/dev/null 2>&1 &&
+    git tag "v3.0.0" &&
     ./scripts/clean.sh &&
-    ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --prod --benchmark &&
+    ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --prod &&
     ./bin/githooks-cli "${CLI_ADD_ARGS[@]}" --version || exit 1
-echo "Commit build v2.1.0 to repo (for test download) ..." &&
+echo "Commit build v3.0.0 to repo (for test download) ..." &&
     cd "$GH_TEST_REPO" &&
     git add . >/dev/null 2>&1 &&
-    git commit -a --allow-empty -m "Version 2.1.0" >/dev/null 2>&1 &&
-    git tag -f "v2.1.0" || exit 1
+    git commit -a --allow-empty -m "Version 3.0.0" >/dev/null 2>&1 &&
+    git tag -f "v3.0.0" || exit 1
+
+# Make a build is production,
+# has no direct update capability in installer
+# Should not download the binary
+cd "$GH_TEST_REPO/githooks" &&
+    git checkout -b "test-package-manager" &&
+    git commit -a --allow-empty \
+        -m "Build version 3.1.0 for benchmark/package-manager test" >/dev/null 2>&1 &&
+    git tag "v3.1.0" &&
+    ./scripts/clean.sh &&
+    ./scripts/build.sh "${BUILD_ADD_ARGS[@]}" --prod --build-tags "package_manager_enabled,download_mock,benchmark" &&
+    echo "Commit build v3.1.0 to repo (for benchmark/package-manager test) ..." &&
+    cd "$GH_TEST_REPO" &&
+    git add . >/dev/null 2>&1 &&
+    git commit -a --allow-empty -m "Version 3.1.0" >/dev/null 2>&1 &&
+    git tag -f "v3.1.0" || exit 1
 
 # Setup server repository from which we install updates
 # branch: main

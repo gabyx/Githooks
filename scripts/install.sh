@@ -271,11 +271,6 @@ trap clean_up EXIT
 githooks="$tempDir/githooks"
 mkdir -p "$githooks"
 
-cliExe="githooks-cli"
-if [ "$os" = "windows" ]; then
-    cliExe="$cliExe.exe"
-fi
-
 cd "$tempDir"
 
 echo -e "Downloading '$checksumFileURL'..."
@@ -303,6 +298,16 @@ case "$url" in
     unzip -d "$githooks" "$githooks.install" >/dev/null
     ;;
 esac
+
+cliExe="cli"
+if [ ! -f "githooks/cli" ]; then
+    # Version 3 has new names
+    cliExe="githooks-cli"
+fi
+
+if [ "$os" = "windows" ]; then
+    cliExe="$cliExe.exe"
+fi
 
 if [ "$unInstall" = "true" ]; then
     "githooks/$cliExe" uninstaller "${installerArgs[@]}"
