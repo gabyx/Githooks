@@ -142,5 +142,4 @@ jobs:
         run: |
           # goreleaser already pushed release tag by the Github API.
           git push origin "githooks/$RELEASE_TAG"
-
           git push -f origin ":$TRIGGER_TAG"
