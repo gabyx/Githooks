@@ -18,7 +18,6 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 	"github.com/gabyx/githooks/githooks/updates"
 	"github.com/gabyx/githooks/githooks/updates/download"
-	"github.com/hashicorp/go-version"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -449,13 +448,6 @@ func runInstallDispatched(
 	if doUpdate {
 		tag = status.UpdateTag
 		commit = status.UpdateCommitSHA
-
-		maxVersion, _ := version.NewSemver("3.0.0")
-		if status.UpdateVersion.GreaterThanOrEqual(maxVersion) {
-			return false, cm.Error("Cannot update to version v3 and greater.\n" +
-				"To much changed. Uninstall Githooks completely and reinstall the new version.")
-		}
-
 	} else {
 		tag = status.LocalTag
 		commit = status.LocalCommitSHA
