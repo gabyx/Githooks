@@ -59,6 +59,7 @@ RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION);
     Write-Host 'Complete.';
 
 ENV DOCKER_RUNNING=true
+ENV GH_SCRIPTS="c:/githooks-tests/scripts"
 ENV GH_TESTS="c:/githooks-tests/tests"
 ENV GH_TEST_TMP="c:/githooks-tests/tmp"
 ENV GH_TEST_REPO="c:/githooks-tests/githooks"
@@ -72,9 +73,10 @@ ADD .githooks/README.md "$GH_TEST_REPO/.githooks/README.md"
 ADD examples "$GH_TEST_REPO/examples"
 
 ADD tests/setup-githooks.sh "$GH_TESTS/"
-RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
+RUN & "'C:/Program Files/Git/bin/bash.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
 
 ADD tests "$GH_TESTS"
+ADD scripts "$GH_SCRIPTS"
 
 WORKDIR C:/githooks-tests/tests
 
