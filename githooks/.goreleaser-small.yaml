@@ -72,6 +72,7 @@ release:
     owner: gabyx
     name: githooks
   prerelease: auto
+  target_commitish: "{{ .Commit }}"
 # Use these values for you own gitea instance...
 # gitea_urls:
 #   api: "https://git.company.com/api/v1"
