@@ -10,9 +10,9 @@ build *args:
   cd "{{root_dir}}" && \
     githooks/scripts/build.sh "$@"
 
-build-nix:
+build-nix *args:
   cd "{{root_dir}}" && \
-    nix build -L "./nix#default" -o ./nix/result
+    nix build -L "./nix#default" -o ./nix/result {{args}}
 
 
 doc *args:
