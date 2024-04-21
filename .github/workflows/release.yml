@@ -16,6 +16,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch annotated tags
+        run: |
+          git fetch origin --force "$GITHUB_REF:$GITHUB_REF"
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -31,8 +35,8 @@ jobs:
       - name: Store Git Tag
         id: "getTag"
         run: |
-          echo ::set-output name=releaseTag::$(echo "${GITHUB_REF##*prepare-}")
-          echo ::set-output name=triggerTag::$(echo "${GITHUB_REF##*/}")
+          echo "releaseTag=${GITHUB_REF##*prepare-}" >> $GITHUB_OUTPUT
+          echo "triggerTag=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
 
       - name: "Tag release commit"
         env:
@@ -42,10 +46,17 @@ jobs:
           git config user.name 'githooks-bot'
           git config user.email 'githooks-bot@users.noreply.github.com'
 
+          # Check we got an annotated tag.
+          [ "$(git cat-file -t "$TRIGGER_TAG")" = "tag" ] || {
+            echo "Tag '$TRIGGER_TAG' is not an annotated tag."
+            exit 1
+          }
+
           # Gets the message on the annotated commit:
           deref() { git for-each-ref "refs/tags/$TRIGGER_TAG" --format="%($1)" ; };
+
           # Creates a new tag with the same message, including trailing headers.
-          git tag "$RELEASE_TAG" -a -m "$(deref contents)"
+          git tag -a -m "$(deref contents)" "$RELEASE_TAG"
           git tag "githooks/$RELEASE_TAG"
 
       - name: Define Release Branch
@@ -57,39 +68,68 @@ jobs:
           RELEASE_BRANCH="main"
           RELEASE_VERSION="${RELEASE_TAG##v}"
 
-          regex="^Release-Branch:\s+(.*)$"
+          echo "Get release branch on tag '$RELEASE_TAG'."
+
           # Gets the message on the annotated commit:
           deref() {
             git for-each-ref "refs/tags/$RELEASE_TAG" --format="%($1)" ;
           };
 
+          deref contents
+
+          regex="^Release-Branch:\s+(.*)$"
           if deref contents | grep -qE "$regex"; then
             RELEASE_BRANCH=$(deref contents | grep -E "$regex" |
                      sed -E "s/$regex/\1/") || {
               echo "Release-Branch trailer is wrong."
               exit 1
             }
+            [ -n "$RELEASE_BRANCH" ] || {
+              echo "Release-Branch trailer is empty."
+              exit 1
+            }
           fi
+
           # Fetch the branch.
           git fetch --depth 50 origin "$RELEASE_BRANCH"
 
           # Check if its reachable.
           [ -n "$(git rev-list --first-parent \
-                    --ancestry-path
+                    --ancestry-path \
                     "$RELEASE_TAG^..origin/$RELEASE_BRANCH")" ] || {
             echo "Tag is not reachable from '$RELEASE_BRANCH' (--first-parent) !" >&2
             exit 1
           }
 
-          echo ::set-output name=releaseVersion ::$RELEASE_VERSION
-          echo ::set-output name=releaseBranch ::$RELEASE_BRANCH
+          # Use only a small release config
+          # when not on `main` branch.
+          if [ "$RELEASE_BRANCH" != "main" ]; then
+            echo "Writing release note."
+            echo "**WARNING: Do not install this version! For internal testing only.**" >>"githooks/.release-notes.md"
+          fi
+
+          echo "releaseVersion=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "releaseBranch=$RELEASE_BRANCH" >> $GITHUB_OUTPUT
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        if: ${{ steps.releaseBranch.outputs.releaseBranch == 'main' }}
+        uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
           workdir: githooks
-          args: release --clean
+          args: "release --clean"
+        env:
+          GORELEASER_CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+
+      - name: Run GoReleaser (non-main)
+        if: ${{ steps.releaseBranch.outputs.releaseBranch != 'main' }}
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: latest
+          workdir: githooks
+          args: "release --clean -f .goreleaser-small.yaml --release-notes .release-notes.md"
         env:
           GORELEASER_CURRENT_TAG: ${{ steps.getTag.outputs.releaseTag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,7 +140,9 @@ jobs:
           RELEASE_TAG: ${{ steps.getTag.outputs.releaseTag }}
           TRIGGER_TAG: ${{ steps.getTag.outputs.triggerTag }}
         run: |
-          # go releaser already pushed release tag
+          # go releaser already pushed release tag but it always
+          # does that on `main` which is wrong so we force update to the commit where it was
+          git push origin -f "$RELEASE_TAG"
           git push origin "githooks/$RELEASE_TAG"
 
           git push -f origin ":$TRIGGER_TAG"

@@ -1514,10 +1514,10 @@ matches the regex `^Update-NoSkip: *true`, than this version **will not be
 skipped**. This feature enables to enforce an update to a specific version. In
 some cases this is useful (serialization changes etc.).
 
-The single-line commit trailers `^Update-Info: *(.*)` on version tagged commits
-are used to assemble a small changelog during update, which is presented to the
-user. The single line can contain important information/links to relevant fixes
-and changes.
+The single-line commit trailers `^Update-Info: *(.*)` (multiple ones allowed) on
+the annotated tag is used to assemble a small changelog during update, which is
+presented to the user. The single line can contain important information/links
+to relevant fixes and changes.
 
 You can also check for updates at any time by executing
 [`git hooks update`](docs/cli/git_hooks_update.md) or using

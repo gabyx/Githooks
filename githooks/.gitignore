@@ -2,3 +2,4 @@
 __debug_bin
 vendor
 dist
+.release-notes.md
