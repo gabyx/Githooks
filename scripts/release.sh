@@ -42,12 +42,12 @@ function commit_version_file() {
 
 function create_tag() {
     tag="v$version"
-    if git tag --list "v*" | grep -q "$tag"; then
+    if git tag --list "v*" | grep -qE "^$tag$"; then
         echo "Git tag '$tag' already exists."
         exit 1
     fi
 
-    if git ls-remote "refs/tags/v*" | grep -q "$tag"; then
+    if git ls-remote "refs/tags/v*" | grep -qE "^$tag$"; then
         echo "Git tag '$tag' already exists."
         exit 1
     fi
