@@ -12,7 +12,7 @@
 ![Go Version](https://img.shields.io/badge/Go-1.20-blue)
 ![OS](https://img.shields.io/badge/OS-linux,%20macOs,%20Windows-blue)
 
-A **platform-independend hooks manager** written in Go to support shared hook
+A **platform-independent hooks manager** written in Go to support shared hook
 repositories and per-repository
 [Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working
 repository. This implementation is the Go port and successor of the
@@ -38,7 +38,7 @@ repositories.
   [automatic build/pull integration of container images](#pull-and-build-integration)
   (optional).
 - Command line interface.
-- Fast execution due to compiled executable. (even **2-3x faster with
+- Fast execution due to compiled executable. (even **2-3x faster from
   `v2.1.1`**)
 - Fast parallel execution over threadpool.
 - Ignoring non-shared and shared hooks with patterns.
@@ -84,10 +84,11 @@ repositories.
 - [User Prompts](#user-prompts)
 - [Installation](#installation)
   - [Quick (Secure)](#quick-secure)
+  - [Package Manager `nix`](#package-manager-nix)
   - [Procedure](#procedure)
-  - [Install Mode - Template Dir](#install-mode-template-dir)
-  - [Install Mode - Centralized Hooks](#install-mode-centralized-hooks)
+  - [Install Modes](#install-modes)
   - [Install Mode - Manual](#install-mode-manual)
+  - [Install Mode - Centralized Hooks](#install-mode-centralized-hooks)
   - [Install from different URL and Branch](#install-from-different-url-and-branch)
   - [Use in CI](#use-in-ci)
     - [Nested Containers](#nested-containers)
@@ -96,10 +97,11 @@ repositories.
   - [Non-Interactive Installation](#non-interactive-installation)
   - [Install on the Server](#install-on-the-server)
     - [Setup for Bare Repositories](#setup-for-bare-repositories)
-  - [Templates or Global Hooks](#templates-or-global-hooks)
-    - [Template Folder (`init.templateDir`)](#template-folder-inittemplatedir)
-    - [Global Hooks Location (`core.hooksPath`)](#global-hooks-location-corehookspath)
+  - [Global Hooks or No Global Hooks](#global-hooks-or-no-global-hooks)
+    - [Manual: Use Githooks Selectively](#manual-use-githooks-selectively)
+    - [Centralized: Use Githooks For All Repositories](#centralized-use-githooks-for-all-repositories)
   - [Updates](#updates)
+    - [Automatic Update Checks](#automatic-update-checks)
     - [Update Mechanics](#update-mechanics)
 - [Uninstalling](#uninstalling)
 - [YAML Specifications](#yaml-specifications)
@@ -486,7 +488,7 @@ You can also manage and update shared hook repositories using the
 available and you need to update them by running `git hooks update`**.
 
 By using
-[`git hooks config skip-non-existing-shared-hooks --help`](docs/cli/skip-non-existing-shared-hooks.md)
+[`git hooks config skip-non-existing-shared-hooks --help`](/docs/cli/git_hooks_config_skip-non-existing-shared-hooks.md)
 you can disable this behavior locally/globally or by environment variable
 `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS` (see
 [env. variables](#environment-variables)) which makes Githooks skip non-existing
@@ -942,7 +944,7 @@ following cases:
    - Various other prompts when the updater is launched: **non-fatal**.
 
 User prompts during `runner` execution are sometimes not desirable (server
-infastructure, docker container, etc...) and need to be disabled. Setting
+infrastructure, docker container, etc...) and need to be disabled. Setting
 `git hooks config non-interactive-runner --enable --global` will:
 
 - Take default answers for all **non-fatal** prompts. No warnings are shown.
@@ -1021,18 +1023,18 @@ The installer will:
    - Use the following template directory if `--hooks-dir-use-template-dir` is
      given:
 
-     1. use `GIT_TEPMLATE_DIR` if set and add `/hooks`
-     1. use Git config value `init.templateDir` if set and add `/hooks`
-     1. use `<install-dir>/templates/hooks`.
+     1. Use `GIT_TEPMLATE_DIR` if set and add `/hooks`
+     1. Use Git config value `init.templateDir` if set and add `/hooks`
+     1. Use `<install-dir>/templates/hooks`.
 
-     **Note:** This will silenty make all new repositories with `git init` or
+     **Note:** This will silently make all new repositories with `git init` or
      `git clone` directly use Githooks, this is similar to the
      [`centralized`](#install-mode-centralized-hooks) install mode.
 
 1. Write all Githooks run-wrappers into the hooks directory `<hooksDir>` and
 
-   - set `core.hooksPath` for [`centralized`](#install-mode-centralized-hooks)
-     install mode (`--use-core-hooks-path`).
+   - Set `core.hooksPath` for [`centralized`](#install-mode-centralized-hooks)
+     install mode (`--centralized`).
 
 1. Offer to enable automatic update checks.
 
@@ -1051,7 +1053,7 @@ The installer will:
 
 1. Offer to set up shared hook repositories.
 
-### Instal Modes
+### Install Modes
 
 This installer can install Githooks in one of 2 ways:
 
@@ -1137,7 +1139,7 @@ curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.s
 The installer always maintains a Githooks clone inside `<installDir>/release`
 for its automatic update logic. The specified custom clone URL and branch will
 then be used for further updates in the above example (see
-[update machanics](#update-mechanics)).
+[update mechanics](#update-mechanics)).
 
 Because the installer **always** downloads the latest release (here from another
 URL/branch), it needs deploy settings to know where to get the binaries from.
@@ -1283,7 +1285,7 @@ function ci_setup_githooks() {
 
     printInfo "Install Githooks."
     curl -sL "https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh" |
-        bash -s -- -- --use-manual --non-interactive --prefix "$GITHOOKS_INSTALL_PREFIX"
+        bash -s -- -- --non-interactive --prefix "$GITHOOKS_INSTALL_PREFIX"
 
     git hooks config enable-containerized-hooks --global --set
 
@@ -1433,7 +1435,7 @@ git hooks install
 ```
 
 which will simply set the `core.hooksPath` to the common location where Githooks
-maintaines its run-wrappers. If you want a partial maintained hooks set with
+maintains its run-wrappers. If you want a partial maintained hooks set with
 `git hooks install --maintained-hooks ...`, it will switch to install Githooks
 run-wrappers inside this sole repository.
 
@@ -1521,7 +1523,7 @@ to relevant fixes and changes.
 
 You can also check for updates at any time by executing
 [`git hooks update`](docs/cli/git_hooks_update.md) or using
-[`git hooks config update [--enable|--disable]`](docs/cli/git_hooks_config_update.md)
+[`git hooks config update-check [--enable|--disable]`](/docs/cli/git_hooks_config_update-check.md)
 command to enable or disable the automatic update checks.
 
 ## Uninstalling
@@ -1567,7 +1569,7 @@ files inside your repositories to make them work directly with a new install:
    `[git hooks list](docs/cli/git_hooks_list.md)`.
 
 2. Convert all entries in `.shared` files to an url in a YAML file
-   `.shared.yaml` [here](docs/yaml-spec.md).
+   `.shared.yaml` [here](/docs/yaml-specs.md).
 
 3. It's heartly recommended to **first** uninstall the old version, to get rid
    of any old settings.
@@ -1603,7 +1605,7 @@ properties (no `cgo`, cancellation through `context`). You can use this dialog
 tool independently of Githooks.
 
 **Test it out!** 🎉: Please refer to the
-[documentation of the tool](docs/dialog/dialog.md).
+[documentation of the tool](/docs/dialog/githooks-dialog.md).
 
 ### Build From Source
 
