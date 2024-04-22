@@ -141,5 +141,6 @@ jobs:
           TRIGGER_TAG: ${{ steps.getTag.outputs.triggerTag }}
         run: |
           # goreleaser already pushed release tag by the Github API.
-          git push origin "githooks/$RELEASE_TAG"
+          # but this tag is not an annotated tag so repush the correct one.
+          git push -f origin "$RELEASE_TAG" "githooks/$RELEASE_TAG"
           git push -f origin ":$TRIGGER_TAG"
