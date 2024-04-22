@@ -124,7 +124,7 @@ func setupSettings(
 func runDispatchedUninstall(log cm.ILogContext, settings *Settings, args *Arguments) bool {
 
 	var uninstaller cm.Executable
-	if cm.PackageManagerEnabled {
+	if !cm.PackageManagerEnabled {
 		uninstaller = hooks.GetUninstallerExecutable(settings.InstallDir)
 	} else {
 		uninstaller = hooks.GetUninstallerExecutable("")
@@ -132,10 +132,10 @@ func runDispatchedUninstall(log cm.ILogContext, settings *Settings, args *Argume
 
 	if !cm.IsFile(uninstaller.Cmd) {
 		log.WarnF("There is no existing Githooks executable present\n"+
-			"in install dir '%s'.\n"+
+			"Path '%s' does not exist.\n"+
 			"Your installation is corrupt.\n"+
 			"We will continue to uninstall agnostically with this installer.",
-			settings.InstallDir)
+			uninstaller.Cmd)
 
 		return false
 	}
@@ -164,7 +164,7 @@ func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Argume
 	err = cm.RunExecutable(
 		&cm.ExecContext{Env: os.Environ()},
 		uninstaller,
-		cm.UseStreams(os.Stdin, log.GetInfoWriter(), log.GetInfoWriter()),
+		cm.UseStreams(os.Stdin, os.Stdout, os.Stderr),
 		"--config", file.Name())
 
 	log.AssertNoErrorPanic(err, "Running uninstaller failed.")
@@ -239,22 +239,24 @@ func uninstallFromRegisteredRepos(
 		})
 }
 
-func cleanTemplateDir(log cm.ILogContext, gitx *git.Context, lfsHooksCache hooks.LFSHooksCache) {
-	hookTemplateDir, err := install.FindHooksDirInstall(log, gitx)
+func cleanHooks(log cm.ILogContext, gitx *git.Context, lfsHooksCache hooks.LFSHooksCache) {
+	hooksDir, err := install.FindHooksDirInstall(log, gitx)
 	log.AssertNoErrorF(err, "Error while determining default hook template directory.")
+	log.InfoF("Clean hooks directory '%s'.", hooksDir)
 
-	if strs.IsEmpty(hookTemplateDir) {
+	if strs.IsEmpty(hooksDir) {
 		log.ErrorF(
 			"Git hook templates directory not found.\n" +
 				"Installation is corrupt!")
 	} else {
-		_, err = hooks.UninstallRunWrappers(hookTemplateDir, lfsHooksCache)
-		log.AssertNoErrorF(err, "Could not uninstall Githooks run-wrappers in\n'%s'.", hookTemplateDir)
+		_, err = hooks.UninstallRunWrappers(hooksDir, lfsHooksCache)
+		log.AssertNoErrorF(err, "Could not uninstall Githooks run-wrappers in\n'%s'.", hooksDir)
 	}
 }
 
 func cleanSharedClones(log cm.ILogContext, installDir string) {
 	sharedDir := hooks.GetSharedDir(installDir)
+	log.InfoF("Clean shared clones in '%s'.", sharedDir)
 
 	if cm.IsDirectory(sharedDir) {
 		err := os.RemoveAll(sharedDir)
@@ -285,6 +287,8 @@ func cleanHooksDir(
 	log cm.ILogContext,
 	installDir string) {
 	hooksDir := path.Join(installDir, "templates")
+
+	log.InfoF("Remove hooks directory '%s'.", hooksDir)
 	err := os.RemoveAll(hooksDir)
 	log.AssertNoErrorF(err, "Could not delete dir '%s'.", hooksDir)
 }
@@ -305,6 +309,7 @@ func cleanBinaries(
 	}
 
 	binDir := hooks.GetBinaryDir(installDir)
+	log.InfoF("Delete binary directory '%s'.", binDir)
 
 	if cm.IsDirectory(binDir) {
 		deleteDir(log, binDir, tempDir)
@@ -316,6 +321,7 @@ func cleanReleaseClone(
 	installDir string) {
 
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
+	log.InfoF("Remove release clone in '%s'.", cloneDir)
 
 	if cm.IsDirectory(cloneDir) {
 		err := os.RemoveAll(cloneDir)
@@ -324,7 +330,15 @@ func cleanReleaseClone(
 	}
 }
 
+func cleanTempDir(log cm.ILogContext, installDir string) {
+	log.InfoF("Clean Githooks temporary directory.")
+	dir, err := hooks.CleanTemporaryDir(installDir)
+	log.AssertNoError(err, "Could not clean temporary directory '%s'.", dir)
+}
+
 func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
+
+	log.InfoF("Clean global Git configuration values.")
 
 	// Remove core.hooksPath if we are using it.
 	pathForUseCoreHooksPath := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
@@ -357,6 +371,7 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 func cleanRegister(log cm.ILogContext, installDir string) {
 
 	registerFile := hooks.GetRegisterFile(installDir)
+	log.InfoF("Remove register file '%s'.", registerFile)
 
 	if cm.IsFile(registerFile) {
 		err := os.Remove(registerFile)
@@ -398,7 +413,7 @@ func runUninstallSteps(
 		args.FullUninstallFromRepos,
 		uiSettings)
 
-	cleanTemplateDir(log, settings.Gitx, settings.LFSHooksCache)
+	cleanHooks(log, settings.Gitx, settings.LFSHooksCache)
 
 	cleanSharedClones(log, settings.InstallDir)
 	cleanReleaseClone(log, settings.InstallDir)
@@ -407,6 +422,7 @@ func runUninstallSteps(
 	cleanRegister(log, settings.InstallDir)
 
 	cleanGitConfig(log, settings.Gitx)
+	cleanTempDir(log, settings.InstallDir)
 }
 
 func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
