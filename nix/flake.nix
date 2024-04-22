@@ -11,11 +11,7 @@
       overlays = [];
       pkgs = import (inputs.nixpkgs) {inherit system overlays;};
     in {
-      packages.default = pkgs.callPackage ./pkgs/default.nix {
-        versionMeta =
-          if (self ? rev)
-          then self.rev
-          else self.dirtyRev;
-      };
+      packages.default =
+        pkgs.callPackage ./pkgs/default.nix {};
     });
 }

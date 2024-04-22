@@ -1415,7 +1415,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 		defer os.Remove(args.InternalTempDir)
 	}
 
-	log.InfoF("Githooks Installer [version: %s]", build.BuildVersion)
+	log.InfoF("Githooks Installer [version: %s, packaged: %v]", build.BuildVersion, cm.PackageManagerEnabled)
 	dt := time.Now()
 	log.InfoF("Started at: %s", dt.String())
 
