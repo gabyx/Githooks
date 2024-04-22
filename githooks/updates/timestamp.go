@@ -14,7 +14,7 @@ import (
 
 var lastUpdateTimeStampFilename = ".last-update-check-timestamp"
 
-func getUpdateCheckTimestampFile(installDir string) string {
+func GetUpdateCheckTimestampFile(installDir string) string {
 	return path.Join(installDir, lastUpdateTimeStampFilename)
 }
 
@@ -26,7 +26,7 @@ func RecordUpdateCheckTimestamp(installDir string) error {
 	}
 
 	err = os.WriteFile(
-		getUpdateCheckTimestampFile(installDir),
+		GetUpdateCheckTimestampFile(installDir),
 		[]byte(fmt.Sprintf("%v", time.Now().Unix())),
 		cm.DefaultFileModeFile)
 
@@ -35,7 +35,7 @@ func RecordUpdateCheckTimestamp(installDir string) error {
 
 // ResetUpdateCheckTimestamp resets the update check time.
 func ResetUpdateCheckTimestamp(installDir string) error {
-	_ = os.Remove(getUpdateCheckTimestampFile(installDir))
+	_ = os.Remove(GetUpdateCheckTimestampFile(installDir))
 
 	return nil
 }
@@ -46,12 +46,12 @@ func GetUpdateCheckTimestamp(installDir string) (t time.Time, isSet bool, err er
 	// Initialize with too old time...
 	t = time.Unix(0, 0)
 
-	file := getUpdateCheckTimestampFile(installDir)
+	file := GetUpdateCheckTimestampFile(installDir)
 	timeLastUpdateCheck := ""
 
 	if exists, _ := cm.IsPathExisting(file); exists {
 		var data []byte
-		data, err = os.ReadFile(getUpdateCheckTimestampFile(installDir))
+		data, err = os.ReadFile(GetUpdateCheckTimestampFile(installDir))
 		if err != nil {
 			return
 		}

@@ -14,6 +14,8 @@ import (
 	"github.com/gabyx/githooks/githooks/hooks"
 	"github.com/gabyx/githooks/githooks/prompt"
 	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/gabyx/githooks/githooks/updates"
+	"github.com/gabyx/githooks/githooks/updates/download"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -368,15 +370,20 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 		"Could not unset global Git config '%s'.", k)
 }
 
-func cleanRegister(log cm.ILogContext, installDir string) {
+func cleanAuxillaryFiles(log cm.ILogContext, installDir string) {
 
-	registerFile := hooks.GetRegisterFile(installDir)
-	log.InfoF("Remove register file '%s'.", registerFile)
+	files := []string{
+		hooks.GetRegisterFile(installDir),
+		download.GetDeploySettingsFile(installDir),
+		updates.GetUpdateCheckTimestampFile(installDir)}
 
-	if cm.IsFile(registerFile) {
-		err := os.Remove(registerFile)
-		log.AssertNoError(err,
-			"Could not delete register file '%s'.", registerFile)
+	for _, file := range files {
+		if cm.IsFile(file) {
+			log.InfoF("Remove file '%s'.", file)
+			err := os.Remove(file)
+			log.AssertNoError(err,
+				"Could not delete register file '%s'.", file)
+		}
 	}
 }
 
@@ -419,7 +426,7 @@ func runUninstallSteps(
 	cleanReleaseClone(log, settings.InstallDir)
 	cleanBinaries(log, settings.InstallDir, settings.TempDir)
 	cleanHooksDir(log, settings.InstallDir)
-	cleanRegister(log, settings.InstallDir)
+	cleanAuxillaryFiles(log, settings.InstallDir)
 
 	cleanGitConfig(log, settings.Gitx)
 	cleanTempDir(log, settings.InstallDir)
