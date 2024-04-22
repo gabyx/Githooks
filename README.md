@@ -1,8 +1,9 @@
-<div style="text-align:center">
+<p align="center">
 <img src="docs/githooks-logo.svg">
-</div>
+<strong>v3</strong>
+</p>
 
-<h1>Githooks<sup style="font-size:12pt;color:#aaaa33;">v3</sup></h1>
+# Githooks
 
 [![CircleCI](https://circleci.com/gh/gabyx/Githooks.svg?style=svg)](https://circleci.com/gh/gabyx/Githooks)
 [![Coverage Status](https://coveralls.io/repos/github/gabyx/Githooks/badge.svg?branch=main)](https://coveralls.io/github/gabyx/Githooks?branch=main)
