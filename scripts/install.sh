@@ -263,7 +263,6 @@ if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
     )
 fi
 
-set -x
 check_old_version_v2 "$versionTag"
 
 os=""
