@@ -120,11 +120,7 @@ into the current repository.`,
 		"Uninstall also Git config values of Githooks and cached\n"+
 			"settings (checksums etc.) inside the repository.")
 
-	installCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
-		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
-	}
-
-	uninstallCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+	installCmd.PersistentPostRun = func(_ *cobra.Command, _ []string) {
 		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
 	}
 

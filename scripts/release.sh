@@ -47,6 +47,11 @@ function create_tag() {
         exit 1
     fi
 
+    if git ls-remote "refs/tags/v*" | grep -q "$tag"; then
+        echo "Git tag '$tag' already exists."
+        exit 1
+    fi
+
     add_message=()
     if [ -n "$update_info" ]; then
         add_message+=(-m "Update-Info: $update_info")

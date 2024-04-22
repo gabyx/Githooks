@@ -236,17 +236,31 @@ function check_old_version_v2() {
     fi
 }
 
+tempDir="$(mktemp -d)"
+function clean_up() {
+    rm -rf "$tempDir" &>/dev/null || true
+}
+trap clean_up EXIT
+
 parse_args "$@"
 
 if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
     # Find the latest version using the GitHub API
-    response=$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases") || {
+    response="$tempDir/response"
+    http_status=$(curl --silent --output "$response" -w "%{response_code}" \
+        --location "https://api.github.com/repos/$org/$repo/releases") || {
         echo "!! Could not get releases info from github.com"
         exit 1
     }
 
-    versionTag="$(echo "$response" |
-        jq --raw-output 'map(select((.assets | length) > 0)) | .[0].tag_name')"
+    if [ "$http_status" != "200" ]; then
+        echo "Could not get latest tag. Status code: '$http_status'."
+        exit 1
+    fi
+
+    versionTag=$(
+        jq --raw-output 'map(select((.assets | length) > 0)) | .[0].tag_name' <"$response"
+    )
 fi
 
 check_old_version_v2 "$versionTag"
@@ -263,15 +277,26 @@ if [ "$os" = "darwin" ]; then
 fi
 
 # Download and install
-response=$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases/tags/$versionTag") || {
+response="$tempDir/response"
+http_status=$(curl --silent --output "$response" -w "%{response_code}" \
+    "https://api.github.com/repos/$org/$repo/releases/tags/$versionTag") || {
     echo "Could not get releases from github.com."
     exit 1
 }
 
-checksumFileURL=$(echo "$response" | jq --raw-output ".assets[] | select( .name == \"githooks.checksums\") | .browser_download_url")
+if [ "$http_status" != "200" ]; then
+    echo "Could not get release info. Status code: '$http_status'."
+    exit 1
+fi
 
-url=$(echo "$response" |
-    jq --raw-output ".assets[] | select( (.name | contains(\"$os\")) and (.name | contains(\"$arch\")) ) | .browser_download_url") || {
+checksumFileURL=$(jq --raw-output ".assets[] | select( .name == \"githooks.checksums\") | .browser_download_url" <"$response")
+
+url=$(
+    jq --raw-output ".assets[] |
+        select( (.name | contains(\"$os\"))
+                    and (.name | contains(\"$arch\")) ) |
+                         .browser_download_url" <"$response"
+) || {
     echo "Could not get assets from tag '$versionTag'."
     exit 1
 }
@@ -283,13 +308,6 @@ if [ -z "$url" ]; then
 
     exit 1
 fi
-
-tempDir="$(mktemp -d)"
-
-function clean_up() {
-    rm -rf "$tempDir" &>/dev/null || true
-}
-trap clean_up EXIT
 
 githooks="$tempDir/githooks"
 mkdir -p "$githooks"
