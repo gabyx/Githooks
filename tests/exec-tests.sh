@@ -44,6 +44,7 @@ FROM githooks:$IMAGE_TYPE-base
 ARG DOCKER_GROUP_ID
 
 ENV DOCKER_RUNNING=true
+ENV GH_SCRIPTS="/var/lib/githooks-scripts"
 ENV GH_TESTS="/var/lib/githooks-tests"
 ENV GH_TEST_TMP="/tmp/githooks"
 ENV GH_TEST_REPO="/var/lib/githooks"
@@ -63,14 +64,7 @@ RUN bash "\$GH_TESTS/setup-githooks.sh"
 
 # Add all tests
 ADD tests "\$GH_TESTS"
-
-# Modify install arguments.
-RUN if [ -n "\$EXTRA_INSTALL_ARGS" ]; then \\
-        sed -i -E 's|(.*)/cli\" installer|\1/cli" installer \$EXTRA_INSTALL_ARGS|g' "\$GH_TESTS"/steps/step-* ; \\
-    fi
-
-# Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
-RUN git config --global githooks.deleteDetectedLFSHooks "n"
+ADD scripts "\$GH_SCRIPTS"
 
 # Git-Core folder must be existing.
 RUN [ -d "\$GH_TEST_GIT_CORE/templates/hooks" ]

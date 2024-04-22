@@ -6,19 +6,27 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 # run the default install
-"$GH_TEST_BIN/cli" installer --non-interactive || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --non-interactive || exit 1
+check_install
 
-mkdir -p "$GH_TEST_TMP/test1" &&
-    cd "$GH_TEST_TMP/test1" &&
-    git init || exit 1
+if ! is_centralized_tests; then
+    mkdir -p "$GH_TEST_TMP/test1" &&
+        cd "$GH_TEST_TMP/test1" &&
+        git init || exit 1
 
-# verify that the pre-commit is installed
+    check_no_local_install .
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    grep -q 'https://github.com/gabyx/githooks' "$(git config core.hooksPath)/pre-commit"
+    # Install hooks
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install ||
+        die "Could not install hooks into repo."
+
+    check_local_install .
+
 else
-    grep -q 'https://github.com/gabyx/githooks' .git/hooks/pre-commit
+    check_centralized_install
 fi

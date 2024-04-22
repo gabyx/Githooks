@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Cli tool: run an update
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test063" &&
     cd "$GH_TEST_TMP/test063" &&
@@ -24,7 +26,7 @@ fi
 # Update to version 9.9.1
 echo "Update to version 9.9.1"
 CURRENT="$(git -C ~/.githooks/release rev-parse HEAD)"
-if ! "$GH_INSTALL_BIN_DIR/cli" update --yes; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" update --yes; then
     echo "! Failed to run the update"
 fi
 AFTER="$(git -C ~/.githooks/release rev-parse HEAD)"
@@ -45,7 +47,7 @@ echo "Try update to 10.1.1 (1)"
 # Update to version 10.1.1
 # input "enter"
 CURRENT="$AFTER"
-out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update 2>&1) || {
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/githooks-cli" update 2>&1) || {
     echo "! Failed to run update"
     exit 1
 }
@@ -67,7 +69,7 @@ fi
 # Update to version 10.1.1 (its a major update which should be declined)
 echo "Try update to 10.1.1 (2)"
 CURRENT="$AFTER"
-out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes 2>&1) || {
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/githooks-cli" update --yes 2>&1) || {
     echo "$out"
     echo "! Failed to run update"
     exit 1
@@ -84,7 +86,7 @@ fi
 # Try again, but now force the major update.
 echo "Force update to 10.1.1"
 CURRENT="$AFTER"
-out=$("$GH_INSTALL_BIN_DIR/cli" update --yes-all 2>&1) || {
+out=$("$GH_INSTALL_BIN_DIR/githooks-cli" update --yes-all 2>&1) || {
     echo "$out"
     echo "! Failed to run update"
     exit 1
@@ -115,7 +117,7 @@ fi
 
 echo "Try update to 10.1.2-rc1"
 CURRENT="$AFTER"
-out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes-all 2>&1) || {
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/githooks-cli" update --yes-all 2>&1) || {
     echo "$out"
     echo "! Failed to run update"
     exit 1
@@ -131,7 +133,7 @@ fi
 
 echo "Force update to 10.1.2-rc1"
 CURRENT="$AFTER"
-out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/cli" update --yes-all --use-pre-release 2>&1) || {
+out=$(EXECUTE_UPDATE="" "$GH_INSTALL_BIN_DIR/githooks-cli" update --yes-all --use-pre-release 2>&1) || {
     echo "$out"
     echo "! Failed to run update"
     exit 1

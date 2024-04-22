@@ -6,20 +6,24 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
 rm -rf /does/not/exist
 
 OUTPUT=$(
-    echo 'n
+    echo 'y
+
+n
 y
 /does/not/exist
-' | "$GH_TEST_BIN/cli" installer --stdin 2>&1
+' | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin 2>&1
 )
 
 if ! echo "$OUTPUT" | grep "Answer must be an existing directory"; then

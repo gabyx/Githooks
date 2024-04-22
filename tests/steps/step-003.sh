@@ -6,14 +6,17 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 # run the default install
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test3" &&
     cd "$GH_TEST_TMP/test3" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized || exit 1
 
 # set up 2 pre-commit hooks, execute them and verify that they worked
 mkdir -p .githooks/pre-commit &&

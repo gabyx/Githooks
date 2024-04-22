@@ -1,15 +1,16 @@
-//go:build mock
+//go:build mock || download_mock
 
 package installer
 
 import (
+	"os"
+	"path"
+	"runtime"
+
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
 	"github.com/gabyx/githooks/githooks/updates"
 	"github.com/gabyx/githooks/githooks/updates/download"
-	"os"
-	"path"
-	"runtime"
 )
 
 // IsRunningCoverage returns if we are running coverage.
@@ -40,9 +41,9 @@ func downloadBinaries(
 	}
 
 	all := []string{
-		path.Join(tempDir, "cli"+ext),
-		path.Join(tempDir, "runner"+ext),
-		path.Join(tempDir, "dialog"+ext)}
+		path.Join(tempDir, "githooks-cli"+ext),
+		path.Join(tempDir, "githooks-runner"+ext),
+		path.Join(tempDir, "githooks-dialog"+ext)}
 
 	for _, exe := range all {
 		src := path.Join(bin, path.Base(exe))

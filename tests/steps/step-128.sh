@@ -6,7 +6,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-"$GH_TEST_BIN/cli" installer || exit 1
+init_step
+
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 # Do not accept trust prompt.
 # accept_all_trust_prompts || exit 1
 

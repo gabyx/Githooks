@@ -11,6 +11,10 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+const RunnerExecutableName = "githooks-runner"
+const CLIExecutableName = "githooks-cli"
+const DialogExecutableName = "githooks-dialog"
+
 // HooksDirName denotes the directory name used for repository specific hooks.
 const HooksDirName = ".githooks"
 const HooksDirNameShared = "githooks"
@@ -20,6 +24,38 @@ const GithooksWebpage = "https://github.com/gabyx/githooks"
 
 // DefaultBugReportingURL is the default url to report errors.
 const DefaultBugReportingURL = "https://github.com/gabyx/githooks/issues"
+
+// All Git hook names.
+var AllHookNames = []string{
+	"applypatch-msg",
+	"commit-msg",
+	"fsmonitor-watchman",
+	"p4-changelist",
+	"p4-post-changelist",
+	"p4-prepare-changelist",
+	"p4-pre-submit",
+	"post-applypatch",
+	"post-checkout",
+	"post-commit",
+	"post-index-change",
+	"post-merge",
+	"post-receive",
+	"post-rewrite",
+	"post-update",
+	"pre-applypatch",
+	"pre-auto-gc",
+	"pre-commit",
+	"pre-merge-commit",
+	"prepare-commit-msg",
+	"pre-push",
+	"pre-rebase",
+	"pre-receive",
+	"proc-receive",
+	"push-to-checkout",
+	"reference-transaction",
+	"sendemail-validate",
+	"update",
+}
 
 // ManagedHookNames are hook names managed by Githooks for normal repositories.
 var ManagedHookNames = []string{
@@ -124,31 +160,6 @@ func GetBugReportingInfo() (info string) {
 	return
 }
 
-// CheckGithooksSetup tests if 'core.hooksPath' is in alignment with 'git.GitCKUseCoreHooksPath'.
-func CheckGithooksSetup(gitx *git.Context) (err error) {
-	useCoreHooksPath := gitx.GetConfig(GitCKUseCoreHooksPath, git.Traverse)
-	coreHooksPath, coreHooksPathSet := gitx.LookupConfig(git.GitCKCoreHooksPath, git.Traverse)
-
-	if coreHooksPathSet {
-		if useCoreHooksPath != git.GitCVTrue {
-			err = cm.ErrorF(
-				"Git config 'core.hooksPath' is set and has value:\n"+
-					"'%s',\n"+
-					"but Githooks is not configured to use that folder.\n"+
-					"This could mean the hooks in this repository are not run by Githooks.", coreHooksPath)
-		}
-	} else {
-		if useCoreHooksPath == git.GitCVTrue {
-			err = cm.ErrorF(
-				"Githooks is configured to consider Git config 'core.hooksPath'\n" +
-					"but that setting is not currently set.\n" +
-					"This could mean the hooks in this repository are not run by Githooks.")
-		}
-	}
-
-	return
-}
-
 // GetGithooksDir gets the hooks directory for Githooks inside a repository (bare, non-bare).
 func GetGithooksDir(repoDir string) string {
 	return path.Join(repoDir, HooksDirName)
@@ -220,12 +231,15 @@ func CleanTemporaryDir(installDir string) (string, error) {
 		return "", err
 	}
 
-	return AssertTemporaryDir(installDir)
+	return GetTemporaryDir(installDir), nil
 }
 
 // GetRunnerExecutable gets the installed Githooks runner executable.
 func GetRunnerExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "runner")
+	p = RunnerExecutableName
+	if strs.IsNotEmpty(installDir) {
+		p = path.Join(GetBinaryDir(installDir), p)
+	}
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
@@ -233,18 +247,17 @@ func GetRunnerExecutable(installDir string) (p string) {
 	return
 }
 
-// SetRunnerExecutableAlias sets the global Githooks runner executable.
-func SetRunnerExecutableAlias(path string) error {
-	if !cm.IsFile(path) {
-		return cm.ErrorF("Runner executable '%s' does not exist.", path)
-	}
-
+// SetRunnerExecutableConfig sets the global Githooks runner executable.
+func SetRunnerExecutableConfig(path string) error {
 	return git.NewCtx().SetConfig(GitCKRunner, path, git.GlobalScope)
 }
 
 // GetDialogExecutable gets the installed Githooks dialog executable.
 func GetDialogExecutable(installDir string) (p string) {
-	p = path.Join(GetBinaryDir(installDir), "dialog")
+	p = DialogExecutableName
+	if strs.IsNotEmpty(installDir) {
+		p = path.Join(GetBinaryDir(installDir), p)
+	}
 	if runtime.GOOS == cm.WindowsOsName {
 		p += cm.WindowsExecutableSuffix
 	}
@@ -254,19 +267,11 @@ func GetDialogExecutable(installDir string) (p string) {
 
 // SetDialogExecutableConfig sets the global Githooks dialog executable.
 func SetDialogExecutableConfig(path string) error {
-	if !cm.IsFile(path) {
-		return cm.ErrorF("Dialog executable '%s' does not exist.", path)
-	}
-
 	return git.NewCtx().SetConfig(GitCKDialog, path, git.GlobalScope)
 }
 
 // SetCLIExecutableAlias sets the global Githooks runner executable.
 func SetCLIExecutableAlias(path string) error {
-	if !cm.IsFile(path) {
-		return cm.ErrorF("CLI executable '%s' does not exist.", path)
-	}
-
 	return git.NewCtx().SetConfig(GitCKAliasHooks, strs.Fmt("!\"%s\"", path), git.GlobalScope)
 }
 

@@ -7,58 +7,57 @@ import (
 
 type InstallModeType int
 type installModeType struct {
-	None          InstallModeType
-	TemplateDir   InstallModeType
-	CoreHooksPath InstallModeType
-	Manual        InstallModeType
+	None        InstallModeType
+	Manual      InstallModeType
+	Centralized InstallModeType
 }
 
 // InstallModeTypeV enumerates all types of install modes.
-var InstallModeTypeV = &installModeType{TemplateDir: 0, CoreHooksPath: 1, Manual: 2, None: 3} // nolint:gomnd
+// Manual is the default install mode.
+var InstallModeTypeV = &installModeType{None: 0, Manual: 0, Centralized: 1} // nolint:gomnd
 
 // GetInstallMode returns the current set install mode of Githooks.
-func GetInstallMode(gitx *git.Context) InstallModeType {
-	useManual := gitx.GetConfig(hooks.GitCKUseManual, git.GlobalScope) == git.GitCVTrue
-	useCoreHooksPathValue := gitx.GetConfig(hooks.GitCKUseCoreHooksPath, git.GlobalScope)
+// Return `none`-value if not installed.
+func GetInstallMode(gitx *git.Context) (haveInstall bool, mode InstallModeType) {
+	installMode := gitx.GetConfig(hooks.GitCKInstallMode, git.GlobalScope)
+	haveInstall = true
 
-	switch {
-	case useManual:
-		return InstallModeTypeV.Manual
-	case useCoreHooksPathValue == git.GitCVTrue:
-		return InstallModeTypeV.CoreHooksPath
-	case useCoreHooksPathValue == git.GitCVFalse:
-		return InstallModeTypeV.TemplateDir
+	switch installMode {
 	default:
-		return InstallModeTypeV.None
+		haveInstall = false
+		mode = InstallModeTypeV.None
+	case "manual":
+		mode = InstallModeTypeV.Manual
+	case "centralized":
+		mode = InstallModeTypeV.Centralized
 	}
 
+	return
 }
 
 // GetInstallModeName returns a string for the install mode.
-func GetInstallModeName(installMode InstallModeType) string {
+func getInstallModeName(installMode InstallModeType) string {
 	switch installMode {
 	case InstallModeTypeV.Manual:
 		return "manual"
-	case InstallModeTypeV.TemplateDir:
-		return "template-dir"
-	case InstallModeTypeV.CoreHooksPath:
-		return "core-hooks-path"
+	case InstallModeTypeV.Centralized:
+		return "centralized"
 	default:
 		return "none"
 	}
 }
 
-// MapInstallerArgsToInstallMode maps installer arguments to install modes.
-func MapInstallerArgsToInstallMode(
-	useCoreHooksPath bool,
-	useManual bool) InstallModeType {
+// Name gets the name of the install mode.
+func (i *InstallModeType) Name() string {
+	return getInstallModeName(*i)
+}
 
+// MapInstallerArgsToInstallMode maps installer arguments to install modes.
+func MapInstallerArgsToInstallMode(useGlobalCoreHooksPath bool) InstallModeType {
 	switch {
-	case useManual:
-		return InstallModeTypeV.Manual
-	case useCoreHooksPath:
-		return InstallModeTypeV.CoreHooksPath
+	case useGlobalCoreHooksPath:
+		return InstallModeTypeV.Centralized
 	default:
-		return InstallModeTypeV.TemplateDir
+		return InstallModeTypeV.Manual
 	}
 }

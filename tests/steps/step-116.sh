@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Test registering mechanism.
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
+if is_centralized_tests; then
+    echo "Using centralized install"
+    exit 249
+fi
+
 accept_all_trust_prompts || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi
@@ -24,18 +31,9 @@ fi
 # Test that first git action registers repo 1
 mkdir -p "$GH_TEST_TMP/test116.1" && cd "$GH_TEST_TMP/test116.1" &&
     git init &&
-    git commit --allow-empty -m 'Initial commit' ||
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "all" &&
+    git commit --allow-empty -m 'Initial commit' &>/dev/null ||
     exit 1
-
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
-    if grep -q "/" "$README_FILE"; then
-        echo "Expected the file to contain any paths"
-        exit 1
-    fi
-    # Skip further tests, because it does not apply for core hooks path
-    exit 0
-fi
 
 if [ ! -f "$REGISTER_FILE" ]; then
     echo "Expected the file to be created"
@@ -49,10 +47,11 @@ if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE"; then
 fi
 
 # Test that a first git action registers repo 2
-# and repo 1 ist still registered
+# and repo 1 is still registered
 mkdir -p "$GH_TEST_TMP/test116.2" && cd "$GH_TEST_TMP/test116.2" &&
     git init &&
-    git commit --allow-empty -m 'Initial commit' ||
+    "$GH_INSTALL_BIN_DIR/githooks-cli" install --maintained-hooks "all" &&
+    git commit --allow-empty -m 'Initial commit' &>/dev/null ||
     exit 1
 
 if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE" ||
@@ -62,12 +61,23 @@ if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE" ||
     exit 3
 fi
 
-# Test install to all repos 1,2,3
-mkdir -p "$GH_TEST_TMP/test116.3" && cd "$GH_TEST_TMP/test116.3" && git init
+mkdir -p "$GH_TEST_TMP/test116.3" &&
+    cd "$GH_TEST_TMP/test116.3" &&
+    git init &&
+    git config --local githooks.maintainedHooks "all" || exit 1
 
+# Should not have registered in repo 3
+if ! grep -qE '.+/test *116.1/.git$' "$REGISTER_FILE" ||
+    ! grep -qE '.+/test *116.2/.git$' "$REGISTER_FILE"; then
+    echo "! Expected correct content"
+    cat "$REGISTER_FILE"
+    exit 3
+fi
+
+echo "- Install into repo 1,2,3 ..."
 echo "Y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if ! grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
     ! grep -qE ".+/test *116.2/.git$" "$REGISTER_FILE" ||
@@ -79,7 +89,7 @@ fi
 
 # Test uninstall to only repo 1
 cd "$GH_TEST_TMP/test116.1" || exit 1
-if ! "$GH_TEST_BIN/cli" uninstall; then
+if ! "$GH_TEST_BIN/githooks-cli" uninstall; then
     echo "! Uninstall from current repo failed"
     exit 1
 fi
@@ -98,34 +108,36 @@ if grep -qE ".+/test *116.1/.git$" "$REGISTER_FILE" ||
 fi
 
 # Test total uninstall to all repos
+echo "- Total uninstall..."
 echo "Y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" uninstaller --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" uninstaller --stdin || exit 1
 
 if [ -f "$REGISTER_FILE" ]; then
     echo "! Expected registered list to not exist"
     exit 1
 fi
 
-if [ -f "$GH_INSTALL_BIN_DIR/runner" ] ||
-    [ -f "$GH_INSTALL_BIN_DIR/cli" ]; then
+if [ -f "$GH_INSTALL_BIN_DIR/githooks-runner" ] ||
+    [ -f "$GH_INSTALL_BIN_DIR/githooks-cli" ]; then
     echo "! Expected that all binaries are deleted."
     exit 1
 fi
 
-# Remove reinstalled LFS hooks.
-rm -rf "$GH_TEST_GIT_CORE/templates/hooks/"* || exit 1
-
 # Reinstall everywhere
-echo "Y
+echo "- Reinstall everywhere..."
+echo "y
+
+Y
 y
 $GH_TEST_TMP
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 # Update Test
 # Set all other hooks to dirty by adding something
 # shellcheck disable=SC2156
-find "$GH_TEST_TMP" -type f -path "*/.git/hooks/*" -exec sh -c "echo 'Add DIRTY to {}' && echo '#DIRTY' >>'{}'" \; || exit 1
+find "$GH_TEST_TMP" -type f -path "*/.git/hooks/*" -exec \
+    sh -c "echo 'Add DIRTY to {}' && echo '#DIRTY' >>'{}'" \; || exit 1
 find "$GH_TEST_TMP" -type f -path "*/.git/hooks/*" |
     while read -r HOOK; do
         if ! grep -q "#DIRTY" "$HOOK"; then
@@ -145,12 +157,25 @@ if ! git -C "$GH_TEST_REPO" reset --hard v9.9.1 >/dev/null; then
 fi
 
 cd "$GH_TEST_TMP/test116.3" &&
-    git config --global githooks.autoUpdateEnabled true &&
+    git config --global githooks.updateCheckEnabled true &&
     set_update_check_timestamp $MOCK_LAST_RUN &&
-    git commit --allow-empty -m 'Second commit' || exit 1
+    OUT=$(git commit --allow-empty -m 'Second commit' 2>&1) || exit 1
+
+if ! echo "$OUT" | grep -q "There is a new Githooks update available"; then
+    echo "! Expected update-check output not found"
+    echo "$OUT"
+    exit 1
+fi
+
+OUT=$("$GH_INSTALL_BIN_DIR/githooks-cli" update 2>&1)
+
+if ! echo "$OUT" | grep -q "All done! Enjoy!"; then
+    echo "! Expected installation output not found"
+    echo "$OUT"
+    exit 1
+fi
 
 # Check that all hooks are updated
-
 find "$GH_TEST_TMP" -type f -path "*/.git/hooks/*" \
     -and -not -name "*disabled*" \
     -and -not -path "*githooks-tmp*" |

@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
@@ -51,11 +53,11 @@ envs:
         - MYSTUFF_B2=ddd
 EOF
 
-"$GH_TEST_BIN/cli" shared update || exit 1
+"$GH_TEST_BIN/githooks-cli" shared update || exit 1
 
 # Execute pre-commit and check that env variables are applied.
 GLOBAL_ENV_VAR="monkeyshit" \
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit || exit 1
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit || exit 1
 
 # shellcheck disable=SC2015
 grep -q "MYSTUFF_A1=aaa" "$GH_TEST_TMP/envs-a" &&

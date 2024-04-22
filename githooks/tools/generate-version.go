@@ -11,6 +11,8 @@ import (
 
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/git"
+	strs "github.com/gabyx/githooks/githooks/strings"
+	"github.com/hashicorp/go-version"
 )
 
 var pkg = "build"
@@ -24,7 +26,6 @@ import 	(
 	cm "github.com/gabyx/githooks/githooks/common"
 )
 
-var BuildCommit = "{{ .Commit }}"
 var BuildVersion = "{{ .Version }}"
 var BuildTag = "{{ .Tag }}"
 
@@ -39,14 +40,30 @@ func main() {
 
 	gitx := git.NewCtxSanitized()
 
-	root, err := gitx.Get("rev-parse", "--show-toplevel")
-	cm.AssertNoErrorPanicF(err, "Could not root dir.")
+	// We are located in the runner, because there is the generate command.
+	srcDir, _ := os.Getwd()
+	srcDir = path.Join(srcDir, "../..")
 
-	commitSHA, err := git.GetCommitSHA(gitx, git.HEAD)
-	cm.AssertNoErrorPanicF(err, "GetCommitSHA failed.")
+	var err error
+	var tag string
+	var ver *version.Version
 
-	ver, tag, err := git.GetVersion(gitx, git.HEAD, "v*") // The tags to match always start with "v...."
-	cm.AssertNoErrorPanicF(err, "GetVersion failed.")
+	versionOverride := os.Getenv("GH_BUILD_VERSION")
+	if strs.IsNotEmpty(versionOverride) {
+		ver, err = version.NewVersion(versionOverride)
+		cm.AssertNoErrorPanicF(err, "Could not parse version.")
+
+		tag = os.Getenv("GH_BUILD_TAG")
+		cm.PanicIfF(strs.IsEmpty(tag), "Tag is empty '%s'", tag)
+
+	} else {
+		root, err := gitx.Get("rev-parse", "--show-toplevel")
+		cm.AssertNoErrorPanicF(err, "Could not root dir.")
+		srcDir = path.Join(root, "githooks")
+
+		ver, tag, err = git.GetVersion(gitx, git.HEAD, "v*") // The tags to match always start with "v...."
+		cm.AssertNoErrorPanicF(err, "GetVersion failed.")
+	}
 
 	// Create or overwrite the go file from template
 	var buf bytes.Buffer
@@ -54,12 +71,10 @@ func main() {
 		Package string
 		Version string
 		Tag     string
-		Commit  string
 	}{
 		Package: pkg,
 		Version: ver.String(),
 		Tag:     tag,
-		Commit:  commitSHA,
 	})
 	cm.AssertNoErrorPanicF(err, "Setting template failed.")
 
@@ -68,7 +83,7 @@ func main() {
 	cm.AssertNoErrorPanicF(err, "Formatting template failed.")
 
 	// Write to disk (in the Current Working Directory)
-	file := path.Join(root, "githooks", verFile)
+	file := path.Join(srcDir, verFile)
 	f, err := os.Create(file)
 	cm.AssertNoErrorPanicF(err, "Opening template file failed.")
 	defer f.Close()

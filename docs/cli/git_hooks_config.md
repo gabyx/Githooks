@@ -47,8 +47,8 @@ git hooks config
   Enable/disable skipping active, untrusted hooks.
 - [git hooks config trust-all](git_hooks_config_trust-all.md) - Change trust
   settings in the current repository.
-- [git hooks config update](git_hooks_config_update.md) - Change Githooks update
-  settings.
+- [git hooks config update-check](git_hooks_config_update-check.md) - Change
+  Githooks update-check settings.
 - [git hooks config update-time](git_hooks_config_update-time.md) - Changes the
   Githooks update time.
 

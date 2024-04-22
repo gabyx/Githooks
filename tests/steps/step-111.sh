@@ -6,10 +6,12 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -17,31 +19,40 @@ mkdir -p "$GH_TEST_TMP/test109.1/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test109.1" &&
     echo "echo 'In-repo' >> '$GH_TEST_TMP/test-109.out'" >.githooks/pre-commit/test &&
     git init && mkdir -p .git/hooks &&
+    # simulate that this repo contains wrappers, such that the install
+    # installs run-wrappers below.
+    touch .git/hooks/githooks-contains-run-wrappers &&
     echo "echo 'Previous1' >> '$GH_TEST_TMP/test-109.out' ; # git lfs arg1 arg2" >.git/hooks/pre-commit &&
     chmod +x .git/hooks/pre-commit ||
     exit 1
 
 mkdir -p "$GH_TEST_TMP/test109.2/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test109.2" && git init && mkdir -p .git/hooks &&
+    # simulate that this repo contains wrappers, such that the install
+    # installs run-wrappers below.
+    touch .git/hooks/githooks-contains-run-wrappers &&
     echo "echo 'Previous2' >> '$GH_TEST_TMP/test-109.out' ; # git-lfs arg1 arg2" >.git/hooks/pre-commit &&
     chmod +x .git/hooks/pre-commit ||
     exit 1
 
 mkdir -p "$GH_TEST_TMP/test109.3/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test109.3" && git init && mkdir -p .git/hooks &&
+    # simulate that this repo contains wrappers, such that the install
+    # installs run-wrappers below.
+    touch .git/hooks/githooks-contains-run-wrappers &&
     echo "echo 'Previous3' >> '$GH_TEST_TMP/test-109.out' ; # git  lfs arg1 arg2" >.git/hooks/pre-commit &&
     chmod +x .git/hooks/pre-commit ||
     exit 1
 
-git config --global --unset githooks.deleteDetectedLFSHooks
+echo "y
 
-echo "n
+n
 y
 $GH_TEST_TMP
 y
 
 s
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if [ -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be deleted (1)'
@@ -67,7 +78,7 @@ if grep 'Previous3' "$GH_TEST_TMP/test-109.out"; then
     exit 1
 fi
 
-out=$("$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --print)
+out=$("$GH_INSTALL_BIN_DIR/githooks-cli" config delete-detected-lfs-hooks --print)
 if ! echo "$out" | grep -q "but instead backed up"; then
     echo "! Expected the correct config behavior (5)"
     echo "$out"
@@ -75,8 +86,8 @@ if ! echo "$out" | grep -q "but instead backed up"; then
 fi
 
 # For coverage
-"$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --reset || exit 1
-out=$("$GH_INSTALL_BIN_DIR/cli" config delete-detected-lfs-hooks --print)
+"$GH_INSTALL_BIN_DIR/githooks-cli" config delete-detected-lfs-hooks --reset || exit 1
+out=$("$GH_INSTALL_BIN_DIR/githooks-cli" config delete-detected-lfs-hooks --print)
 if ! echo "$out" | grep -q "left to the user"; then
     echo "! Expected the correct config behavior (6)"
     echo "$out"
@@ -97,7 +108,7 @@ $GH_TEST_TMP
 N
 
 a
-" | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin || exit 1
 
 if [ ! -f "$GH_TEST_TMP/test109.1/.git/hooks/pre-commit.disabled.githooks" ]; then
     echo '! Expected hook to be moved (7)'

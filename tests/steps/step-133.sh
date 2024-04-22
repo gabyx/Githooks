@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if ! is_docker_available; then
     echo "docker is not available"
     exit 249
@@ -42,7 +44,7 @@ mkdir -p .githooks &&
     echo -e "urls:\n  - file://$GH_TEST_TMP/shared/hooks-133-a.git" >.githooks/.shared.yaml ||
     exit 1
 
-"$GH_TEST_BIN/cli" shared update
+"$GH_TEST_BIN/githooks-cli" shared update
 
 if ! is_image_existing "sharedhooks-test-image:1.0.0" ||
     ! is_image_existing "registry.com/sharedhooks-test-image:1.0.0" ||
@@ -67,7 +69,7 @@ if docker images | grep -q "test-image"; then
     exit 1
 fi
 
-"$GH_TEST_BIN/cli" images update
+"$GH_TEST_BIN/githooks-cli" images update
 
 if ! is_image_existing "sharedhooks-test-image:1.0.0" ||
     ! is_image_existing "registry.com/sharedhooks-test-image:1.0.0" ||

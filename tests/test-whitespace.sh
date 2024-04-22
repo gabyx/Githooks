@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
-
+# shellcheck disable=SC1091
+#
 set -e
 set -u
 
-TEST_DIR=$(cd "$(dirname "$0")" && pwd)
+ROOT_DIR=$(git rev-parse --show-toplevel)
+TEST_DIR="$ROOT_DIR/tests"
+. "$ROOT_DIR/tests/general.sh"
+
+cd "$ROOT_DIR"
 
 cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-whitespace-base -
-FROM golang:1.20-alpine
+FROM golang:1.21-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
 

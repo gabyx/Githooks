@@ -6,11 +6,13 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi
@@ -22,12 +24,15 @@ mkdir -p "$GH_TEST_TMP/test110/hooks" &&
 # Hooks
 cd "$GH_TEST_TMP/test110/hooks" &&
     git init || exit 1
-"$GH_INSTALL_BIN_DIR/cli" config disable --set || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" config disable --set || exit 1
 
 # Server
-cd "$GH_TEST_TMP/test110/server" && git init --bare || exit 1
+cd "$GH_TEST_TMP/test110/server" && git init --bare &&
+    install_hooks_if_not_centralized || exit 1
+
 # Repo
-git clone "$GH_TEST_TMP/test110/server" "$GH_TEST_TMP/test110/local" || exit 1
+git clone "$GH_TEST_TMP/test110/server" "$GH_TEST_TMP/test110/local" &&
+    install_hooks_if_not_centralized || exit 1
 
 echo "Setup hooks"
 cd "$GH_TEST_TMP/test110/hooks" || exit 1
@@ -42,11 +47,11 @@ git commit -a -m "Hooks" || exit 1
 
 echo "Setup shared hook in server repo"
 cd "$GH_TEST_TMP/test110/server" || exit 1
-"$GH_INSTALL_BIN_DIR/cli" shared add file://"$GH_TEST_TMP/test110/hooks" || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared add file://"$GH_TEST_TMP/test110/hooks" || exit 1
 echo "Setup shared hook in server repo: set trusted"
-"$GH_INSTALL_BIN_DIR/cli" config trust-all --accept || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" config trust-all --accept || exit 1
 echo "Setup shared hook in server repo: update shared"
-"$GH_INSTALL_BIN_DIR/cli" shared update || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared update || exit 1
 
 echo "Test hook from push"
 cd "$GH_TEST_TMP/test110/local" || exit 1
@@ -70,7 +75,7 @@ git commit -a -m "Make hook succeed"
 
 echo "Update hooks"
 cd "$GH_TEST_TMP/test110/server" || exit 1
-"$GH_INSTALL_BIN_DIR/cli" shared update || exit 1
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared update || exit 1
 
 echo "Push hook to succeed"
 cd "$GH_TEST_TMP/test110/local" || exit 1

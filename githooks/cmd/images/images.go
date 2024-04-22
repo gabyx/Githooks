@@ -63,7 +63,7 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
-	sharedCmd := &cobra.Command{
+	imagesCmd := &cobra.Command{
 		Use:   "images",
 		Short: "Manage container images.",
 		Long:  "Manages container images used by Githooks repositories in the current repository."}
@@ -86,7 +86,11 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 			"'githooks/.images.yaml' directory.\n"+
 			"Namespace is read from the current repository.")
 
-	sharedCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, imagesUpdateCmd))
+	imagesCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, imagesUpdateCmd))
 
-	return ccm.SetCommandDefaults(ctx.Log, sharedCmd)
+	imagesCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
+	return ccm.SetCommandDefaults(ctx.Log, imagesCmd)
 }

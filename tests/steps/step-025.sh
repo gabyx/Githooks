@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test25" &&
@@ -18,7 +20,7 @@ mkdir -p .githooks &&
     echo "#!/bin/sh" >.git/hooks/pre-commit.replaced.githook &&
     echo 'exit 1' >>.git/hooks/pre-commit.replaced.githook &&
     chmod +x .git/hooks/pre-commit.replaced.githook &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if [ $? -ne 1 ]; then
     echo "! Expected the hooks to fail"
@@ -26,5 +28,5 @@ if [ $? -ne 1 ]; then
 fi
 
 printf 'patterns:\n   - "ns:gh-replaced/**/*.replaced.githook"' >.git/.githooks.ignore.yaml &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit ||
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit ||
     exit 1

@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 useSymlink="false"
 [ "$1" = "--use-symbolic-link" ] && useSymlink="true"
 
@@ -20,7 +22,7 @@ fi
 mkdir -p .githooks &&
     mkdir -p .githooks/pre-commit &&
     echo "echo 'First execution' >> '$GH_TEST_TMP/test028.out'" >.githooks/pre-commit/test &&
-    ACCEPT_CHANGES=A "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    ACCEPT_CHANGES=A "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if ! grep -q "First execution" "$GH_TEST_TMP/test028.out"; then
     echo "! Expected to execute the hook the first time"
@@ -34,7 +36,7 @@ if [ "$NUMBER_OF_CHECKSUMS" != "1" ]; then
 fi
 
 echo "echo 'Second execution' >> '$GH_TEST_TMP/test028.out'" >.githooks/pre-commit/test &&
-    ACCEPT_CHANGES=Y "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    ACCEPT_CHANGES=Y "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if ! grep -q "Second execution" "$GH_TEST_TMP/test028.out"; then
     echo "! Expected to execute the hook the second time"

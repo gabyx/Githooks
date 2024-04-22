@@ -6,26 +6,28 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 mkdir "$GH_TEST_TMP/not-a-git-repo" && cd "$GH_TEST_TMP/not-a-git-repo" || exit 1
 
-if ! "$GH_TEST_BIN/cli" installer; then
+if ! "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}"; then
     echo "! Failed to execute the install script"
     exit 1
 fi
 
-if "$GH_INSTALL_BIN_DIR/cli" list; then
+if "$GH_INSTALL_BIN_DIR/githooks-cli" list; then
     echo "! Expected to fail"
     exit 1
 fi
 
-if "$GH_INSTALL_BIN_DIR/cli" trust; then
+if "$GH_INSTALL_BIN_DIR/githooks-cli" trust; then
     echo "! Expected to fail"
     exit 1
 fi
 
-if "$GH_INSTALL_BIN_DIR/cli" disable; then
+if "$GH_INSTALL_BIN_DIR/githooks-cli" disable; then
     echo "! Expected to fail"
     exit 1
 fi

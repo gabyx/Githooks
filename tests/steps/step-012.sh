@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test12" &&
@@ -18,7 +20,7 @@ mkdir -p .githooks &&
     echo "echo \"GITHOOKS_OS=\$GITHOOKS_OS\" >> '$GH_TEST_TMP/test012env.out'" >>.githooks/pre-commit &&
     echo "echo \"GITHOOKS_ARCH=\$GITHOOKS_ARCH\" >> '$GH_TEST_TMP/test012env.out'" >>.githooks/pre-commit &&
     export GLOBAL_ENV_VAR="monkeyshit" &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit ||
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit ||
     exit 1
 
 # From https://github.com/golang/go/blob/master/src/go/build/syslist.go

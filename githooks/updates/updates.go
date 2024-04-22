@@ -152,7 +152,9 @@ func FetchUpdates(
 	tag string,
 	checkRemote bool,
 	checkRemoteAction RemoteCheckAction,
-	usePreRelease bool) (status ReleaseStatus, err error) {
+	usePreRelease bool,
+	setGitConfig bool,
+) (status ReleaseStatus, err error) {
 
 	cm.AssertOrPanic(strs.IsNotEmpty(cloneDir))
 
@@ -248,8 +250,10 @@ func FetchUpdates(
 	}
 
 	// Set the url/branch back...
-	if err = SetCloneURL(url, branch); err != nil {
-		return
+	if setGitConfig {
+		if err = SetCloneURL(url, branch); err != nil {
+			return
+		}
 	}
 
 	// On a new clone we reset local branch
@@ -475,16 +479,8 @@ func RunUpdate(
 	usePreRelease bool,
 	run func() error) (updateAvailable bool, accepted bool, err error) {
 
-	err = RecordUpdateCheckTimestamp(installDir)
-
-	if err != nil {
-		err = cm.Error("Could not record update check timestamp.")
-
-		return
-	}
-
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
-	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease)
+	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease, true)
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not fetch updates."), err)
 
@@ -537,6 +533,42 @@ const (
 	AcceptNonInteractiveAll AcceptNonInteractiveMode = 1
 )
 
+// FormatUpdateText formats a default update text for updates.
+func FormatUpdateText(status *ReleaseStatus, withUpdateHint bool) (versionText string, isMajorUpdate bool) {
+	if !status.IsUpdateAvailable {
+		return strs.Fmt("Githooks is at the latest version '%s'.", build.BuildTag), false
+	}
+
+	versionText = "There is a new Githooks update available:"
+
+	if Enabled {
+		cmd := "git hooks update"
+		if strs.IsNotEmpty(status.UpdateVersion.Prerelease()) {
+			cmd += " --use-pre-release"
+		}
+
+		versionText += strs.Fmt("\nInstall the update with:\n  $ %s", cmd)
+	} else {
+		versionText += "\nInstall the update over your package manager."
+	}
+
+	versionText += strs.Fmt("\nCurrent Version: '%s'\n"+
+		"New Version: '%s'",
+		build.GetBuildVersion(),
+		status.UpdateVersion.String())
+
+	isMajorUpdate = build.GetBuildVersion().Segments()[0] < status.UpdateVersion.Segments()[0]
+	if isMajorUpdate {
+		versionText += " (Major Update)"
+	}
+
+	if status.UpdateInfo != nil {
+		versionText += formatUpdateInfo(status.UpdateInfo)
+	}
+
+	return
+}
+
 // DefaultAcceptUpdateCallback creates a default accept update callback
 // which prompts the user. If no prompt context is given, the
 // `acceptNonInteractive` decides if an update happens.
@@ -549,29 +581,17 @@ func DefaultAcceptUpdateCallback(
 		log.DebugF("Fetch status: '%v'", status)
 		cm.DebugAssert(status.IsUpdateAvailable, "Wrong input.")
 
-		versionText := strs.Fmt(
-			"Current Version: '%s'\n"+
-				"New Version: '%s'",
-			build.GetBuildVersion(),
-			status.UpdateVersion.String())
-
-		isMajorUpdate := build.GetBuildVersion().Segments()[0] < status.UpdateVersion.Segments()[0]
+		versionText, isMajorUpdate := FormatUpdateText(status, false)
 
 		promptHint := "(Yes/no)"
 		promptDefault := "Y/n"
 		if isMajorUpdate {
-			versionText += " (Major Update)"
 			promptHint = "(yes/No)"
 			promptDefault = "y/N"
 		}
 
-		if status.UpdateInfo != nil {
-			versionText += formatUpdateInfo(status.UpdateInfo)
-		}
-
-		if promptx != nil {
-			question := "There is a new Githooks update available:\n" +
-				versionText + "\n" +
+		if Enabled && promptx != nil {
+			question := versionText + "\n" +
 				"Would you like to install it now?"
 
 			answer, err := promptx.ShowOptions(question,
@@ -589,11 +609,16 @@ func DefaultAcceptUpdateCallback(
 		} else {
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
-			if acceptNonInteractive == AcceptNonInteractiveAll ||
-				(!isMajorUpdate && acceptNonInteractive == AcceptNonInteractiveOnlyNonMajor) {
-				log.InfoF("Going to install version: '%s'.", status.UpdateVersion.String())
+			if Enabled {
+				if acceptNonInteractive == AcceptNonInteractiveAll ||
+					(!isMajorUpdate && acceptNonInteractive == AcceptNonInteractiveOnlyNonMajor) {
+					log.InfoF("Going to install version: '%s'.", status.UpdateVersion.String())
 
-				return true
+					return true
+				}
+			} else {
+				log.WarnF("Running updates has been disabled in this Githooks build.\n" +
+					"Update it manually or over your systems package manager.")
 			}
 		}
 
@@ -607,6 +632,10 @@ func RunUpdateOverExecutable(
 	execC cm.IExecContext,
 	pipeSetup cm.PipeSetupFunc,
 	args ...string) error {
+
+	if !Enabled {
+		return cm.Error("Updates have been disabled in this build of Githooks.")
+	}
 
 	installer := hooks.GetInstallerExecutable(installDir)
 

@@ -10,6 +10,22 @@ build *args:
   cd "{{root_dir}}" && \
     githooks/scripts/build.sh "$@"
 
+build-nix *args:
+  cd "{{root_dir}}" && \
+    nix build -L "./nix#default" -o ./nix/result {{args}}
+
+
+doc *args:
+  cd "{{root_dir}}" && \
+    githooks/scripts/build-doc.sh "$@"
+
+list-tests:
+  cd "{{root_dir}}/tests/steps" && \
+    readarray -t files < <(find . -name "*.sh" -name "step-*" | sort) && \
+    for f in "${files[@]}"; do \
+      printf " - %s: %s\n" "$f" "$(head -3 "$f" | tail -1)"; \
+    done
+
 test-user *args:
   cd "{{root_dir}}" && \
     tests/test-alpine-user.sh "$@"
@@ -17,6 +33,10 @@ test-user *args:
 test *args:
   cd "{{root_dir}}" && \
     tests/test-alpine.sh "$@"
+
+coverage *args:
+  cd "{{root_dir}}" && \
+    COVERALLS_TOKEN=non-existing tests/test-coverage.sh "$@"
 
 lint fix="false":
   cd "{{root_dir}}" && \

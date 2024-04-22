@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1091
 # Test:
 #   Test template area is set up properly (core.hooksPath)
+# shellcheck disable=SC1091
 
 TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
+if is_centralized_tests; then
+    echo "Using centralized install"
     exit 249
 fi
 
@@ -30,10 +32,10 @@ mkdir -p ~/.githooks/templates
 echo "n
 y
 $GH_TEST_TMP/test114
-" | "$GH_TEST_BIN/cli" installer --stdin --use-core-hookspath --template-dir ~/.githooks/templates || exit 3
+" | "$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --stdin --centralized --hooks-dir ~/.githooks/templates/hooks || exit 3
 
 # check if hooks are inside the template folder.
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep -q "test-hook"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep -q "test-hook"; then
     echo "! Hooks were not installed successfully"
     exit 4
 fi
@@ -53,7 +55,7 @@ fi
 
 rm -rf ~/.githooks/templates/hooks/* # Remove to see if the correct folder gets choosen
 
-if ! "$GH_INSTALL_BIN_DIR/cli" update --yes; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" update --yes; then
     echo "! Failed to run the update"
     exit 1
 fi

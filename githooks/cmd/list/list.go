@@ -469,5 +469,9 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	listCmd.Flags().BoolVar(&onlyListActiveHooks, "active", false, "Only list hooks with state 'active'.")
 	listCmd.Flags().BoolVar(&withBatchName, "batch-name", false, "Also show the parallel batch name.")
 
+	listCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, listCmd)
 }

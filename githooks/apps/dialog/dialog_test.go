@@ -9,7 +9,7 @@ import (
 )
 
 func TestCoverage(t *testing.T) {
-	if coverage.Setup("dialog") {
+	if coverage.Setup("githooks-dialog") {
 		// Careful if you print to much stuff, certain tests might fail
 		// fmt.Printf("Forward args: %q\n", os.Args)
 

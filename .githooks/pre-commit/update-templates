@@ -4,46 +4,47 @@ set -e
 set -u
 
 if command -v gsed &>/dev/null; then
-    SED="gsed"
+  SED="gsed"
 else
-    SED="sed"
+  SED="sed"
 fi
 
 if ! $SED --version 2>&1 | grep -q "GNU"; then
-    echo "! Install GNU sed for updating the templates." >&2
-    exit 1
+  echo "! Install GNU sed for updating the templates." >&2
+  exit 1
 fi
 
 # Patch the hooks
 # shellcheck disable=SC2016
 hook_names=$($SED -E '1,/ManagedHookNames.*\{/d;/\}/,$d ; s/\s+"(.*)",/\1/' githooks/hooks/githooks.go) ||
-    {
-        echo "update-templates:: Replacement command failed!" >&2
-        exit 1
-    }
+  {
+    echo "update-templates:: Replacement command failed!" >&2
+    exit 1
+  }
 
 for hook_name in $hook_names; do
-    # shellcheck disable=SC2015
-    $SED -e "s|GITHOOKS_RUNNER=.*|GITHOOKS_RUNNER=\"\$(cd \"\$(dirname \"\$0\")/../\" \&\& pwd)/githooks/bin/runner\"|" \
-        -e "s|\(various Git triggers.*\)|\1\n#\n# This file is auto-generated, do not edit!|" \
-        <githooks/build/embedded/run-wrapper.sh >"hooks/$hook_name" &&
-        chmod u+x "hooks/$hook_name" &&
-        git add hooks/* ||
-        {
-            echo "Failed to update \`hooks/$hook_name\`" >&2
-            exit 2
-        }
+  # shellcheck disable=SC2015
+  $SED -e "s|GITHOOKS_RUNNER=.*|GITHOOKS_RUNNER=\"\$(cd \"\$(dirname \"\$0\")/../\" \&\& pwd)/githooks/bin/githooks-runner\"|" \
+    -e "/echo \" .*/d" \
+    -e "s|echo \"! .*|echo \"! The runner '\$GITHOOKS_RUNNER' is not existing\" \>\&2\n|g" \
+    -e "s|\(various Git triggers.*\)|\1\n#\n# This file is auto-generated, do not edit!|" \
+    <githooks/build/embedded/run-wrapper.sh >"hooks/$hook_name" &&
+    chmod u+x "hooks/$hook_name" ||
+    {
+      echo "Failed to update 'hooks/$hook_name'" >&2
+      exit 2
+    }
 done
 
 # Delete all files not in `$hook_name`
 for hook_file in hooks/*; do
-    name=$(basename "$hook_file")
-    if ! echo "$hook_names" | grep -q "$name"; then
-        git rm "$hook_file" >/dev/null 2>&1 || {
-            echo "Failed to delete obsolete hook \`$hook_file\`" >&2
-            exit 3
-        }
-    fi
+  name=$(basename "$hook_file")
+  if ! echo "$hook_names" | grep -q "$name"; then
+    git rm "$hook_file" >/dev/null 2>&1 || {
+      echo "Failed to delete obsolete hook \`$hook_file\`" >&2
+      exit 3
+    }
+  fi
 done
 
 echo "* Updated all hooks in 'hooks/*'" >&2

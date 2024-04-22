@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 # make sure we don't have LFS installed
@@ -14,8 +16,12 @@ if command -v git-lfs; then
     exit 249
 fi
 
-# run Githooks install
-"$GH_TEST_BIN/cli" installer || exit 1
+# Run Githooks install (use --template-dir to install on clone.)
+mkdir -p "$GH_TEST_TMP/templates" &&
+    git config --global init.templateDir "$GH_TEST_TMP/templates"
+
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" \
+    --hooks-dir-use-template-dir || exit 1
 
 # setup the first repository
 mkdir -p "$GH_TEST_TMP/test107a/.githooks" &&
@@ -27,7 +33,8 @@ mkdir -p "$GH_TEST_TMP/test107a/.githooks" &&
     exit 2
 
 # this will only fail in `post-commit` where the exit code is ignored
-git commit -m "Test commit" || exit 3
+git commit -m "Test commit" 2>&1 |
+    grep -q "This repository requires Git LFS" || exit 3
 
 # try to clone, which should fail on `post-checkout`
 if git clone "$GH_TEST_TMP/test107a" "$GH_TEST_TMP/test107b"; then

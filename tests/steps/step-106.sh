@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 function on_exit() {
     if [ -n "$ORIGINAL_GIT_LFS" ]; then
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs-backup" "$ORIGINAL_GIT_LFS" || {
@@ -54,7 +56,7 @@ cd "$GH_TEST_TMP/test106-lfs" &&
 
 if [ -n "$GH_ON_WINDOWS" ]; then
     # On windows replace the original git-lfs completely,
-    # because git.exe perturbates the PATH
+    # because git.exe perturbs the PATH
     ORIGINAL_GIT_LFS=$(cygpath -m "$(command -v git-lfs)")
     cp -f "$ORIGINAL_GIT_LFS" "$GH_TEST_TMP/test106-lfs/git-lfs-backup" &&
         cp -f "$GH_TEST_TMP/test106-lfs/git-lfs.exe" "$ORIGINAL_GIT_LFS" || exit 4
@@ -65,10 +67,11 @@ else
     export PATH="$GH_TEST_TMP/test106-lfs:$PATH" || exit 4
 fi
 
-"$GH_TEST_BIN/cli" installer || exit 5
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 5
 
 cd "$GH_TEST_TMP/test106" &&
     git init &&
+    install_hooks_if_not_centralized &&
     git lfs install ||
     exit 6
 
@@ -96,9 +99,9 @@ if ! grep -q 'post-commit' lfs.out; then
     exit 11
 fi
 
-# Test LFS invocation if git hooks are disabled
+# Test LFS invocation if "$GH_INSTALL_BIN_DIR/githooks-cli" are disabled
 rm lfs.out && rm hook.out &&
-    "$GH_INSTALL_BIN_DIR/cli" config disable --set &&
+    "$GH_INSTALL_BIN_DIR/githooks-cli" config disable --set &&
     ACCEPT_CHANGES=Y git commit --allow-empty -m "Second commit" ||
     exit 12
 
@@ -108,7 +111,7 @@ if ! grep -q 'post-commit' lfs.out || [ -f hook.out ]; then
 fi
 
 # an extra invocation for coverage
-"$GH_INSTALL_BIN_DIR/runner" "$(pwd)"/.git/hooks/post-merge unused ||
+"$GH_INSTALL_BIN_DIR/githooks-runner" "$(pwd)"/.git/hooks/post-merge unused ||
     exit 12
 
 if ! grep -q 'post-merge' lfs.out; then

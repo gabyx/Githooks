@@ -6,12 +6,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-accept_all_trust_prompts || exit 1
+init_step
 
-if echo "${EXTRA_INSTALL_ARGS:-}" | grep -q "use-core-hookspath"; then
-    echo "Using core.hooksPath"
-    exit 249
-fi
+accept_all_trust_prompts || exit 1
 
 # move the built-in git template folder
 mkdir -p "$GH_TEST_TMP/git-templates" &&
@@ -20,19 +17,39 @@ mkdir -p "$GH_TEST_TMP/git-templates" &&
     touch "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit.sample" ||
     exit 1
 
+export GIT_TEMPLATE_DIR="$GH_TEST_TMP/git-templates/templates"
+
 # run the install, and let it search for the templates
-echo 'y
-y
-y
-y
-' | "$GH_TEST_BIN/cli" installer --stdin || exit 1
+OUT=$("$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" --hooks-dir-use-template-dir 2>&1)
+EXIT_CODE="$?"
+
+if is_centralized_tests; then
+    if [ "$EXIT_CODE" -eq "0" ] || ! echo "$OUT" |
+        grep -C 10 "You cannot use 'centralized'" |
+        grep -C 10 "duplicating run-wrappers" |
+        grep -q "is nonsense"; then
+        echo "! Expected install to fail."
+        echo "$OUT"
+        exit 1
+    fi
+
+    # Further test are not useful for centralized install.
+    exit 0
+else
+    if [ "$EXIT_CODE" -ne "0" ]; then
+        echo "! Expected install to succeed."
+        exit 1
+    fi
+fi
+
+check_install
 
 if ! [ -f "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit" ]; then
-    # verify that a new hook file was installed
     echo "! Expected hook is not installed"
     exit 1
-elif ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit"; then
-    # verify that the new hook is ours
+fi
+
+if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/git-templates/templates/hooks/pre-commit"; then
     echo "! Expected hook doesn't have the expected contents"
     exit 1
 fi
@@ -41,8 +58,8 @@ mkdir -p "$GH_TEST_TMP/test6" &&
     cd "$GH_TEST_TMP/test6" &&
     git init || exit 1
 
-# verify that the hooks are installed and are working
-if ! grep 'github.com/gabyx/githooks' "$GH_TEST_TMP/test6/.git/hooks/pre-commit"; then
-    echo "! Githooks were not installed into a new repo"
-    exit 1
-fi
+check_local_install_run_wrappers
+
+# Reinstall and check again.
+"$GH_INSTALL_BIN_DIR/githooks-cli" install
+check_local_install_run_wrappers

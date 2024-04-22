@@ -6,9 +6,11 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/shared/first-shared.git/pre-commit" &&
     cd "$GH_TEST_TMP/shared/first-shared.git" &&
@@ -34,38 +36,38 @@ mkdir -p "$GH_TEST_TMP/test061/.githooks" &&
 git config --local githooks.shared "file://$GH_TEST_TMP/shared/second-shared.git" || exit 1
 git config --global githooks.shared "file://$GH_TEST_TMP/shared/third-shared.git" || exit 1
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "sample-one" | grep -q "'shared:repo'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "sample-one" | grep -q "'shared:repo'"; then
     echo "! Unexpected cli list output (1)"
     exit 1
 fi
 
-if "$GH_INSTALL_BIN_DIR/cli" list | grep -q "sample-two" ||
-    "$GH_INSTALL_BIN_DIR/cli" list | grep -q "sample-three"; then
+if "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep -q "sample-two" ||
+    "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep -q "sample-three"; then
     echo "! Unexpected cli list output (2)"
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep -qi "pending shared hooks"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep -qi "pending shared hooks"; then
     echo "! Unexpected cli list output (3)"
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" shared update; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" shared update; then
     echo "! Failed to update the shared hook repositories"
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "sample-one" | grep -q "'shared:repo'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "sample-one" | grep -q "'shared:repo'"; then
     echo "! Unexpected cli list output (4)"
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "sample-two" | grep -q "'shared:local'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "sample-two" | grep -q "'shared:local'"; then
     echo "! Unexpected cli list output (5)"
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "sample-three" | grep -q "'shared:global'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "sample-three" | grep -q "'shared:global'"; then
     echo "! Unexpected cli list output (6)"
     exit 1
 fi

@@ -1,0 +1,89 @@
+# Check Documentation:
+# https://goreleaser.com/customization/
+project_name: githooks
+before:
+  hooks:
+    - go mod download
+    - go mod vendor
+    - go generate -mod=vendor ./...
+builds:
+  - id: runner
+    binary: githooks-runner
+    main: ./apps/runner
+    env: &ENV
+      - CGO_ENABLED=0
+    goos: &GOOS
+      - linux
+    goarch: &GOARCH
+      - amd64
+  - id: cli
+    binary: githooks-cli
+    main: ./apps/cli
+    env: *ENV
+    goos: *GOOS
+    goarch: *GOARCH
+  - id: dialog
+    binary: githooks-dialog
+    main: ./apps/dialog
+    env: *ENV
+    goos: *GOOS
+    goarch: *GOARCH
+archives:
+  - id: githooks
+    builds:
+      - runner
+      - cli
+      - dialog
+    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ if eq .Os "darwin" }}macos{{else}}{{ .Os }}{{end}}.{{ .Arch }}'
+    format: tar.gz
+    files:
+      - none*
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: "{{ .ProjectName }}.checksums"
+  algorithm: sha256
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  filters:
+    # Commit messages matching the regexp listed here will be removed from
+    # the changelog
+    exclude:
+      - '^\[np\]'
+      - '^\[docs\]'
+signs:
+  - artifacts: checksum
+    cmd: gpg
+    # Signing with the private key where 'deploy.asc' is this public key in this repo.
+    args:
+      [
+        "-u",
+        "{{ .Env.GPG_FINGERPRINT }}",
+        "--output",
+        "${signature}",
+        "--detach-sign",
+        "${artifact}",
+      ]
+    signature: "${artifact}.sig"
+release:
+  github:
+    owner: gabyx
+    name: githooks
+  prerelease: auto
+  target_commitish: "{{ .Commit }}"
+# Use these values for you own gitea instance...
+# gitea_urls:
+#   api: "https://git.company.com/api/v1"
+#   download: "https://git.company.com"
+#   # set to true if you use a self-signed certificate
+#   skip_tls_verify: true
+
+# Use these values for you own github instance...
+# github_urls:
+#   api: https://git.company.com/api/v3/
+#   upload: https://git.company.com/api/uploads/
+#   download: https://git.company.com/
+#   # set to true if you use a self-signed certificate
+#   skip_tls_verify: false

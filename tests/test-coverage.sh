@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 
 set -e
 set -u
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
 TEST_DIR="$ROOT_DIR/tests"
+. "$ROOT_DIR/tests/general.sh"
+
+cd "$ROOT_DIR"
+
+SHOW_REPLACEMENTS=false
+[ "${1:-}" != "--show" ] || {
+    shift 1
+    SHOW_REPLACEMENTS=true
+}
 
 IMAGE_TYPE="alpine-coverage"
 
@@ -22,6 +32,7 @@ fi
 function cleanup() {
     docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
     docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
+    docker volume rm gh-test-tmp &>/dev/null || true
 }
 
 trap cleanup EXIT
@@ -34,7 +45,7 @@ cat <<EOF | docker build \
 EOF
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
-FROM golang:1.20-alpine
+FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
 
@@ -43,6 +54,8 @@ RUN git config --system protocol.file.allow always
 
 RUN go install github.com/wadey/gocovmerge@latest
 RUN go install github.com/mattn/goveralls@latest
+RUN go install gitlab.com/fgmarand/gocoverstats@latest
+RUN go install github.com/nikolaydubina/go-cover-treemap@latest
 
 ENV DOCKER_RUNNING=true
 ENV GH_COVERAGE_DIR="/cover"
@@ -79,9 +92,6 @@ RUN bash "\$GH_TESTS/setup-githooks.sh" --coverage
 
 ADD tests "\$GH_TESTS"
 
-# Always don't delete LFS Hooks (for testing, default is unset, but cumbersome for tests)
-RUN git config --global githooks.deleteDetectedLFSHooks "n"
-
 # Replace some statements which rely on proper CLI output
 # The built instrumented executable output test&coverage shit...
 RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | grep "^/")@g' \\
@@ -90,18 +100,24 @@ RUN sed -i -E 's@cli" shared root-from-url(.*)\)@cli" shared root-from-url\1 | g
     "\$GH_TESTS/steps/"step-*
 
 # Replace all runnner/cli/dialog/'git hooks' invocations.
-# Forward over 'coverage/forwarder'.
-RUN sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/cli"@g' \\
+RUN \\
+    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-cli"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-cli"@g' \\
     "\$GH_TESTS/exec-steps.sh" \\
+    "\$GH_TESTS/steps"/step-* \\
+    "\$GH_TESTS/general.sh" && \\
+    #
+    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-runner"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
-    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/runner"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/runner"@g' \\
+    #
+    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/githooks-dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/githooks-dialog"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
-    sed -i -E 's@"(.GH_INSTALL_BIN_DIR|.GH_TEST_BIN)/dialog"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1/dialog"@g' \\
-    "\$GH_TESTS/steps"/step-* && \\
+    #
     sed -i -E 's@".DIALOG"@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\1"@g' \\
     "\$GH_TESTS/steps"/step-* && \\
-    sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GH_INSTALL_BIN_DIR/cli"@g' \\
-    "\$GH_TESTS/steps"/step-*
+    #
+    sed -i -E 's@git hooks@"\$GH_TEST_REPO/githooks/coverage/forwarder" "\$GH_INSTALL_BIN_DIR/githooks-cli"@g' \\
+    "\$GH_TESTS/steps"/step-* \\
+    "\$GH_TESTS/general.sh"
 
 ${ADDITIONAL_INSTALL_STEPS:-}
 
@@ -112,11 +128,25 @@ EOF
 
 # Clean all coverage data
 if [ -d "$TEST_DIR/cover" ]; then
-    rm -rf "$TEST_DIR/cover"/*
+    echo "Delete coverage folder."
+    # Do this over container due to user permissions.
+    docker run --rm \
+        -v "$TEST_DIR/cover":/cover \
+        "githooks:$IMAGE_TYPE" \
+        find /cover -mindepth 1 -delete
+fi
+
+if [ "$SHOW_REPLACEMENTS" = "true" ]; then
+    docker container rm copy-test || true
+    docker container create --name copy-test "githooks:$IMAGE_TYPE"
+    docker cp "copy-test:/var/lib/githooks-tests/." "$TEST_DIR"
+    docker container rm copy-test
+    exit 0
 fi
 
 # Run the normal tests to add to the coverage
 # inside the current repo
+echo "Run unit tests..."
 docker run --rm \
     -a stdout -a stderr \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
@@ -127,10 +157,13 @@ docker run --rm \
     ./exec-unittests.sh ||
     exit $?
 
-# Run the integration tests# Create a volume where all test setup and repositories go in.
+echo "Run integration tests..."
+# Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
 delete_container_volume gh-test-tmp &>/dev/null || true
 docker volume create gh-test-tmp
+
+# Run coverage with normal install
 docker run --rm \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
@@ -139,10 +172,18 @@ docker run --rm \
     "githooks:$IMAGE_TYPE" \
     ./exec-steps.sh "$@" || exit $?
 
-CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
+# Run coverage with centralized install
+docker run --rm \
+    -a stdout -a stderr \
+    -v "gh-test-tmp:/tmp" \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -v "$TEST_DIR/cover":/cover \
+    "githooks:$IMAGE_TYPE" \
+    ./exec-steps.sh --test-centralized-install "$@" || exit $?
 
 # Upload the produced coverage
 # inside the current repo
+CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
 docker run --rm \
     -a stdout -a stderr \
     -v "$TEST_DIR/cover":/cover \

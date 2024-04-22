@@ -210,12 +210,38 @@ function parse_args() {
     done
 }
 
+function check_old_version_v2() {
+    if ! version_compare "${versionTag##v}" ">=" "2.3.4"; then
+        echo "!! Can only bootstrap version tags >= 'v2.3.4' with this script. Got tag '$versionTag'."
+        exit 1
+    fi
+
+    local versionTag="$1"
+    local installedVersion
+    installedVersion=$(git hooks --version 2>/dev/null | sed -E 's/.* ([0-9]+\..*)/\1/') || true
+
+    if [ -n "$installedVersion" ] &&
+        version_compare "$installedVersion" "<=" "3.0.0" &&
+        version_compare "${versionTag##v}" ">=" "3.0.0"; then
+        echo "!! You use an old Githooks version < 3 and want to install a version > 3.0.0." >&2
+        echo "!! Please uninstall the version before reinstalling the major new one." >&2
+        exit 1
+    fi
+
+    if [ -n "$(git config githooks.usecorehookspath)" ] &&
+        version_compare "${versionTag##v}" ">=" "3.0.0"; then
+        echo "!! You seem to use an old Githooks version < 3 and want to install a version > 3.0.0." >&2
+        echo "!! Please uninstall the version before reinstalling the major new one." >&2
+        exit 1
+    fi
+}
+
 parse_args "$@"
 
 if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
     # Find the latest version using the GitHub API
     response=$(curl --silent --location "https://api.github.com/repos/$org/$repo/releases") || {
-        echo "Could not get releases info from github.com"
+        echo "!! Could not get releases info from github.com"
         exit 1
     }
 
@@ -223,10 +249,7 @@ if [ "$versionTag" = "" ] || [ "$unInstall" = "true" ]; then
         jq --raw-output 'map(select((.assets | length) > 0)) | .[0].tag_name')"
 fi
 
-if ! version_compare "${versionTag##v}" ">=" "2.3.4"; then
-    echo "!! Can only bootstrap version tags >= 'v2.3.4' with this script. Got tag '$versionTag'."
-    exit 1
-fi
+check_old_version_v2 "$versionTag"
 
 os=""
 arch=""
@@ -271,11 +294,6 @@ trap clean_up EXIT
 githooks="$tempDir/githooks"
 mkdir -p "$githooks"
 
-cliExe="cli"
-if [ "$os" = "windows" ]; then
-    cliExe="$cliExe.exe"
-fi
-
 cd "$tempDir"
 
 echo -e "Downloading '$checksumFileURL'..."
@@ -303,6 +321,16 @@ case "$url" in
     unzip -d "$githooks" "$githooks.install" >/dev/null
     ;;
 esac
+
+cliExe="cli"
+if [ ! -f "githooks/cli" ]; then
+    # Version 3 has new names
+    cliExe="githooks-cli"
+fi
+
+if [ "$os" = "windows" ]; then
+    cliExe="$cliExe.exe"
+fi
 
 if [ "$unInstall" = "true" ]; then
     "githooks/$cliExe" uninstaller "${installerArgs[@]}"

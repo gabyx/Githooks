@@ -146,5 +146,9 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	execCmd.Flags().BoolVar(&opts.Containarized,
 		"containerized", false, "Force the execution to be containerized.")
 
+	execCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
+
 	return ccm.SetCommandDefaults(ctx.Log, execCmd)
 }

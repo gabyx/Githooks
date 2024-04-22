@@ -11,23 +11,23 @@ assertStaged
 success=0
 
 checkTodo() {
-    local lines
-    lines=$(grep -rnHE "(TODO|FIXME)" "$1") || true
+  local lines
+  lines=$(grep -rnHE "(TODO|FIXME)" "$1") || true
 
-    if [ -n "$lines" ]; then
-        echo "! TODO or FIXME found in: $lines" >&2
-        success=1
-    fi
+  if [ -n "$lines" ]; then
+    echo "! TODO or FIXME found in: $lines" >&2
+    success=1
+  fi
 }
 
 for file in $STAGED_FILES; do
-    if echo "$file" | grep -qvE '(cover/|pre-commit/no-todo-or-fixme|\.md|\.devcontainer/\.p10k)'; then
-        checkTodo "$file"
-    fi
+  if echo "$file" | grep -qvE '(cover/|pre-commit/no-todo-or-fixme|\.md|\.devcontainer/\.p10k)'; then
+    checkTodo "$file"
+  fi
 done
 
 if [ "$success" = "0" ]; then
-    echo "* No TODO or FIXME detected" >&2
+  echo "* No TODO or FIXME detected" >&2
 else
-    exit "$success"
+  exit "$success"
 fi

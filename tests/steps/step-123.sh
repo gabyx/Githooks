@@ -6,7 +6,9 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-"$GH_TEST_BIN/cli" installer || exit 1
+init_step
+
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 accept_all_trust_prompts || exit 1
 
 function cleanup() {
@@ -65,11 +67,11 @@ mkdir -p "$GH_TEST_TMP/test123" &&
     git init || exit 11
 
 # Add the shared repo
-"$GH_INSTALL_BIN_DIR/cli" shared add --local "file://$GH_TEST_TMP/shared" || exit 12
-"$GH_INSTALL_BIN_DIR/cli" shared update || exit 13
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared add --local "file://$GH_TEST_TMP/shared" || exit 12
+"$GH_INSTALL_BIN_DIR/githooks-cli" shared update || exit 13
 
 # Execute pre-commit by the runner
-OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
 # shellcheck disable=SC2181,SC2016
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Hello from compiled hook"; then

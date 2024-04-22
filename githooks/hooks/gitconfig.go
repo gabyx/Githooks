@@ -8,8 +8,8 @@ const (
 
 	GitCKDisable = "githooks.disable"
 
-	GitCKAutoUpdateEnabled       = "githooks.autoUpdateEnabled"
-	GitCKAutoUpdateUsePrerelease = "githooks.autoUpdateUsePrerelease"
+	GitCKUpdateCheckEnabled       = "githooks.updateCheckEnabled"
+	GitCKUpdateCheckUsePrerelease = "githooks.updateCheckUsePrerelease"
 
 	GitCKBugReportInfo = "githooks.bugReportInfo"
 
@@ -20,10 +20,9 @@ const (
 
 	GitCKDeleteDetectedLFSHooksAnswer = "githooks.deleteDetectedLFSHooks"
 
-	GitCKUseManual         = "githooks.useManual"
-	GitCKManualTemplateDir = "githooks.manualTemplateDir"
+	// Install modes.
+	GitCKInstallMode = "githooks.installMode"
 
-	GitCKUseCoreHooksPath        = "githooks.useCoreHooksPath"
 	GitCKPathForUseCoreHooksPath = "githooks.pathForUseCoreHooksPath"
 
 	GitCKPreviousSearchDir = "githooks.previousSearchDir"
@@ -63,6 +62,7 @@ const (
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
 func GetGlobalGitConfigKeys() []string {
 	return []string{
+		GitCKInstallMode,
 		GitCKInstallDir,
 		GitCKRunner,
 		GitCKDialog,
@@ -72,8 +72,8 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKMaintainedHooks,
 		GitCKPreviousSearchDir,
 
-		GitCKAutoUpdateEnabled,
-		GitCKAutoUpdateUsePrerelease,
+		GitCKUpdateCheckEnabled,
+		GitCKUpdateCheckUsePrerelease,
 
 		GitCKBugReportInfo,
 
@@ -84,10 +84,6 @@ func GetGlobalGitConfigKeys() []string {
 
 		GitCKDeleteDetectedLFSHooksAnswer,
 
-		GitCKUseManual,
-		GitCKManualTemplateDir,
-
-		GitCKUseCoreHooksPath,
 		GitCKPathForUseCoreHooksPath,
 
 		GitCKNumThreads,
@@ -132,6 +128,14 @@ func GetLocalGitConfigKeys() []string {
 		GitCKContainerizedHooksEnabled,
 
 		GitCKExportStagedFilesAsFile,
+	}
+}
+
+// GetLocalGitConfigKeysNonMinUninstall gets all local keys which should always be uninstalled
+// in registered repos.
+func GetLocalGitConfigKeysNonMinUninstall() []string {
+	return []string{
+		GitCKRegistered,
 	}
 }
 

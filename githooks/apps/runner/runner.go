@@ -231,9 +231,7 @@ func getInstallDir(gitx *git.Context) string {
 }
 
 func assertRegistered(gitx *git.Context, installDir string) {
-
-	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) &&
-		!gitx.IsConfigSet(git.GitCKCoreHooksPath, git.Traverse) {
+	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) {
 
 		gitDir, err := gitx.GetGitDirCommon()
 		log.AssertNoErrorPanicF(err, "Could not get Git common dir.")
@@ -247,7 +245,7 @@ func assertRegistered(gitx *git.Context, installDir string) {
 
 	} else {
 		log.Debug(
-			"Repository already registered or using 'core.hooksPath'.")
+			"Repository already registered.")
 	}
 }
 
@@ -359,38 +357,31 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 }
 
 func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
-
 	if !shouldRunUpdateCheck(settings) {
 		return
 	}
 
-	opts := []string{"--internal-auto-update"}
-	if settings.NonInteractive {
-		opts = append(opts, "--non-interactive")
-	}
+	err := updates.RecordUpdateCheckTimestamp(settings.InstallDir)
+	log.AssertNoError(err, "Could not record update check time.")
 
 	var usePreRelease bool
-	if settings.GitX.GetConfig(hooks.GitCKAutoUpdateUsePrerelease, git.GlobalScope) == git.GitCVTrue {
+	if settings.GitX.GetConfig(hooks.GitCKUpdateCheckUsePrerelease, git.GlobalScope) == git.GitCVTrue {
 		usePreRelease = true
-		opts = append(opts, "--use-pre-release")
 	}
 
-	updateAvailable, accepted, err := updates.RunUpdate(
-		settings.InstallDir,
-		updates.DefaultAcceptUpdateCallback(log, uiSettings.PromptCtx, updates.AcceptNonInteractiveNone),
-		usePreRelease,
-		func() error {
-			return updates.RunUpdateOverExecutable(settings.InstallDir,
-				&settings.ExecX,
-				cm.UseStreams(nil, os.Stderr, os.Stderr), // Must not use stdout, because Git hooks.
-				opts...)
-		})
+	cloneDir := hooks.GetReleaseCloneDir(settings.InstallDir)
+	status, err := updates.FetchUpdates(
+		cloneDir,
+		"",
+		"",
+		build.BuildTag,
+		true,
+		updates.ErrorOnWrongRemote,
+		usePreRelease, true)
 
 	if err != nil {
 		m := strs.Fmt(
-			"Running update failed. See latest log '%s' !",
-			path.Join(os.TempDir(),
-				"githooks-installer-*.log"))
+			"Running update check failed.")
 
 		log.AssertNoError(err, m)
 		err = uiSettings.PromptCtx.ShowMessage(m, true)
@@ -399,21 +390,11 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 		return
 	}
 
-	switch {
-	case updateAvailable:
-		if accepted {
-			log.Info("Update successfully dispatched.")
-		} else {
-			log.Info("Update declined.")
-		}
-	default:
-		log.InfoF("Githooks is at the latest version '%s'",
-			build.GetBuildVersion().String())
-	}
-
+	versionText, _ := updates.FormatUpdateText(&status, true)
+	log.Info(versionText)
 	log.Info(
-		"If you would like to disable auto-updates, run:",
-		"  $ git hooks update disable")
+		"If you would like to disable update checks, run:",
+		"  $ git hooks update --disable-check")
 }
 
 func shouldRunUpdateCheck(settings *HookSettings) bool {
@@ -421,7 +402,7 @@ func shouldRunUpdateCheck(settings *HookSettings) bool {
 		return false
 	}
 
-	enabled, _ := updates.GetAutomaticUpdateCheckSettings(settings.GitX)
+	enabled, _ := updates.GetUpdateCheckSettings(settings.GitX)
 	if !enabled {
 		return false
 	}

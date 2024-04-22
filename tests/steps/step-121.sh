@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 [ "$(id -u)" -eq 0 ] && ROOT_ACCESS="true"
@@ -66,7 +68,7 @@ version: 1
 EOF
 
 # Execute pre-commit by the runner
-OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+OUT=$(MONKEY="mon key" "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
 # shellcheck disable=SC2181,SC2016
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Hello" ||
@@ -97,7 +99,7 @@ version: 1
 EOF
 
 # Execute pre-commit by the runner
-OUT=$(MONKEY="mon key" "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+OUT=$(MONKEY="mon key" "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
 # shellcheck disable=SC2181,SC2016
 if [ "$?" -ne 0 ] ||
     ! echo "$OUT" | grep "Args:mon key,\${env:MONKEY},git-monkey,git-monkey,git-monkey-global,$SYSTEM_VALUE"; then
@@ -117,7 +119,7 @@ args:
 version: 1
 EOF
 
-OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
 # shellcheck disable=SC2181,SC2016
 if [ "$?" -eq 0 ] || ! echo "$OUT" | grep "Error in hook run config"; then
     echo "! Expected hook to fail."
@@ -135,7 +137,7 @@ args:
 version: 1
 EOF
 
-OUT=$("$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
+OUT=$("$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit 2>&1)
 # shellcheck disable=SC2181,SC2016
 if [ "$?" -ne 0 ] || echo "$OUT" | grep "Error in hook run config"; then
     echo "! Expected hook to succeed."

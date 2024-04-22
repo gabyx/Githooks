@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 mkdir -p "$GH_TEST_TMP/test15" &&
@@ -21,7 +23,7 @@ mkdir -p .githooks/pre-commit &&
     chmod +x .githooks/pre-commit/test.fourth &&
     echo 'patterns: - pre-commit/*first' >.githooks/.ignore.yaml &&
     echo 'patterns: - ./*second' >.githooks/pre-commit/.ignore.yaml &&
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit ||
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit ||
     exit 1
 
 grep -q 'Third was run' "$GH_TEST_TMP/test015.out" &&

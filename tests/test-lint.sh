@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 
 set -e
 set -u
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
+. "$ROOT_DIR/tests/general.sh"
+
+cd "$ROOT_DIR"
 
 # shellcheck disable=SC2317
 function clean_up() {
@@ -24,7 +28,7 @@ EOF
 
 # Build test container.
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
-FROM golang:1.20-alpine
+FROM golang:1.21-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker just
 
@@ -33,7 +37,7 @@ RUN git config --global safe.directory /data
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
 
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.52.2
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.57.2
 
 RUN git config --global user.email "githook@test.com" && \
     git config --global user.name "Githook Tests" && \

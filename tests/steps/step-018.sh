@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 accept_all_trust_prompts || exit 1
 
 git config --global githooks.testingTreatFileProtocolAsRemote "true"
@@ -24,10 +26,10 @@ mkdir -p "$GH_TEST_TMP/test18" &&
 
 mkdir -p .githooks &&
     echo "urls: - file://$GH_TEST_TMP/shared/hooks-018.git" >.githooks/.shared.yaml &&
-    "$GH_TEST_BIN/cli" shared update ||
+    "$GH_TEST_BIN/githooks-cli" shared update ||
     exit 1
 
-"$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+"$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if [ $? -ne 1 ]; then
     echo "! Expected to fail on shared hook execution"

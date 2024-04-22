@@ -8,7 +8,7 @@ before:
     - go generate -mod=vendor ./...
 builds:
   - id: runner
-    binary: runner
+    binary: githooks-runner
     main: ./apps/runner
     env: &ENV
       - CGO_ENABLED=0
@@ -35,14 +35,14 @@ builds:
       - goos: windows
         goarch: arm64
   - id: cli
-    binary: cli
+    binary: githooks-cli
     main: ./apps/cli
     env: *ENV
     goos: *GOOS
     goarch: *GOARCH
     ignore: *IGNORE
   - id: dialog
-    binary: dialog
+    binary: githooks-dialog
     main: ./apps/dialog
     env: *ENV
     goos: *GOOS
@@ -92,6 +92,7 @@ release:
     owner: gabyx
     name: githooks
   prerelease: auto
+  target_commitish: "{{ .Commit }}"
 # Use these values for you own gitea instance...
 # gitea_urls:
 #   api: "https://git.company.com/api/v1"

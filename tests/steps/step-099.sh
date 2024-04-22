@@ -6,12 +6,15 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
-"$GH_TEST_BIN/cli" installer || exit 1
+init_step
+
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 mkdir -p "$GH_TEST_TMP/test099/.git/hooks" &&
     cd "$GH_TEST_TMP/test099" &&
     git init &&
-    git config githooks.autoUpdateEnabled false ||
+    install_hooks_if_not_centralized &&
+    git config githooks.updateCheckEnabled false ||
     exit 1
 
 if ! git worktree list >/dev/null 2>/dev/null; then
@@ -36,9 +39,9 @@ if [ ! -f "$GH_TEST_TMP/test099.out" ]; then
     exit 1
 fi
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "example" | grep "'active'" | grep -q "'trusted'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "example" | grep "'active'" | grep -q "'trusted'"; then
     echo "! Unexpected cli list output"
-    "$GH_INSTALL_BIN_DIR/cli" list
+    "$GH_INSTALL_BIN_DIR/githooks-cli" list
     exit 3
 fi
 
@@ -46,8 +49,8 @@ fi
 git worktree add -b example-a ../test099-A HEAD || exit 2
 cd ../test099-A || exit 2
 
-if ! "$GH_INSTALL_BIN_DIR/cli" list | grep "example" | grep "'active'" | grep -q "'untrusted'"; then
+if ! "$GH_INSTALL_BIN_DIR/githooks-cli" list | grep "example" | grep "'active'" | grep -q "'untrusted'"; then
     echo "! Unexpected cli list output"
-    "$GH_INSTALL_BIN_DIR/cli" list
+    "$GH_INSTALL_BIN_DIR/githooks-cli" list
     exit 3
 fi

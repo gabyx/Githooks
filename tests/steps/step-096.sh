@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 mkdir -p "$GH_TEST_TMP/test096/.githooks/pre-commit" &&
     cd "$GH_TEST_TMP/test096" &&
     git init || exit 1
@@ -27,7 +29,7 @@ EOF
 git add sub f*
 
 ACCEPT_CHANGES=A \
-    "$GH_TEST_BIN/runner" "$(pwd)"/.git/hooks/pre-commit
+    "$GH_TEST_BIN/githooks-runner" "$(pwd)"/.git/hooks/pre-commit
 
 if [ "$(wc -l <"$GH_TEST_TMP/test096.out")" != "4" ]; then
     echo "! Unexpected number of output rows"

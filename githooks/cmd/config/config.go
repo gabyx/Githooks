@@ -429,28 +429,28 @@ func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
 }
 
-// RunUpdate enables/disables automatic Githooks update.
-func RunUpdate(ctx *ccm.CmdContext, opts *SetOptions) {
-	const text = "Automatic Githooks update"
+// RunUpdateCheck enables/disables Githooks update checks.
+func RunUpdateCheck(ctx *ccm.CmdContext, opts *SetOptions) {
+	const text = "Githooks update"
 
 	switch {
 	case opts.Set:
-		err := updates.SetAutomaticUpdateCheckSettings(true, false)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not enable automatic update settings.")
+		err := updates.SetUpdateCheckSettings(true, false)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not enable update settings.")
 		ctx.Log.InfoF("%s checks are now enabled.", text)
 
 	case opts.Unset:
-		err := updates.SetAutomaticUpdateCheckSettings(false, false)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not disable automatic update settings.")
+		err := updates.SetUpdateCheckSettings(false, false)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not disable update settings.")
 		ctx.Log.InfoF("%s checks are now disabled.", text)
 
 	case opts.Reset:
-		err := updates.SetAutomaticUpdateCheckSettings(false, true)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not reset automatic update settings.")
+		err := updates.SetUpdateCheckSettings(false, true)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not reset update settings.")
 		ctx.Log.InfoF("%s setting is now unset.", text)
 
 	case opts.Print:
-		enabled, _ := updates.GetAutomaticUpdateCheckSettings(ctx.GitX)
+		enabled, _ := updates.GetUpdateCheckSettings(ctx.GitX)
 		switch {
 		case enabled:
 			ctx.Log.InfoF("%s checks are enabled.", text)
@@ -854,14 +854,14 @@ This command needs to be run at the root of a repository.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, trustCmd))
 }
 
-func configUpdateCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
+func configUpdateCheckCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
 
 	updateCmd := &cobra.Command{
-		Use:   "update [flags]",
-		Short: "Change Githooks update settings.",
-		Long:  `Enable or disable automatic Githooks updates.`,
+		Use:   "update-check [flags]",
+		Short: "Change Githooks update-check settings.",
+		Long:  `Enable or disable automatic Githooks update checks.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			RunUpdate(ctx, setOpts)
+			RunUpdateCheck(ctx, setOpts)
 		}}
 
 	optsPSUR := createOptionMap(true, true, true)
@@ -1125,7 +1125,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configTrustAllHooksCmd(ctx, configCmd, &setOpts)
 
 	configSearchDirCmd(ctx, configCmd, &setOpts)
-	configUpdateCmd(ctx, configCmd, &setOpts)
+	configUpdateCheckCmd(ctx, configCmd, &setOpts)
 	configUpdateTimeCmd(ctx, configCmd, &setOpts)
 	configCloneURLCmd(ctx, configCmd, &setOpts)
 	configCloneBranchCmd(ctx, configCmd, &setOpts)
@@ -1142,6 +1142,10 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 	configNonInteractiveRunner(ctx, configCmd, &setOpts, &gitOpts)
 
 	configDetectedLFSCmd(ctx, configCmd, &setOpts, &gitOpts)
+
+	configCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
 
 	return ccm.SetCommandDefaults(ctx.Log, configCmd)
 }

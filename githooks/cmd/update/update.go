@@ -20,7 +20,7 @@ func runUpdate(
 
 	switch {
 	case setOpts.Set || setOpts.Unset:
-		config.RunUpdate(ctx, setOpts)
+		config.RunUpdateCheck(ctx, setOpts)
 
 	default:
 
@@ -28,6 +28,9 @@ func runUpdate(
 		if !nonInteractive {
 			promptx = ctx.PromptCtx
 		}
+
+		err := updates.RecordUpdateCheckTimestamp(ctx.InstallDir)
+		ctx.Log.AssertNoError(err, "Could not record update check time.")
 
 		updateAvailable, accepted, err := updates.RunUpdate(
 			ctx.InstallDir,
@@ -79,7 +82,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 If it finds one and the user accepts the prompt (or '--yes' is used)
 the installer is executed to update to the latest version.
 
-The '--enable' and '--disable' options enable or disable
+The '--enable-ckeck' and '--disable-ckeck' options enable or disable
 the automatic checks that would normally run daily
 after a successful commit event.`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -113,8 +116,12 @@ after a successful commit event.`,
 		"Always accepts a new update (non-interactive, all versions).")
 	updateCmd.Flags().BoolVar(&usePreRelease, "use-pre-release", false,
 		"Also discover pre-release versions when updating.")
-	updateCmd.Flags().BoolVar(&setOpts.Set, "enable", false, "Enable daily Githooks update checks.")
-	updateCmd.Flags().BoolVar(&setOpts.Unset, "disable", false, "Disable daily Githooks update checks.")
+	updateCmd.Flags().BoolVar(&setOpts.Set, "enable-check", false, "Enable daily Githooks update checks.")
+	updateCmd.Flags().BoolVar(&setOpts.Unset, "disable-check", false, "Disable daily Githooks update checks.")
+
+	updateCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
+		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)
+	}
 
 	return ccm.SetCommandDefaults(ctx.Log, updateCmd)
 }

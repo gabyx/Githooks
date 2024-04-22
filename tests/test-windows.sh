@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 
 set -e
 set -u
+
+ROOT_DIR=$(git rev-parse --show-toplevel)
+. "$ROOT_DIR/tests/general.sh"
+
+cd "$ROOT_DIR"
 
 cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/dotnet/framework/runtime:4.8-windowsservercore-ltsc2022
@@ -28,13 +34,13 @@ RUN $newPath = ('{0}\bin;C:\go\bin;{1}' -f $env:GOPATH, $env:PATH); \
 # doing this first to share cache across versions more aggressively
 
 # Check hash below for download.
-ENV GOLANG_VERSION 1.20.5
+ENV GOLANG_VERSION 1.21.0
 
 RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION); \
     Write-Host ('Downloading {0} ...' -f $url); \
     $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri $url -OutFile 'go.zip'; \
     \
-    $sha256 = 'c04a4ed73c3624d5b4c4f62e44a141549cc0bfd83a7492c31ca8b86b3752f077'; \
+    $sha256 = '732121e64e0ecb07c77fdf6cc1bc5ce7b242c2d40d4ac29021ad4c64a08731f6'; \
     Write-Host ('Verifying sha256 ({0}) ...' -f $sha256); \
     if ((Get-FileHash go.zip -Algorithm sha256).Hash -ne $sha256) { \
         Write-Host 'FAILED!'; \
@@ -53,6 +59,7 @@ RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION);
     Write-Host 'Complete.';
 
 ENV DOCKER_RUNNING=true
+ENV GH_SCRIPTS="c:/githooks-tests/scripts"
 ENV GH_TESTS="c:/githooks-tests/tests"
 ENV GH_TEST_TMP="c:/githooks-tests/tmp"
 ENV GH_TEST_REPO="c:/githooks-tests/githooks"
@@ -66,9 +73,10 @@ ADD .githooks/README.md "$GH_TEST_REPO/.githooks/README.md"
 ADD examples "$GH_TEST_REPO/examples"
 
 ADD tests/setup-githooks.sh "$GH_TESTS/"
-RUN & "'C:/Program Files/Git/bin/sh.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
+RUN & "'C:/Program Files/Git/bin/bash.exe'" "C:/githooks-tests/tests/setup-githooks.sh"
 
 ADD tests "$GH_TESTS"
+ADD scripts "$GH_SCRIPTS"
 
 WORKDIR C:/githooks-tests/tests
 

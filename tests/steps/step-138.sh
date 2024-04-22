@@ -8,12 +8,14 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if ! is_docker_available; then
     echo "docker is not available"
     exit 249
 fi
 
-"$GH_TEST_BIN/cli" installer || exit 1
+"$GH_TEST_BIN/githooks-cli" installer "${EXTRA_INSTALL_ARGS[@]}" || exit 1
 
 accept_all_trust_prompts || exit 1
 assert_no_test_images
@@ -46,7 +48,7 @@ mkdir -p "$GH_TEST_TMP/test138" &&
 # Enable containerized hooks.
 export GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true
 
-"$GH_TEST_BIN/cli" shared update
+"$GH_TEST_BIN/githooks-cli" shared update
 
 # Creating volumes for the mounting, because
 # `docker in docker` uses directories on host volume,
@@ -56,7 +58,7 @@ show_all_container_volumes 3
 set_githooks_container_volume_envs "."
 
 # Test the containerized run.
-OUT=$("$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
+OUT=$("$GH_TEST_BIN/githooks-cli" exec ns:sharedhooks/scripts/test-success.yaml "arg1" "arg2" 2>&1) ||
     {
         echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
@@ -70,7 +72,7 @@ if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2' banana"; then
 fi
 
 # Test the normal run as well.
-OUT=$("$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
+OUT=$("$GH_TEST_BIN/githooks-cli" exec ns:sharedhooks/scripts/test-success.sh "arg1" "arg2" 2>&1) ||
     {
         echo "Execution failed. [exit code: $?]:"
         echo "$OUT"
@@ -84,14 +86,14 @@ if ! echo "$OUT" | grep -iq "executing test script 'arg1' 'arg2' banana"; then
 fi
 
 set +e
-OUT=$("$GH_TEST_BIN/cli" exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
-exitCode="$?"
+OUT=$("$GH_TEST_BIN/githooks-cli" exec ns:sharedhooks/scripts/test-fail.yaml 2>&1)
+EXIT_CODE="$?"
 set -e
 
 # Coverage cannot report correct exit codes, without wrapping it to a file.
 if [ -z "${GH_COVERAGE_DIR:-}" ] &&
-    [ "$exitCode" != "123" ]; then
-    echo "! Test script should have reported 123 [exit code: $exitCode]"
+    [ "$EXIT_CODE" != "123" ]; then
+    echo "! Test script should have reported 123 [exit code: $EXIT_CODE]"
     exit 1
 fi
 

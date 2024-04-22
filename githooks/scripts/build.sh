@@ -31,8 +31,6 @@ parse_args() {
             BUILD_TAGS="$p"
         elif [ "$p" = "--coverage" ]; then
             BUILD_COVERAGE="true"
-        elif [ "$p" = "--benchmark" ]; then
-            DEBUG_TAG="${DEBUG_TAG}${DEBUG_TAG+,}benchmark"
         elif [ "$p" = "--prod" ]; then
             DEBUG_TAG=""
             LD_FLAGS+=("-ldflags" "-s -w") # strip debug information
@@ -44,7 +42,7 @@ parse_args() {
     done
 }
 
-parse_args "$@" || die "Parsing args failed."
+parse_args "$@"
 
 cd "$GO_SRC"
 
@@ -70,9 +68,19 @@ fi
 if [ -z "$BUILD_COVERAGE" ]; then
     echo "Build normal ..."
     echo "go install ..."
-    go generate -mod=vendor ./...
+
+    cmd=(go generate -mod=vendor ./...)
+    echo -e "Generating with:\n" "${cmd[@]}"
+    "${cmd[@]}"
+
     # shellcheck disable=SC2086
-    go install -mod=vendor -tags "$BUILD_TAGS" "${LD_FLAGS[@]}" ./...
+    cmd=(go install -mod=vendor -tags "$BUILD_TAGS" "${LD_FLAGS[@]}" ./...)
+    echo -e "Building with:\n" "${cmd[@]}"
+    "${cmd[@]}"
+
+    mv "$GOBIN/cli" "$GOBIN/githooks-cli"
+    mv "$GOBIN/runner" "$GOBIN/githooks-runner"
+    mv "$GOBIN/dialog" "$GOBIN/githooks-dialog"
 else
     echo "Build coverage ..."
     BUILD_TAGS="$BUILD_TAGS,coverage"
@@ -80,9 +88,9 @@ else
     echo "go test ..."
     go generate -mod=vendor ./...
     # shellcheck disable=SC2086
-    go test ./apps/cli -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/cli"
+    go test ./apps/cli -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/githooks-cli"
     # shellcheck disable=SC2086
-    go test ./apps/dialog -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/dialog"
+    go test ./apps/dialog -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/githooks-dialog"
     # shellcheck disable=SC2086
-    go test ./apps/runner -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/runner"
+    go test ./apps/runner -tags "$BUILD_TAGS" -covermode=count -coverpkg ./... -c -o "$GOBIN/githooks-runner"
 fi

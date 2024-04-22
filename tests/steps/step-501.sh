@@ -6,6 +6,8 @@ TEST_DIR=$(cd "$(dirname "$0")/.." && pwd)
 # shellcheck disable=SC1091
 . "$TEST_DIR/general.sh"
 
+init_step
+
 if [ -n "$GH_COVERAGE_DIR" ]; then
     echo "Benchmark not for coverage."
     exit 249
@@ -13,20 +15,33 @@ fi
 
 accept_all_trust_prompts || exit 1
 
-# Misuse the 2.1.0 prod build with `benchmark` build to test.
-# but forbid update during commits otherwise the runner is overwritten.
-git -C "$GH_TEST_REPO" reset --hard v2.1.0 >/dev/null 2>&1 || exit 1
+# Misuse the 3.1.0 prod build with package-manager enabled and download mocked.
+git -C "$GH_TEST_REPO" reset --hard v3.1.0 >/dev/null 2>&1 || exit 1
 
 # run the default install
-"$GH_TEST_BIN/cli" installer &>/dev/null || exit 1
+"$GH_TEST_BIN/githooks-cli" installer \
+    "${EXTRA_INSTALL_ARGS[@]}" \
+    --clone-url "file://$GH_TEST_REPO" \
+    --clone-branch "test-package-manager" || exit 1
 
-# Overwrite runner.
-git config --global githooks.autoUpdateEnabled false
-git config --global githooks.runner "$GH_TEST_BIN/runner"
+# Test run-wrappers with pure binaries in the path.
+# Put binaries into the path to find them.
+export PATH="$GH_TEST_BIN:$PATH"
+# Install CLI it into the default location for the test functions...
+mkdir ~/.githooks/bin &&
+    cp "$(which githooks-cli)" ~/.githooks/bin/ || exit 1
 
 mkdir -p "$GH_TEST_TMP/test501" &&
     cd "$GH_TEST_TMP/test501" &&
-    git init || exit 1
+    git init &&
+    install_hooks_if_not_centralized ||
+    exit 1
+
+if ! is_centralized_tests; then
+    check_local_install
+else
+    check_centralized_install
+fi
 
 function run_commits() {
     for i in {1..30}; do
@@ -44,7 +59,7 @@ function average() {
     local input
     input=$(cat | grep "execution time:" | sed -E "s/.*'([0-9\.]+)'.*/\1/g")
     [ -n "$input" ] || {
-        echo "no time extracted"
+        echo "no time extracted" >&2
         exit 1
     }
 
@@ -64,6 +79,11 @@ function average() {
     echo "execution time: '$time' ms."
 }
 
-echo -e "Runtime average (no load):\n$(run_commits | average 3)"
+# shellcheck disable=SC2015
+OUT=$(run_commits | average 3) || {
+    echo "Benchmark not successful."
+}
+
+echo -e "Runtime average (no load):\n$OUT"
 
 exit 250
