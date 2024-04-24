@@ -21,8 +21,6 @@ function check_bash() {
 
 function get_platform_os() {
     local -n _platform_os="$1"
-    local platform_os_dist=""
-    local platform_os_version=""
 
     if [[ "$OSTYPE" == "linux"* ]]; then
         _platform_os="linux"
@@ -35,72 +33,11 @@ function get_platform_os() {
         local name
         name=$(uname -a)
         case "$name" in
-        CYGWIN*) _platform_os="windows" && platform_os_dist="cygwin" ;;
-        MINGW*) _platform_os="windows" && platform_os_dist="mingw" ;;
-        *Msys) _platform_os="windows" && platform_os_dist="msys" ;;
+        CYGWIN*) _platform_os="windows" ;;
+        MINGW*) _platform_os="windows" ;;
+        *Msys) _platform_os="windows" ;;
         *) die "Platform: '$name' not supported." ;;
         esac
-    fi
-
-    if [ "$_platform_os" = "linux" ]; then
-
-        if [ "$(lsb_release -si 2>/dev/null)" = "Ubuntu" ] ||
-            grep -qE 'ID="?ubuntu' "/etc/os-release"; then
-            platform_os_dist="ubuntu"
-            platform_os_version=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
-                sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
-        elif grep -qE 'ID="?debian' "/etc/os-release"; then
-            platform_os_dist="debian"
-            platform_os_version=$(grep -m 1 "VERSION_CODENAME=" "/etc/os-release" |
-                sed -E "s|.*=[\"']?(.*)[\"']?|\1|")
-        elif grep -qE 'ID="?alpine' "/etc/os-release"; then
-            platform_os_dist="alpine"
-            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
-                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
-        elif grep -qE 'ID="?nixos' "/etc/os-release"; then
-            platform_os_dist="nixos"
-            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
-                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
-        elif grep -qE 'ID="?rhel' "/etc/os-release"; then
-            platform_os_dist="redhat"
-            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
-                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
-        elif grep -qE 'ID="?opensuse' "/etc/os-release"; then
-            platform_os_dist="opensuse"
-            platform_os_version=$(grep -m 1 "VERSION_ID=" "/etc/os-release" |
-                sed -E 's|.*="?([0-9]+\.[0-9]+).*|\1|')
-        else
-            die "Linux Distro '/etc/os-release' not supported currently:" \
-                "$(cat /etc/os-release 2>/dev/null)"
-        fi
-
-        # Remove whitespaces
-        platform_os_dist="${platform_os_dist// /}"
-        platform_os_version="${platform_os_version// /}"
-
-    elif [ "$_platform_os" = "darwin" ]; then
-
-        platform_os_dist=$(sw_vers | grep -m 1 'ProductName' | sed -E 's/.*:\s+(.*)/\1/')
-        platform_os_version=$(sw_vers | grep -m 1 'ProductVersion' | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+)/\1/g')
-        # Remove whitespaces
-        platform_os_dist="${platform_os_dist// /}"
-        platform_os_version="${platform_os_version// /}"
-
-    elif [ "$_platform_os" = "windows" ]; then
-        platform_os_version=$(systeminfo | grep -m 1 'OS Version:' | sed -E "s/.*:\s+([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
-        platform_os_version="${platform_os_version// /}"
-    else
-        die "Platform '$_platform_os' not supported currently."
-    fi
-
-    if [ -n "${2:-}" ]; then
-        local -n _platformOSDist="$2"
-        _platformOSDist="$platform_os_dist"
-    fi
-
-    if [ -n "${3:-}" ]; then
-        local -n _platformOSVersion="$3"
-        _platformOSVersion="$platform_os_version"
     fi
 
     return 0
