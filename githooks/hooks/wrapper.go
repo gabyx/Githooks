@@ -12,6 +12,7 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
+var RunWrapperMarkerFileName = "githooks-contains-run-wrappers"
 var runWrapperDetectionRegex = regexp.MustCompile(`https://github\.com/(gabyx|rycus86)/githooks`)
 
 // IsRunWrapper answers the question if `filePath`
@@ -321,7 +322,7 @@ func InstallRunWrappers(
 		}
 	}
 
-	err = cm.TouchFile(path.Join(dir, "githooks-contains-run-wrappers"), true)
+	err = cm.TouchFile(path.Join(dir, RunWrapperMarkerFileName), true)
 	if err != nil {
 		err = cm.CombineErrors(err,
 			cm.ErrorF("Could not create marker that directory '%s' contains run-wrappers.", dir))
@@ -389,7 +390,7 @@ func uninstallRunWrappers(
 		}
 	}
 
-	_ = os.Remove(path.Join(dir, "githooks-contains-run-wrappers"))
+	_ = os.Remove(path.Join(dir, RunWrapperMarkerFileName))
 
 	return
 }

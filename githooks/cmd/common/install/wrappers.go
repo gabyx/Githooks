@@ -47,7 +47,7 @@ func InstallIntoRepo(
 	// a link `core.hooksPath`.
 	// We switch to run-wrappers if we install a set of maintained hooks.
 	// or repository settings have maintained hooks set.
-	installRunWrappers, _ := cm.IsPathExisting(path.Join(hooksDir, "githooks-contains-run-wrappers"))
+	installRunWrappers, _ := cm.IsPathExisting(path.Join(hooksDir, hooks.RunWrapperMarkerFileName))
 	log.DebugF("Marker file for run-wrappers detected: '%v'.", installRunWrappers)
 	installRunWrappers = installRunWrappers || hookNames != nil
 
@@ -197,7 +197,7 @@ func UninstallFromRepo(
 
 	// We always uninstall run-wrappers if any are existing.
 	// Also reinstalls LFS hooks.
-	// No need to check the marker file `.githooks-contains-run-wrappers`.
+	// No need to check the marker file `RunWrapperMarkerFileName`.
 	nLfsCount, err = hooks.UninstallRunWrappers(hooksDir, lfsHooksCache)
 	log.InfoF("Githooks has reinstalled '%v' LFS hooks into '%s'.", nLfsCount, hooksDir)
 
