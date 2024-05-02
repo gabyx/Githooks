@@ -45,7 +45,7 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 
 		gitDir, err := gitx.GetGitDirCommon()
 		log.AssertNoErrorF(err, "Could not determine common Git dir.")
-		hasRunWrappers, _ := cm.IsPathExisting(path.Join(gitDir, "githooks-contains-run-wrappers"))
+		hasRunWrappers, _ := cm.IsPathExisting(path.Join(gitDir, "hooks", "githooks-contains-run-wrappers"))
 
 		if hasHooksConfigured &&
 			!localCoreHooksPathSet && !globalCoreHooksPathSet &&
