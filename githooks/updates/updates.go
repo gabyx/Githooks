@@ -256,7 +256,7 @@ func FetchUpdates(
 		}
 	}
 
-	// On a new clone we reset local branch
+	// We reset local branch
 	// to the matching current release tag descending from HEAD.
 	// Remote stays and might trigger a direct update.
 
