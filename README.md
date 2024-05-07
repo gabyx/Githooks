@@ -977,8 +977,11 @@ script and `bash -s -- -- <options>` to pass arguments to the installer
 
 ### Package Manager `nix`
 
-Install the Githooks derivation at version `<version>` by adding the following
-to your `inputs` in your `flake.nix`:
+Githooks is inside [`nixpkgs`](https://github.com/NixOS/nixpkgs), so you can
+access it by `pkgs.githooks` in your `flake.nix`.
+
+To install the Githooks derivation at a different version `<version>`, add the
+following to your `inputs` in your `flake.nix`:
 
 ```nix
 inputs = {
