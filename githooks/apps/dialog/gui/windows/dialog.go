@@ -68,8 +68,8 @@ func centerOnScreen(app *walk.Dialog) {
 	hScreen := int(win.GetSystemMetrics(win.SM_CYSCREEN))
 
 	rect := app.Bounds()
-	rect.X = wScreen/2 - rect.Width/2  // nolint: gomnd
-	rect.Y = hScreen/2 - rect.Height/2 // nolint: gomnd
+	rect.X = wScreen/2 - rect.Width/2  // nolint: mnd
+	rect.Y = hScreen/2 - rect.Height/2 // nolint: mnd
 	_ = app.SetBounds(rect)
 }
 

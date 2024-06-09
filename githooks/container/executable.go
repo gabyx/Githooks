@@ -62,20 +62,20 @@ const dindMsg = "Note: If you are inside a container ALREADY and want\n" +
 func (e *ContainerizedExecutable) ResolveExitCode(exitCode int) string {
 	if e.containerType == ContainerManagerTypeV.Docker {
 		switch exitCode {
-		case 125: // nolint: gomnd
+		case 125: // nolint: mnd
 			return "The docker daemon reported an error.\n" + dindMsg
-		case 126: // nolint: gomnd
+		case 126: // nolint: mnd
 			return "Docker command could not be invoked (permission problem?)."
-		case 127: // nolint: gomnd
+		case 127: // nolint: mnd
 			return "Command inside container could not be found."
 		}
 	} else if e.containerType == ContainerManagerTypeV.Podman {
 		switch exitCode {
-		case 125: // nolint: gomnd
+		case 125: // nolint: mnd
 			return "The podman reported an error.\n" + dindMsg
-		case 126: // nolint: gomnd
+		case 126: // nolint: mnd
 			return "Podman command could not be invoked (permission problem?)."
-		case 127: // nolint: gomnd
+		case 127: // nolint: mnd
 			return "Command inside container could not be found."
 		}
 	}

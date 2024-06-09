@@ -468,7 +468,7 @@ func (c *LogContext) RemoveFileWriter() {
 // Moves the the write pointer to the end of the file.
 func (c *LogContext) MoveFileWriterToEnd() {
 	if c.file != nil {
-		_, _ = c.file.Seek(0, 2) // nolint: gomnd
+		_, _ = c.file.Seek(0, 2) // nolint: mnd
 	}
 }
 

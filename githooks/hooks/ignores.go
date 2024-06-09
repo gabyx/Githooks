@@ -280,7 +280,7 @@ func GetHookPatternsHooksDir(
 	hookNamespace string) (patterns HookPatterns, err error) {
 
 	files := GetHookIgnoreFilesHooksDir(hooksDir, hookNames)
-	patterns.Reserve(2 * len(files)) // nolint: gomnd
+	patterns.Reserve(2 * len(files)) // nolint: mnd
 
 	mainFile := GetHookIgnoreFileHooksDir(hooksDir, "")
 	if cm.IsFile(mainFile) {

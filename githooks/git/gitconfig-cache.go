@@ -117,9 +117,9 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 	}
 
 	addEntry := func(scope ConfigScope, keyValue []string) {
-		cm.DebugAssert(len(keyValue) == 2) // nolint: gomnd
+		cm.DebugAssert(len(keyValue) == 2) // nolint: mnd
 		if len(keyValue) != 2 ||
-			(filterFunc != nil && !filterFunc(keyValue[0])) { // nolint: gomnd
+			(filterFunc != nil && !filterFunc(keyValue[0])) { // nolint: mnd
 			return
 		}
 
@@ -154,7 +154,7 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 
 			addEntry(
 				idx,
-				strings.SplitN(txt, "\n", 2)) // nolint: gomnd
+				strings.SplitN(txt, "\n", 2)) // nolint: mnd
 		}
 	}
 

@@ -101,7 +101,7 @@ func wtsMessage(s *sets.Notification) error {
 	cm.AssertNoErrorPanic(err, "Conversion string to UTF16 failed")
 
 	var res uint32
-	// nolint: gomnd
+	// nolint: mnd
 	success, _, err := wtsSendMessage.Call(
 		0,          // WTS_CURRENT_SERVER_HANDLE
 		0xffffffff, // WTS_CURRENT_SESSION

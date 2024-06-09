@@ -27,8 +27,8 @@ func CreateDefaultProgressSettings(title string, titleStillRunning string) Progr
 	return ProgressSettings{
 		Title:                     title,
 		TitleStillRunning:         titleStillRunning,
-		ProgressUpdateInterval:    100 * time.Millisecond, //nolint: gomnd
-		ProgressStillRunningAfter: 5 * time.Second}        //nolint: gomnd
+		ProgressUpdateInterval:    100 * time.Millisecond, //nolint: mnd
+		ProgressStillRunningAfter: 5 * time.Second}        //nolint: mnd
 }
 
 // RunTaskWithProgress runs a task with a progress spinner

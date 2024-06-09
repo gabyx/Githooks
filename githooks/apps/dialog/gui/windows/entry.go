@@ -60,7 +60,7 @@ func defineEntryButtons(app *EntryApp, entry *sets.Entry, r *res.Entry) []Widget
 		okCallback, cancelCallback, extraButtonCallback)
 }
 
-// nolint: gomnd
+// nolint: mnd
 func defineDefaultEntry(app *EntryApp, opts *sets.Entry, addTextIcon bool) (w []Widget) {
 
 	app.icon = getIcon(opts.WindowIcon)
@@ -96,7 +96,7 @@ func defineEntryEdit(app *EntryApp, opts *sets.Entry) Widget {
 }
 
 // Shows an entry dialog.
-// nolint: gomnd
+// nolint: mnd
 func ShowEntry(ctx context.Context, entry *sets.Entry) (r res.Entry, err error) {
 
 	app := &EntryApp{}
@@ -118,7 +118,7 @@ func ShowEntry(ctx context.Context, entry *sets.Entry) (r res.Entry, err error) 
 		defaultButton, cancelButton = cancelButton, defaultButton
 	}
 
-	// nolint: gomnd
+	// nolint: mnd
 	m := Dialog{
 		AssignTo:      &app.Dialog,
 		Title:         entry.Title,

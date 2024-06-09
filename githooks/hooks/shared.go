@@ -36,7 +36,7 @@ type sharedHookType struct {
 }
 
 // SharedHookTypeV enumerates all types of shared hooks.
-var SharedHookTypeV = &sharedHookType{Repo: 0, Local: 1, Global: 2, count: 3} // nolint:gomnd
+var SharedHookTypeV = &sharedHookType{Repo: 0, Local: 1, Global: 2, count: 3} // nolint: mnd
 
 // SharedRepos a collection of all shared repos.
 // Indexable by `SharedHookTypeV`.
@@ -153,7 +153,7 @@ func GetSharedCloneDir(installDir string, url string) string {
 	cm.AssertNoErrorPanicF(err, "Could not compute hash.")
 
 	name := []rune(url)
-	if len(url) > 48 { // nolint:gomnd
+	if len(url) > 48 { // nolint: mnd
 		name = name[0:48]
 	}
 	nameAbrev := reEscapeURL.ReplaceAllLiteralString(string(name), "-")

@@ -16,7 +16,7 @@ import (
 var osascripts embed.FS
 
 const (
-	ExitCodeCancel = 5 // nolint: gomnd
+	ExitCodeCancel = 5 // nolint: mnd
 )
 
 // RunOSAScript runs Apple's `osascripts` to execute JavaScript or AppleScript.

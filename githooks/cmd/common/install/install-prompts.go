@@ -103,7 +103,7 @@ func PromptExistingRepos(
 		"Searching ...", "Still searching ...")
 	taskIn := GitDirsSearchTask{Dir: searchDir}
 
-	resultTask, err := cm.RunTaskWithProgress(&taskIn, log, 300*time.Second, settings) //nolint: gomnd
+	resultTask, err := cm.RunTaskWithProgress(&taskIn, log, 300*time.Second, settings) //nolint: mnd
 	if err != nil {
 		log.AssertNoErrorF(err, "Could not find Git directories in '%s'.", searchDir)
 		return //nolint: nlreturn

@@ -156,7 +156,7 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 
 		maxLength := 0
 		for i := range pairs {
-			maxLength = math.MaxInt(maxLength, len(pairs[i].Key)+2) // nolint: gomnd
+			maxLength = math.MaxInt(maxLength, len(pairs[i].Key)+2) // nolint: mnd
 		}
 		keyFmt := strs.Fmt("%%-%vs", maxLength)
 
@@ -774,7 +774,7 @@ If unset 'docker' is used.`,
 
 	optsPSR := createOptionMap(true, false, true)
 
-	configSetOptions(enableCmd, setOpts, &optsPSR, ctx.Log, 1, 2) // nolint: gomnd
+	configSetOptions(enableCmd, setOpts, &optsPSR, ctx.Log, 1, 2) // nolint: mnd
 	enableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
 	enableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, enableCmd))
