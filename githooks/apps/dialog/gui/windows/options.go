@@ -78,7 +78,7 @@ func defineListButtons(app *OptionsApp, opts *sets.Options, r *res.Options) []Wi
 		okCallback, cancelCallback, extraButtonCallback)
 }
 
-// nolint: gomnd
+// nolint: mnd
 func defineListText(app *OptionsApp, opts *sets.Options, addTextIcon bool) (w []Widget) {
 
 	switch opts.WindowIcon {
@@ -118,8 +118,8 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 
 	app := &OptionsApp{list: &ListModel{options: opts.Options}}
 
-	minSize := Size{Width: 240, Height: 240}                        // nolint: gomnd
-	size := walk.Size{Width: minSize.Width, Height: minSize.Height} // nolint: gomnd
+	minSize := Size{Width: 240, Height: 240}                        // nolint: mnd
+	size := walk.Size{Width: minSize.Width, Height: minSize.Height} // nolint: mnd
 
 	if opts.Width != 0 {
 		size.Width = int(opts.Width)
@@ -135,7 +135,7 @@ func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err er
 		defaultButton, cancelButton = cancelButton, defaultButton
 	}
 
-	// nolint: gomnd
+	// nolint: mnd
 	m := Dialog{
 		AssignTo:      &app.Dialog,
 		Title:         opts.Title,

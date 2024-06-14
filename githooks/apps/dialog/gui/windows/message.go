@@ -66,7 +66,7 @@ func defineMessageButtons(app *MessageApp, msg *sets.Message, r *res.Message) []
 		okCallback, cancelCallback, extraButtonCallback)
 }
 
-// nolint: gomnd
+// nolint: mnd
 func defineMessageText(app *MessageApp, msg *sets.Message, addTextIcon bool) (w []Widget) {
 
 	app.icon = getIcon(msg.WindowIcon)
@@ -100,7 +100,7 @@ func defineMessageText(app *MessageApp, msg *sets.Message, addTextIcon bool) (w 
 }
 
 // Shows an Message dialog.
-// nolint: gomnd
+// nolint: mnd
 func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err error) {
 
 	app := &MessageApp{}
@@ -124,7 +124,7 @@ func ShowMessage(ctx context.Context, msg *sets.Message) (r res.Message, err err
 		defaultButton, cancelButton = cancelButton, defaultButton
 	}
 
-	// nolint: gomnd
+	// nolint: mnd
 	m := Dialog{
 		AssignTo:      &app.Dialog,
 		Title:         msg.Title,

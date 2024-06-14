@@ -86,7 +86,7 @@ type taggedHooksIndex struct {
 
 // TaggedHookIndices is a list of indices for all
 // possible hooks Githooks supports.
-// nolint: gomnd
+// nolint: mnd
 var TaggedHookIndices = taggedHooksIndex{
 	Replaced:     0,
 	Repo:         1,

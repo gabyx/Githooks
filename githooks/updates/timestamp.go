@@ -66,7 +66,7 @@ func GetUpdateCheckTimestamp(installDir string) (t time.Time, isSet bool, err er
 	}
 
 	isSet = true
-	value, err := strconv.ParseInt(timeLastUpdateCheck, 10, 64) // nolint: gomnd
+	value, err := strconv.ParseInt(timeLastUpdateCheck, 10, 64) // nolint: mnd
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not parse update time."), err)
 

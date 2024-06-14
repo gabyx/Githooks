@@ -14,7 +14,7 @@ type installModeType struct {
 
 // InstallModeTypeV enumerates all types of install modes.
 // Manual is the default install mode.
-var InstallModeTypeV = &installModeType{None: 0, Manual: 0, Centralized: 1} // nolint:gomnd
+var InstallModeTypeV = &installModeType{None: 0, Manual: 0, Centralized: 1} // nolint: mnd
 
 // GetInstallMode returns the current set install mode of Githooks.
 // Return `none`-value if not installed.

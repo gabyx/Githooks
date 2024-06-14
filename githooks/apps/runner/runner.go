@@ -410,7 +410,7 @@ func shouldRunUpdateCheck(settings *HookSettings) bool {
 	lastUpdateCheck, _, err := updates.GetUpdateCheckTimestamp(settings.InstallDir)
 	log.AssertNoErrorF(err, "Could get last update check time.")
 
-	return time.Since(lastUpdateCheck).Hours() > 24.0 //nolint: gomnd
+	return time.Since(lastUpdateCheck).Hours() > 24.0 //nolint: mnd
 }
 
 func executeLFSHooks(settings *HookSettings) {
@@ -1035,7 +1035,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 	var pool *threadpool.ThreadPool
 	if hooks.UseThreadPool && hs.GetHooksCount() > 1 {
 		log.Debug("Launching with thread pool")
-		p := threadpool.New(nThreads, 15) // nolint: gomnd
+		p := threadpool.New(nThreads, 15) // nolint: mnd
 		pool = &p
 	}
 

@@ -15,10 +15,10 @@ import (
 
 const (
 	// DefaultFileModeDirectory is the default file mod for directory creation.
-	DefaultFileModeDirectory = os.FileMode(0775) // nolint:gomnd
+	DefaultFileModeDirectory = os.FileMode(0775) // nolint: mnd
 
 	// DefaultFileModeFile is the default file mod for file creation.
-	DefaultFileModeFile = os.FileMode(0664) // nolint:gomnd
+	DefaultFileModeFile = os.FileMode(0664) // nolint: mnd
 
 )
 
@@ -221,10 +221,10 @@ func GetTempPath(dir string, postfix string) (file string) {
 	maxLoops := 10
 	i := 0
 
-	file = path.Join(dir, strs.RandomString(8)+postfix) // nolint:gomnd
+	file = path.Join(dir, strs.RandomString(8)+postfix) // nolint: mnd
 	exists, err := IsPathExisting(file)
 	for (err != nil || exists) && i < maxLoops {
-		file = path.Join(dir, strs.RandomString(8)+postfix) // nolint:gomnd
+		file = path.Join(dir, strs.RandomString(8)+postfix) // nolint: mnd
 		exists, err = IsPathExisting(file)
 		i++
 	}

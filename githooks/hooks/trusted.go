@@ -152,7 +152,7 @@ func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
 	for i := range checksums {
 		checksum := &checksums[i]
 
-		cm.DebugAssertF(len(checksum.SHA1) == 40, "Wrong SHA1 hash '%s'", checksum.SHA1) // nolint:gomnd
+		cm.DebugAssertF(len(checksum.SHA1) == 40, "Wrong SHA1 hash '%s'", checksum.SHA1) // nolint: mnd
 
 		dir := path.Join(t.checksumDir, checksum.SHA1[0:2])
 		err := os.MkdirAll(dir, cm.DefaultFileModeDirectory)
@@ -181,7 +181,7 @@ func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err er
 
 	for _, sha1 := range sha1s {
 
-		cm.DebugAssertF(len(sha1) == 40, "Wrong SHA1 hash '%s'", sha1) // nolint:gomnd
+		cm.DebugAssertF(len(sha1) == 40, "Wrong SHA1 hash '%s'", sha1) // nolint: mnd
 
 		dir := path.Join(t.checksumDir, sha1[0:2])
 		file := path.Join(dir, sha1[2:])

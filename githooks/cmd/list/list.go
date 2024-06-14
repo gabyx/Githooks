@@ -81,7 +81,7 @@ func PrepareListHookState(
 	ctx.Log.DebugF("Accumuldated repository ignore patterns: '%q'.", ignores.HooksDir)
 
 	// Load all shared hooks
-	shared = hooks.NewSharedRepos(8) //nolint: gomnd
+	shared = hooks.NewSharedRepos(8) //nolint: mnd
 
 	shared[hooks.SharedHookTypeV.Repo], err = hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
 	ctx.Log.AssertNoErrorF(err, "Could not load repository shared hooks.")
@@ -100,7 +100,7 @@ func PrepareListHookState(
 		Ignores:            &ignores,
 		isRepoTrusted:      isTrusted,
 		isGithooksDisabled: isDisabled,
-		sharedIgnores:      make(ignoresPerHooksDir, 10)} // nolint: gomnd
+		sharedIgnores:      make(ignoresPerHooksDir, 10)} // nolint: mnd
 
 	return
 }

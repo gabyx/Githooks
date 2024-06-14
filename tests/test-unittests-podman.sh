@@ -68,7 +68,7 @@ RUN (echo "[storage]" && \
     echo "[storage.options.overlay]" && \
     echo "mount_program = \"\$(which fuse-overlayfs)\"") >"/home/test-user/.config/containers/storage.conf"
 
-RUN chown -R "test-user:test-user" "/home/test-user/.config/containers" && \
+RUN chown -R "test-user:test-user" "/home/test-user/.config" && \
     chown -R "test-user:test-user" "/home/test-user/.local/share/containers"
 
 USER "test-user"

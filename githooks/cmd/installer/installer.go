@@ -306,7 +306,7 @@ func setupSettings(
 			CloneDir:         cloneDir,
 			TempDir:          tempDir,
 			LFSHooksCache:    lfsHooksCache,
-			InstalledGitDirs: make(InstallSet, 10)}, // nolint: gomnd
+			InstalledGitDirs: make(InstallSet, 10)}, // nolint: mnd
 		install.UISettings{PromptCtx: promptx}
 }
 
@@ -1463,7 +1463,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 
 func transformLegacyGitConfigSettings(log cm.ILogContext, internalUpdateFromVersion string) {
 	if strs.IsNotEmpty(internalUpdateFromVersion) {
-		if v, _ := version.NewSemver(internalUpdateFromVersion); v.Segments()[0] < 3 { // nolint: gomnd
+		if v, _ := version.NewSemver(internalUpdateFromVersion); v.Segments()[0] < 3 { // nolint: mnd
 			log.PanicF("Cannot install new version '%s' over current version '%s' < 3.\n"+
 				"Too much changed. Please uninstall this version fully\n"+
 				"(also in registered repositories) and then install the new version.",

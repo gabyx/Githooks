@@ -167,7 +167,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res []KeyValu
 			continue
 		}
 
-		keyValue := strings.SplitN(list[i], " ", 2) // nolint: gomnd
+		keyValue := strings.SplitN(list[i], " ", 2) // nolint: mnd
 		cm.PanicIf(len(keyValue) == 0, "Wrong split.")
 		// Handle unset values
 		if len(keyValue) == 1 {
@@ -218,7 +218,7 @@ func (c *Context) UnsetConfig(key string, scope ConfigScope) (err error) {
 		exitC, err = c.GetExitCode("config", "--unset-all", key)
 	}
 
-	if exitC == 5 || exitC == 0 { // nolint: gomnd
+	if exitC == 5 || exitC == 0 { // nolint: mnd
 		//See: https: //git-scm.com/docs/git-config#_description
 		return nil
 	}

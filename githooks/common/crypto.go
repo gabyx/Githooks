@@ -51,7 +51,7 @@ func VerifyFile(file io.Reader, signature io.Reader, publicKey string) error {
 	hash := sig.Hash.New()
 
 	// Hash the content of the file
-	buf := make([]byte, 1024) // nolint:gomnd
+	buf := make([]byte, 1024) // nolint: mnd
 	for {
 		n, err := file.Read(buf)
 		if err == io.EOF {

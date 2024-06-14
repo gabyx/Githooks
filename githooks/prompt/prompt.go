@@ -100,12 +100,12 @@ func CreateContext(
 
 	var input io.Reader
 	printAnswer := false
-	maxTries := uint(3) //nolint: gomnd
+	maxTries := uint(3) //nolint: mnd
 
 	if useStdIn {
 		input = os.Stdin
 		printAnswer = true
-		maxTries = uint(1) //nolint: gomnd
+		maxTries = uint(1) //nolint: mnd
 	} else {
 		input, err = cm.GetCtty()
 		// if err != nil => we don't have a terminal attached.

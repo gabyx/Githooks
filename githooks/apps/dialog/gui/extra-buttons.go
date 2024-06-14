@@ -48,7 +48,7 @@ func addInvisiblePrefix(extraButtons []string) (res []string, err error) {
 
 // getResultButtons gets the pressed button,
 // First button is the Ok button (if not excluded), 2,3,... are extra buttons.
-// nolint: gomnd
+// nolint: mnd
 func getResultButtons(out string, maxButtons int) res.General {
 	s := strings.TrimSpace(out)
 	cm.DebugAssert(strs.IsNotEmpty(s))

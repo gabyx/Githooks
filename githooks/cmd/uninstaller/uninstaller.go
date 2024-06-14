@@ -118,7 +118,7 @@ func setupSettings(
 			InstallDir:         installDir,
 			CloneDir:           hooks.GetReleaseCloneDir(installDir),
 			TempDir:            tempDir,
-			UninstalledGitDirs: make(UninstallSet, 10), // nolint: gomnd
+			UninstalledGitDirs: make(UninstallSet, 10), // nolint: mnd
 			LFSHooksCache:      lfsHooksCache},
 		UISettings{PromptCtx: promptx}
 }

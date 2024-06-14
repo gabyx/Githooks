@@ -13,7 +13,7 @@ if
   CGO_ENABLED=0 golangci-lint run \
     --exclude-dirs /usr/local/go \
     -E godot \
-    -E gomnd \
+    -E mnd \
     -E goconst \
     -E gochecknoinits \
     -E nlreturn \

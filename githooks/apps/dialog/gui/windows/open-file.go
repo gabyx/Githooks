@@ -115,7 +115,7 @@ func translateFileSelection(s *sets.FileSelection) (ofn openFileNameW, buf []uin
 
 	addSelectedFilenamesChars := 0
 	if s.MultipleSelection {
-		addSelectedFilenamesChars = 1024 * 256 //nolint: gomnd
+		addSelectedFilenamesChars = 1024 * 256 //nolint: mnd
 	}
 
 	buf = make([]uint16, maxPath+addSelectedFilenamesChars)

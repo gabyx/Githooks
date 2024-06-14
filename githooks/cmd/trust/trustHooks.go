@@ -22,7 +22,7 @@ func getAllHooks(
 	shared hooks.SharedRepos,
 	state *list.ListingState) (allHooks []hooks.Hook) {
 
-	allHooks = make([]hooks.Hook, 0, 10+2*shared.GetCount()) // nolint: gomnd
+	allHooks = make([]hooks.Hook, 0, 10+2*shared.GetCount()) // nolint: mnd
 
 	gitx := git.NewCtxAt(repoDir)
 

@@ -41,9 +41,9 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	hr, _, _ := coInitializeEx.Call(0, 0x6) //nolint: gomnd // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
+	hr, _, _ := coInitializeEx.Call(0, 0x6) //nolint: mnd // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
 
-	if hr != 0x80010106 { // nolint: gomnd // RPC_E_CHANGED_MODE
+	if hr != 0x80010106 { // nolint: mnd // RPC_E_CHANGED_MODE
 		if int32(hr) < 0 {
 			err = cm.ErrorF("Failed call 'coInitializeEx': error '%v'", syscall.Errno(hr))
 
@@ -55,7 +55,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 
 	var dialog *iFileOpenDialog
 	hr, _, _ = coCreateInstance.Call(
-		_CLSID_FileOpenDialog, 0, 0x17, // nolint: gomnd // CLSCTX_ALL
+		_CLSID_FileOpenDialog, 0, 0x17, // nolint: mnd // CLSCTX_ALL
 		iIDiFileOpenDialog, uintptr(unsafe.Pointer(&dialog)))
 
 	if int32(hr) < 0 {
@@ -79,7 +79,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 		flags |= 0x10000000 // FOS_FORCESHOWHIDDEN
 	}
 
-	hr, _, _ = dialog.Call(dialog.vtbl.SetOptions, uintptr(flags|0x68)) // nolint: gomnd
+	hr, _, _ = dialog.Call(dialog.vtbl.SetOptions, uintptr(flags|0x68)) // nolint: mnd
 	// FOS_NOCHANGEDIR|FOS_PICKFOLDERS|FOS_FORCEFILESYSTEM
 	if int32(hr) < 0 {
 		err = cm.ErrorF("Failed call 'dialog.SetOptions': error '%v'", syscall.Errno(hr))
@@ -143,7 +143,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 		return
 	}
 
-	if hr == 0x800704c7 { //nolint: gomnd // ERROR_CANCELLED
+	if hr == 0x800704c7 { //nolint: mnd // ERROR_CANCELLED
 		return res.File{General: res.CancelResult()}, nil
 	}
 
@@ -169,7 +169,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 		var ptr uintptr
 		hr, _, _ = item.Call(
 			item.vtbl.GetDisplayName,
-			0x80058000, // nolint: gomnd // SIGDN_FILESYSPATH
+			0x80058000, // nolint: mnd // SIGDN_FILESYSPATH
 			uintptr(unsafe.Pointer(&ptr)))
 		if int32(hr) < 0 {
 			err = cm.ErrorF("Failed call 'dialog.GetDisplayName': error '%v'", syscall.Errno(hr))
@@ -238,7 +238,7 @@ func browseForFolder(ctx context.Context, s *sets.FileSelection) (r res.File, er
 				func(wnd uintptr, msg uint32, lparam, data uintptr) uintptr {
 					if msg == 1 { // BFFMiNITIALIZED
 						sendMessage.Call( //nolint: errcheck
-							wnd, 1024+103, //nolint:  gomnd
+							wnd, 1024+103, //nolint: mnd
 							/* BFFM_SETSELECTIONW */
 							1, /* TRUE */
 							data)
