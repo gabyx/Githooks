@@ -24,12 +24,11 @@ repository. This implementation is the Go port and successor of the
 [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are
-installed into the `.git/hooks` folders automatically on `git init` and
-`git clone`. There's more [to the story though](#templates-or-global-hooks).
-When one of the Githooks run-wrappers executes, Githooks starts up and tries to
-find matching hooks in the `.githooks` directory under the project root, and
-invoke them one-by-one. Also it searches for hooks in configured shared hook
-repositories.
+installed into the `.git/hooks` folders on request (by default). There's more
+[to the story though](#templates-or-global-hooks). When one of the Githooks
+run-wrappers executes, Githooks starts up and tries to find matching hooks in
+the `.githooks` directory under the project root, and invoke them one-by-one.
+Also it searches for hooks in configured shared hook repositories.
 
 **This Git hook manager supports:**
 
