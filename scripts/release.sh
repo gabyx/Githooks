@@ -62,7 +62,7 @@ function create_tag() {
     fi
 
     echo "Tagging..."
-    git tag -a -m "Version $tag" "${add_message[@]}" "prepare-$tag"
+    git tag -a -m "Version $tag" -m "${add_message[@]}" "prepare-$tag"
 
     echo "Tag contains:"
     git cat-file -p "prepare-$tag"
