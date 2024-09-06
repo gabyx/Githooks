@@ -583,7 +583,8 @@ func updateLocalHookImages(settings *HookSettings) {
 		settings.RepositoryDir,
 		settings.RepositoryHooksDir,
 		"",
-		settings.ContainerMgr)
+		settings.ContainerMgr,
+		false)
 
 	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
 }

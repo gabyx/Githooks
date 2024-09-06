@@ -10,14 +10,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
+func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string, alwaysBuild bool) {
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
 	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false, nil)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create container manager.")
 
 	hooksDir := hooks.GetGithooksDir(repoDir)
-	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile, containerMgr)
+	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile, containerMgr, alwaysBuild)
 	ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", imagesFile)
 
 	if strs.IsNotEmpty(imagesFile) {
@@ -55,7 +55,8 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string) {
 			allRepos[rI].RepositoryDir,
 			hooksDir,
 			"",
-			containerMgr)
+			containerMgr,
+			alwaysBuild)
 		ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", allRepos[rI].OriginalURL)
 	}
 }
@@ -69,6 +70,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 		Long:  "Manages container images used by Githooks repositories in the current repository."}
 
 	imagesFile := ""
+	alwaysBuild := false
 	imagesUpdateCmd := &cobra.Command{
 		Use:   "update",
 		Short: `Build/pull container images.`,
@@ -76,7 +78,7 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 			"repository and shared repositories which are needed for Githooks.",
 		PreRun: ccm.PanicIfNotExactArgs(ctx.Log, 0),
 		Run: func(c *cobra.Command, args []string) {
-			runImagesUpdate(ctx, imagesFile)
+			runImagesUpdate(ctx, imagesFile, alwaysBuild)
 		}}
 
 	imagesUpdateCmd.Flags().StringVar(&imagesFile,
@@ -85,6 +87,9 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 			"Useful to build images in shared repositories\n"+
 			"'githooks/.images.yaml' directory.\n"+
 			"Namespace is read from the current repository.")
+
+	imagesUpdateCmd.Flags().BoolVarP(&alwaysBuild,
+		"always-build", "b", false, "Always build images, even if they already exist.")
 
 	imagesCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, imagesUpdateCmd))
 
