@@ -59,7 +59,9 @@ workflows:
             branches:
               only: &task-branches
                 - /feature\/.*/
+                - /feat\/.*/
                 - /bugfix\/.*/
+                - /fix\/.*/
       - linux:
           matrix:
             parameters:
