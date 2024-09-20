@@ -12,7 +12,7 @@ jobs:
         default: "test-alpine"
         type: string
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2204:current
     steps:
       - checkout
       - run: bash tests/<<parameters.test>>.sh
@@ -30,12 +30,15 @@ jobs:
     executor:
       size: medium
       name: win/server-2022
-      version: 2023.11.1
+      version: current
     steps:
       - checkout
       - run:
           no_output_timeout: 30m
-          command: "& 'C:/Program Files/Git/bin/bash.exe' -c 'tests/<<parameters.test>>.sh --seq <<parameters.seq>>'"
+          command: >-
+            & 'C:/Program Files/Git/bin/bash.exe'
+            -c 'tests/<<parameters.test>>.sh
+            --seq <<parameters.seq>>'
 
 workflows:
   version: 2

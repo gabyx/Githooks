@@ -57,7 +57,13 @@ func mainRun() (exitCode int) {
 	cwd = filepath.ToSlash(cwd)
 
 	settings, uiSettings := setupSettings(cwd)
-	assertRegistered(settings.GitX, settings.InstallDir)
+
+	if settings.HookName != "reference-transaction" {
+		// Git 2.46.x apparently runs `reference-transaction` on `git init`
+		// where different commands fail like `git config ...` since
+		// the repo is not yet properly initialized (?).
+		assertRegistered(settings.GitX, settings.InstallDir)
+	}
 
 	checksums, err := hooks.GetChecksumStorage(settings.GitDirWorktree)
 	log.AssertNoErrorF(err, "Errors while loading checksum store.")
@@ -139,6 +145,9 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 
 	// General execution context, in currenct working dir.
 	execx := cm.ExecContext{Env: os.Environ()}
+
+	log.DebugF("Arguments: '%q'", os.Args)
+	log.DebugF("Env: '%q'", os.Environ())
 
 	// Current git context, in current working dir.
 	gitx := git.NewCtxAt(repoPath)

@@ -84,13 +84,22 @@ func (c *Context) GetMainWorktree() (string, error) {
 // GetGitDirCommon returns the common Git directory.
 // For normal repos this points to the `.git` directory.
 // For worktrees this points to the main worktrees git dir.
-// The env. variable GIT_COMMON_DIR has especiall
+// The env. variable GIT_COMMON_DIR has especially
 // be introduced for multiple worktrees, see:
 // https://github.com/git/git/commit/c7b3a3d2fe2688a30ddb8d516ed000eeda13c24e
 func (c *Context) GetGitDirCommon() (gitDir string, err error) {
-	gitDir, err = c.Get("rev-parse", "--git-common-dir")
-	if err != nil {
-		return
+	// Git 2.46.x apparently runs `reference-transaction` on `git init`
+	// where `rev-parse` fails despite the documentation saying it reports `$GIT_COMMON_DIR` if set
+	// (it is set!) -> Bug was reported.
+	gitDir = os.Getenv("GIT_COMMON_DIR")
+	if strs.IsEmpty(gitDir) {
+		gitDir = os.Getenv("GIT_DIR")
+		if strs.IsEmpty(gitDir) {
+			gitDir, err = c.Get("rev-parse", "--git-common-dir")
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	if !filepath.IsAbs(gitDir) {
@@ -111,9 +120,15 @@ func (c *Context) GetGitDirCommon() (gitDir string, err error) {
 // For normal repos this points to the `.git` directory.
 // For worktrees this points to the actual worktrees git dir `.git/worktrees/<....>/`.
 func (c *Context) GetGitDirWorktree() (gitDir string, err error) {
-	gitDir, err = c.Get("rev-parse", "--absolute-git-dir")
-	if err != nil {
-		return
+	// Git 2.46.x apparently runs `reference-transaction` on `git init`
+	// where `rev-parse` fails despite the documentation saying it reports `$GIT_DIR` if set
+	// (it is set!) -> Bug was reported.
+	gitDir = os.Getenv("GIT_DIR")
+	if strs.IsEmpty(gitDir) {
+		gitDir, err = c.Get("rev-parse", "--absolute-git-dir")
+		if err != nil {
+			return
+		}
 	}
 
 	gitDir = filepath.ToSlash(gitDir)
