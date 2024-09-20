@@ -34,10 +34,10 @@ function commit_version_file() {
     jq ".version |= \"$version\"" nix/pkgs/version.json >"$temp"
     mv "$temp" nix/pkgs/version.json
 
-    if ! git diff --quiet --exit-code; then
-        git add nix/pkgs/version.json
-        git commit -m "np: Update version to '$version'"
-    fi
+    git add nix/pkgs/version.json
+    git commit -a -m "np: Update version to '$version'" || {
+        echo "No new version file generated."
+    }
 }
 
 function create_tag() {
@@ -47,7 +47,7 @@ function create_tag() {
         exit 1
     fi
 
-    if git ls-remote "refs/tags/v*" | grep -qE "^$tag$"; then
+    if git ls-remote origin "refs/tags/v*" | grep -qE "^$tag$"; then
         echo "Git tag '$tag' already exists."
         exit 1
     fi
@@ -62,7 +62,7 @@ function create_tag() {
     fi
 
     echo "Tagging..."
-    git tag -a -m "Version $tag" -m "${add_message[@]}" "prepare-$tag"
+    git tag -a -m "Version $tag" "${add_message[@]}" "prepare-$tag"
 
     echo "Tag contains:"
     git cat-file -p "prepare-$tag"
