@@ -123,7 +123,7 @@ RUN apk add bash
 	mgr, err := container.NewManager("docker")
 	assert.Nil(t, err)
 	assert.NotNil(t, mgr)
-	err = UpdateImages(log, "test-repo", repo, path.Join(repo, ".githooks"), "", mgr)
+	err = UpdateImages(log, "test-repo", repo, path.Join(repo, ".githooks"), "", mgr, true)
 	assert.Nil(t, err, "Update images failed: %s", err)
 
 	mgr, err = container.NewManager("")

@@ -29,8 +29,6 @@ const (
 	GitCKNumThreads        = "githooks.numThreads"
 
 	GitCKAliasHooks = "alias.hooks"
-
-	GitCKBuildImagesOnSharedUpdate = "githooks.buildImagesOnSharedUpdate"
 )
 
 // Git config keys for local config.

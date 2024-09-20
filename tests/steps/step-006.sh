@@ -61,5 +61,8 @@ mkdir -p "$GH_TEST_TMP/test6" &&
 check_local_install_run_wrappers
 
 # Reinstall and check again.
-"$GH_INSTALL_BIN_DIR/githooks-cli" install
+"$GH_INSTALL_BIN_DIR/githooks-cli" install || {
+    echo "! Reinstall failed."
+    exit 1
+}
 check_local_install_run_wrappers

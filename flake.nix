@@ -27,41 +27,44 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgsStable,
-    flake-utils,
-    ...
-  } @ inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixpkgsStable,
+      flake-utils,
+      ...
+    }@inputs:
     flake-utils.lib.eachDefaultSystem
-    # Creates an attribute map `{ devShells.<system>.default = ...}`
-    # by calling this function:
-    (
-      system: let
-        overlays = [];
+      # Creates an attribute map `{ devShells.<system>.default = ...}`
+      # by calling this function:
+      (
+        system:
+        let
+          overlays = [ ];
 
-        # Import nixpkgs and load it into pkgs.
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
+          # Import nixpkgs and load it into pkgs.
+          pkgs = import nixpkgs {
+            inherit system overlays;
+          };
 
-        # Things needed only at compile-time.
-        nativeBuildInputs = with pkgs; [
-          go_1_21
-        ];
+          # Things needed only at compile-time.
+          nativeBuildInputs = with pkgs; [
+            go_1_22
+          ];
 
-        # Things needed at runtime.
-        buildInputs = with pkgs; [];
-      in
-        with pkgs; {
+          # Things needed at runtime.
+          buildInputs = with pkgs; [ ];
+        in
+        with pkgs;
+        {
           devShells.default = mkShell {
             # To make CGO and the debugger delve work.
             # https://nixos.wiki/wiki/Go#Using_cgo_on_NixOS
-            hardeningDisable = ["fortify"];
+            hardeningDisable = [ "fortify" ];
 
             inherit buildInputs nativeBuildInputs;
           };
         }
-    );
+      );
 }

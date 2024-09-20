@@ -18,8 +18,8 @@ trap clean_up EXIT
 
 cd "$ROOT_DIR"
 
-cat <<EOF | docker build --force-rm -t githooks:unittests -
-FROM golang:1.21-alpine
+cat <<EOF | docker build --force-rm -t githooks:unittests -f - "$ROOT_DIR"
+FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl
 
@@ -73,19 +73,25 @@ RUN chown -R "test-user:test-user" "/home/test-user/.config" && \
 
 USER "test-user"
 
-# CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --global protocol.file.allow always
-# Git refuses to do stuff in this mounted directory.
-RUN git config --global safe.directory /githooks
+# Git refuses to do stuff in directories.
+# also CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
+RUN git config --global safe.directory '*' && \
+    git config --global user.email test@githooks.com && \
+    git config --global user.name Githooks CI && \
+    git config --global protocol.file.allow always
+
+RUN mkdir -p ~/repo/
+COPY --chown=1000:1000 ./githooks /home/test-user/repo/githooks
+COPY --chown=1000:1000 ./tests /home/test-user/repo/tests
+RUN cd ~/repo && git init . && git add . && git commit -a -m init && git tag v1.0.0
+WORKDIR /home/test-user/repo
 
 ENV DOCKER_RUNNING=true
 EOF
 
 if ! docker run --privileged --rm -it \
-    -v "$(pwd)":/githooks \
-    -w /githooks githooks:unittests \
+    githooks:unittests \
     tests/exec-unittests.sh ".*Podman.*" "test_podman"; then
-
     echo "! Check rules had failures."
     exit 1
 fi

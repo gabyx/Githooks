@@ -128,7 +128,9 @@ func buildImage(
 	stage string,
 	imageRef string,
 	file string,
-	repositoryDir string) (err error) {
+	repositoryDir string,
+	alwaysBuild bool,
+) (err error) {
 	// Do a build of the image because no `pull` but `build` specified.
 
 	if filepath.IsAbs(context) {
@@ -141,6 +143,17 @@ func buildImage(
 		return cm.ErrorF(
 			"Dockerfile path '%s' given in '%s' must be a relative path.",
 			dockerfile, file)
+	}
+
+	if !alwaysBuild {
+		exists, e := mgr.ImageExists(imageRef)
+		log.AssertNoError(e, "Could not check if images exists.")
+
+		if exists {
+			log.InfoF("Image '%v' already exists.", imageRef)
+
+			return nil
+		}
 	}
 
 	out, err := mgr.ImageBuild(
@@ -185,7 +198,9 @@ func UpdateImages(
 	repositoryDir string,
 	hooksDir string,
 	configFile string,
-	containerMgr container.IManager) (err error) {
+	containerMgr container.IManager,
+	alwaysBuild bool,
+) (err error) {
 
 	if strs.IsEmpty(configFile) {
 		configFile = GetRepoImagesFile(hooksDir)
@@ -264,7 +279,8 @@ func UpdateImages(
 				img.Build.Stage,
 				imageRef,
 				configFile,
-				repositoryDir)
+				repositoryDir,
+				alwaysBuild)
 
 			if e != nil {
 				err = cm.CombineErrors(err, e)

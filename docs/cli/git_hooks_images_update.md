@@ -18,6 +18,7 @@ git hooks images update
                         Useful to build images in shared repositories
                         `githooks/.images.yaml` directory.
                         Namespace is read from the current repository.
+  -b, --always-build    Always build images, even if they already exist.
   -h, --help            help for update
 ```
 

@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 
 cat <<EOF | docker build \
     --force-rm -t githooks:alpine-user-base -
-FROM golang:1.21-alpine
+FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl
 
@@ -24,6 +24,14 @@ EOF
 export ADDITIONAL_PRE_INSTALL_STEPS='
 RUN adduser -D -u 1099 test
 RUN if [ -n "$DOCKER_GROUP_ID" ]; then \
+    existingGroup=$(getent group "$DOCKER_GROUP_ID" | cut -d: -f1); \
+    if [ "$existingGroup" != "" ]; then \
+            apk add shadow && \
+            newID=$(($DOCKER_GROUP_ID - 1)) && \
+            echo "Remapping group id $existingGroup:$DOCKER_GROUP_ID to $newID since existing." && \
+            groupmod -g "$newID" "$existingGroup" && \
+            apk del shadow; \
+        fi; \
         addgroup -g "$DOCKER_GROUP_ID" docker && \
         adduser test docker && \
         apk add docker; \
