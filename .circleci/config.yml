@@ -65,6 +65,7 @@ workflows:
                 - /feat\/.*/
                 - /bugfix\/.*/
                 - /fix\/.*/
+                - /pull/.*/
       - linux:
           matrix:
             parameters:
@@ -73,8 +74,11 @@ workflows:
             branches:
               only:
                 - /feature\/.*/
+                - /feat\/.*/
                 - /bugfix\/.*/
-                - "main"
+                - /fix\/.*/
+                - /pull/.*/
+                - main
 
       - windows:
           matrix:
