@@ -471,7 +471,7 @@ func runInstallDispatched(
 	// Only do an update if enabled and we either have
 	// given the update flag or its an auto-update
 	// call.
-	doUpdate := updates.Enabled && args.Update && status.IsUpdateAvailable
+	doUpdate := updates.UpdateEnabled && args.Update && status.IsUpdateAvailable
 
 	tag := ""
 	commit := ""
@@ -1282,7 +1282,7 @@ func runInstaller(
 		args.DryRun,
 		uiSettings)
 
-	if updates.Enabled {
+	if updates.UpdateEnabled {
 		setupAutomaticUpdateChecks(log, gitx, args.NonInteractive, args.DryRun, uiSettings.PromptCtx)
 	}
 
