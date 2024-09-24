@@ -248,6 +248,7 @@ func FetchUpdates(
 			return
 		}
 	}
+	remoteBranch := DefaultRemote + "/" + branch
 
 	// Set the url/branch back...
 	if setGitConfig {
@@ -256,12 +257,17 @@ func FetchUpdates(
 		}
 	}
 
-	// We reset local branch
-	// to the matching current release tag descending from HEAD.
-	// Remote stays and might trigger a direct update.
+	branchFrom := "HEAD"
+	if !UpdateEnabled {
+		// When updates disabled we do the check onto the remote branch.
+		branchFrom = remoteBranch
+	}
 
-	// Check if current tag is reachable from HEAD.
-	reachable, e := git.IsRefReachable(gitx, "HEAD", tag)
+	// We reset local branch to the matching
+	// current release tag descending from the HEAD branch.
+	// Remote stays and might trigger a direct update.
+	// Check if current tag is reachable from the remote branch.
+	reachable, e := git.IsRefReachable(gitx, branchFrom, tag)
 	if e != nil || !reachable {
 		err = cm.CombineErrors(
 			cm.ErrorF("Current version tag '%v' could not be found on branch '%s'",
@@ -280,7 +286,6 @@ func FetchUpdates(
 	}
 
 	resetRemoteTo := ""
-	remoteBranch := DefaultRemote + "/" + branch
 	status, err = getStatus(gitx, url, DefaultRemote, branch, remoteBranch, usePreRelease)
 
 	status.IsNewClone = isNewClone
@@ -541,7 +546,7 @@ func FormatUpdateText(status *ReleaseStatus, withUpdateHint bool) (versionText s
 
 	versionText = "There is a new Githooks update available:"
 
-	if Enabled {
+	if UpdateEnabled {
 		cmd := "git hooks update"
 		if strs.IsNotEmpty(status.UpdateVersion.Prerelease()) {
 			cmd += " --use-pre-release"
@@ -590,7 +595,7 @@ func DefaultAcceptUpdateCallback(
 			promptDefault = "y/N"
 		}
 
-		if Enabled && promptx != nil {
+		if UpdateEnabled && promptx != nil {
 			question := versionText + "\n" +
 				"Would you like to install it now?"
 
@@ -609,7 +614,7 @@ func DefaultAcceptUpdateCallback(
 		} else {
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
-			if Enabled {
+			if UpdateEnabled {
 				if acceptNonInteractive == AcceptNonInteractiveAll ||
 					(!isMajorUpdate && acceptNonInteractive == AcceptNonInteractiveOnlyNonMajor) {
 					log.InfoF("Going to install version: '%s'.", status.UpdateVersion.String())
@@ -633,7 +638,7 @@ func RunUpdateOverExecutable(
 	pipeSetup cm.PipeSetupFunc,
 	args ...string) error {
 
-	if !Enabled {
+	if !UpdateEnabled {
 		return cm.Error("Updates have been disabled in this build of Githooks.")
 	}
 

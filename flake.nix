@@ -49,12 +49,10 @@
           };
 
           # Things needed only at compile-time.
-          nativeBuildInputs = with pkgs; [
+          packages = with pkgs; [
+            golines
             go_1_22
           ];
-
-          # Things needed at runtime.
-          buildInputs = with pkgs; [ ];
         in
         with pkgs;
         {
@@ -62,8 +60,7 @@
             # To make CGO and the debugger delve work.
             # https://nixos.wiki/wiki/Go#Using_cgo_on_NixOS
             hardeningDisable = [ "fortify" ];
-
-            inherit buildInputs nativeBuildInputs;
+            inherit packages;
           };
         }
       );
