@@ -21,6 +21,7 @@ type HookSettings struct {
 	HookName      string // Name of the hook.
 	HookDir       string // Directory of the hook.
 	HookNamespace string // Namespace of this repositorie's Githooks.
+	ChecksumsDir  string // Name of the directory with the trust checksums.
 
 	IsRepoTrusted              bool               // If the repository is a trusted repository.
 	SkipNonExistingSharedHooks bool               // If Githooks should skip non-existing shared hooks.

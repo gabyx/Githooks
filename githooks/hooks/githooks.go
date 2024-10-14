@@ -19,6 +19,9 @@ const DialogExecutableName = "githooks-dialog"
 const HooksDirName = ".githooks"
 const HooksDirNameShared = "githooks"
 
+// ChecksumsDir denotes the directory name used by default for storing checksums for trusted hooks.
+const ChecksumsDir = ".githooks.checksums"
+
 // GithooksWebpage is the main Githooks webpage.
 const GithooksWebpage = "https://github.com/gabyx/githooks"
 
