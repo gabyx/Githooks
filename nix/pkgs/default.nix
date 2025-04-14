@@ -1,12 +1,12 @@
 {
   lib,
-  buildGo122Module,
-  fetchFromGitHub,
+  buildGo124Module,
+  # fetchFromGitHub,
   git,
   testers,
   makeWrapper,
 }:
-buildGo122Module rec {
+buildGo124Module rec {
   pname = "githooks";
 
   version = (lib.importJSON ./version.json).version;
@@ -22,15 +22,15 @@ buildGo122Module rec {
 
   modRoot = "./githooks";
   vendorHash = "sha256-ZcDD4Z/thtyCvXg6GzzKC/FSbh700QEaqXU8FaZaZc4=";
-  nativeBuildInputs = [makeWrapper];
-  buildInputs = [git];
+  nativeBuildInputs = [ makeWrapper ];
+  buildInputs = [ git ];
 
   ldflags = [
     "-s" # Disable symbole table.
     "-w" # Disable DWARF generation.
   ];
 
-  tags = ["package_manager_enabled"];
+  tags = [ "package_manager_enabled" ];
 
   doCheck = false;
 
@@ -45,8 +45,8 @@ buildGo122Module rec {
     mv "$out/bin/runner" "$out/bin/githooks-runner"
     mv "$out/bin/dialog" "$out/bin/githooks-dialog"
 
-    wrapProgram "$out/bin/githooks-cli" --prefix PATH : ${lib.makeBinPath [git]}
-    wrapProgram "$out/bin/githooks-runner" --prefix PATH : ${lib.makeBinPath [git]}
+    wrapProgram "$out/bin/githooks-cli" --prefix PATH : ${lib.makeBinPath [ git ]}
+    wrapProgram "$out/bin/githooks-runner" --prefix PATH : ${lib.makeBinPath [ git ]}
   '';
 
   passthru.tests.version = testers.testVersion {
@@ -59,7 +59,7 @@ buildGo122Module rec {
     description = "Githooks is a Git hooks manager with per-repo and shared Git hooks including version control";
     homepage = "https://github.com/gabyx/Githooks";
     license = licenses.mpl20;
-    maintainers = with maintainers; [gabyx];
+    maintainers = with maintainers; [ gabyx ];
     mainProgram = "githooks-cli";
   };
 }

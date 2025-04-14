@@ -8,7 +8,6 @@ func Any(vs []interface{}, f func(interface{}) bool) bool {
 			return true
 		}
 	}
-
 	return false
 }
 
