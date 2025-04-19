@@ -174,6 +174,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 	nonInteractive := hooks.IsRunnerNonInteractive(gitx, git.Traverse)
 	skipNonExistingSharedHooks := hooks.SkipNonExistingSharedHooks(gitx, git.Traverse)
 	skipUntrustedHooks, _ := hooks.SkipUntrustedHooks(gitx, git.Traverse)
+	checksumsDir := hooks.GetChecksumDirectoryGitDir(gitDir)
 
 	isTrusted, hasTrustFile, trustAllSet := hooks.IsRepoTrusted(gitx, repoPath)
 	if !isTrusted && hasTrustFile && !trustAllSet && !nonInteractive && !isGithooksDisabled {
@@ -188,6 +189,7 @@ func setupSettings(repoPath string) (HookSettings, UISettings) {
 		RepositoryHooksDir: path.Join(repoPath, hooks.HooksDirName),
 		GitDirWorktree:     gitDir,
 		InstallDir:         installDir,
+		ChecksumsDir:       checksumsDir,
 
 		HookPath:      hookPath,
 		HookName:      path.Base(hookPath),
