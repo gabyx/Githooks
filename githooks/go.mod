@@ -5,7 +5,9 @@ go 1.22
 require (
 	code.gitea.io/sdk/gitea v0.15.0
 	github.com/agext/regexp v1.3.0
+	github.com/antchfx/htmlquery v1.3.1
 	github.com/bmatcuk/doublestar/v3 v3.0.0
+	github.com/distribution/distribution v2.8.2+incompatible
 	github.com/goccy/go-yaml v1.9.4
 	github.com/google/go-github/v33 v33.0.0
 	github.com/google/uuid v1.3.0
@@ -27,18 +29,17 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.1.0
-	golang.org/x/sys v0.5.0
-	golang.org/x/term v0.5.0
+	golang.org/x/crypto v0.21.0
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
+	golang.org/x/sys v0.18.0
+	golang.org/x/term v0.18.0
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
-	github.com/antchfx/htmlquery v1.3.1 // indirect
 	github.com/antchfx/xpath v1.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/distribution/distribution v2.8.2+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/fatih/color v1.13.0 // indirect
@@ -75,9 +76,8 @@ require (
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
