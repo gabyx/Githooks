@@ -285,8 +285,8 @@ Do you want to allow running every current and future hooks?`, repoPath)
 
 func exportGeneralVars(settings *HookSettings) {
 	// Here set into global env, for simple env replacement in run command.
-	os.Setenv(hooks.EnvVariableOs, runtime.GOOS)
-	os.Setenv(hooks.EnvVariableArch, runtime.GOARCH)
+	_ = os.Setenv(hooks.EnvVariableOs, runtime.GOOS)
+	_ = os.Setenv(hooks.EnvVariableArch, runtime.GOARCH)
 
 	settings.ExecX.Env = append(settings.ExecX.Env,
 		strs.Fmt("%s=%s", hooks.EnvVariableOs, runtime.GOOS),
@@ -335,7 +335,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			relPath := path.Join(hooks.HooksDirName, path.Base(filePath))
 
 			// Remove the file on exit.
-			defer file.Close()
+			defer func() { _ = file.Close() }()
 			cleanUp = func() { _ = os.Remove(file.Name()) }
 
 			if log.AssertNoError(err, "Could not open temp file for staged files") {
@@ -346,7 +346,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			}
 
 			// Set environment directly.
-			os.Setenv(hooks.EnvVariableStagedFilesFile, relPath)
+			_ = os.Setenv(hooks.EnvVariableStagedFilesFile, relPath)
 			// Set environment also in execution context.
 			settings.ExecX.Env = append(settings.ExecX.Env,
 				strs.Fmt("%s=%s", hooks.EnvVariableStagedFilesFile, relPath))
@@ -355,7 +355,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			files = strings.ReplaceAll(files, "\x00", "\n")
 
 			// Set environment directly.
-			os.Setenv(hooks.EnvVariableStagedFiles, files)
+			_ = os.Setenv(hooks.EnvVariableStagedFiles, files)
 			// Set environment also in execution context.
 			settings.ExecX.Env = append(settings.ExecX.Env,
 				strs.Fmt("%s=%s", hooks.EnvVariableStagedFiles, files))
@@ -1054,11 +1054,11 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 
 	// Dump execution sequence.
 	if cm.IsDebug {
-		file, err := os.CreateTemp("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
-		log.AssertNoErrorPanic(err, "Failed to create execution log.")
-		defer file.Close()
-		err = hs.StoreJSON(file)
-		log.AssertNoErrorPanic(err, "Failed to create execution log.")
+		file, e := os.CreateTemp("", strs.Fmt("*-githooks-prio-list-%s.json", settings.HookName))
+		log.AssertNoErrorPanic(e, "Failed to create execution log.")
+		defer func() { _ = file.Close() }()
+		e = hs.StoreJSON(file)
+		log.AssertNoErrorPanic(e, "Failed to create execution log.")
 		log.DebugF("Hooks priority list written to '%s'.", file.Name())
 	}
 

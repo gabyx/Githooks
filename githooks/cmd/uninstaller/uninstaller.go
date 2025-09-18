@@ -156,10 +156,10 @@ func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Argume
 
 	file, err := os.CreateTemp("", "*uninstall-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
-	defer os.Remove(file.Name())
+	defer func() { _ = os.Remove(file.Name()) }()
 
 	// Write the config to
-	// make the uninstaller gettings all settings
+	// make the uninstaller settings all settings
 	writeArgs(log, file.Name(), args)
 
 	// Run the uninstaller binary
@@ -370,7 +370,7 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 		"Could not unset global Git config '%s'.", k)
 }
 
-func cleanAuxillaryFiles(log cm.ILogContext, installDir string) {
+func cleanAuxiliaryFiles(log cm.ILogContext, installDir string) {
 
 	files := []string{
 		hooks.GetRegisterFile(installDir),
@@ -426,7 +426,7 @@ func runUninstallSteps(
 	cleanReleaseClone(log, settings.InstallDir)
 	cleanBinaries(log, settings.InstallDir, settings.TempDir)
 	cleanHooksDir(log, settings.InstallDir)
-	cleanAuxillaryFiles(log, settings.InstallDir)
+	cleanAuxiliaryFiles(log, settings.InstallDir)
 
 	cleanGitConfig(log, settings.Gitx)
 	cleanTempDir(log, settings.InstallDir)
@@ -447,7 +447,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 	tempDir, err := os.MkdirTemp(dir, "githooks-uninstaller-*")
 	log.AssertNoErrorPanicF(err, "Could not create temp. dir in '%s'.", dir)
 	ctx.CleanupX.AddHandler(func() { _ = os.Remove(tempDir) })
-	defer os.Remove(tempDir)
+	defer func() { _ = os.Remove(tempDir) }()
 
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args, tempDir)
 

@@ -662,10 +662,14 @@ func runDeleteDetectedLFSHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
 	case opts.Print:
 		conf := ctx.GitX.GetConfig(opt, git.GlobalScope)
-		switch {
-		case conf == "a" /* legacy */ || conf == "y":
+		switch conf { //nolint:staticcheck
+		case "y":
+			fallthrough
+		case "a" /* legacy */ :
 			ctx.Log.Info("Detected LFS hooks are automatically deleted during install.")
-		case conf == "s" /* legacy */ || conf == "n":
+		case "n":
+			fallthrough
+		case "s" /* legacy */ :
 			ctx.Log.Info("Detected LFS hooks are not automatically deleted during install",
 				"but instead backed up.")
 		default:

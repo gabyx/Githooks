@@ -418,7 +418,7 @@ func ModifyGlobalSharedHooks(gitx *git.Context, url string, remove bool) (modifi
 
 // UpdateSharedHooks updates all shared hooks `sharedHooks`.
 // It clones or pulls latest changes in the shared clones. The `log` can be nil.
-// If `containerMgr` is not nil, all images are upated too.
+// If `containerMgr` is not nil, all images are updated too.
 func UpdateSharedHooks(
 	log cm.ILogContext,
 	sharedHooks []SharedRepo,
@@ -548,7 +548,7 @@ func ClearRepoSharedHooks(repoDir string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	return nil
 }

@@ -542,10 +542,10 @@ func dispatchToInstaller(log cm.ILogContext, installer cm.IExecutable, args *Arg
 
 	file, err := os.CreateTemp("", "*install-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
-	defer os.Remove(file.Name())
+	defer func() { _ = os.Remove(file.Name()) }()
 
 	// Write the config to
-	// make the installer gettings all settings
+	// make the installer settings all settings
 	writeArgs(log, file.Name(), args)
 
 	// Run the installer binary
@@ -591,12 +591,12 @@ func setupNewHooksDir(log cm.ILogContext, installDir string, promptx prompt.ICon
 	cm.AssertNoErrorPanic(err, "Could not get home directory.")
 
 	if promptx != nil {
-		var err error
-		hooksDir, err = promptx.ShowEntry(
+		var e error
+		hooksDir, e = promptx.ShowEntry(
 			"Enter the target folder ('~' allowed)",
 			hooksDir,
 			nil)
-		log.AssertNoErrorF(err, "Could not show prompt.")
+		log.AssertNoErrorF(e, "Could not show prompt.")
 	}
 
 	hooksDir = cm.ReplaceTildeWith(hooksDir, homeDir)
@@ -1412,7 +1412,7 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 	if isOwnedTemp {
 		// When we own the temp. directory we are cleaning it at the end.
 		ctx.CleanupX.AddHandler(func() { _ = os.Remove(args.InternalTempDir) })
-		defer os.Remove(args.InternalTempDir)
+		defer func() { _ = os.Remove(args.InternalTempDir) }()
 	}
 
 	log.InfoF("Githooks Installer [version: %s, packaged: %v]", build.BuildVersion, cm.PackageManagerEnabled)

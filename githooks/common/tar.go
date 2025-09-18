@@ -51,7 +51,7 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err err
 			if err != nil {
 				return
 			}
-			defer file.Close()
+			defer func() { _ = file.Close() }()
 
 			if _, err = io.Copy(file, tarReader); err != nil {
 				err = CombineErrors(ErrorF("Copy of data to '%s' failed", outPath), err)
@@ -60,7 +60,7 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err err
 			}
 
 			if runtime.GOOS == WindowsOsName {
-				file.Close()
+				_ = file.Close()
 				if err = Chmod(outPath, header.FileInfo().Mode()); err != nil {
 					return
 				}

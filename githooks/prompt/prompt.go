@@ -39,7 +39,7 @@ type IContext interface {
 }
 
 // Formatter is the format function to format a prompt or error.
-type Formatter func(format string, args ...interface{}) string
+type Formatter func(format string, args ...any) string
 
 // Context defines the prompt context based on a `ILogContext`
 // or as a fallback using the defined dialog tool if configured.
@@ -68,7 +68,7 @@ func (p *Context) Close() {
 	if p.termIn != nil {
 		t, ok := p.termIn.(*os.File)
 		if ok {
-			t.Close()
+			_ = t.Close()
 		}
 	}
 }

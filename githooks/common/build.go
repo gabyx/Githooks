@@ -15,7 +15,7 @@ func DebugAssert(condition bool, lines ...string) {
 }
 
 // DebugAssertF asserts that a condition is `true`, otherwise panic (disabled in production mode).
-func DebugAssertF(condition bool, format string, args ...interface{}) {
+func DebugAssertF(condition bool, format string, args ...any) {
 }
 
 // DebugAssertNoError asserts that a condition is `true`, otherwise panic (disabled in production mode).
@@ -23,5 +23,5 @@ func DebugAssertNoError(err error, lines ...string) {
 }
 
 // DebugAssertNoErrorF asserts that a condition is `true`, otherwise panic (disabled in production mode).
-func DebugAssertNoErrorF(err error, format string, args ...interface{}) {
+func DebugAssertNoErrorF(err error, format string, args ...any) {
 }

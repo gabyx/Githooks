@@ -14,7 +14,7 @@ import (
 func TestLoadImagesConfig(t *testing.T) {
 	file, err := os.CreateTemp("", "image.yaml")
 	assert.Nil(t, err)
-	defer os.Remove(file.Name())
+	defer func() { _ = os.Remove(file.Name()) }()
 
 	c := createImageConfigFile()
 	cc := ImageConfig{}
@@ -33,7 +33,7 @@ func TestLoadImagesConfig(t *testing.T) {
 func TestLoadImagesConfig2(t *testing.T) {
 	file, err := os.CreateTemp("", "image.yaml")
 	assert.Nil(t, err)
-	defer os.Remove(file.Name())
+	defer func() { _ = os.Remove(file.Name()) }()
 	c := createImageConfigFile()
 
 	cc := ImageConfig{}
@@ -61,7 +61,7 @@ images:
 
 	_, err = io.WriteString(file, content)
 	assert.Nil(t, err)
-	defer os.Remove(file.Name())
+	defer func() { _ = os.Remove(file.Name()) }()
 
 	config, err := loadImagesConfigFile(file.Name())
 	assert.Nil(t, err)
@@ -72,7 +72,7 @@ func TestUpdateImages(t *testing.T) {
 
 	repo, err := os.MkdirTemp("", "repo")
 	assert.Nil(t, err)
-	defer os.RemoveAll(repo)
+	defer func() { _ = os.RemoveAll(repo) }()
 
 	err = os.MkdirAll(path.Join(repo, ".githooks/docker/src"), cm.DefaultFileModeDirectory)
 	assert.Nil(t, err)

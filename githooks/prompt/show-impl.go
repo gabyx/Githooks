@@ -8,11 +8,11 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-func formatTitle(p *Context) string {
+func formatTitle(_ *Context) string {
 	return cm.FormatInfoMessage("Githooks - Git Hook Manager")
 }
 
-func formatTitleQuestion(p *Context) string {
+func formatTitleQuestion(_ *Context) string {
 	return cm.FormatPromptMessage("Githooks - Git Hook Manager")
 }
 
@@ -227,7 +227,7 @@ func showEntryLoopTerminal(
 func showMessageTerminal(
 	p *Context,
 	message string,
-	_asError bool) (bool, error) {
+	_ bool) (bool, error) {
 
 	_, isPromptDisplayed, err := showEntryLoopTerminal(
 		p,
@@ -317,7 +317,7 @@ func showEntryMulti(
 
 	// Wrap the validator into another one which
 	// reacts on `exitAnswer` for non-GUI prompts.
-	var val AnswerValidator = validator
+	var val = validator
 	exitReceived := false
 
 	if !p.useGUI {

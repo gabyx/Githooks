@@ -11,7 +11,6 @@ import (
 
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
-	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
@@ -32,8 +31,8 @@ func getChoicesZenity(output string) (indices []uint) {
 	return
 }
 
-// ShowOptions shows a option dialog with `zenity`.
-func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r res.Options, err error) {
+// ShowOptionsZenity shows a option dialog with `zenity`.
+func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (r res.Options, err error) {
 
 	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at least one option specified.")
@@ -41,7 +40,7 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 		return
 	}
 
-	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
+	if opts.Style == sets.OptionsStyleButtons && !opts.MultipleSelection {
 		return showOptionsWithButtons(ctx, opts,
 			func(ctx context.Context, m *sets.Message) (res.Message, error) {
 				return ShowMessageZenity(ctx, zenity, m)
@@ -69,13 +68,13 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 	}
 
 	switch opts.WindowIcon {
-	case set.ErrorIcon:
+	case sets.ErrorIcon:
 		args = append(args, "--window-icon=error")
-	case set.WarningIcon:
+	case sets.WarningIcon:
 		args = append(args, "--window-icon=warning")
-	case set.InfoIcon:
+	case sets.InfoIcon:
 		args = append(args, "--window-icon=info")
-	case set.QuestionIcon:
+	case sets.QuestionIcon:
 		args = append(args, "--window-icon=question")
 	}
 

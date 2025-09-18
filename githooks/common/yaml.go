@@ -8,12 +8,12 @@ import (
 )
 
 // LoadYAML loads and parses JSON file into a representation.
-func LoadYAML(file string, repr interface{}) error {
+func LoadYAML(file string, repr any) error {
 	yamlFile, err := os.Open(file)
 	if err != nil {
 		return ErrorF("Could not open file '%s'.", file)
 	}
-	defer yamlFile.Close()
+	defer func() { _ = yamlFile.Close() }()
 
 	bytes, err := io.ReadAll(yamlFile)
 	if err != nil {
@@ -28,12 +28,12 @@ func LoadYAML(file string, repr interface{}) error {
 }
 
 // StoreYAML stores a representation in a JSON file.
-func StoreYAML(file string, repr interface{}) error {
+func StoreYAML(file string, repr any) error {
 	yamlFile, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0664) // nolint: mnd
 	if err != nil {
 		return err
 	}
-	defer yamlFile.Close()
+	defer func() { _ = yamlFile.Close() }()
 
 	bytes, err := yaml.Marshal(repr)
 	if err != nil {

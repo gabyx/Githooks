@@ -39,9 +39,10 @@ func GetHookDisableCallback(
 
 			log.AssertNoError(err, "Could not show prompt.")
 
-			if userAnswer == "s" {
+			switch userAnswer {
+			case "s":
 				uiSettings.DeleteDetectedLFSHooks = "n" // Store the decision.
-			} else if userAnswer == "a" {
+			case "a":
 				uiSettings.DeleteDetectedLFSHooks = "y" // Store the decision.
 			}
 

@@ -43,7 +43,7 @@ func OutputIndexArray(l []uint, sep string) error {
 // DefaultExtraButtonCallback is the default extra button callback.
 func DefaultExtraButtonCallback(g *res.General) func() error {
 	return func() error {
-		os.Stdout.WriteString(strs.Fmt("%d%s", g.ExtraButtonIdx, LineBreak))
+		_, _ = os.Stdout.WriteString(strs.Fmt("%d%s", g.ExtraButtonIdx, LineBreak))
 
 		return nil
 	}
@@ -131,7 +131,7 @@ func HandleJSONResult(ctx *CmdContext, r res.JSONResult, g *res.General, err err
 		return cm.CombineErrors(e, cm.ErrorF("Could not convert to JSON."))
 	}
 
-	os.Stdout.Write(bytes)
+	_, _ = os.Stdout.Write(bytes)
 
 	if err != nil {
 		// All other errors are not handled.

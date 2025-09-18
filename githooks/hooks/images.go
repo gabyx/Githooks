@@ -166,7 +166,7 @@ func buildImage(
 	if err != nil {
 		// Save build error to temporary file.
 		file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		_, e := io.WriteString(file,
 			err.Error()+
 				"\nOutput:\n=====================================================\n"+
@@ -230,7 +230,7 @@ func UpdateImages(
 
 	for imageRef, img := range imagesConfig.Images {
 
-		imageRef, e := addImageReferenceSuffix(imageRef, configFile, namespace)
+		imageRef, e := addImageReferenceSuffix(imageRef, configFile, namespace) //nolint:shadow
 		if e != nil {
 			err = cm.CombineErrors(err, e)
 

@@ -20,7 +20,7 @@ const (
 )
 
 // RunOSAScript runs Apple's `osascripts` to execute JavaScript or AppleScript.
-func RunOSAScript(ctx context.Context, script string, data interface{}, workingDir string) ([]byte, error) {
+func RunOSAScript(ctx context.Context, script string, data any, workingDir string) ([]byte, error) {
 	var buf strings.Builder
 	lang := "JavaScript"
 

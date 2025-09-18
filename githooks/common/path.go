@@ -157,8 +157,9 @@ func MakeRelative(base string, path string) (s string, e error) {
 // ReplaceTildeWith replaces a prefix tilde '~' character in a path
 // with the string `repl`.
 func ReplaceTildeWith(p string, repl string) string {
-	if strings.HasPrefix(p, "~") {
-		return path.Join(repl, strings.TrimPrefix(p, "~"))
+	c, found := strings.CutPrefix(p, "~")
+	if found {
+		return path.Join(repl, c)
 	}
 
 	return p
@@ -199,7 +200,7 @@ func TouchFile(filePath string, makeDirs bool) (err error) {
 		if err != nil {
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 	}
 
 	return
@@ -258,12 +259,14 @@ func CopyFileWithBackup(src string, dst string, backupDir string, doMoveInstead 
 
 	if IsFile(dst) {
 		// Force remove any backup file.
-		backupFile := GetTempPath(backupDir, "-"+path.Base(dst))
+		temp := GetTempPath(backupDir, "-"+path.Base(dst))
 
 		// Copy destination to the backup file.
-		if err = os.Rename(dst, backupFile); err != nil {
+		if err = os.Rename(dst, temp); err != nil {
 			return
 		}
+
+		backupFile = temp
 	}
 
 	// Rollback operation if any error happens

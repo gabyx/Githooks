@@ -180,7 +180,8 @@ func (m *ManagerDocker) NewHookRunExec(
 	// Add all additional arguments.
 	containerExec.ArgsPre = append(containerExec.ArgsPre, m.runConfig.Args...)
 
-	if m.mgrType == ContainerManagerTypeV.Docker {
+	switch m.mgrType {
+	case ContainerManagerTypeV.Docker:
 		if runtime.GOOS != cm.WindowsOsName &&
 			runtime.GOOS != "darwin" {
 			// On non win/mac, execute as the user/group from the host.
@@ -193,7 +194,7 @@ func (m *ManagerDocker) NewHookRunExec(
 				"--user",
 				strs.Fmt("%v:%v", m.uid, m.gid))
 		}
-	} else if m.mgrType == ContainerManagerTypeV.Podman {
+	case ContainerManagerTypeV.Podman:
 		// With rootless podman its much easier to make the volumes
 		// match the host user which launch this Githook.
 		containerExec.ArgsPre = append(containerExec.ArgsPre, "--userns=keep-id:uid=1000,gid=1000")

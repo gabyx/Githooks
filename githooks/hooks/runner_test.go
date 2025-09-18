@@ -29,8 +29,8 @@ func TestEnvReplace(t *testing.T) {
 
 	subst := getVarSubstitution(os.LookupEnv, getGitConfig)
 
-	os.Setenv("var", "banana")
-	os.Setenv("tar", "monkey")
+	_ = os.Setenv("var", "banana")
+	_ = os.Setenv("tar", "monkey")
 
 	var r string
 	var err error
@@ -90,7 +90,7 @@ func TestRunnerConfigVersion(t *testing.T) {
 	f, e := os.CreateTemp("", "")
 	assert.Nil(t, e)
 
-	defer os.Remove(f.Name())
+	defer func() { _ = os.Remove(f.Name()) }()
 	_, e = io.WriteString(f,
 		`
 version: 999999

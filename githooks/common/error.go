@@ -25,7 +25,7 @@ func Error(lines ...string) error {
 }
 
 // ErrorF makes an error message.
-func ErrorF(format string, args ...interface{}) error {
+func ErrorF(format string, args ...any) error {
 	return fmt.Errorf(format, args...)
 }
 
@@ -68,7 +68,7 @@ func Panic(lines ...string) {
 }
 
 // PanicF panics with an `error`.
-func PanicF(format string, args ...interface{}) {
+func PanicF(format string, args ...any) {
 	panic(ErrorF(format, args...))
 }
 
@@ -80,7 +80,7 @@ func AssertOrPanic(condition bool, lines ...string) {
 }
 
 // AssertOrPanicF Assert a condition is `true`, otherwise panic.
-func AssertOrPanicF(condition bool, format string, args ...interface{}) {
+func AssertOrPanicF(condition bool, format string, args ...any) {
 	if !condition {
 		PanicF(format, args...)
 	}
@@ -94,7 +94,7 @@ func PanicIf(condition bool, lines ...string) {
 }
 
 // PanicIfF Assert a condition is `true`, otherwise panic.
-func PanicIfF(condition bool, format string, args ...interface{}) {
+func PanicIfF(condition bool, format string, args ...any) {
 	if condition {
 		PanicF(format, args...)
 	}
@@ -108,7 +108,7 @@ func AssertNoErrorPanic(err error, lines ...string) {
 }
 
 // AssertNoErrorPanicF Assert no error, otherwise panic.
-func AssertNoErrorPanicF(err error, format string, args ...interface{}) {
+func AssertNoErrorPanicF(err error, format string, args ...any) {
 	if err != nil {
 		PanicF(format+" -> errors:\n"+FormatError(err), args...)
 	}
