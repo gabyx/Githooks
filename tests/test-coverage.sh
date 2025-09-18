@@ -53,7 +53,7 @@ RUN apk add bash jq curl docker
 RUN git config --system protocol.file.allow always
 
 RUN go install github.com/wadey/gocovmerge@b5bfa59ec0ad
-RUN go install github.com/mattn/goveralls@0.0.12
+RUN go install github.com/mattn/goveralls@v0.0.12
 RUN go install gitlab.com/fgmarand/gocoverstats@v0.0.5
 RUN go install github.com/nikolaydubina/go-cover-treemap@v1.5.0
 

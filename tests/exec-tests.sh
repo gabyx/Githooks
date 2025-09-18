@@ -18,9 +18,9 @@ fi
 
 # shellcheck disable=SC2317
 function clean_up() {
-    docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
-    docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
-    docker volume rm gh-test-tmp &>/dev/null || true
+    run_docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
+    run_docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
+    run_docker volume rm gh-test-tmp &>/dev/null || true
 }
 
 trap clean_up EXIT
@@ -29,14 +29,14 @@ function build_image() {
     local docker_group_id="$1"
 
     # Build container to only copy to volumes.
-    cat <<EOF | docker build \
+    cat <<EOF | run_docker build \
         --force-rm -t "githooks:volumecopy" -f - . || exit 1
     FROM scratch
     CMD you-should-not-run-this-container
 EOF
 
     # Build the Githooks test container.
-    cat <<EOF | docker build \
+    cat <<EOF | run_docker build \
         --build-arg "DOCKER_GROUP_ID=$docker_group_id" \
         --force-rm -t "githooks:$IMAGE_TYPE" -f - "$ROOT_DIR" || exit 1
 
@@ -78,19 +78,19 @@ EOF
 }
 
 # Only works on linux (macOS does not need it)
-dockerGroupId=$(getent group docker 2>/dev/null | cut -d: -f3) || true
-echo "Docker group id: $dockerGroupId"
+dockerGroupId=$(getent group run_docker 2>/dev/null | cut -d: -f3) || true
+echo "run_docker group id: $dockerGroupId"
 build_image "$dockerGroupId"
 
 # Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
 delete_container_volume gh-test-tmp &>/dev/null || true
-docker volume create gh-test-tmp
+run_docker volume create gh-test-tmp
 
 # Privileged --privileged is needed if you want
-# launch nested containers when not sharing the docker socket.
+# launch nested containers when not sharing the run_docker socket.
 # Both are dangerous and should be handled with care.
-docker run \
+run_docker run \
     --privileged \
     --rm \
     -a stdout -a stderr \

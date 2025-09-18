@@ -3,9 +3,9 @@
 function run_docker() {
     if [ "${CI:-}" = "true" ]; then
         docker "$@"
+    else
+        sudo docker "$@"
     fi
-
-    sudo docker "$@"
 }
 
 function init_step() {
