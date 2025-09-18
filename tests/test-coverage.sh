@@ -45,17 +45,17 @@ cat <<EOF | docker build \
 EOF
 
 cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
-FROM golang:1.22-alpine
+FROM golang:1.24-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
 
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
 
-RUN go install github.com/wadey/gocovmerge@latest
-RUN go install github.com/mattn/goveralls@latest
-RUN go install gitlab.com/fgmarand/gocoverstats@latest
-RUN go install github.com/nikolaydubina/go-cover-treemap@latest
+RUN go install github.com/wadey/gocovmerge@b5bfa59ec0ad
+RUN go install github.com/mattn/goveralls@0.0.12
+RUN go install gitlab.com/fgmarand/gocoverstats@v0.0.5
+RUN go install github.com/nikolaydubina/go-cover-treemap@v1.5.0
 
 ENV DOCKER_RUNNING=true
 ENV GH_COVERAGE_DIR="/cover"
