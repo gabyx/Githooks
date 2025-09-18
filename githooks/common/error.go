@@ -45,7 +45,8 @@ func formatErrors(errors []error) string {
 
 // FormatError formats an error.
 func FormatError(err error) string {
-	if e, ok := err.(*multierror.Error); ok {
+	e := &multierror.Error{}
+	if errors.As(err, &e) {
 		e.ErrorFormat = formatErrors
 
 		return e.Error()

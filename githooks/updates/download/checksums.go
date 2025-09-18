@@ -12,7 +12,6 @@ import (
 // verifyChecksumSignature verifies checksums with the signature and the public key, and returns
 // the checksums content.
 func verifyChecksumSignature(checksums Checksums, publicPGP string) ([]byte, error) {
-
 	checksumFile, err := GetFile(checksums.File.URL)
 	if err != nil {
 		return nil, err

@@ -11,7 +11,6 @@ func HandleCLIErrors(
 	log ILogContext,
 	getBugReportingInfo func() string,
 ) bool {
-
 	if err == nil {
 		return false
 	}

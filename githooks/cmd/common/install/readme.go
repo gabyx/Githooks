@@ -15,7 +15,6 @@ func setupReadme(
 	repoGitDir string,
 	dryRun bool,
 	uiSettings *UISettings) {
-
 	mainWorktree, err := git.NewCtxAt(repoGitDir).GetMainWorktree()
 	if err != nil || !git.NewCtxAt(mainWorktree).IsGitRepo() {
 		log.WarnF("Main worktree could not be determined in:\n'%s'\n"+
@@ -29,7 +28,6 @@ func setupReadme(
 	hookDir := path.Dir(readme)
 
 	if !cm.IsFile(readme) {
-
 		createFile := false
 
 		switch uiSettings.AnswerSetupIncludedReadme {
@@ -57,11 +55,11 @@ func setupReadme(
 						"brief overview of Githooks?", mainWorktree)
 			}
 
-			answer, err := uiSettings.PromptCtx.ShowOptions(
+			answer, e := uiSettings.PromptCtx.ShowOptions(
 				msg, "(Skip all, no, yes, all)",
 				"S/n/y/a",
 				"Skip All", "No", "Yes", "All")
-			log.AssertNoError(err, "Could not show prompt.")
+			log.AssertNoError(e, "Could not show prompt.")
 
 			switch answer {
 			case "s":
@@ -76,24 +74,23 @@ func setupReadme(
 		}
 
 		if createFile {
-
 			if dryRun {
 				log.InfoF("[dry run] Readme file '%s' would have been written.", readme)
 
 				return
 			}
 
-			err := os.MkdirAll(path.Dir(readme), cm.DefaultFileModeDirectory)
+			e := os.MkdirAll(path.Dir(readme), cm.DefaultFileModeDirectory)
 
-			if err != nil {
+			if e != nil {
 				log.WarnF("Could not create directory for '%s'.\n"+
 					"-> Skipping Readme setup.", readme)
 
 				return
 			}
 
-			err = hooks.WriteReadmeFile(readme)
-			log.AssertNoErrorF(err, "Could not write README file '%s'.", readme)
+			e = hooks.WriteReadmeFile(readme)
+			log.AssertNoErrorF(e, "Could not write README file '%s'.", readme)
 			log.InfoF("Readme file has been written to '%s'.", readme)
 		}
 	}

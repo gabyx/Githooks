@@ -36,7 +36,6 @@ func downloadGitea(
 	versionTag string,
 	dir string,
 	publicPGP string) error {
-
 	client, err := gitea.NewClient(url)
 	if err != nil {
 		return cm.CombineErrors(err, cm.Error("Cannot initialize Gitea client"))

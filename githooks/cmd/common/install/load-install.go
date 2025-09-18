@@ -15,11 +15,9 @@ import (
 // LoadInstallDir loads the install directory and uses a default if
 // it does not exist.
 func LoadInstallDir(log cm.ILogContext, gitx *git.Context) (installDir string) {
-
 	installDir = hooks.GetInstallDir(gitx)
 
 	if !cm.IsDirectory(installDir) {
-
 		if strs.IsNotEmpty(installDir) {
 			log.WarnF("Install directory '%s' does not exist.\n"+
 				"Githooks installation is corrupt!\n"+

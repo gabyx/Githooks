@@ -63,20 +63,20 @@ func (e *ContainerizedExecutable) ResolveExitCode(exitCode int) string {
 	switch e.containerType {
 	case ContainerManagerTypeV.Docker:
 		switch exitCode {
-		case 125: // nolint: mnd
+		case 125: //nolint:mnd
 			return "The docker daemon reported an error.\n" + dindMsg
-		case 126: // nolint: mnd
+		case 126: //nolint:mnd
 			return "Docker command could not be invoked (permission problem?)."
-		case 127: // nolint: mnd
+		case 127: //nolint:mnd
 			return "Command inside container could not be found."
 		}
 	case ContainerManagerTypeV.Podman:
 		switch exitCode {
-		case 125: // nolint: mnd
+		case 125: //nolint:mnd
 			return "The podman reported an error.\n" + dindMsg
-		case 126: // nolint: mnd
+		case 126: //nolint:mnd
 			return "Podman command could not be invoked (permission problem?)."
-		case 127: // nolint: mnd
+		case 127: //nolint:mnd
 			return "Command inside container could not be found."
 		}
 	}

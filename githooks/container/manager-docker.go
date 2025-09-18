@@ -53,7 +53,6 @@ func (m *ManagerDocker) ImageBuild(
 	context string,
 	stage string,
 	ref string) (string, error) {
-
 	cmd := []string{
 		"build",
 		"-f", dockerfile,
@@ -90,7 +89,6 @@ func (m *ManagerDocker) NewHookRunExec(
 	attachStdIn bool,
 	allocateTTY bool,
 ) (cm.IExecutable, error) {
-
 	cm.DebugAssert(filepath.IsAbs(workspaceDir), "Workspace dir must be an absolute path.")
 	cm.DebugAssert(filepath.IsAbs(workspaceHookDir), "Workspace hook dir must be an abs path.")
 
@@ -227,7 +225,6 @@ func newManagerDocker(
 	cmd string,
 	mgrType ContainerManagerType,
 	readMounts []ReadBindMount) (mgr *ManagerDocker, err error) {
-
 	var uid, gid string
 
 	if runtime.GOOS != cm.WindowsOsName && runtime.GOOS != "darwin" {

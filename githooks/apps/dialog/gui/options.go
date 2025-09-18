@@ -12,7 +12,6 @@ func showOptionsWithButtons(
 	ctx context.Context,
 	opts *sets.Options,
 	showMessage func(context.Context, *sets.Message) (res.Message, error)) (r res.Options, err error) {
-
 	// Wrap it through `ShowMessage`.
 	msg := sets.Message{
 		General:       opts.General,
@@ -48,9 +47,7 @@ func showOptionsWithButtons(
 			return res.Options{
 				General: res.OkResult(),
 				Options: []uint{okOptionIdx}}, nil
-
 		} else if ok, idx := mRes.IsExtraButton(); ok {
-
 			nSkip := uint(len(opts.Options) - 1)
 			if idx < nSkip {
 				return res.Options{
@@ -59,11 +56,10 @@ func showOptionsWithButtons(
 			}
 
 			return res.Options{General: res.ExtraButtonResult(idx - nSkip)}, nil
-
 		} else if mRes.IsCanceled() {
 			return res.Options{General: res.CancelResult()}, nil
 		}
 	}
 
-	return
+	return r, err
 }

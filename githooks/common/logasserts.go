@@ -90,7 +90,7 @@ func (c *LogContext) PanicIfF(condition bool, format string, args ...any) {
 func (c *LogContext) AssertNoError(err error, lines ...string) bool {
 	if err != nil {
 		c.Warn(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...)
-		return false // nolint:nlreturn
+		return false //nolint:nlreturn
 	}
 
 	return true
@@ -99,8 +99,8 @@ func (c *LogContext) AssertNoError(err error, lines ...string) bool {
 // AssertNoErrorF Assert no error, and otherwise log it.
 func (c *LogContext) AssertNoErrorF(err error, format string, args ...any) bool {
 	if err != nil {
-		c.WarnF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
-		return false                                               // nolint:nlreturn
+		c.WarnF(format+"\n-> errors:\n"+FormatError(err), args...)
+		return false //nolint:nlreturn
 	}
 
 	return true
@@ -109,14 +109,14 @@ func (c *LogContext) AssertNoErrorF(err error, format string, args ...any) bool 
 // AssertNoErrorPanic asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
-		c.Panic(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...) //nolint: goconst
+		c.Panic(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...)
 	}
 }
 
 // AssertNoErrorPanicF asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...any) {
 	if err != nil {
-		c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+		c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...)
 	}
 }
 
@@ -124,13 +124,13 @@ func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...any) 
 func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args ...any) {
 	if isFatal {
 		if err != nil {
-			c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+			c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...)
 		} else {
 			c.PanicF(format, args...)
 		}
 	} else {
 		if err != nil {
-			c.ErrorF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+			c.ErrorF(format+"\n-> errors:\n"+FormatError(err), args...)
 		} else {
 			c.ErrorF(format, args...)
 		}

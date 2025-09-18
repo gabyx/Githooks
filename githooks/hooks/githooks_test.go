@@ -11,7 +11,7 @@ import (
 
 func TestGithooksCompliesWithGit(t *testing.T) {
 	doc, err := htmlquery.LoadURL("https://git-scm.com/docs/githooks")
-	assert.Nil(t, err, "Could not load doc.")
+	assert.NoError(t, err, "Could not load doc.")
 
 	list := htmlquery.Find(doc, `//h2[@id="_hooks"]/following-sibling::div//h3`)
 	assert.NotEmpty(t, list)

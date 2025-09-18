@@ -154,9 +154,7 @@ func GetAllHooksIn(
 	lazyIfIgnored bool,
 	parseRunnerConfig bool,
 	containerMgr container.IManager) (allHooks []Hook, maxBatches int, err error) {
-
 	appendHook := func(prefix, hookPath, hookNamespace, batchName string) error {
-
 		prefix += "/"
 
 		trimmedHookPath := strings.TrimPrefix(hookPath, prefix)
@@ -239,7 +237,6 @@ func GetAllHooksIn(
 
 		// Collect all files starting from `hookPath`
 		collectFiles := func(p string, info os.FileInfo) error {
-
 			base := path.Base(p)
 
 			if !allParallel {
@@ -255,9 +252,8 @@ func GetAllHooksIn(
 			}
 
 			if info.IsDir() {
-
 				// Get all files in the parallel batch folder
-				err := cm.WalkPaths(p, func(p string, info os.FileInfo) error {
+				e := cm.WalkPaths(p, func(p string, info os.FileInfo) error {
 					// Ignore `.dotfile` files
 					if strings.HasPrefix(path.Base(p), ".") {
 						return ignorePath(info)
@@ -270,8 +266,8 @@ func GetAllHooksIn(
 					return nil
 				})
 
-				if err != nil {
-					return err
+				if e != nil {
+					return e
 				}
 
 				// Skip this batch folder...
@@ -287,7 +283,7 @@ func GetAllHooksIn(
 		if err != nil {
 			err = cm.CombineErrors(cm.ErrorF("Errors while walking '%s'", dirOrFile), err)
 
-			return
+			return allHooks, maxBatches, err
 		}
 
 	case cm.IsFile(dirOrFile):
@@ -303,7 +299,7 @@ func GetAllHooksIn(
 		}
 	}
 
-	return
+	return allHooks, maxBatches, err
 }
 
 // ExecuteHooksParallel executes hooks in parallel over a thread pool.
@@ -314,7 +310,6 @@ func ExecuteHooksParallel(
 	res []HookResult,
 	outputCallback func(res ...HookResult),
 	args ...string) ([]HookResult, error) {
-
 	// Count number of results we need
 	nResults := 0
 	for _, hooksGroup := range hs {

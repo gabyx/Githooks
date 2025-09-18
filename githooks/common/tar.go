@@ -3,6 +3,7 @@ package common
 import (
 	"archive/tar"
 	"compress/gzip"
+	"errors"
 	"io"
 	"os"
 	"path"
@@ -14,7 +15,7 @@ import (
 func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err error) {
 	uncompressedStream, err := gzip.NewReader(gzipStream)
 	if err != nil {
-		return
+		return paths, err
 	}
 
 	tarReader := tar.NewReader(uncompressedStream)
@@ -22,16 +23,16 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err err
 
 	err = os.MkdirAll(baseDir, DefaultFileModeDirectory)
 	if err != nil {
-		return
+		return paths, err
 	}
 
 	for {
 		header, err = tarReader.Next()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
-			return
+			return paths, err
 		}
 
 		outPath := path.Join(baseDir, header.Name)
@@ -41,7 +42,7 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err err
 
 			err = os.MkdirAll(outPath, DefaultFileModeDirectory)
 			if err != nil {
-				return
+				return paths, err
 			}
 
 		case tar.TypeReg:
@@ -49,23 +50,23 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err err
 			var file *os.File
 			file, err = os.Create(outPath)
 			if err != nil {
-				return
+				return paths, err
 			}
 			defer func() { _ = file.Close() }()
 
 			if _, err = io.Copy(file, tarReader); err != nil {
 				err = CombineErrors(ErrorF("Copy of data to '%s' failed", outPath), err)
 
-				return
+				return paths, err
 			}
 
 			if runtime.GOOS == WindowsOsName {
 				_ = file.Close()
 				if err = Chmod(outPath, header.FileInfo().Mode()); err != nil {
-					return
+					return paths, err
 				}
 			} else if err = file.Chmod(header.FileInfo().Mode()); err != nil {
-				return
+				return paths, err
 			}
 
 			paths = append(paths, outPath)
@@ -75,7 +76,7 @@ func ExtractTarGz(gzipStream io.Reader, baseDir string) (paths []string, err err
 				header.Typeflag,
 				header.Name)
 
-			return
+			return paths, err
 		}
 	}
 

@@ -41,7 +41,6 @@ func downloadGithub(
 	versionTag string,
 	dir string,
 	publicPGP string) error {
-
 	client := github.NewClient(nil)
 	rel, _, err := client.Repositories.GetReleaseByTag(context.Background(),
 		owner, repo, versionTag)

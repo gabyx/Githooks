@@ -45,7 +45,6 @@ func RunOSAScript(ctx context.Context, script string, data any, workingDir strin
 	var cmd *exec.Cmd
 	if ctx != nil {
 		cmd = exec.CommandContext(ctx, "osascript", "-l", lang)
-
 	} else {
 		cmd = exec.Command("osascript", "-l", lang)
 	}

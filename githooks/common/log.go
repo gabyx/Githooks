@@ -220,7 +220,7 @@ func parseLogLevel() int {
 	switch level {
 	case "debug":
 		return debugLevel
-	default: // nolint: gocritic
+	default: //nolint:gocritic
 		fallthrough
 	case "info":
 		return infoLevel
@@ -468,7 +468,7 @@ func (c *LogContext) RemoveFileWriter() {
 // MoveFileWriterToEnd the the write pointer to the end of the file.
 func (c *LogContext) MoveFileWriterToEnd() {
 	if c.file != nil {
-		_, _ = c.file.Seek(0, 2) // nolint: mnd
+		_, _ = c.file.Seek(0, 2) //nolint:mnd
 	}
 }
 
@@ -480,7 +480,7 @@ func FormatMessage(suffix string, indent string, lines ...string) string {
 // FormatMessageF formats  several lines with a suffix and indent.
 func FormatMessageF(suffix string, indent string, format string, args ...any) string {
 	s := suffix + strs.Fmt(format, args...)
-	return strings.ReplaceAll(s, "\n", "\n"+indent) // nolint:nlreturn
+	return strings.ReplaceAll(s, "\n", "\n"+indent) //nolint:nlreturn
 }
 
 // FormatInfo formats  several lines with a suffix and indent.

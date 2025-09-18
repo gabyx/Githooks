@@ -77,7 +77,6 @@ func disableHookIfLFSDetected(
 	disableCallBack func(file string) HookDisableOption,
 	log cm.ILogContext,
 ) (disabled bool, deleted bool, err error) {
-
 	isLFSHook := false
 	found := false
 	disableOption := BackupHook
@@ -89,7 +88,7 @@ func disableHookIfLFSDetected(
 			err = cm.CombineErrors(err,
 				cm.ErrorF("Could not detect if '%s' is a `git lfs` hook.", filePath))
 
-			return
+			return disabled, deleted, err
 		}
 	}
 
@@ -102,7 +101,7 @@ func disableHookIfLFSDetected(
 		// Fallback find with regex match
 		found, err = cm.MatchLineRegexInFile(filePath, lfsDetectionRe)
 		if err != nil {
-			return
+			return disabled, deleted, err
 		}
 		if found {
 			disableOption = disableCallBack(filePath)
@@ -126,7 +125,7 @@ func disableHookIfLFSDetected(
 		}
 	}
 
-	return
+	return disabled, deleted, err
 }
 
 // Moves existing hook `dest` to `dir(path)/GetHookReplacementFileName(dest)`
@@ -138,7 +137,6 @@ func moveExistingHooks(
 	disableHookIfLFS func(file string) HookDisableOption,
 	log cm.ILogContext,
 ) error {
-
 	// Check there is already a Git hook in place and replace it.
 	if !cm.IsFile(dest) {
 		return nil
@@ -155,9 +153,9 @@ func moveExistingHooks(
 	// Try to detect a potential LFS statements and
 	// disable the hook (backup or delete).
 	if disableHookIfLFS != nil {
-		_, _, err := disableHookIfLFSDetected(dest, lfsHooksCache, disableHookIfLFS, log)
-		if err != nil {
-			return err
+		_, _, e := disableHookIfLFSDetected(dest, lfsHooksCache, disableHookIfLFS, log)
+		if e != nil {
+			return e
 		}
 	}
 
@@ -213,7 +211,7 @@ func InstallRunWrappersLink(
 
 	for i := range AllHookNames {
 		hookFile := path.Join(hooksDir, AllHookNames[i])
-		if exists, _ := cm.IsPathExisting(hookFile); !exists {
+		if ex, _ := cm.IsPathExisting(hookFile); !ex {
 			continue
 		}
 
@@ -291,7 +289,6 @@ func InstallRunWrappers(
 	disableHookIfLFS func(file string) HookDisableOption,
 	lfsHooksCache LFSHooksCache,
 	log cm.ILogContext) (nLFSHooks int, err error) {
-
 	// Uninstall all other hooks.
 	otherHooks := GetAllOtherHooks(hookNames)
 	nLFSHooks, err = uninstallRunWrappers(otherHooks, dir, lfsHooksCache)
@@ -301,7 +298,6 @@ func InstallRunWrappers(
 
 	// Install all maintained hooks.
 	for _, hookName := range hookNames {
-
 		dest := path.Join(dir, hookName)
 
 		err = moveExistingHooks(dest, lfsHooksCache, disableHookIfLFS, log)
@@ -343,12 +339,10 @@ func uninstallRunWrappers(
 	hookNames []string,
 	dir string,
 	lfsHooksCache LFSHooksCache) (nLFSCount int, err error) {
-
 	var e error
 	var isRunWrapper bool
 
 	for _, hookName := range hookNames {
-
 		dest := path.Join(dir, hookName)
 
 		if !cm.IsFile(dest) {
@@ -362,20 +356,17 @@ func uninstallRunWrappers(
 				cm.ErrorF("Run-wrapper detection for '%s' failed.", dest))
 		} else if isRunWrapper {
 			// Delete the run-wrapper
-			e := os.Remove(dest)
-
-			if e == nil {
+			if eR := os.Remove(dest); eR == nil {
 				// Move replaced hook (if existing) back in place.
 				replacedHook := path.Join(path.Dir(dest), GetHookReplacementFileName(dest))
 
 				if cm.IsFile(replacedHook) {
-					if e := os.Rename(replacedHook, dest); e != nil {
+					if eRn := os.Rename(replacedHook, dest); eRn != nil {
 						err = cm.CombineErrors(err,
 							cm.ErrorF("Could not rename file '%s' to '%s'.",
 								replacedHook, dest))
 					}
 				}
-
 			} else {
 				err = cm.CombineErrors(err, cm.ErrorF("Could not delete file '%s'.", dest))
 			}
@@ -392,7 +383,7 @@ func uninstallRunWrappers(
 
 	_ = os.Remove(path.Join(dir, RunWrapperMarkerFileName))
 
-	return
+	return nLFSCount, err
 }
 
 // Get all missing LFS hook in `hookNames` and install them into `dir`.
@@ -400,19 +391,17 @@ func reinstallLFSHooks(
 	dir string,
 	hookNames []string,
 	lfsHooksCache LFSHooksCache) (count int, err error) {
-
 	if len(hookNames) == 0 {
-		return
+		return count, err
 	}
 
 	lfsHookPaths, lfsHookNames, err := lfsHooksCache.GetLFSHooks()
 
 	if err != nil {
-		return
+		return count, err
 	}
 
 	for i := range lfsHookNames {
-
 		if !strs.Includes(hookNames, lfsHookNames[i]) {
 			// no LFS hooks
 			continue
@@ -424,7 +413,6 @@ func reinstallLFSHooks(
 
 		// Copy LFS hooks to destination.
 		if cm.IsFile(dest) {
-
 			equal, e := cm.AreChecksumsIdentical(src, dest)
 			if equal {
 				continue // This is obviously a LFS hook already. Skip it.
@@ -452,5 +440,5 @@ func reinstallLFSHooks(
 		}
 	}
 
-	return
+	return count, err
 }

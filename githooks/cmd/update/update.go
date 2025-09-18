@@ -17,7 +17,6 @@ func runUpdate(
 	nonInteractive bool,
 	nonInteractiveAccept updates.AcceptNonInteractiveMode,
 	usePreRelease bool) {
-
 	switch {
 	case setOpts.Set || setOpts.Unset:
 		config.RunUpdateCheck(ctx, setOpts)
@@ -37,7 +36,6 @@ func runUpdate(
 			updates.DefaultAcceptUpdateCallback(ctx.Log, promptx, nonInteractiveAccept),
 			usePreRelease,
 			func() error {
-
 				installer := installer.NewCmd(ctx)
 				args := []string{"--update"}
 				if usePreRelease {
@@ -66,7 +64,6 @@ func runUpdate(
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	yes := false
 	no := false
 	yesMajor := false
@@ -82,16 +79,15 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 If it finds one and the user accepts the prompt (or '--yes' is used)
 the installer is executed to update to the latest version.
 
-The '--enable-ckeck' and '--disable-ckeck' options enable or disable
+The '--enable-check' and '--disable-check' options enable or disable
 the automatic checks that would normally run daily
 after a successful commit event.`,
 		Run: func(cmd *cobra.Command, args []string) {
-
 			nonInteractive := false
 			nonInteractiveAccept := updates.AcceptNonInteractiveNone
 
 			ctx.Log.PanicIfF(yes && no || no && yesMajor || yesMajor && yes,
-				"Options '--no', '--yes', '--yes-all' are mutualy exclusive.")
+				"Options '--no', '--yes', '--yes-all' are mutually exclusive.")
 
 			switch {
 			case no:

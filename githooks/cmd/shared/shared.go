@@ -45,7 +45,6 @@ func addSharedOpts(c *cobra.Command, opts *sharedOpts, withAll bool) *cobra.Comm
 }
 
 func runSharedAdd(ctx *ccm.CmdContext, opts *sharedOpts, remove bool, url string) {
-
 	t1 := "add url to"
 	t2 := "Added '%s' to"
 	if remove {
@@ -82,7 +81,6 @@ func runSharedAdd(ctx *ccm.CmdContext, opts *sharedOpts, remove bool, url string
 		} else {
 			ctx.Log.WarnF("Global shared hooks url '%s' does not exist.", url)
 		}
-
 	}
 }
 
@@ -159,7 +157,6 @@ func runSharedList(ctx *ccm.CmdContext, opts *sharedOpts) {
 
 		ctx.Log.InfoF("Shared hook repositories in '%s':\n%s",
 			hooks.GetRepoSharedFileRel(), format(shared))
-
 	}
 
 	if opts.Local {
@@ -171,7 +168,6 @@ func runSharedList(ctx *ccm.CmdContext, opts *sharedOpts) {
 		ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
 
 		ctx.Log.InfoF("Local shared hook repositories:\n%s", format(local))
-
 	}
 
 	if opts.Global {
@@ -180,7 +176,6 @@ func runSharedList(ctx *ccm.CmdContext, opts *sharedOpts) {
 
 		ctx.Log.InfoF("Global shared hook repositories:\n%s", format(global))
 	}
-
 }
 
 func runSharedUpdate(ctx *ccm.CmdContext) {
@@ -209,8 +204,8 @@ func runSharedRoot(ctx *ccm.CmdContext, nsPaths []string) (exitCode error) {
 	ctx.Log.AssertNoErrorPanicF(err, "Could not resolve namespace paths")
 
 	for i := range results {
-		_, err := ctx.Log.GetInfoWriter().Write([]byte(results[i].RepositoryRoot + "\n"))
-		ctx.Log.AssertNoErrorF(err, "Could not write output.")
+		_, e := ctx.Log.GetInfoWriter().Write([]byte(results[i].RepositoryRoot + "\n"))
+		ctx.Log.AssertNoErrorF(e, "Could not write output.")
 	}
 
 	if !foundAll {
@@ -229,7 +224,7 @@ func runSharedRoot(ctx *ccm.CmdContext, nsPaths []string) (exitCode error) {
 	return
 }
 
-func runSharedRootFromUrl(ctx *ccm.CmdContext, urls []string) {
+func runSharedRootFromURL(ctx *ccm.CmdContext, urls []string) {
 	for _, url := range urls {
 		location := hooks.GetSharedCloneDir(ctx.InstallDir, url)
 		_, err := ctx.Log.GetInfoWriter().Write([]byte(location + "\n"))
@@ -239,7 +234,6 @@ func runSharedRootFromUrl(ctx *ccm.CmdContext, urls []string) {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	var opts = sharedOpts{}
 
 	sharedCmd := &cobra.Command{
@@ -287,7 +281,6 @@ file is modified in the local repository.`, hooks.GetRepoSharedFileRel())
 			sharedOptsMess + "\n" +
 			"The '--all' option clears all three lists.",
 		Run: func(c *cobra.Command, args []string) {
-
 			if c.Flags().NFlag() == 0 {
 				opts.Shared = true
 			}
@@ -308,7 +301,6 @@ file is modified in the local repository.`, hooks.GetRepoSharedFileRel())
 		Short: `List shared repositories.`,
 		Long:  `List the shared, local, global or all (default) shared hooks repositories.`,
 		Run: func(c *cobra.Command, args []string) {
-
 			if c.Flags().NFlag() == 0 {
 				opts.All = true
 			}
@@ -348,7 +340,7 @@ To ensure run 'git hooks shared update'.`,
 		Hidden: true,
 		PreRun: ccm.PanicIfNotRangeArgs(ctx.Log, 1, -1),
 		Run: func(cmd *cobra.Command, args []string) {
-			runSharedRootFromUrl(ctx, args)
+			runSharedRootFromURL(ctx, args)
 		}}
 
 	addSharedOpts(sharedAddCmd, &opts, false)

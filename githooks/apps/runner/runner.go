@@ -31,7 +31,6 @@ func main() {
 }
 
 func mainRun() (exitCode int) {
-
 	createLog()
 
 	log.DebugF("Githooks Runner [version: %s]", build.BuildVersion)
@@ -92,7 +91,7 @@ func mainRun() (exitCode int) {
 		executeLFSHooks(&settings)
 		executeOldHook(&settings, &uiSettings, &ignores, &checksums)
 
-		return
+		return exitCode
 	}
 
 	exportGeneralVars(&settings)
@@ -115,7 +114,7 @@ func mainRun() (exitCode int) {
 	uiSettings.PromptCtx.Close()
 	log.Debug("All done.\n")
 
-	return
+	return exitCode
 }
 
 func createLog() {
@@ -138,7 +137,6 @@ func logInvocation(s *HookSettings) {
 }
 
 func setupSettings(repoPath string) (HookSettings, UISettings) {
-
 	cm.PanicIf(
 		len(os.Args) <= 1,
 		"No arguments given! -> Abort")
@@ -218,7 +216,6 @@ func getInstallDir(gitx *git.Context) string {
 	if strs.IsEmpty(installDir) {
 		setDefault()
 	} else if exists, err := cm.IsPathExisting(installDir); !exists {
-
 		log.AssertNoError(err,
 			"Could not check path '%s'", installDir)
 		log.WarnF(
@@ -241,7 +238,6 @@ func getInstallDir(gitx *git.Context) string {
 
 func assertRegistered(gitx *git.Context, installDir string) {
 	if !gitx.IsConfigSet(hooks.GitCKRegistered, git.LocalScope) {
-
 		gitDir, err := gitx.GetGitDirCommon()
 		log.AssertNoErrorPanicF(err, "Could not get Git common dir.")
 
@@ -251,7 +247,6 @@ func assertRegistered(gitx *git.Context, installDir string) {
 
 		err = hooks.MarkRepoRegistered(gitx)
 		log.AssertNoErrorF(err, "Could not set register flag in repo '%s'.", gitDir)
-
 	} else {
 		log.Debug(
 			"Repository already registered.")
@@ -272,12 +267,12 @@ Do you want to allow running every current and future hooks?`, repoPath)
 	}
 
 	if answer == "y" {
-		err := hooks.SetTrustAllSetting(gitx, true, false)
-		log.AssertNoErrorF(err, "Could not store trust setting.")
+		e := hooks.SetTrustAllSetting(gitx, true, false)
+		log.AssertNoErrorF(e, "Could not store trust setting.")
 		isTrusted = true
 	} else {
-		err := hooks.SetTrustAllSetting(gitx, false, false)
-		log.AssertNoErrorF(err, "Could not store trust setting.")
+		e := hooks.SetTrustAllSetting(gitx, false, false)
+		log.AssertNoErrorF(e, "Could not store trust setting.")
 	}
 
 	return
@@ -313,7 +308,6 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 	}
 
 	if log.AssertNoError(err, "Could not export staged files.") {
-
 		exportOnlyFile := settings.GitX.GetConfig(
 			hooks.GitCKExportStagedFilesAsFile,
 			git.Traverse) == git.GitCVTrue
@@ -321,7 +315,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 		cm.DebugAssertF(
 			func() bool {
 				_, exists := os.LookupEnv(hooks.EnvVariableStagedFiles)
-				return !exists // nolint:nlreturn
+				return !exists //nolint:nlreturn
 			}(),
 			"Env. variable '%s' already defined.", hooks.EnvVariableStagedFiles)
 
@@ -330,7 +324,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			// to make it better accessible when running containerized.
 			// If it would be in /tmp we would need to mount this file to the container
 			// as well.
-			file, err := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
+			file, e := os.CreateTemp(settings.RepositoryHooksDir, ".githooks-staged-files-*")
 			filePath := filepath.ToSlash(file.Name())
 			relPath := path.Join(hooks.HooksDirName, path.Base(filePath))
 
@@ -338,9 +332,9 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			defer func() { _ = file.Close() }()
 			cleanUp = func() { _ = os.Remove(file.Name()) }
 
-			if log.AssertNoError(err, "Could not open temp file for staged files") {
-				_, err := file.WriteString(files)
-				log.AssertNoError(err, "Could not write staged files to temp file.")
+			if log.AssertNoError(e, "Could not open temp file for staged files") {
+				_, ef := file.WriteString(files)
+				log.AssertNoError(ef, "Could not write staged files to temp file.")
 
 				settings.StagedFilesFile = filePath
 			}
@@ -350,7 +344,6 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 			// Set environment also in execution context.
 			settings.ExecX.Env = append(settings.ExecX.Env,
 				strs.Fmt("%s=%s", hooks.EnvVariableStagedFilesFile, relPath))
-
 		} else {
 			files = strings.ReplaceAll(files, "\x00", "\n")
 
@@ -362,7 +355,7 @@ func exportStagedFiles(settings *HookSettings) (cleanUp func()) {
 		}
 	}
 
-	return
+	return cleanUp
 }
 
 func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
@@ -419,11 +412,10 @@ func shouldRunUpdateCheck(settings *HookSettings) bool {
 	lastUpdateCheck, _, err := updates.GetUpdateCheckTimestamp(settings.InstallDir)
 	log.AssertNoErrorF(err, "Could get last update check time.")
 
-	return time.Since(lastUpdateCheck).Hours() > 24.0 //nolint: mnd
+	return time.Since(lastUpdateCheck).Hours() > 24.0 //nolint:mnd
 }
 
 func executeLFSHooks(settings *HookSettings) {
-
 	if !strs.Includes(hooks.LFSHookNames[:], settings.HookName) {
 		return
 	}
@@ -443,7 +435,6 @@ func executeLFSHooks(settings *HookSettings) {
 			)...)
 
 		log.AssertNoErrorPanic(err, "Execution of LFS Hook failed.")
-
 	} else if lfsIsRequired {
 		log.PanicF("This repository requires Git LFS, but 'git-lfs' was\n"+
 			"not found on your PATH.\n"+
@@ -475,7 +466,6 @@ func executeOldHook(
 	uiSettings *UISettings,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) {
-
 	// e.g. 'hooks/pre-commit.replaced.githook's
 	hookName := hooks.GetHookReplacementFileName(settings.HookName)
 	hookNamespace := hooks.NamespaceReplacedHook
@@ -542,7 +532,6 @@ func collectHooks(
 	uiSettings *UISettings,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) (h hooks.Hooks) {
-
 	// Load common env. file if existing.
 	namespaceEnvs, err := hooks.LoadNamespaceEnvs(settings.RepositoryHooksDir)
 	cm.AssertNoErrorPanic(err, "Could not load env. file")
@@ -599,7 +588,6 @@ func updateLocalHookImages(settings *HookSettings) {
 }
 
 func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, sharedType hooks.SharedHookType) {
-
 	disableUpdate, _ := hooks.IsSharedHooksUpdateDisabled(settings.GitX, git.Traverse)
 	updateTriggers := settings.GitX.GetConfigAll(hooks.GitCKSharedUpdateTriggers, git.Traverse)
 
@@ -632,7 +620,6 @@ func getRepoSharedHooks(
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore,
 	allAddedHooks *[]string) (hs hooks.HookPrioList) {
-
 	shared, err :=
 		hooks.LoadRepoSharedHooks(settings.InstallDir, settings.RepositoryDir)
 
@@ -669,7 +656,6 @@ func getConfigSharedHooks(
 	checksums *hooks.ChecksumStore,
 	allAddedHooks *[]string,
 	sharedType hooks.SharedHookType) (hs hooks.HookPrioList) {
-
 	var shared []hooks.SharedRepo
 	var err error
 
@@ -711,7 +697,6 @@ func checkSharedHook(
 	hook *hooks.SharedRepo,
 	allAddedHooks *[]string,
 	sharedType hooks.SharedHookType) bool {
-
 	// Aborting a 'reference-transaction' hook (type 'prepared') leads
 	// to all sorts of problems, therefore
 	// do only print an error and continue.
@@ -746,7 +731,6 @@ func checkSharedHook(
 	exists, err := cm.IsPathExisting(hook.RepositoryDir)
 
 	if !exists {
-
 		mess := "Repository: '%s'\nneeds shared hooks in:\n" +
 			"'%s'\n"
 
@@ -808,7 +792,6 @@ func getHooksIn(
 	readNamespace bool,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) (batches hooks.HookPrioList) {
-
 	log.DebugF("Getting hooks in '%s'", hooksDir)
 
 	isTrusted := func(hookPath string) (bool, string) {
@@ -853,7 +836,7 @@ func getHooksIn(
 	log.AssertNoErrorPanicF(err, "Errors while collecting hooks in '%s'.", hooksDir)
 
 	if len(allHooks) == 0 {
-		return
+		return batches
 	}
 
 	// Sort allHooks by the given batchName
@@ -871,11 +854,9 @@ func getHooksIn(
 	curBatchName := &allHooks[0].BatchName
 
 	for i := range allHooks {
-
 		hook := &allHooks[i]
 
 		if hook.Active && !hook.Trusted {
-
 			if !settings.NonInteractive {
 				// Active hook, but not trusted:
 				// Show trust prompt to let user trust it or disable it.
@@ -902,7 +883,7 @@ func getHooksIn(
 		batches[curBatchIdx] = append(batches[curBatchIdx], *hook)
 	}
 
-	return
+	return batches
 }
 
 func getHooksInShared(settings *HookSettings,
@@ -911,7 +892,6 @@ func getHooksInShared(settings *HookSettings,
 	shRepo *hooks.SharedRepo,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) hooks.HookPrioList {
-
 	hookNamespace := hooks.GetDefaultHooksNamespaceShared(shRepo)
 
 	dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir)
@@ -942,7 +922,6 @@ func showTrustPrompt(
 	uiSettings *UISettings,
 	checksums *hooks.ChecksumStore,
 	hook *hooks.Hook) {
-
 	if hook.Trusted {
 		return
 	}
@@ -953,7 +932,6 @@ func showTrustPrompt(
 	disableHook := false
 
 	if !acceptHook {
-
 		question := mess + "\nDo you accept the changes?"
 
 		answer, err := uiSettings.PromptCtx.ShowOptions(question,
@@ -965,7 +943,7 @@ func showTrustPrompt(
 		switch answer {
 		case "a":
 			uiSettings.AcceptAllChanges = true
-			fallthrough // nolint:nlreturn
+			fallthrough //nolint:nlreturn
 		case "y":
 			acceptHook = true
 		case "d":
@@ -993,7 +971,6 @@ func showTrustPrompt(
 				NamespacePath: hook.NamespacePath})
 
 		checksums.AddChecksum(hook.SHA1, hook.Path)
-
 	} else if disableHook {
 		log.InfoF("-> Adding hook\n'%s'\nto disabled list.", hook.Path)
 
@@ -1019,7 +996,6 @@ func applyEnvToContainerRunArgs(hs *hooks.Hooks) {
 }
 
 func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
-
 	// Containerized executions need to apply env. variables to
 	// arguments of the command.
 	if settings.ContainerMgr != nil {
@@ -1045,7 +1021,7 @@ func executeHooks(settings *HookSettings, hs *hooks.Hooks) {
 	var pool *threadpool.ThreadPool
 	if hooks.UseThreadPool && hs.GetHooksCount() > 1 {
 		log.Debug("Launching with thread pool")
-		p := threadpool.New(nThreads, 15) // nolint: mnd
+		p := threadpool.New(nThreads, 15) //nolint:mnd
 		pool = &p
 	}
 
@@ -1136,10 +1112,8 @@ func storePendingData(
 	uiSettings *UISettings,
 	ignores *hooks.RepoIgnorePatterns,
 	checksums *hooks.ChecksumStore) {
-
 	// Store all ignore user patterns if there are new ones.
 	if len(uiSettings.DisabledHooks) != 0 {
-
 		// Add all back to the list ...
 		for i := range uiSettings.DisabledHooks {
 			ignores.User.AddNamespacePaths(uiSettings.DisabledHooks[i].NamespacePath)

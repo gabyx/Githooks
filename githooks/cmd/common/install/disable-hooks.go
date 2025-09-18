@@ -14,14 +14,12 @@ func GetHookDisableCallback(
 	gitx *git.Context,
 	nonInteractive bool,
 	uiSettings *UISettings) func(file string) hooks.HookDisableOption {
-
 	if strs.IsEmpty(uiSettings.DeleteDetectedLFSHooks) {
 		// Load default UI value from config.
 		uiSettings.DeleteDetectedLFSHooks = gitx.GetConfig(hooks.GitCKDeleteDetectedLFSHooksAnswer, git.GlobalScope)
 	}
 
 	return func(file string) (answer hooks.HookDisableOption) {
-
 		userAnswer := "n"
 		if strs.IsNotEmpty(uiSettings.DeleteDetectedLFSHooks) {
 			userAnswer = uiSettings.DeleteDetectedLFSHooks
@@ -45,7 +43,6 @@ func GetHookDisableCallback(
 			case "a":
 				uiSettings.DeleteDetectedLFSHooks = "y" // Store the decision.
 			}
-
 		}
 
 		switch userAnswer {

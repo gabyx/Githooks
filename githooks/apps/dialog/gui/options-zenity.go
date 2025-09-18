@@ -4,7 +4,7 @@ package gui
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -33,11 +33,10 @@ func getChoicesZenity(output string) (indices []uint) {
 
 // ShowOptionsZenity shows a option dialog with `zenity`.
 func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (r res.Options, err error) {
-
 	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at least one option specified.")
 
-		return
+		return r, err
 	}
 
 	if opts.Style == sets.OptionsStyleButtons && !opts.MultipleSelection {
@@ -60,11 +59,11 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (
 	args = append(args, "--text", opts.Text, "--no-markup")
 
 	if opts.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", opts.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(opts.Width), 10))
 	}
 
 	if opts.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", opts.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(opts.Height), 10))
 	}
 
 	switch opts.WindowIcon {
@@ -88,7 +87,6 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (
 
 	if opts.ExtraButtons != nil {
 		for i := range opts.ExtraButtons {
-
 			if strs.IsEmpty(opts.ExtraButtons[i]) {
 				return res.Options{}, cm.ErrorF("Empty label for extra button is not allowed")
 			}
@@ -117,7 +115,7 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (
 
 	// Add choices with ids.
 	for i := range opts.Options {
-		args = append(args, fmt.Sprintf("%d", i), opts.Options[i])
+		args = append(args, strconv.Itoa(i), opts.Options[i])
 	}
 
 	out, err := gunix.RunZenity(ctx, zenity, args, "")
@@ -127,9 +125,9 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (
 			Options: getChoicesZenity(string(out))}, nil
 	}
 
-	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
-
+	exErr := &exec.ExitError{}
+	if errors.As(err, &exErr) {
+		if exErr.ExitCode() == 1 {
 			// Handle extra buttons.
 			if len(out) > 0 {
 				button := string(out[:len(out)-1])

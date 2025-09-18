@@ -95,17 +95,16 @@ func CreateContext(
 	log cm.ILogContext,
 	useGUIFallback,
 	useStdIn bool) (IContext, error) {
-
 	var err error
 
 	var input io.Reader
 	printAnswer := false
-	maxTries := uint(3) //nolint: mnd
+	maxTries := uint(3) //nolint:mnd
 
 	if useStdIn {
 		input = os.Stdin
 		printAnswer = true
-		maxTries = uint(1) //nolint: mnd
+		maxTries = uint(1)
 	} else {
 		input, err = cm.GetCtty()
 		// if err != nil => we don't have a terminal attached.

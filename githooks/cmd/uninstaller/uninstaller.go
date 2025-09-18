@@ -23,7 +23,6 @@ import (
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	vi := viper.New()
 
 	var cmd = &cobra.Command{
@@ -42,7 +41,6 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 }
 
 func initArgs(log cm.ILogContext, args *Arguments, vi *viper.Viper) {
-
 	config := vi.GetString("config")
 	if strs.IsNotEmpty(config) {
 		vi.SetConfigFile(config)
@@ -93,7 +91,6 @@ func setupSettings(
 	gitx *git.Context,
 	args *Arguments,
 	tempDir string) (Settings, UISettings) {
-
 	var promptx prompt.IContext
 	var err error
 
@@ -118,13 +115,12 @@ func setupSettings(
 			InstallDir:         installDir,
 			CloneDir:           hooks.GetReleaseCloneDir(installDir),
 			TempDir:            tempDir,
-			UninstalledGitDirs: make(UninstallSet, 10), // nolint: mnd
+			UninstalledGitDirs: make(UninstallSet, 10), //nolint:mnd
 			LFSHooksCache:      lfsHooksCache},
 		UISettings{PromptCtx: promptx}
 }
 
 func runDispatchedUninstall(log cm.ILogContext, settings *Settings, args *Arguments) bool {
-
 	var uninstaller cm.Executable
 	if !cm.PackageManagerEnabled {
 		uninstaller = hooks.GetUninstallerExecutable(settings.InstallDir)
@@ -151,7 +147,6 @@ func runDispatchedUninstall(log cm.ILogContext, settings *Settings, args *Argume
 }
 
 func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Arguments) {
-
 	log.Info("Dispatching to uninstaller ...")
 
 	file, err := os.CreateTemp("", "*uninstall-config.json")
@@ -188,7 +183,6 @@ func uninstallFromExistingRepos(
 	registeredRepos *hooks.RegisterRepos,
 	fullUninstall bool,
 	uiSettings *UISettings) {
-
 	// Show prompt and run callback.
 	install.PromptExistingRepos(
 		log,
@@ -198,9 +192,7 @@ func uninstallFromExistingRepos(
 		true,
 		uiSettings.PromptCtx,
 		func(gitDir string) {
-
 			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, fullUninstall) {
-
 				registeredRepos.Remove(gitDir)
 				uninstalledRepos.Insert(gitDir)
 			}
@@ -215,7 +207,6 @@ func uninstallFromRegisteredRepos(
 	registeredRepos *hooks.RegisterRepos,
 	fullUninstall bool,
 	uiSettings *UISettings) {
-
 	if len(registeredRepos.GitDirs) == 0 {
 		return
 	}
@@ -234,7 +225,6 @@ func uninstallFromRegisteredRepos(
 		uiSettings.PromptCtx,
 		func(gitDir string) {
 			if install.UninstallFromRepo(log, gitDir, lfsHooksCache, fullUninstall) {
-
 				registeredRepos.Remove(gitDir)
 				uninstalledRepos.Insert(gitDir)
 			}
@@ -276,7 +266,6 @@ func deleteDir(log cm.ILogContext, dir string, tempDir string) {
 		tmp := cm.GetTempPath(tempDir, "old-binaries")
 		err := os.Rename(dir, tmp)
 		log.AssertNoErrorF(err, "Could not move dir\n'%s' to '%s'.", dir, tmp)
-
 	} else {
 		// On Unix system we can simply remove the binary dir,
 		// even if we are running the installer
@@ -299,7 +288,6 @@ func cleanBinaries(
 	log cm.ILogContext,
 	installDir string,
 	tempDir string) {
-
 	if cm.PackageManagerEnabled {
 		// Cannot uninstall binaries because this is done
 		// through the package manager
@@ -321,7 +309,6 @@ func cleanBinaries(
 func cleanReleaseClone(
 	log cm.ILogContext,
 	installDir string) {
-
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
 	log.InfoF("Remove release clone in '%s'.", cloneDir)
 
@@ -339,7 +326,6 @@ func cleanTempDir(log cm.ILogContext, installDir string) {
 }
 
 func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
-
 	log.InfoF("Clean global Git configuration values.")
 
 	// Remove core.hooksPath if we are using it.
@@ -353,7 +339,6 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 
 	// Remove all global configs
 	for _, k := range hooks.GetGlobalGitConfigKeys() {
-
 		log.AssertNoErrorF(gitx.UnsetConfig(k, git.GlobalScope),
 			"Could not unset global Git config '%s'.", k)
 	}
@@ -371,7 +356,6 @@ func cleanGitConfig(log cm.ILogContext, gitx *git.Context) {
 }
 
 func cleanAuxiliaryFiles(log cm.ILogContext, installDir string) {
-
 	files := []string{
 		hooks.GetRegisterFile(installDir),
 		download.GetDeploySettingsFile(installDir),
@@ -392,7 +376,6 @@ func runUninstallSteps(
 	settings *Settings,
 	uiSettings *UISettings,
 	args *Arguments) {
-
 	// Read registered file if existing.
 	// We ensured during load, that only existing Git directories are listed.
 	err := settings.RegisteredGitDirs.Load(settings.InstallDir, true, true)
@@ -433,7 +416,6 @@ func runUninstallSteps(
 }
 
 func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
-
 	log := ctx.Log
 	args := Arguments{}
 

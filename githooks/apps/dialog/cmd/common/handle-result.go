@@ -56,13 +56,11 @@ func HandleGeneralResult(ctx *CmdContext,
 	okCallback func() error,
 	cancelCallback func() error,
 	extraCallback func() error) error {
-
 	// Handle expected errors first.
 	if os.IsTimeout(err) {
 		ctx.ExitCode = 5
 
 		return nil
-
 	} else if err != nil {
 		// All other errors are not handled.
 		return err
@@ -99,7 +97,6 @@ func HandleGeneralResult(ctx *CmdContext,
 
 // HandleGeneralJSONResult handles the output of the general result.
 func HandleGeneralJSONResult(ctx *CmdContext, err error) error {
-
 	// Handle expected errors first.
 	if os.IsTimeout(err) {
 		return nil
@@ -113,7 +110,6 @@ func HandleGeneralJSONResult(ctx *CmdContext, err error) error {
 
 // HandleJSONResult handles the output of the result in form of JSON.
 func HandleJSONResult(ctx *CmdContext, r res.JSONResult, g *res.General, err error) error {
-
 	// Handle expected errors first.
 	if os.IsTimeout(err) {
 		r.Timeout = true

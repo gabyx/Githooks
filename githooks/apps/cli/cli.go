@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,7 +28,6 @@ func installSignalHandling() *cm.InterruptContext {
 }
 
 func mainRun(cleanUpX *cm.InterruptContext) (exitCode int) {
-
 	log, err := cm.CreateLogContext(false, false)
 	cm.AssertOrPanic(err == nil, "Could not create log")
 
@@ -48,7 +48,8 @@ func mainRun(cleanUpX *cm.InterruptContext) (exitCode int) {
 	err = cmd.Run(log, log, wrapPanicExitCode, cleanUpX)
 
 	// Overwrite the exit code if its a command exit error.
-	if v, ok := err.(ccm.CmdExit); ok {
+	var v ccm.CmdExit
+	if errors.As(err, &v) {
 		exitCode = v.ExitCode
 	} else if err == nil {
 		exitCode = 0

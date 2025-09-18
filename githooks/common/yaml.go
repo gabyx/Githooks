@@ -20,7 +20,8 @@ func LoadYAML(file string, repr any) error {
 		return CombineErrors(err, ErrorF("Could not read file '%s'.", file))
 	}
 
-	if err := yaml.Unmarshal(bytes, repr); err != nil {
+	err = yaml.Unmarshal(bytes, repr)
+	if err != nil {
 		return CombineErrors(err, ErrorF("Could not unmarshal file '%s'.", file))
 	}
 
@@ -40,7 +41,7 @@ func StoreYAML(file string, repr any) error {
 		return CombineErrors(err, ErrorF("Could not marshal representation to file '%s'.", file))
 	}
 
-	if _, err := yamlFile.Write(bytes); err != nil {
+	if _, err = yamlFile.Write(bytes); err != nil {
 		return CombineErrors(err, ErrorF("Could not write file '%s'.", file))
 	}
 
