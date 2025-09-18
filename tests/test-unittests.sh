@@ -11,14 +11,14 @@ cd "$ROOT_DIR"
 
 function clean_up() {
     # shellcheck disable=SC2317
-    docker rmi "githooks:unittests" &>/dev/null || true
+    run_docker rmi "githooks:unittests" &>/dev/null || true
 }
 
 trap clean_up EXIT
 
 cd "$ROOT_DIR"
 
-cat <<EOF | docker build --force-rm -t githooks:unittests -
+cat <<EOF | run_docker build --force-rm -t githooks:unittests -
 FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
@@ -33,7 +33,7 @@ RUN git config --global safe.directory /githooks
 ENV DOCKER_RUNNING=true
 EOF
 
-if ! docker run --rm -it \
+if ! run_docker run --rm -it \
     -v "$(pwd)":/githooks \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -w /githooks githooks:unittests \
