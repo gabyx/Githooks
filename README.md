@@ -991,9 +991,22 @@ inputs = {
 }
 ```
 
-**You should never install a major version upgrade as Githooks should be
-uninstalled completely before. The uninstaller on any version however should
-work backward-compatible.**
+or directly into a Nix profile with
+
+```bash
+nix profile install "github:gabyx/githooks?dir=nix&ref=v3.0.4"
+```
+
+> [!NOTE] 
+>
+> You still need to run the installer to enable it on your system
+> `githooks-cli installer`
+
+> [!WARNING] 
+>
+> You should never install a major version upgrade as Githooks should be
+> uninstalled completely before. The uninstaller on any version however should
+> work backward-compatible.**
 
 and then use it in your packages, e.g. here with home-manager by doing:
 
