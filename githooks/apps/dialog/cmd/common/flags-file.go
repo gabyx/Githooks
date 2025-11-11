@@ -22,7 +22,7 @@ func (f *fileFilterArgs) Type() string {
 func (f *fileFilterArgs) Set(s string) error {
 	var filter settings.FileFilter
 
-	if split := strings.SplitN(s, "|", 2); len(split) > 1 { // nolint: mnd
+	if split := strings.SplitN(s, "|", 2); len(split) > 1 { //nolint:mnd
 		filter.Name = split[0]
 		s = split[1]
 	}

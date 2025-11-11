@@ -10,7 +10,7 @@ func (c *LogContext) AssertWarn(condition bool, lines ...string) {
 }
 
 // AssertWarnF Assert a condition is `true`, otherwise log.
-func (c *LogContext) AssertWarnF(condition bool, format string, args ...interface{}) {
+func (c *LogContext) AssertWarnF(condition bool, format string, args ...any) {
 	if !condition {
 		c.WarnF(format, args...)
 	}
@@ -24,7 +24,7 @@ func (c *LogContext) DebugIf(condition bool, lines ...string) {
 }
 
 // DebugIfF Assert a condition is `true`, otherwise log.
-func (c *LogContext) DebugIfF(condition bool, format string, args ...interface{}) {
+func (c *LogContext) DebugIfF(condition bool, format string, args ...any) {
 	if condition {
 		c.DebugF(format, args...)
 	}
@@ -38,7 +38,7 @@ func (c *LogContext) InfoIf(condition bool, lines ...string) {
 }
 
 // InfoIfF Assert a condition is `true`, otherwise log.
-func (c *LogContext) InfoIfF(condition bool, format string, args ...interface{}) {
+func (c *LogContext) InfoIfF(condition bool, format string, args ...any) {
 	if condition {
 		c.InfoF(format, args...)
 	}
@@ -52,7 +52,7 @@ func (c *LogContext) ErrorIf(condition bool, lines ...string) {
 }
 
 // ErrorIfF Assert a condition is `true`, otherwise log.
-func (c *LogContext) ErrorIfF(condition bool, format string, args ...interface{}) {
+func (c *LogContext) ErrorIfF(condition bool, format string, args ...any) {
 	if condition {
 		c.ErrorF(format, args...)
 	}
@@ -66,7 +66,7 @@ func (c *LogContext) WarnIf(condition bool, lines ...string) {
 }
 
 // WarnIfF Assert a condition is `true`, otherwise log.
-func (c *LogContext) WarnIfF(condition bool, format string, args ...interface{}) {
+func (c *LogContext) WarnIfF(condition bool, format string, args ...any) {
 	if condition {
 		c.WarnF(format, args...)
 	}
@@ -80,7 +80,7 @@ func (c *LogContext) PanicIf(condition bool, lines ...string) {
 }
 
 // PanicIfF Assert a condition is `true`, otherwise log it.
-func (c *LogContext) PanicIfF(condition bool, format string, args ...interface{}) {
+func (c *LogContext) PanicIfF(condition bool, format string, args ...any) {
 	if condition {
 		c.PanicF(format, args...)
 	}
@@ -90,17 +90,17 @@ func (c *LogContext) PanicIfF(condition bool, format string, args ...interface{}
 func (c *LogContext) AssertNoError(err error, lines ...string) bool {
 	if err != nil {
 		c.Warn(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...)
-		return false // nolint:nlreturn
+		return false //nolint:nlreturn
 	}
 
 	return true
 }
 
 // AssertNoErrorF Assert no error, and otherwise log it.
-func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{}) bool {
+func (c *LogContext) AssertNoErrorF(err error, format string, args ...any) bool {
 	if err != nil {
-		c.WarnF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
-		return false                                               // nolint:nlreturn
+		c.WarnF(format+"\n-> errors:\n"+FormatError(err), args...)
+		return false //nolint:nlreturn
 	}
 
 	return true
@@ -109,28 +109,28 @@ func (c *LogContext) AssertNoErrorF(err error, format string, args ...interface{
 // AssertNoErrorPanic asserts no error, and otherwise log and panic.
 func (c *LogContext) AssertNoErrorPanic(err error, lines ...string) {
 	if err != nil {
-		c.Panic(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...) //nolint: goconst
+		c.Panic(append(lines, strs.SplitLines("-> errors:\n"+FormatError(err))...)...)
 	}
 }
 
 // AssertNoErrorPanicF asserts no error, and otherwise log and panic.
-func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...interface{}) {
+func (c *LogContext) AssertNoErrorPanicF(err error, format string, args ...any) {
 	if err != nil {
-		c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+		c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...)
 	}
 }
 
 // ErrorOrPanicF logs an error or a fatal error and also with a potential occurred error.
-func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args ...interface{}) {
+func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args ...any) {
 	if isFatal {
 		if err != nil {
-			c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+			c.PanicF(format+"\n-> errors:\n"+FormatError(err), args...)
 		} else {
 			c.PanicF(format, args...)
 		}
 	} else {
 		if err != nil {
-			c.ErrorF(format+"\n-> errors:\n"+FormatError(err), args...) //nolint: goconst
+			c.ErrorF(format+"\n-> errors:\n"+FormatError(err), args...)
 		} else {
 			c.ErrorF(format, args...)
 		}
@@ -138,7 +138,7 @@ func (c *LogContext) ErrorOrPanicF(isFatal bool, err error, format string, args 
 }
 
 // ErrorOrPanicIfF logs an error or a fatal error if the condition is met.
-func (c *LogContext) ErrorOrPanicIfF(isFatal bool, condition bool, format string, args ...interface{}) {
+func (c *LogContext) ErrorOrPanicIfF(isFatal bool, condition bool, format string, args ...any) {
 	if isFatal {
 		c.PanicIfF(condition, format, args...)
 	} else {

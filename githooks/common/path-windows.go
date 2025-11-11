@@ -16,7 +16,7 @@ var (
 	procGetBinaryTypeW = kernel32.NewProc("GetBinaryTypeW")
 )
 
-//nolint: deadcode,varcheck
+//nolint:deadcode,varcheck
 const (
 	scs32BitBinary = 0
 	scs64BitBinary = 6
@@ -47,7 +47,7 @@ func IsExecutable(path string) bool {
 
 	_, _, e := syscall.Syscall(
 		procGetBinaryTypeW.Addr(),
-		2, //nolint: mnd
+		2, //nolint:mnd
 		uintptr(unsafe.Pointer(pPath)),
 		uintptr(unsafe.Pointer(&t)),
 		0)
@@ -67,7 +67,7 @@ func IsWritable(path string) bool {
 	}
 
 	// Check if the user bit is enabled in file permission
-	if info.Mode().Perm()&(1<<(uint(7))) == 0 { //nolint: mnd
+	if info.Mode().Perm()&(1<<(uint(7))) == 0 { //nolint:mnd
 		return false
 	}
 

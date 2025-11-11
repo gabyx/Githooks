@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -101,12 +102,12 @@ func (c *CmdContext) Get(args ...string) (string, error) {
 
 	if err != nil {
 		var errS string
+		exitErr := &exec.ExitError{}
+
 		if c.captureError {
 			errS = buf.String()
-		} else {
-			if exitErr, ok := err.(*exec.ExitError); ok {
-				errS = string(exitErr.Stderr)
-			}
+		} else if errors.As(err, &exitErr) {
+			errS = string(exitErr.Stderr)
 		}
 
 		err = CombineErrors(
@@ -127,7 +128,8 @@ func (c *CmdContext) GetCombined(args ...string) (string, error) {
 
 	if err != nil {
 		var errS string
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		exitErr := &exec.ExitError{}
+		if errors.As(err, &exitErr) {
 			errS = string(exitErr.Stderr)
 		}
 		err = CombineErrors(
@@ -156,7 +158,8 @@ func (c *CmdContext) Check(args ...string) (err error) {
 		if c.captureError {
 			errS = buf.String()
 		} else {
-			if exitErr, ok := err.(*exec.ExitError); ok {
+			exitErr := &exec.ExitError{}
+			if errors.As(err, &exitErr) {
 				errS = string(exitErr.Stderr)
 			}
 		}
@@ -181,7 +184,8 @@ func (c *CmdContext) GetExitCode(args ...string) (int, error) {
 		return 0, nil
 	}
 
-	if t, ok := err.(*exec.ExitError); ok {
+	t := &exec.ExitError{}
+	if errors.As(err, &t) {
 		return t.ExitCode(), nil
 	}
 
@@ -211,7 +215,8 @@ func (c *CmdContext) CheckPiped(args ...string) (err error) {
 		if c.captureError {
 			errS = buf.String()
 		} else {
-			if exitErr, ok := err.(*exec.ExitError); ok {
+			exitErr := &exec.ExitError{}
+			if errors.As(err, &exitErr) {
 				errS = string(exitErr.Stderr)
 			}
 		}

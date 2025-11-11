@@ -73,7 +73,6 @@ func GetHookRunCmd(
 	hookNamespace string,
 	envs []string,
 ) (cm.IExecutable, error) {
-
 	exec := cm.NewExecutable(hookPath, nil, envs)
 
 	if cm.IsExecutable(exec.Cmd) {
@@ -123,20 +122,20 @@ func GetHookRunCmd(
 	if containerMgr != nil && strs.IsNotEmpty(config.Image.Reference) {
 		// Containerized execution.
 
-		reference, err := addImageReferenceSuffix(config.Image.Reference, hookPath, hookNamespace)
-		if err != nil {
-			return nil, err
+		reference, eR := addImageReferenceSuffix(config.Image.Reference, hookPath, hookNamespace)
+		if eR != nil {
+			return nil, eR
 		}
 
-		containerExec, err := containerMgr.NewHookRunExec(
+		containerExec, eR := containerMgr.NewHookRunExec(
 			reference,
 			gitx.GetCwd(),
 			rootDir, &exec,
 			false, false,
 		)
 
-		if err != nil {
-			return nil, cm.CombineErrors(err, cm.Error("Could not create container hook executor."))
+		if eR != nil {
+			return nil, cm.CombineErrors(eR, cm.Error("Could not create container hook executor."))
 		}
 
 		return containerExec, nil
@@ -165,11 +164,8 @@ var reEnvVariable = regexp.MustCompile(`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s)
 func getVarSubstitution(
 	getEnv func(string) (string, bool),
 	gitGet func(string, git.ConfigScope) (string, bool)) func(string) (string, error) {
-
 	return func(s string) (res string, err error) {
-
 		res = reEnvVariable.ReplaceAllStringSubmatchFunc(s, func(match []string) (subs string) {
-
 			// Escape '\${var}' => '${var}'
 			if len(match[1]) != 0 {
 				return string([]rune(match[0])[1:])

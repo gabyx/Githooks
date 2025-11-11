@@ -37,7 +37,7 @@ func (e CmdExit) Error() string {
 
 // NewCmdExit creates a new command error with exit code.
 // The error is logged if `ec != 0` directly.
-func (c *CmdContext) NewCmdExit(ec int, format string, args ...interface{}) error {
+func (c *CmdContext) NewCmdExit(ec int, format string, args ...any) error {
 	if ec != 0 {
 		c.Log.ErrorF(format, args...)
 	}

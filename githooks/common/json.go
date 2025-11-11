@@ -8,12 +8,12 @@ import (
 )
 
 // LoadJSON loads and parses JSON file into a representation.
-func LoadJSON(file string, repr interface{}) error {
+func LoadJSON(file string, repr any) error {
 	jsonFile, err := os.Open(file)
 	if err != nil {
 		return ErrorF("Could not open file '%s'.", file)
 	}
-	defer jsonFile.Close()
+	defer func() { _ = jsonFile.Close() }()
 
 	err = ReadJSON(jsonFile, repr)
 	if err != nil {
@@ -25,12 +25,12 @@ func LoadJSON(file string, repr interface{}) error {
 }
 
 // StoreJSON stores a representation in a JSON file.
-func StoreJSON(file string, repr interface{}) error {
-	jsonFile, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0664) //nolint: mnd
+func StoreJSON(file string, repr any) error {
+	jsonFile, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0664)
 	if err != nil {
 		return err
 	}
-	defer jsonFile.Close()
+	defer func() { _ = jsonFile.Close() }()
 
 	err = WriteJSON(jsonFile, repr)
 	if err != nil {
@@ -42,7 +42,7 @@ func StoreJSON(file string, repr interface{}) error {
 }
 
 // WriteJSON writes the JSON representation of `repr` to `writer`.
-func WriteJSON(writer io.Writer, repr interface{}) error {
+func WriteJSON(writer io.Writer, repr any) error {
 	bytes, err := jsoniter.Marshal(repr)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func WriteJSON(writer io.Writer, repr interface{}) error {
 }
 
 // ReadJSON reads the JSON representation of `repr` from `reader`.
-func ReadJSON(reader io.Reader, repr interface{}) error {
+func ReadJSON(reader io.Reader, repr any) error {
 	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		return err

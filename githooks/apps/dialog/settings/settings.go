@@ -157,7 +157,6 @@ type FileSelection struct {
 
 // SetDefaultIcons sets default icons for message dialogs.
 func (s *Message) SetDefaultIcons() {
-
 	switch s.Style {
 	case QuestionStyle:
 		if s.WindowIcon == UndefinedIcon {

@@ -11,7 +11,6 @@ import (
 )
 
 func updateReadme(ctx *ccm.CmdContext, panicIfExists bool) {
-
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
 	file := hooks.GetReadmeFile(repoDir)
@@ -45,7 +44,6 @@ func runUpdateReadme(ctx *ccm.CmdContext) {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	readmeCmd := &cobra.Command{
 		Use:   "readme",
 		Short: "Manages the Githooks README in the current repository.",

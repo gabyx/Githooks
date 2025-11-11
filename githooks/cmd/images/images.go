@@ -46,7 +46,7 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string, alwaysBuild bool) {
 			continue
 		}
 
-		hooksDir := hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
+		hooksDir = hooks.GetSharedGithooksDir(allRepos[rI].RepositoryDir)
 
 		ctx.Log.InfoF("%s", hooksDir)
 		err = hooks.UpdateImages(
@@ -63,7 +63,6 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string, alwaysBuild bool) {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	imagesCmd := &cobra.Command{
 		Use:   "images",
 		Short: "Manage container images.",

@@ -27,8 +27,8 @@ func CreateDefaultProgressSettings(title string, titleStillRunning string) Progr
 	return ProgressSettings{
 		Title:                     title,
 		TitleStillRunning:         titleStillRunning,
-		ProgressUpdateInterval:    100 * time.Millisecond, //nolint: mnd
-		ProgressStillRunningAfter: 5 * time.Second}        //nolint: mnd
+		ProgressUpdateInterval:    100 * time.Millisecond, //nolint:mnd
+		ProgressStillRunningAfter: 5 * time.Second}        //nolint:mnd
 }
 
 // RunTaskWithProgress runs a task with a progress spinner
@@ -40,7 +40,6 @@ func RunTaskWithProgress(
 	log ILogContext,
 	timeout time.Duration,
 	sett ProgressSettings) (taskOut ITask, taskError error) {
-
 	spinner := GetProgressBar(log, sett.Title, -1)
 	if spinner == nil {
 		log.Info(sett.Title)
@@ -87,5 +86,5 @@ func RunTaskWithProgress(
 		}
 	}
 
-	return
+	return taskOut, taskError
 }

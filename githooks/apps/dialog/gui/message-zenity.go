@@ -4,8 +4,9 @@ package gui
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os/exec"
+	"strconv"
 
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
@@ -15,7 +16,6 @@ import (
 
 // ShowMessage shows a message dialog with `zenity`.
 func ShowMessageZenity(ctx context.Context, zenity string, msg *set.Message) (r res.Message, err error) {
-
 	msg.SetDefaultIcons()
 
 	var args []string
@@ -35,11 +35,11 @@ func ShowMessageZenity(ctx context.Context, zenity string, msg *set.Message) (r 
 	args = append(args, "--title", msg.Title)
 
 	if msg.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", msg.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(msg.Width), 10))
 	}
 
 	if msg.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", msg.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(msg.Height), 10))
 	}
 
 	switch msg.WindowIcon {
@@ -68,7 +68,7 @@ func ShowMessageZenity(ctx context.Context, zenity string, msg *set.Message) (r 
 		var extraButtons []string
 		extraButtons, err = addInvisiblePrefix(msg.ExtraButtons)
 		if err != nil {
-			return
+			return r, err
 		}
 
 		for i := range extraButtons {
@@ -104,9 +104,9 @@ func ShowMessageZenity(ctx context.Context, zenity string, msg *set.Message) (r 
 		return res.Message{General: res.OkResult()}, nil
 	}
 
-	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
-
+	exErr := &exec.ExitError{}
+	if errors.As(err, &exErr) {
+		if exErr.ExitCode() == 1 {
 			// Handle extra buttons.
 			if len(out) > 0 {
 				return res.Message{General: getResultButtons(string(out), len(msg.ExtraButtons)+1)}, nil

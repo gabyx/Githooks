@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/crypto/openpgp/armor"  // nolint: staticcheck
-	"golang.org/x/crypto/openpgp/packet" // nolint: staticcheck
+	"golang.org/x/crypto/openpgp/armor"  //nolint:staticcheck
+	"golang.org/x/crypto/openpgp/packet" //nolint:staticcheck
 )
 
 // VerifyFile verifies an input `file` with its `signature`
 // provided a public GPG kex in hex format.
 func VerifyFile(file io.Reader, signature io.Reader, publicKey string) error {
-
 	// Read the signature file
 	pack, err := packet.Read(signature)
 	if err != nil {
@@ -29,7 +28,7 @@ func VerifyFile(file io.Reader, signature io.Reader, publicKey string) error {
 	// Decode armored public key
 	block, err := armor.Decode(bytes.NewReader([]byte(publicKey)))
 	if err != nil {
-		return fmt.Errorf("error decoding public key: %s", err)
+		return fmt.Errorf("error decoding public key: %w", err)
 	}
 	if block.Type != "PGP PUBLIC KEY BLOCK" {
 		return errors.New("not an armored public key")
@@ -51,16 +50,16 @@ func VerifyFile(file io.Reader, signature io.Reader, publicKey string) error {
 	hash := sig.Hash.New()
 
 	// Hash the content of the file
-	buf := make([]byte, 1024) // nolint: mnd
+	buf := make([]byte, 1024) //nolint:mnd
 	for {
-		n, err := file.Read(buf)
-		if err == io.EOF {
+		n, e := file.Read(buf)
+		if errors.Is(e, io.EOF) {
 			break
 		}
 
-		_, err = hash.Write(buf[:n])
-		if err != nil {
-			return CombineErrors(err, Error("Failed hashing the file."))
+		_, e = hash.Write(buf[:n])
+		if e != nil {
+			return CombineErrors(e, Error("Failed hashing the file."))
 		}
 	}
 

@@ -42,7 +42,6 @@ func SetTrustAllSetting(gitx *git.Context, enable bool, reset bool) error {
 func IsRepoTrusted(
 	gitx *git.Context,
 	repoPath string) (isTrusted bool, hasTrustFile bool, trustAllSet bool) {
-
 	trustFile := GetTrustMarkerFile(repoPath)
 
 	if cm.IsFile(trustFile) {
@@ -116,7 +115,7 @@ func newChecksumData(paths ...string) ChecksumData {
 	return ChecksumData{paths}
 }
 
-// AddChecksums sets the search directory to `path`.
+// SetSearchDirectory sets the search directory to `path`.
 func (t *ChecksumStore) SetSearchDirectory(path string) {
 	t.checksumDir = path
 }
@@ -132,8 +131,7 @@ func (t *ChecksumStore) AddChecksum(sha1 string, filePath string) bool {
 	t.assertData()
 	filePath = filepath.ToSlash(filePath)
 	if data, exists := t.checksums[sha1]; exists {
-		p := &data.Paths
-		*p = append(*p, filePath)
+		t.checksums[sha1] = newChecksumData(append(data.Paths, filePath)...)
 
 		return true
 	}
@@ -152,7 +150,7 @@ func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
 	for i := range checksums {
 		checksum := &checksums[i]
 
-		cm.DebugAssertF(len(checksum.SHA1) == 40, "Wrong SHA1 hash '%s'", checksum.SHA1) // nolint: mnd
+		cm.DebugAssertF(len(checksum.SHA1) == 40, "Wrong SHA1 hash '%s'", checksum.SHA1) //nolint:mnd
 
 		dir := path.Join(t.checksumDir, checksum.SHA1[0:2])
 		err := os.MkdirAll(dir, cm.DefaultFileModeDirectory)
@@ -172,7 +170,6 @@ func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
 // SyncChecksumRemove removes SHA1 checksums
 // of a path from the search directory.
 func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err error) {
-
 	if strs.IsEmpty(t.checksumDir) {
 		err = cm.Error("No checksum directory.")
 
@@ -180,8 +177,7 @@ func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err er
 	}
 
 	for _, sha1 := range sha1s {
-
-		cm.DebugAssertF(len(sha1) == 40, "Wrong SHA1 hash '%s'", sha1) // nolint: mnd
+		cm.DebugAssertF(len(sha1) == 40, "Wrong SHA1 hash '%s'", sha1) //nolint:mnd
 
 		dir := path.Join(t.checksumDir, sha1[0:2])
 		file := path.Join(dir, sha1[2:])
@@ -200,7 +196,6 @@ func (t *ChecksumStore) SyncChecksumRemove(sha1s ...string) (removed int, err er
 
 // IsTrusted checks if a path has been trusted.
 func (t *ChecksumStore) IsTrusted(filePath string) (bool, string, error) {
-
 	sha1, err := cm.GetSHA1HashFile(filePath)
 	if err != nil {
 		return false, "",
@@ -210,11 +205,11 @@ func (t *ChecksumStore) IsTrusted(filePath string) (bool, string, error) {
 	// Check first search directory ...
 	if strs.IsNotEmpty(t.checksumDir) {
 		bucket := sha1[0:2]
-		exists, err := cm.IsPathExisting(path.Join(t.checksumDir, bucket, sha1[2:]))
+		exists, e := cm.IsPathExisting(path.Join(t.checksumDir, bucket, sha1[2:]))
 		if exists {
 			return true, sha1, nil
-		} else if err != nil {
-			return false, sha1, err
+		} else if e != nil {
+			return false, sha1, e
 		}
 	}
 
@@ -244,7 +239,6 @@ func GetChecksumDirectoryGitDir(gitDir string) string {
 // GetChecksumStorage loads the checksum store from the
 // current Git directory.
 func GetChecksumStorage(gitDirWorktree string) (store ChecksumStore, err error) {
-
 	cacheDir := GetChecksumDirectoryGitDir(gitDirWorktree)
 
 	fi, e := os.Lstat(cacheDir)

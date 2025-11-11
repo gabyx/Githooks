@@ -60,7 +60,6 @@ func loadContainerRunConfig() (config containerRunConfig, err error) {
 	file, exists := os.LookupEnv(EnvVariableContainerRunConfigFile)
 
 	if exists && cm.IsFile(file) {
-
 		err = cm.LoadYAML(file, &config)
 		if err != nil {
 			err = cm.CombineErrors(err, cm.ErrorF("Could not load file '%s'", file))

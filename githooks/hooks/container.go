@@ -13,7 +13,6 @@ func NewContainerManager(
 	readMounts []container.ReadBindMount) (containerMgr container.IManager, err error) {
 	if containerized ||
 		IsContainerizedHooksEnabled(gitx, true) {
-
 		manager := gitx.GetConfig(GitCKContainerManager, git.Traverse)
 		containerMgr, err = container.NewManager(manager)
 	}

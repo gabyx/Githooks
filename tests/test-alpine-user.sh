@@ -10,7 +10,7 @@ TEST_DIR="$ROOT_DIR/tests"
 
 cd "$ROOT_DIR"
 
-cat <<EOF | docker build \
+cat <<EOF | run_docker build \
     --force-rm -t githooks:alpine-user-base -
 FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
@@ -32,11 +32,11 @@ RUN if [ -n "$DOCKER_GROUP_ID" ]; then \
             groupmod -g "$newID" "$existingGroup" && \
             apk del shadow; \
         fi; \
-        addgroup -g "$DOCKER_GROUP_ID" docker && \
-        adduser test docker && \
+        addgroup -g "$DOCKER_GROUP_ID" run_docker && \
+        adduser test run_docker && \
         apk add docker; \
     else \
-        echo "Not adding docker since not working with user!" &>2; \
+        echo "Not adding run_docker since not working with user!" &>2; \
     fi
 RUN rm -rf "$GH_TEST_GIT_CORE/templates/hooks" && \
     mkdir -p "$GH_TEST_REPO" "$GH_TEST_GIT_CORE/templates/hooks" && \

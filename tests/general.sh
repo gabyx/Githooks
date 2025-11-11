@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+function run_docker() {
+    if [ "${CI:-}" = "true" ]; then
+        docker "$@"
+    else
+        sudo docker "$@"
+    fi
+}
+
 function init_step() {
     # Set extra install arguments for all steps.
     # when running centralized tests.

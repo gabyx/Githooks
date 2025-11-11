@@ -13,13 +13,13 @@ const (
 	hookNameServer = "server"
 )
 
-// Check hook names supporting also 'all', 'server' and negation prefix '!'.
+// CheckHookNames checks hook names supporting also 'all', 'server' and negation prefix '!'.
 // Additionally sanitize the names.
 func CheckHookNames(hookNames []string) ([]string, error) {
 	hookNames = strs.Map(hookNames, strings.TrimSpace)
 
 	for _, h := range hookNames {
-		h := strings.TrimPrefix(h, "!")
+		h = strings.TrimPrefix(h, "!")
 
 		if h != hookNameAll && h != hookNameServer && !strs.Includes(ManagedHookNames, h) {
 			return hookNames, cm.ErrorF(
@@ -33,9 +33,8 @@ func CheckHookNames(hookNames []string) ([]string, error) {
 
 // UnwrapHookNames returns a unique list of hook names built from the input.
 // Variable `hookNames` can contain hook names, 'server', 'all'
-// and negation prefix '!'. This function alyways returns a non-nil list.
+// and negation prefix '!'. This function always returns a non-nil list.
 func UnwrapHookNames(hookNames []string) ([]string, error) {
-
 	var err error
 
 	if len(hookNames) == 0 {
@@ -49,7 +48,6 @@ func UnwrapHookNames(hookNames []string) ([]string, error) {
 	}
 
 	for i := range hookNames {
-
 		h := strings.TrimPrefix(hookNames[i], "!")
 		subtract := len(hookNames[i]) != len(h)
 
@@ -103,7 +101,6 @@ func SetMaintainedHooks(
 	gitx *git.Context,
 	maintainedHooks []string,
 	scope git.ConfigScope) (err error) {
-
 	// Set maintained hooks into global config.
 	if maintainedHooks == nil {
 		maintainedHooks = append(maintainedHooks, "all")
@@ -123,7 +120,6 @@ func SetMaintainedHooks(
 // By default it returns `all`.
 func getMaintainedHooksFromString(maintainedHooks string) (hookNamesUnwrapped []string,
 	maintHooks []string, err error) {
-
 	if strs.IsNotEmpty(maintainedHooks) {
 		maintHooks = strings.Split(maintainedHooks, ",")
 		maintHooks, err = CheckHookNames(maintHooks)

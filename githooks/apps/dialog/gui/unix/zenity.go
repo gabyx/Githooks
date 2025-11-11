@@ -36,7 +36,6 @@ func RunZenity(ctx context.Context, zenity string, args []string, workingDir str
 
 	if ctx != nil {
 		cmd = exec.CommandContext(ctx, zenity, args...)
-
 	} else {
 		cmd = exec.Command(zenity, args...)
 	}

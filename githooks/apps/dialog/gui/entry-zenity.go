@@ -4,8 +4,9 @@ package gui
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
@@ -16,18 +17,17 @@ import (
 
 // ShowEntry shows an entry dialog with `zenity`.
 func ShowEntryZenity(ctx context.Context, zenity string, e *set.Entry) (r res.Entry, err error) {
-
 	args := []string{"--entry"}
 
 	// Zenity prints default title and text if not set.
 	args = append(args, "--title", e.Title)
 
 	if e.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", e.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(e.Width), 10))
 	}
 
 	if e.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", e.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(e.Height), 10))
 	}
 
 	switch e.WindowIcon {
@@ -56,7 +56,7 @@ func ShowEntryZenity(ctx context.Context, zenity string, e *set.Entry) (r res.En
 		var extraButtons []string
 		extraButtons, err = addInvisiblePrefix(e.ExtraButtons)
 		if err != nil {
-			return
+			return r, err
 		}
 
 		for i := range extraButtons {
@@ -86,7 +86,6 @@ func ShowEntryZenity(ctx context.Context, zenity string, e *set.Entry) (r res.En
 
 	out, err := gunix.RunZenity(ctx, zenity, args, "")
 	if err == nil {
-
 		// Any linebreak at the end will be trimmed away.
 		s := strings.TrimSuffix(string(out), "\n")
 
@@ -95,9 +94,9 @@ func ShowEntryZenity(ctx context.Context, zenity string, e *set.Entry) (r res.En
 			Text:    s}, nil
 	}
 
-	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
-
+	exErr := &exec.ExitError{}
+	if errors.As(err, &exErr) {
+		if exErr.ExitCode() == 1 {
 			// Handle extra buttons.
 			if len(out) > 0 {
 				return res.Entry{General: getResultButtons(string(out), len(e.ExtraButtons)+1)}, nil

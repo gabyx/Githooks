@@ -9,7 +9,7 @@ Executes an update check for a newer Githooks version.
 If it finds one and the user accepts the prompt (or `--yes` is used) the
 installer is executed to update to the latest version.
 
-The `--enable-ckeck` and `--disable-ckeck` options enable or disable the
+The `--enable-check` and `--disable-check` options enable or disable the
 automatic checks that would normally run daily after a successful commit event.
 
 ```

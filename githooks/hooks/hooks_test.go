@@ -7,10 +7,9 @@ import (
 )
 
 func TestHookCountString(t *testing.T) {
-
 	l := HookPrioList{[]Hook{{}, {}}, []Hook{{}, {}}, []Hook{{}, {}, {}}}
-	assert.Equal(t, l.CountFmt(), "[2,2,3]")
+	assert.Equal(t, "[2,2,3]", l.CountFmt())
 
 	l = HookPrioList{}
-	assert.Equal(t, l.CountFmt(), "[0]")
+	assert.Equal(t, "[0]", l.CountFmt())
 }

@@ -50,7 +50,7 @@ func GetDefaultHooksNamespaceShared(sharedRepo *SharedRepo) string {
 // SplitNamespacePath splits a namespace path `ns:xxx/a/b/c` into
 // `xxx` and `a/b/c`.
 func SplitNamespacePath(nsPath string) (ns, path string, err error) {
-	s := strings.SplitN(nsPath, "/", 2) // nolint: mnd
+	s := strings.SplitN(nsPath, "/", 2) //nolint:mnd
 	if len(s) > 1 {
 		path = s[1]
 	}

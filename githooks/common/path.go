@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"os"
 	"path"
 	"path/filepath"
@@ -24,7 +25,9 @@ const (
 
 // IsPathError returns `true` if the error is a `os.PathError`.
 func IsPathError(err error) bool {
-	return err != nil && err.(*os.PathError) != nil
+	target := &os.PathError{}
+
+	return errors.As(err, &target)
 }
 
 // IsPathExisting checks if a path exists.
@@ -61,7 +64,6 @@ type FileFilter = func(path string, info os.FileInfo) bool
 // GetFiles returns the filtered files in directory `root` (non-recursive).
 // The nil Filter returns all files.
 func GetFiles(root string, filter FileFilter) (files []string, err error) {
-
 	f := func(path string, info os.FileInfo) error {
 		if filter == nil || filter(path, info) {
 			files = append(files, path)
@@ -98,7 +100,6 @@ func WalkPaths(root string, filter FileFunc) error {
 
 // walkPaths walks all paths in directory `root` (non-recursive) and calls `filter`.
 func walkPaths(root string, filter FileFunc, skipDir bool) (err error) {
-
 	rootDirVisited := false
 
 	if filter == nil {
@@ -157,8 +158,9 @@ func MakeRelative(base string, path string) (s string, e error) {
 // ReplaceTildeWith replaces a prefix tilde '~' character in a path
 // with the string `repl`.
 func ReplaceTildeWith(p string, repl string) string {
-	if strings.HasPrefix(p, "~") {
-		return path.Join(repl, strings.TrimPrefix(p, "~"))
+	c, found := strings.CutPrefix(p, "~")
+	if found {
+		return path.Join(repl, c)
 	}
 
 	return p
@@ -182,12 +184,9 @@ func ReplaceTilde(p string) (string, error) {
 // TouchFile touches a file `path`.
 func TouchFile(filePath string, makeDirs bool) (err error) {
 	if IsFile(filePath) {
-
 		currentTime := time.Now().Local()
 		err = os.Chtimes(filePath, currentTime, currentTime)
-
 	} else {
-
 		if makeDirs {
 			if err = os.MkdirAll(path.Dir(filePath), DefaultFileModeDirectory); err != nil {
 				return
@@ -199,7 +198,7 @@ func TouchFile(filePath string, makeDirs bool) (err error) {
 		if err != nil {
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 	}
 
 	return
@@ -217,7 +216,6 @@ func CopyFileOrDirectory(src string, dest string) error {
 // GetTempPath creates a random non-existing path
 // with a postfix `postfix` in directory `dir` (can be empty to use the working dir).
 func GetTempPath(dir string, postfix string) (file string) {
-
 	maxLoops := 10
 	i := 0
 
@@ -258,12 +256,14 @@ func CopyFileWithBackup(src string, dst string, backupDir string, doMoveInstead 
 
 	if IsFile(dst) {
 		// Force remove any backup file.
-		backupFile := GetTempPath(backupDir, "-"+path.Base(dst))
+		temp := GetTempPath(backupDir, "-"+path.Base(dst))
 
 		// Copy destination to the backup file.
-		if err = os.Rename(dst, backupFile); err != nil {
+		if err = os.Rename(dst, temp); err != nil {
 			return
 		}
+
+		backupFile = temp
 	}
 
 	// Rollback operation if any error happens

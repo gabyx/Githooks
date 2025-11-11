@@ -12,7 +12,7 @@ type ValidationError struct {
 }
 
 // NewValidationError is the error for failed user input validation.
-func NewValidationError(format string, args ...interface{}) ValidationError {
+func NewValidationError(format string, args ...any) ValidationError {
 	return ValidationError{cm.ErrorF(format, args...)}
 }
 

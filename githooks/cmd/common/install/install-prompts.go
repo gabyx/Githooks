@@ -36,15 +36,14 @@ func PromptExistingRepos(
 	uninstall bool,
 	promptx prompt.IContext,
 	callback func(string)) {
-
 	// Message index.
 	idx := 0
 	if uninstall {
 		idx = 1
 	}
 
-	homeDir, err := homedir.Dir()
-	cm.AssertNoErrorPanic(err, "Could not get home directory.")
+	homeDir, e := homedir.Dir()
+	cm.AssertNoErrorPanic(e, "Could not get home directory.")
 
 	searchDir := gitx.GetConfig(hooks.GitCKPreviousSearchDir, git.GlobalScope)
 	hasSearchDir := strs.IsNotEmpty(searchDir)
@@ -57,7 +56,6 @@ func PromptExistingRepos(
 			return
 		}
 	} else {
-
 		var questionPrompt []string
 		if hasSearchDir {
 			questionPrompt = []string{"(Yes/no)", "Y/n"}
@@ -93,8 +91,8 @@ func PromptExistingRepos(
 	}
 
 	if !dryRun {
-		err = gitx.SetConfig(hooks.GitCKPreviousSearchDir, searchDir, git.GlobalScope)
-		log.AssertNoError(err, "Could not set git config 'githooks.previousSearchDir'")
+		e = gitx.SetConfig(hooks.GitCKPreviousSearchDir, searchDir, git.GlobalScope)
+		log.AssertNoError(e, "Could not set git config 'githooks.previousSearchDir'")
 	}
 
 	log.InfoF("Searching for Git directories in '%s'...", searchDir)
@@ -103,18 +101,18 @@ func PromptExistingRepos(
 		"Searching ...", "Still searching ...")
 	taskIn := GitDirsSearchTask{Dir: searchDir}
 
-	resultTask, err := cm.RunTaskWithProgress(&taskIn, log, 300*time.Second, settings) //nolint: mnd
-	if err != nil {
-		log.AssertNoErrorF(err, "Could not find Git directories in '%s'.", searchDir)
-		return //nolint: nlreturn
+	resultTask, e := cm.RunTaskWithProgress(&taskIn, log, 300*time.Second, settings) //nolint:mnd
+	if e != nil {
+		log.AssertNoErrorF(e, "Could not find Git directories in '%s'.", searchDir)
+		return //nolint:nlreturn
 	}
 
-	taskOut := resultTask.(*GitDirsSearchTask)
+	taskOut := resultTask.(*GitDirsSearchTask) //nolint:errcheck
 	cm.DebugAssert(taskOut != nil, "Wrong output.")
 
-	if len(taskOut.Matches) == 0 { //nolint: staticcheck
+	if len(taskOut.Matches) == 0 {
 		log.InfoF("No Git directories found in '%s'.", searchDir)
-		return //nolint: nlreturn
+		return //nolint:nlreturn
 	}
 
 	for _, gitDir := range taskOut.Matches {
@@ -136,7 +134,6 @@ func PromptRegisteredRepos(
 	uninstall bool,
 	promptx prompt.IContext,
 	callback func(string)) {
-
 	// Message index.
 	idx := 0
 	if uninstall {
@@ -144,7 +141,6 @@ func PromptRegisteredRepos(
 	}
 
 	if !nonInteractive && len(dirs) != 0 {
-
 		answer, err := promptx.ShowOptions(
 			"The following remaining registered repositories\n"+
 				"contain Githooks installation:\n"+

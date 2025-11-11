@@ -25,7 +25,6 @@ const IsRunningCoverage = false
 // For Gitea you need to specify the deploy api `deployAPI`.
 // Others will fail and need a special deploy settings config file.
 func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySettings, error) {
-
 	publicPGP, err := build.Asset("embedded/.deploy-pgp")
 	cm.AssertNoErrorPanic(err, "Could not get embedded deploy PGP.")
 
@@ -43,10 +42,9 @@ func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySe
 	host := ""
 
 	if git.IsCloneURLANormalURL(cloneURL) {
-
 		// Parse normal URL.
-		url, err := url.Parse(cloneURL)
-		if err != nil {
+		url, e := url.Parse(cloneURL)
+		if e != nil {
 			return nil, cm.ErrorF("Cannot parse clone url '%s'.", cloneURL)
 		}
 
@@ -55,15 +53,13 @@ func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySe
 
 		owner = strings.TrimSpace(strings.ReplaceAll(owner, "/", ""))
 		repo = strings.TrimSpace(strings.TrimSuffix(repo, ".git"))
-
-	} else if userHostPath := git.ParseSCPSyntax(cloneURL); userHostPath != nil { //nolint: gocritic
+	} else if userHostPath := git.ParseSCPSyntax(cloneURL); userHostPath != nil {
 		// Parse SCP Syntax.
 		host = userHostPath[1]
 		owner, repo = path.Split(userHostPath[2])
 
 		owner = strings.TrimSpace(strings.TrimPrefix(owner, "/"))
 		repo = strings.TrimSpace(strings.TrimSuffix(repo, ".git"))
-
 	} else {
 		return nil,
 			cm.ErrorF("Cannot auto-determine deploy API for url '%s'.", cloneURL)
@@ -100,7 +96,6 @@ func detectDeploySettings(cloneURL string, deployAPI string) (download.IDeploySe
 			"deploy api '%s' not supported.",
 			deployAPI)
 	}
-
 }
 
 func downloadBinaries(
@@ -108,7 +103,6 @@ func downloadBinaries(
 	deploySettings download.IDeploySettings,
 	tempDir string,
 	versionTag string) updates.Binaries {
-
 	log.PanicIfF(deploySettings == nil,
 		"Could not determine deploy settings.")
 
@@ -126,14 +120,14 @@ func downloadBinaries(
 
 	// Handle old binary names.
 	if exists, _ := cm.IsPathExisting(path.Join(tempDir, "runner")); exists {
-		err := os.Rename(path.Join(tempDir, "cli"+ext), cli)
-		log.AssertNoErrorPanic(err, "Could not rename excutable 'cli'.")
+		e := os.Rename(path.Join(tempDir, "cli"+ext), cli)
+		log.AssertNoErrorPanic(e, "Could not rename executable 'cli'.")
 
-		err = os.Rename(path.Join(tempDir, "runner"+ext), runner)
-		log.AssertNoErrorPanic(err, "Could not rename excutable 'runner'.")
+		e = os.Rename(path.Join(tempDir, "runner"+ext), runner)
+		log.AssertNoErrorPanic(e, "Could not rename executable 'runner'.")
 
-		err = os.Rename(path.Join(tempDir, "dialog"+ext), dialog)
-		log.AssertNoErrorPanic(err, "Could not rename excutable 'dialog'.")
+		e = os.Rename(path.Join(tempDir, "dialog"+ext), dialog)
+		log.AssertNoErrorPanic(e, "Could not rename executable 'dialog'.")
 	}
 
 	all := []string{cli, runner, dialog}

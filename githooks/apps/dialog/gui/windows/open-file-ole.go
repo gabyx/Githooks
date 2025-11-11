@@ -41,7 +41,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	hr, _, _ := coInitializeEx.Call(0, 0x6) //nolint: mnd // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
+	hr, _, _ := coInitializeEx.Call(0, 0x6) //nolint:mnd // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
 
 	if hr != 0x80010106 { // nolint: mnd // RPC_E_CHANGED_MODE
 		if int32(hr) < 0 {
@@ -50,7 +50,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 			return
 		}
 
-		defer coUninitialize.Call() //nolint: errcheck
+		defer coUninitialize.Call() //nolint:errcheck
 	}
 
 	var dialog *iFileOpenDialog
@@ -61,7 +61,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 	if int32(hr) < 0 {
 		return browseForFolder(ctx, s) // use fallback..
 	}
-	defer dialog.Call(dialog.vtbl.Release) //nolint: errcheck
+	defer dialog.Call(dialog.vtbl.Release) //nolint:errcheck
 
 	var flags int
 	hr, _, _ = dialog.Call(dialog.vtbl.GetOptions, uintptr(unsafe.Pointer(&flags)))
@@ -143,7 +143,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 		return
 	}
 
-	if hr == 0x800704c7 { //nolint: mnd // ERROR_CANCELLED
+	if hr == 0x800704c7 { //nolint:mnd // ERROR_CANCELLED
 		return res.File{General: res.CancelResult()}, nil
 	}
 
@@ -164,7 +164,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 			return
 		}
 
-		defer item.Call(item.vtbl.Release) //nolint: errcheck
+		defer item.Call(item.vtbl.Release) //nolint:errcheck
 
 		var ptr uintptr
 		hr, _, _ = item.Call(
@@ -177,7 +177,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 			return
 		}
 
-		defer coTaskMemFree.Call(ptr) //nolint: errcheck
+		defer coTaskMemFree.Call(ptr) //nolint:errcheck
 
 		var res []uint16
 		hdr := (*reflect.SliceHeader)(unsafe.Pointer(&res))
@@ -194,7 +194,7 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 			return
 		}
 
-		defer items.Call(items.vtbl.Release) //nolint: errcheck
+		defer items.Call(items.vtbl.Release) //nolint:errcheck
 
 		var count uint32
 		hr, _, _ = items.Call(items.vtbl.GetCount, uintptr(unsafe.Pointer(&count)))
@@ -237,8 +237,8 @@ func browseForFolder(ctx context.Context, s *sets.FileSelection) (r res.File, er
 			syscall.NewCallback(
 				func(wnd uintptr, msg uint32, lparam, data uintptr) uintptr {
 					if msg == 1 { // BFFMiNITIALIZED
-						sendMessage.Call( //nolint: errcheck
-							wnd, 1024+103, //nolint: mnd
+						sendMessage.Call( //nolint:errcheck
+							wnd, 1024+103, //nolint:mnd
 							/* BFFM_SETSELECTIONW */
 							1, /* TRUE */
 							data)
@@ -291,32 +291,32 @@ var (
 	_CLSID_FileOpenDialog = uuid("\x9c\x5a\x1c\xdc\x8a\xe8\xde\x4d\xa5\xa1\x60\xf8\x2a\x20\xae\xf7")
 )
 
-//nolint: structcheck
+//nolint:structcheck
 type iFileOpenDialog struct {
 	comObject
 	vtbl *iFileOpenDialogVtbl
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iShellItem struct {
 	comObject
 	vtbl *iShellItemVtbl
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iShellItemArray struct {
 	comObject
 	vtbl *iShellItemArrayVtbl
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iFileOpenDialogVtbl struct {
 	iFileDialogVtbl
 	GetResults       uintptr
 	GetSelectedItems uintptr
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iFileDialogVtbl struct {
 	iModalWindowVtbl
 	SetFileTypes        uintptr
@@ -344,13 +344,13 @@ type iFileDialogVtbl struct {
 	SetFilter           uintptr
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iModalWindowVtbl struct {
 	unknownVtbl
 	Show uintptr
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iShellItemVtbl struct {
 	unknownVtbl
 	BindToHandler  uintptr
@@ -360,7 +360,7 @@ type iShellItemVtbl struct {
 	Compare        uintptr
 }
 
-//nolint: structcheck
+//nolint:structcheck
 type iShellItemArrayVtbl struct {
 	unknownVtbl
 	BindToHandler              uintptr

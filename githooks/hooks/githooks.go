@@ -130,7 +130,6 @@ func GetGithooksEnvVariables(newStagedFilesFile string) []string {
 	names = []string{EnvVariableStagedFiles, EnvVariableStagedFilesFile}
 	for i := range names {
 		if val, exists := os.LookupEnv(names[i]); exists {
-
 			// Modify the file name.
 			if names[i] == EnvVariableStagedFilesFile &&
 				strs.IsNotEmpty(newStagedFilesFile) {
@@ -146,7 +145,6 @@ func GetGithooksEnvVariables(newStagedFilesFile string) []string {
 
 // GetBugReportingInfo gets the default bug reporting url. Argument 'repoPath' can be empty.
 func GetBugReportingInfo() (info string) {
-
 	// Set default if needed
 	defer func() {
 		if strs.IsEmpty(info) {
@@ -167,7 +165,6 @@ func GetGithooksDir(repoDir string) string {
 
 // GetSharedGithooksDir gets the hooks directory for Githooks inside a shared repository.
 func GetSharedGithooksDir(repoDir string) (dir string) {
-
 	// 1. priority has non-dot folder 'githooks'
 	// 2. priority is the normal '.githooks' folder.
 	// This is second, to allow internal development Githooks inside shared repos.
@@ -294,7 +291,6 @@ func GetLFSRequiredFile(repoDir string) (string, bool) {
 // any config starting from the working dir given by the git context or
 // optional also by the env. variable `GITHOOKS_DISABLE`.
 func IsGithooksDisabled(gitx *git.Context, checkEnv bool) bool {
-
 	if checkEnv {
 		env := os.Getenv("GITHOOKS_DISABLE")
 		if env != "" &&

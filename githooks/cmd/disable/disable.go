@@ -15,7 +15,6 @@ type disableOptions struct {
 
 // RunDisable disables Githooks completely.
 func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
-
 	var scope git.ConfigScope
 	var fmt string
 
@@ -43,7 +42,6 @@ func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 		err := ctx.GitX.UnsetConfig(hooks.GitCKDisable, scope)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not unset '%s' Git config '%s'.", scope, hooks.GitCKDisable)
 		ctx.Log.InfoF("Enabled Githooks %s.", fmt)
-
 	} else {
 		err := ctx.GitX.SetConfig(hooks.GitCKDisable, true, scope)
 		ctx.Log.AssertNoErrorPanicF(err, "Could not set '%s' Git config '%s'.", scope, hooks.GitCKDisable)
@@ -53,7 +51,6 @@ func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	var disableOpts disableOptions
 
 	disableCmd := &cobra.Command{

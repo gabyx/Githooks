@@ -32,7 +32,6 @@ func InstallIntoRepo(
 	skipReadme bool,
 	uiSettings *UISettings,
 ) bool {
-
 	hooksDir := path.Join(repoGitDir, "hooks")
 	if !cm.IsDirectory(hooksDir) {
 		err := os.MkdirAll(hooksDir, cm.DefaultFileModeDirectory)
@@ -93,8 +92,8 @@ func InstallIntoRepo(
 			return false
 		} else if lcpSet {
 			// We can safely delete this local config an then install run-wrappers.
-			err := gitx.UnsetConfig(git.GitCKCoreHooksPath, git.LocalScope)
-			log.AssertNoErrorPanicF(err, "Could not uset local Git config '%s'.", git.GitCKCoreHooksPath)
+			e := gitx.UnsetConfig(git.GitCKCoreHooksPath, git.LocalScope)
+			log.AssertNoErrorPanicF(e, "Could not uset local Git config '%s'.", git.GitCKCoreHooksPath)
 		}
 
 		if isBare {
@@ -104,14 +103,14 @@ func InstallIntoRepo(
 			lfsHooksCache = nil
 		}
 
-		nLFSHooks, err := hooks.InstallRunWrappers(
+		nLFSHooks, e := hooks.InstallRunWrappers(
 			hooksDir, hookNames,
 			nil,
 			GetHookDisableCallback(log, gitx, nonInteractive, uiSettings),
 			lfsHooksCache,
 			nil)
 
-		log.AssertNoErrorPanicF(err, "Could not install run-wrappers into '%s'.", hooksDir)
+		log.AssertNoErrorPanicF(e, "Could not install run-wrappers into '%s'.", hooksDir)
 
 		if nLFSHooks != 0 {
 			log.InfoF("Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks into '%s'.",
@@ -120,11 +119,9 @@ func InstallIntoRepo(
 			log.InfoF("Installed '%v' Githooks run-wrapper(s) into '%s'",
 				len(hookNames), hooksDir)
 		}
-
 	} else {
-
-		err := hooks.InstallRunWrappersLink(log, gitx, hooksDir, lfsHooksCache)
-		log.AssertNoErrorPanicF(err, "Could not install run-wrapper link into '%s'.", repoGitDir)
+		e := hooks.InstallRunWrappersLink(log, gitx, hooksDir, lfsHooksCache)
+		log.AssertNoErrorPanicF(e, "Could not install run-wrapper link into '%s'.", repoGitDir)
 
 		log.InfoF("Installed Githooks run-wrapper link ('%s') into '%s'",
 			git.GitCKCoreHooksPath, hooksDir)
@@ -141,7 +138,6 @@ func InstallIntoRepo(
 }
 
 func cleanArtefactsInRepo(log cm.ILogContext, gitDir string) {
-
 	// Remove checksum files...
 	cacheDir := hooks.GetChecksumDirectoryGitDir(gitDir)
 	if cm.IsDirectory(cacheDir) {
@@ -186,7 +182,6 @@ func UninstallFromRepo(
 	gitDir string,
 	lfsHooksCache hooks.LFSHooksCache,
 	fullUninstall bool) bool {
-
 	hooksDir := path.Join(gitDir, "hooks")
 	err := os.MkdirAll(hooksDir, cm.DefaultFileModeDirectory)
 	log.AssertNoErrorPanicF(err, "Could not create directory '%s'.", hooksDir)

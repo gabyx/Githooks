@@ -18,7 +18,6 @@ const idPrefix rune = '\u200B'
 // First button has 2 invisible 'idPrefix', second has 3, etc. to possibly
 // include the OK button.
 func addInvisiblePrefix(extraButtons []string) (res []string, err error) {
-
 	if extraButtons == nil {
 		return nil, nil
 	}
@@ -27,7 +26,6 @@ func addInvisiblePrefix(extraButtons []string) (res []string, err error) {
 	id := string(idPrefix)
 
 	for i := range extraButtons {
-
 		if strs.IsEmpty(extraButtons[i]) {
 			return nil, cm.ErrorF("Empty label for extra button is not allowed")
 		}

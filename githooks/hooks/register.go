@@ -47,7 +47,6 @@ func UnmarkRepoRegistered(gitx *git.Context) error {
 // install folder.
 // We ensured during load, that only existing Git directories are listed.
 func (r *RegisterRepos) Load(installDir string, filterExisting bool, filterGitDirs bool) (err error) {
-
 	file := GetRegisterFile(installDir)
 
 	if cm.IsFile(file) {
@@ -94,7 +93,7 @@ func (r *RegisterRepos) FilterExisting() {
 	r.GitDirs = strs.Filter(r.GitDirs,
 		func(v string) bool {
 			exists, _ := cm.IsPathExisting(v)
-			return exists // nolint:nlreturn
+			return exists //nolint:nlreturn
 		})
 }
 

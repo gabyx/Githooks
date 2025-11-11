@@ -11,7 +11,6 @@ import (
 )
 
 func mainRun() (exitCode int) {
-
 	// Without handling the exit code
 	// would match with SIGINT on Windows, which does not have signals
 	// and would call exit(SIGINT), so handle it explicitly.

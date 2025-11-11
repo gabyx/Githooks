@@ -55,7 +55,7 @@ func hookDialog(
 		if lparam.Message == wmInitDialog {
 
 			name := [8]uint16{}
-			getClassName.Call(lparam.Wnd, uintptr(unsafe.Pointer(&name)), uintptr(len(name))) //nolint: errcheck
+			getClassName.Call(lparam.Wnd, uintptr(unsafe.Pointer(&name)), uintptr(len(name))) //nolint:errcheck
 
 			if syscall.UTF16ToString(name[:]) == "#32770" { // The class for a dialog box
 				var close bool
@@ -69,7 +69,7 @@ func hookDialog(
 				mtx.Unlock()
 
 				if close {
-					sendMessage.Call(lparam.Wnd, wmSysCommand, scClose, 0) //nolint: errcheck
+					sendMessage.Call(lparam.Wnd, wmSysCommand, scClose, 0) //nolint:errcheck
 				} else if initDialog != nil {
 					initDialog(lparam.Wnd)
 				}
@@ -88,7 +88,7 @@ func hookDialog(
 	}
 
 	if ctx == nil {
-		return func() { unhookWindowsHookEx.Call(hook) }, nil //nolint: errcheck
+		return func() { unhookWindowsHookEx.Call(hook) }, nil //nolint:errcheck
 	}
 
 	wait := make(chan struct{})
@@ -101,14 +101,14 @@ func hookDialog(
 
 			if w != 0 {
 				// Send close to the window.
-				sendMessage.Call(w, wmSysCommand, scClose, 0) //nolint: errcheck
+				sendMessage.Call(w, wmSysCommand, scClose, 0) //nolint:errcheck
 			}
 		case <-wait:
 		}
 	}()
 
 	return func() {
-		unhookWindowsHookEx.Call(hook) //nolint: errcheck
+		unhookWindowsHookEx.Call(hook) //nolint:errcheck
 		close(wait)
 	}, nil
 }

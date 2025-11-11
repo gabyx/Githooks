@@ -11,30 +11,28 @@ func isSame(t *testing.T, a []string, b []string) {
 	for _, b := range b {
 		assert.Contains(t, a, b)
 	}
-	assert.Equal(t, len(a), len(b))
+	assert.Len(t, b, len(a))
 }
 
 func TestCheckHookNames(t *testing.T) {
-
 	h, _, err := getMaintainedHooksFromString("!all")
 	assert.NoError(t, err)
-	assert.Equal(t, 0, len(h))
+	assert.Empty(t, h)
 
 	h, _, err = getMaintainedHooksFromString("!all, pre-commit")
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(h))
+	assert.Len(t, h, 1)
 
 	h, _, err = getMaintainedHooksFromString("!all, p-commit")
 	assert.Error(t, err)
-	assert.Equal(t, len(ManagedHookNames), len(h))
+	assert.Len(t, h, len(ManagedHookNames))
 
 	h, _, err = getMaintainedHooksFromString("!all,\npre-commit,    post-commit")
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(h))
+	assert.Len(t, h, 2)
 }
 
 func TestHookNameUnwrap(t *testing.T) {
-
 	// All hooks minus 1.
 	res := strs.NewStringSetFromList(ManagedHookNames)
 	res.Remove("post-merge")
@@ -45,7 +43,7 @@ func TestHookNameUnwrap(t *testing.T) {
 	h, err = UnwrapHookNames([]string{"!all"})
 	assert.NoError(t, err)
 	assert.NotNil(t, h)
-	assert.Equal(t, 0, len(h))
+	assert.Empty(t, h)
 
 	// All hooks minus 1.
 	h, err = UnwrapHookNames([]string{"all", "!post-merge"})
@@ -88,5 +86,4 @@ func TestHookNameUnwrap(t *testing.T) {
 	h, err = UnwrapHookNames([]string{"all", "!post-gaga"})
 	isSame(t, res.ToList(), h)
 	assert.Error(t, err)
-
 }

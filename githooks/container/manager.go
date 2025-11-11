@@ -58,7 +58,6 @@ type IManager interface {
 // to use the one which first can be constructed.
 // Currently only `docker` and `podman` is supported.
 func NewManager(manager string) (mgr IManager, err error) {
-
 	if strs.IsEmpty(manager) {
 		manager = "docker"
 	}
@@ -85,5 +84,4 @@ func NewManager(manager string) (mgr IManager, err error) {
 	}
 
 	return nil, cm.CombineErrors(err, cm.Error("Container manager could not be validated."))
-
 }

@@ -30,9 +30,7 @@ func loadIgnoreFile(
 	ignAct *ignoreActionOptions,
 	repoRoot string,
 	gitDir string) (file string, patterns hooks.HookPatterns) {
-
 	if ignAct.UseRepository {
-
 		ctx.Log.PanicIfF(
 			strs.IsNotEmpty(ignAct.HookName) &&
 				!strs.Includes(hooks.ManagedHookNames, ignAct.HookName),
@@ -57,14 +55,12 @@ func loadIgnoreFile(
 func runIgnoreAddPattern(
 	ctx *ccm.CmdContext, ignAct *ignoreActionOptions,
 	remove bool, patterns *hooks.HookPatterns) {
-
 	repoRoot, _, gitDirWorktree := ccm.AssertRepoRoot(ctx)
 	file, ps := loadIgnoreFile(ctx, ignAct, repoRoot, gitDirWorktree)
 
 	var text string
 
 	if remove {
-
 		switch {
 		case ps.IsEmpty():
 			ctx.Log.WarnF("Ignore file '%s' is empty or does not exist.\nNothing to remove!", file)
@@ -79,9 +75,7 @@ func runIgnoreAddPattern(
 			text = strs.Fmt("Removed '%v' of '%v' given entries from",
 				removed, patterns.GetCount())
 		}
-
 	} else {
-
 		for _, p := range patterns.Patterns {
 			if valid := hooks.IsHookPatternValid(p); !valid {
 				ctx.Log.PanicF("Pattern '%s' is not valid.", p)
@@ -103,7 +97,6 @@ func runIgnoreAddPattern(
 }
 
 func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
-
 	repoRoot, _, gitDirWorktree := ccm.AssertRepoRoot(ctx)
 	var sb strings.Builder
 	count := 0
@@ -111,7 +104,6 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 	print := func(file string, catergory string) {
 		exists := cm.IsFile(file)
 		if !ignShow.OnlyExisting || exists {
-
 			_, err := strs.FmtW(
 				&sb, " %s '%s' : exists: '%v', type: '%s'\n",
 				cm.ListItemLiteral, file, exists, catergory)
@@ -132,7 +124,6 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 		for _, file := range hooks.GetHookIgnoreFilesHooksDir(
 			root,
 			hooks.ManagedHookNames) {
-
 			print(file, "repo")
 		}
 	}
@@ -141,7 +132,6 @@ func runIgnoreShow(ctx *ccm.CmdContext, ignShow *ignoreShowOptions) {
 }
 
 func addIgnoreOpts(c *cobra.Command, actOpts *ignoreActionOptions, addAllFlag bool) *cobra.Command {
-
 	c.Flags().BoolVar(&actOpts.UseRepository,
 		"repository", false,
 		`The action affects the repository's main ignore list.`)
@@ -218,7 +208,6 @@ func addFlags(cmd *cobra.Command, patterns *hooks.HookPatterns) {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	var ignoreActionOpts = ignoreActionOptions{}
 	var ignoreShowOpts = ignoreShowOptions{}
 
@@ -289,7 +278,6 @@ about the pattern syntax and namespace paths.`,
 		Long:   `Shows the paths of the ignore files.`,
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
 		Run: func(c *cobra.Command, args []string) {
-
 			if c.Flags().NFlag() == 0 {
 				ignoreShowOpts.Repository = true
 				ignoreShowOpts.User = true

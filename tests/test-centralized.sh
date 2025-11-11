@@ -10,7 +10,7 @@ TEST_DIR="$ROOT_DIR/tests"
 
 cd "$ROOT_DIR"
 
-cat <<EOF | docker build --force-rm -t githooks:alpine-lfs-centralized-base -
+cat <<EOF | run_docker build --force-rm -t githooks:alpine-lfs-centralized-base -
 FROM golang:1.22-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker

@@ -4,16 +4,15 @@ package gui
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-// ShowNotification shows a system notifaction with `zenity`.
+// ShowNotification shows a system notification with `zenity`.
 func ShowNotificationZenity(ctx context.Context, zenity string, n *set.Notification) error {
-
 	args := []string{"--notification"}
 
 	if strs.IsNotEmpty(n.Title) {
@@ -21,11 +20,11 @@ func ShowNotificationZenity(ctx context.Context, zenity string, n *set.Notificat
 	}
 
 	if n.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", n.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(n.Width), 10))
 	}
 
 	if n.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", n.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(n.Height), 10))
 	}
 
 	switch n.WindowIcon {
