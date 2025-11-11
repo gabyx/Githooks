@@ -157,8 +157,9 @@ func MakeRelative(base string, path string) (s string, e error) {
 // ReplaceTildeWith replaces a prefix tilde '~' character in a path
 // with the string `repl`.
 func ReplaceTildeWith(p string, repl string) string {
-	if strings.HasPrefix(p, "~") {
-		return path.Join(repl, strings.TrimPrefix(p, "~"))
+	s, found := strings.CutPrefix(p, "~")
+	if found {
+		return path.Join(repl, s)
 	}
 
 	return p
@@ -199,7 +200,7 @@ func TouchFile(filePath string, makeDirs bool) (err error) {
 		if err != nil {
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 	}
 
 	return

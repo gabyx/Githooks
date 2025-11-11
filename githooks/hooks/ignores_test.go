@@ -45,7 +45,7 @@ func TestIgnoreConfigVersion(t *testing.T) {
 	f, e := os.CreateTemp("", "")
 	assert.Nil(t, e)
 
-	defer os.Remove(f.Name())
+	defer func() { _ = os.Remove(f.Name()) }()
 	_, e = io.WriteString(f,
 		`
 version: 999999

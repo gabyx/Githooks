@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+function run_docker() {
+    cmd="${CONTAINER_MGR:-docker}"
+
+    if [ "${CI:-}" != true ] && [ -z "${DOCKER_RUNNING:-}" ] && [ "$cmd" = "docker" ]; then
+        sudo "$cmd" "$@"
+    else
+        "$cmd" "$@"
+    fi
+}
+
 function init_step() {
     # Set extra install arguments for all steps.
     # when running centralized tests.
@@ -44,25 +54,25 @@ function accept_all_trust_prompts() {
 }
 
 function is_docker_available() {
-    command -v docker &>/dev/null || return 1
+    command -v run_docker &>/dev/null || return 1
 }
 
 function is_image_existing() {
-    docker image inspect "$1" &>/dev/null || return 1
+    run_docker image inspect "$1" &>/dev/null || return 1
 }
 
 function assert_no_test_images() {
     images=$(
-        docker images -q --filter "reference=*test-image*" &&
-            docker images -q --filter "reference=*/*test-image*" &&
-            docker images -q --filter "reference=*/*/*test-image*"
+        run_docker images -q --filter "reference=*test-image*" &&
+            run_docker images -q --filter "reference=*/*test-image*" &&
+            run_docker images -q --filter "reference=*/*/*test-image*"
     )
 
     if [ -n "$images" ]; then
-        echo "Docker test images are still existing." >&2
-        docker images --filter "reference=*test-image*" || true
-        docker images --filter "reference=*/*test-image*" || true
-        docker images --filter "reference=*/*/*test-image*" || true
+        echo "run_docker test images are still existing." >&2
+        run_docker images --filter "reference=*test-image*" || true
+        run_docker images --filter "reference=*/*test-image*" || true
+        run_docker images --filter "reference=*/*/*test-image*" || true
         die "Failed."
     fi
 }
@@ -96,14 +106,14 @@ function delete_all_test_images() {
     # Delete the images by the reference name, instead of ID,
     # because multiple tags to the same ID can exists.
     images=$(
-        docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*test-image*" &&
-            docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*/*test-image*" &&
-            docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*/*/*test-image*"
+        run_docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*test-image*" &&
+            run_docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*/*test-image*" &&
+            run_docker images -q --format="{{ .Repository }}:{{ .Tag }}" --filter "reference=*/*/*test-image*"
     )
     if [ -n "$images" ]; then
         # shellcheck disable=SC2086
         echo "$images" | while read -r img; do
-            docker rmi -f "$img" >/dev/null || die "Could not delete images."
+            run_docker rmi -f "$img" >/dev/null || die "Could not delete images."
         done
     fi
 }
@@ -132,13 +142,13 @@ function store_into_container_volume() {
     echo "Storing '$src' into volume '$volume' for mounting."
 
     # shellcheck disable=SC2015
-    docker volume create "$volume" &&
-        docker container create --name githookscopytovolume \
+    run_docker volume create "$volume" &&
+        run_docker container create --name githookscopytovolume \
             -v "$volume:/mnt/volume" githooks:volumecopy &&
-        docker cp -a "$src" "githookscopytovolume:/mnt/volume/${dest}" &&
-        docker container rm githookscopytovolume ||
+        run_docker cp -a "$src" "githookscopytovolume:/mnt/volume/${dest}" &&
+        run_docker container rm githookscopytovolume ||
         {
-            docker container rm githookscopytovolume &>/dev/null || true
+            run_docker container rm githookscopytovolume &>/dev/null || true
             die "Could not copy file to storage."
         }
 }
@@ -151,20 +161,20 @@ function restore_from_container_volume() {
     local files=("$@")
 
     # shellcheck disable=SC2015
-    docker container create --name githookscopytovolume \
+    run_docker container create --name githookscopytovolume \
         -v "$volume:/mnt/volume" githooks:volumecopy ||
         die "Could not start copy container."
 
     for file in "${files[@]}"; do
         echo "Restoring '$dest/$file' from volume path '$volume/$base/$file'."
-        docker cp -a "githookscopytovolume:/mnt/volume/$base/$file" "$dest/$file" ||
+        run_docker cp -a "githookscopytovolume:/mnt/volume/$base/$file" "$dest/$file" ||
             {
-                docker container rm githookscopytovolume &>/dev/null || true
-                die "Docker copy failed."
+                run_docker container rm githookscopytovolume &>/dev/null || true
+                die "run_docker copy failed."
             }
     done
 
-    docker container rm githookscopytovolume &>/dev/null ||
+    run_docker container rm githookscopytovolume &>/dev/null ||
         die "Removing copycontainer failed."
 }
 
@@ -173,7 +183,7 @@ function show_container_volume() {
     local level="$2"
 
     # shellcheck disable=SC2015
-    docker run --rm \
+    run_docker run --rm \
         -v "$volume:/mnt/volume" \
         -w "/mnt/volume" \
         alpine:latest \
@@ -217,8 +227,8 @@ function delete_container_volumes() {
 
 function delete_container_volume() {
     local volume="$1"
-    if docker volume ls | grep "$volume"; then
-        docker volume rm "$volume"
+    if run_docker volume ls | grep "$volume"; then
+        run_docker volume rm "$volume"
     fi
 }
 
@@ -227,7 +237,7 @@ function container_mgr() {
     if command -v podman &>/dev/null; then
         podman "$@"
     else
-        docker "$@"
+        run_docker "$@"
     fi
 
 }

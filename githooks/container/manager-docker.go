@@ -180,7 +180,7 @@ func (m *ManagerDocker) NewHookRunExec(
 	// Add all additional arguments.
 	containerExec.ArgsPre = append(containerExec.ArgsPre, m.runConfig.Args...)
 
-	if m.mgrType == ContainerManagerTypeV.Docker {
+	if m.mgrType == ContainerManagerTypeV.Docker { //nolint:staticcheck
 		if runtime.GOOS != cm.WindowsOsName &&
 			runtime.GOOS != "darwin" {
 			// On non win/mac, execute as the user/group from the host.

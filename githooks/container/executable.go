@@ -58,9 +58,9 @@ const dindMsg = "Note: If you are inside a container ALREADY and want\n" +
 	"   location on the host machine, e.g `~/.githooks/shared`.\n\n" +
 	"Check the Githooks manual for instructions on docker-in-docker."
 
-// GetExitCodeHelp gets help for any non-zero exit code if needed.
+// ResolveExitCode gets help for any non-zero exit code if needed.
 func (e *ContainerizedExecutable) ResolveExitCode(exitCode int) string {
-	if e.containerType == ContainerManagerTypeV.Docker {
+	if e.containerType == ContainerManagerTypeV.Docker { //nolint:staticcheck
 		switch exitCode {
 		case 125: // nolint: mnd
 			return "The docker daemon reported an error.\n" + dindMsg

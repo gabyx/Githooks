@@ -181,7 +181,7 @@ func (c *Context) GetConfigRegex(regex string, scope ConfigScope) (res []KeyValu
 }
 
 // SetConfig sets a Git configuration values with key `key`.
-func (c *Context) SetConfig(key string, value interface{}, scope ConfigScope) error {
+func (c *Context) SetConfig(key string, value any, scope ConfigScope) error {
 	cm.DebugAssert(scope != Traverse, "Wrong scope.")
 
 	s := strs.Fmt("%v", value)
@@ -193,7 +193,7 @@ func (c *Context) SetConfig(key string, value interface{}, scope ConfigScope) er
 }
 
 // AddConfig adds a Git configuration values with key `key`.
-func (c *Context) AddConfig(key string, value interface{}, scope ConfigScope) error {
+func (c *Context) AddConfig(key string, value any, scope ConfigScope) error {
 	cm.DebugAssert(scope != Traverse, "Wrong scope.")
 
 	s := strs.Fmt("%v", value)

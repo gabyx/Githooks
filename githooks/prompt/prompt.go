@@ -39,7 +39,7 @@ type IContext interface {
 }
 
 // Formatter is the format function to format a prompt or error.
-type Formatter func(format string, args ...interface{}) string
+type Formatter func(format string, args ...any) string
 
 // Context defines the prompt context based on a `ILogContext`
 // or as a fallback using the defined dialog tool if configured.
@@ -68,24 +68,24 @@ func (p *Context) Close() {
 	if p.termIn != nil {
 		t, ok := p.termIn.(*os.File)
 		if ok {
-			t.Close()
+			_ = t.Close()
 		}
 	}
 }
 
 // AddFileWriter adds a another sink to all sinks log.
-func (c *Context) AddFileWriter(file io.Writer) {
+func (p *Context) AddFileWriter(file io.Writer) {
 	if file == nil {
 		return
 	}
-	if c.termOut != nil {
-		c.termOut = io.MultiWriter(c.termOut, file)
+	if p.termOut != nil {
+		p.termOut = io.MultiWriter(p.termOut, file)
 	}
-	if c.termErr != nil {
-		c.termErr = io.MultiWriter(c.termErr, file)
+	if p.termErr != nil {
+		p.termErr = io.MultiWriter(p.termErr, file)
 	}
-	if c.termPrompt != nil {
-		c.termPrompt = io.MultiWriter(c.termPrompt, file)
+	if p.termPrompt != nil {
+		p.termPrompt = io.MultiWriter(p.termPrompt, file)
 	}
 }
 

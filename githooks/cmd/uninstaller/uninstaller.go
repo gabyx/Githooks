@@ -156,7 +156,7 @@ func runUninstaller(log cm.ILogContext, uninstaller cm.IExecutable, args *Argume
 
 	file, err := os.CreateTemp("", "*uninstall-config.json")
 	log.AssertNoErrorPanicF(err, "Could not create temporary file in '%s'.")
-	defer os.Remove(file.Name())
+	defer func() { _ = os.Remove(file.Name()) }()
 
 	// Write the config to
 	// make the uninstaller gettings all settings
@@ -447,7 +447,7 @@ func runUninstall(ctx *ccm.CmdContext, vi *viper.Viper) {
 	tempDir, err := os.MkdirTemp(dir, "githooks-uninstaller-*")
 	log.AssertNoErrorPanicF(err, "Could not create temp. dir in '%s'.", dir)
 	ctx.CleanupX.AddHandler(func() { _ = os.Remove(tempDir) })
-	defer os.Remove(tempDir)
+	defer func() { _ = os.Remove(tempDir) }()
 
 	settings, uiSettings := setupSettings(log, ctx.GitX, &args, tempDir)
 

@@ -317,7 +317,7 @@ func showEntryMulti(
 
 	// Wrap the validator into another one which
 	// reacts on `exitAnswer` for non-GUI prompts.
-	var val AnswerValidator = validator
+	val := validator
 	exitReceived := false
 
 	if !p.useGUI {

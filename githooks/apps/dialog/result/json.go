@@ -4,10 +4,10 @@ package result
 type JSONResult struct {
 	Version int
 	Timeout bool
-	Result  interface{} `yaml:",inline"`
+	Result  any `yaml:",inline"`
 }
 
 // NewJSONResult returns a new JSON result.
-func NewJSONResult(res interface{}) JSONResult {
+func NewJSONResult(res any) JSONResult {
 	return JSONResult{Version: 1, Result: res}
 }
