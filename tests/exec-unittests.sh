@@ -3,7 +3,7 @@ set -e
 set -u
 
 if [ "$DOCKER_RUNNING" != "true" ]; then
-    echo "! This script is only meant to be run in a Docker container"
+    echo "! This script is only meant to be run in a run_docker container"
     exit 1
 fi
 
