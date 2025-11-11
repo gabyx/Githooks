@@ -40,7 +40,7 @@ RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION);
     Write-Host ('Downloading {0} ...' -f $url); \
     $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri $url -OutFile 'go.zip'; \
     \
-    $sha256 = '78d4ea375b9f729c4883e0c1a92d63c73f1bcf0edaafdb0932295472f72acbce'; \
+    $sha256 = '2444fb53637facb37c06faa85d64c38c6cd23d22407f205edb68c7ddb8fbe0d4'; \
     Write-Host ('Verifying sha256 ({0}) ...' -f $sha256); \
     $sha256Ex = (Get-FileHash go.zip -Algorithm sha256).Hash; \
     if ($sha256Ex -ne $sha256) { \
