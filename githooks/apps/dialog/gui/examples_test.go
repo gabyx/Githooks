@@ -33,6 +33,8 @@ func ExampleShowMessage() {
 	// Output:
 }
 
+func ShowMessageExtra() {}
+
 func ExampleShowMessageExtra() {
 	t := settings.Message{}
 	t.Title = "SpamMails Alert"
@@ -49,6 +51,8 @@ func ExampleShowMessageExtra() {
 	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
 	// Output:
 }
+
+func ShowQuestion() {}
 
 func ExampleShowQuestion() {
 	t := settings.Message{}
@@ -106,6 +110,7 @@ func ExampleShowOptions() {
 	// Output:
 }
 
+func ShowOptionsButtons() {}
 func ExampleShowOptionsButtons() {
 	t := settings.Options{}
 	t.Title = "What pizza do you want to order?"
@@ -158,6 +163,7 @@ func ExampleShowFileSelection() {
 	// Output:
 }
 
+func ShowDirectorySelection() {}
 func ExampleShowDirectorySelection() {
 	t := settings.FileSelection{}
 	t.Title = "Choose your pizza folders:"

@@ -28,7 +28,7 @@ EOF
 
 # Build test container.
 cat <<EOF | docker build --force-rm -t githooks:test-rules -
-FROM golang:1.22-alpine
+FROM golang:1.24-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker just
 
@@ -37,7 +37,8 @@ RUN git config --global safe.directory /data
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
 
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v1.59.0
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
+        sh -s -- -b \$(go env GOPATH)/bin v2.6.1
 
 RUN git config --global user.email "githook@test.com" && \
     git config --global user.name "Githook Tests" && \

@@ -19,7 +19,7 @@ trap clean_up EXIT
 cd "$ROOT_DIR"
 
 cat <<EOF | docker build --force-rm -t githooks:unittests -
-FROM golang:1.22-alpine
+FROM golang:1.24-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
 
