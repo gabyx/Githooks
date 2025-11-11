@@ -34,7 +34,7 @@ RUN $newPath = ('{0}\bin;C:\go\bin;{1}' -f $env:GOPATH, $env:PATH); \
 # doing this first to share cache across versions more aggressively
 
 # Check hash below for download.
-ENV GOLANG_VERSION 1.24.7
+ENV GOLANG_VERSION 1.24.10
 
 RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION); \
     Write-Host ('Downloading {0} ...' -f $url); \
