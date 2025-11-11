@@ -42,7 +42,7 @@ RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION);
     \
     $sha256 = 'efbc30520601f4d91d9f3f46af03aafb2e1428388c5ff6a40eb88489f7212e85'; \
     Write-Host ('Verifying sha256 ({0}) ...' -f $sha256); \
-    $sha256Ex = (Get-FileHash go.zip -Algorithm sha256).Hash
+    $sha256Ex = (Get-FileHash go.zip -Algorithm sha256).Hash; \
     if ($sha256Ex -ne $sha256) { \
         Write-Host 'FAILED! Got sha: $sha256Ex'; \
         exit 1; \
