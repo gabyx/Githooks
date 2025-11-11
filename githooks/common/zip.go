@@ -60,8 +60,8 @@ func ExtractZip(zipFile io.ReaderAt, zipFileSize int64, destDir string) (paths [
 
 		_, err = io.Copy(outFile, rc)
 		// Close the file without defer to close before next iteration of loop
-		outFile.Close()
-		rc.Close()
+		_ = outFile.Close()
+		_ = rc.Close()
 
 		if err != nil {
 			return

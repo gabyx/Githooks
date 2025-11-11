@@ -17,13 +17,13 @@ func verifyChecksumSignature(checksums Checksums, publicPGP string) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-	defer checksumFile.Body.Close()
+	defer func() { _ = checksumFile.Body.Close() }()
 
 	checksumFileSignature, err := GetFile(checksums.FileSignature.URL)
 	if err != nil {
 		return nil, err
 	}
-	defer checksumFileSignature.Body.Close()
+	defer func() { _ = checksumFileSignature.Body.Close() }()
 
 	// Read the checksumFile into memory
 	checksumBytes, err := io.ReadAll(checksumFile.Body)
@@ -47,7 +47,7 @@ func checkChecksum(filePath string, checksumData []byte) (err error) {
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	hash, err := cm.GetSHA256Hash(file)
 	if err != nil {

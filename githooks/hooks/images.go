@@ -75,7 +75,7 @@ func loadImagesConfigFile(file string) (config ImagesConfigFile, err error) {
 	return config, nil
 }
 
-// GetRepoSharedFile gets the shared file with respect to the hooks dir in the repository.
+// GetRepoImagesFile gets the shared file with respect to the hooks dir in the repository.
 func GetRepoImagesFile(hookDir string) string {
 	return path.Join(hookDir, ".images.yaml")
 }
@@ -166,7 +166,7 @@ func buildImage(
 	if err != nil {
 		// Save build error to temporary file.
 		file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		_, e := io.WriteString(file,
 			err.Error()+
 				"\nOutput:\n=====================================================\n"+

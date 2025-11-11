@@ -40,7 +40,7 @@ func WriteRunWrapper(filePath string) (err error) {
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	_, err = file.Write(runWrapperContent)
 	if err != nil {

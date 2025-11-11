@@ -16,7 +16,7 @@ func GetSHA1HashFile(path string) (sha string, err error) {
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	stat, err := file.Stat()
 	if err != nil {
@@ -62,13 +62,13 @@ func AreChecksumsIdentical(fileA string, fileB string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer fA.Close()
+	defer func() { _ = fA.Close() }()
 
 	fB, err := os.Open(fileB)
 	if err != nil {
 		return false, err
 	}
-	defer fB.Close()
+	defer func() { _ = fB.Close() }()
 
 	shaA, err := GetSHA1Hash(fA)
 	if err != nil {

@@ -49,7 +49,7 @@ func (e *Executable) ApplyEnvironmentToArgs(env []string) {
 	// Dont to anything, since normal command dont need this.
 }
 
-// GetExitCodeHelp gets help for any non-zero exit code if needed.
+// ResolveExitCode gets help for any non-zero exit code if needed.
 func (e *Executable) ResolveExitCode(exitCode int) string {
 	// Not needed for normal commands.
 	return ""
