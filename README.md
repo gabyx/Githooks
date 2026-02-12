@@ -18,7 +18,7 @@
 
 A **platform-independent hooks manager** written in Go to support shared hook
 repositories and per-repository
-[Git hooks](https://git-scm.com/docs/cli/githooks), checked into the working
+[Git hooks](https://git-scm.com/docs/githooks), checked into the working
 repository. This implementation is the Go port and successor of the
 [original implementation](https://github.com/rycus86/githooks) (see
 [Migration](#migrating)).
@@ -315,7 +315,7 @@ You can inspect the computed batch name by running
 ## Supported Hooks
 
 The supported hooks are listed below. Refer to the
-[Git documentation](https://git-scm.com/docs/cli/githooks) for information on
+[Git documentation](https://git-scm.com/docs/githooks) for information on
 what they do and what parameters they receive.
 
 It is receommended to use `--maintained-hooks` options during install
@@ -450,7 +450,7 @@ you can do it any time by changing the global configuration variable.
 
 Supported URL for shared hooks are:
 
-- **All URLs [Git supports](https://git-scm.com/docs/cli/git-clone#_git_urls)**
+- **All URLs [Git supports](https://git-scm.com/docs/git-clone#_git_urls)**
   such as:
 
   - `ssh://github.com/shared/hooks-maven.git@mybranch` and also the short `scp`
@@ -1168,7 +1168,7 @@ hopefully downloaded) already or you can specify them by using
 `<type>` can either be `gitea` ( or `github` which is not needed since it can be
 auto-detected from the URL) and it will automatically download and **verify**
 the binaries over the implemented API. Credentials will be collected over
-[`git credential`](https://git-scm.com/docs/cli/git-credential) to access the
+[`git credential`](https://git-scm.com/docs/git-credential) to access the
 API. [@todo].
 
 ### Use in CI

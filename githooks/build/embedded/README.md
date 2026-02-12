@@ -1,7 +1,7 @@
 # Githooks
 
 This project uses [Githooks](https://github.com/gabyx/githooks), that allows
-running [Git hooks](https://git-scm.com/docs/cli/githooks) checked into this
+running [Git hooks](https://git-scm.com/docs/githooks) checked into this
 repository. This folder contains hooks that should be executed by everyone who
 interacts with this source repository. For a documentation on how this works and
 how to get it [installed](https://github.com/gabyx/githooks#installation), check
