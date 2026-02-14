@@ -24,7 +24,7 @@ else
     OS_USER="root"
 fi
 
-[ -n "$COVERALLS_TOKEN" ] || {
+[ -n "${COVERALLS_TOKEN:-}" ] || {
     echo "! You need to set 'COVERALLS_TOKEN'."
     exit 1
 }
