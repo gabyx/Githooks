@@ -3,6 +3,7 @@ package download
 import (
 	"context"
 	"io"
+	"net/http"
 	"os"
 	"path"
 
@@ -10,6 +11,43 @@ import (
 
 	"github.com/google/go-github/v33/github"
 )
+
+// tokenTransport is an http.RoundTripper that adds a Bearer token
+// to every outgoing request. Used to authenticate GitHub API calls
+// when the GH_TOKEN environment variable is set.
+type tokenTransport struct {
+	token string
+	base  http.RoundTripper
+}
+
+func (t *tokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req = req.Clone(req.Context())
+	req.Header.Set("Authorization", "Bearer "+t.token)
+
+	return t.base.RoundTrip(req)
+}
+
+// githubHTTPClient returns an *http.Client that injects a Bearer token
+// from the GH_TOKEN environment variable. Returns nil when GH_TOKEN is
+// unset, which makes go-github use http.DefaultClient (current behavior).
+//
+// Note: go-github v50+ has github.NewClient(nil).WithAuthToken(token)
+// which would replace this helper. This project uses v33 which lacks it.
+//
+// TODO: Consider setting a timeout on the returned http.Client.
+func githubHTTPClient() *http.Client {
+	token := os.Getenv("GH_TOKEN")
+	if token == "" {
+		return nil
+	}
+
+	return &http.Client{
+		Transport: &tokenTransport{
+			token: token,
+			base:  http.DefaultTransport,
+		},
+	}
+}
 
 // RepoSettings holds repo data for web based Git services such as Github or Gitea.
 type RepoSettings struct {
@@ -42,7 +80,7 @@ func downloadGithub(
 	dir string,
 	publicPGP string) error {
 
-	client := github.NewClient(nil)
+	client := github.NewClient(githubHTTPClient())
 	rel, _, err := client.Repositories.GetReleaseByTag(context.Background(),
 		owner, repo, versionTag)
 	if err != nil {
