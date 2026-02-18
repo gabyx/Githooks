@@ -55,6 +55,8 @@ const (
 	GitCKContainerImageUpdateAutomatic = "githooks.containerImageUpdateAutomatic"
 
 	GitCKExportStagedFilesAsFile = "githooks.exportStagedFilesAsFile"
+
+	GitCKChecksumsDir = "githooks.checksumsDir"
 )
 
 // GetGlobalGitConfigKeys gets all global git config keys relevant for Githooks.
@@ -102,6 +104,8 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKExportStagedFilesAsFile,
 
 		GitCKContainerizedHooksEnabled,
+
+		GitCKChecksumsDir,
 	}
 }
 
@@ -126,6 +130,7 @@ func GetLocalGitConfigKeys() []string {
 		GitCKContainerizedHooksEnabled,
 
 		GitCKExportStagedFilesAsFile,
+		GitCKChecksumsDir,
 	}
 }
 

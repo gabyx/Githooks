@@ -142,8 +142,8 @@ func InstallIntoRepo(
 
 func cleanArtefactsInRepo(log cm.ILogContext, gitDir string) {
 
-	// Remove checksum files...
-	cacheDir := hooks.GetChecksumDirectoryGitDir(gitDir)
+	// Remove local checksum files...
+	cacheDir := path.Join(gitDir, hooks.ChecksumsDir)
 	if cm.IsDirectory(cacheDir) {
 		log.AssertNoErrorF(os.RemoveAll(cacheDir),
 			"Could not delete checksum cache dir '%s'.", cacheDir)
