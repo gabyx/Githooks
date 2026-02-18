@@ -11,14 +11,14 @@ import (
 
 // verifyChecksumSignature verifies checksums with the signature and the public key, and returns
 // the checksums content.
-func verifyChecksumSignature(checksums Checksums, publicPGP string) ([]byte, error) {
-	checksumFile, err := GetFile(checksums.File.URL)
+func verifyChecksumSignature(checksums Checksums, publicPGP string, token string) ([]byte, error) {
+	checksumFile, err := GetFile(checksums.File.URL, token)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = checksumFile.Body.Close() }()
 
-	checksumFileSignature, err := GetFile(checksums.FileSignature.URL)
+	checksumFileSignature, err := GetFile(checksums.FileSignature.URL, token)
 	if err != nil {
 		return nil, err
 	}

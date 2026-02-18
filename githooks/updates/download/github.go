@@ -27,21 +27,31 @@ type GithubDeploySettings struct {
 }
 
 // Download downloads the version with `versionTag` to `dir` from a Github instance.
-func (s *GithubDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
-	return downloadGithub(log, s.Owner, s.Repository, versionTag, dir, s.PublicPGP)
+// The `token` is an optional authentication token used to authenticate GitHub API
+// requests and file downloads. If empty, unauthenticated requests are made.
+func (s *GithubDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
+	return downloadGithub(log, s.Owner, s.Repository, versionTag, dir, s.PublicPGP, token)
 }
 
 // Downloads the Githooks release with tag `versionTag` and
 // extracts the matched asset into `dir`.
-// The assert matches the OS and architecture of the current runtime.
+// The asset matches the OS and architecture of the current runtime.
+// The `token` is an optional authentication token for GitHub API requests
+// and file downloads. If empty, unauthenticated requests are made.
 func downloadGithub(
 	log cm.ILogContext,
 	owner string,
 	repo string,
 	versionTag string,
 	dir string,
-	publicPGP string) error {
+	publicPGP string,
+	token string) error {
+
 	client := github.NewClient(nil)
+	if token != "" {
+		client = client.WithAuthToken(token)
+	}
+
 	rel, _, err := client.Repositories.GetReleaseByTag(context.Background(),
 		owner, repo, versionTag)
 	if err != nil {
@@ -71,7 +81,7 @@ func downloadGithub(
 	}
 
 	log.InfoF("Verify signature of checksum file '%s'.", checksums.File.URL)
-	checksumData, err := verifyChecksumSignature(checksums, publicPGP)
+	checksumData, err := verifyChecksumSignature(checksums, publicPGP, token)
 	if err != nil {
 		return cm.CombineErrors(err,
 			cm.ErrorF("Signature verification of update failed."+
@@ -79,7 +89,7 @@ func downloadGithub(
 	}
 
 	log.InfoF("Downloading file '%s'.", target.URL)
-	response, err := GetFile(target.URL)
+	response, err := GetFile(target.URL, token)
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}

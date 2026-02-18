@@ -17,6 +17,18 @@ import (
 	"github.com/gabyx/githooks/githooks/updates/download"
 )
 
+// ghToken returns the GitHub/Gitea API token from the environment.
+// It checks GH_TOKEN first, then falls back to GITHUB_TOKEN.
+// The token is read here, at the application boundary, and threaded
+// into the download library as a parameter.
+func ghToken() string {
+	if token := os.Getenv("GH_TOKEN"); token != "" {
+		return token
+	}
+
+	return os.Getenv("GITHUB_TOKEN")
+}
+
 // IsRunningCoverage tells if we are running coverage.
 const IsRunningCoverage = false
 
@@ -106,7 +118,7 @@ func downloadBinaries(
 	log.PanicIfF(deploySettings == nil,
 		"Could not determine deploy settings.")
 
-	err := deploySettings.Download(log, versionTag, tempDir)
+	err := deploySettings.Download(log, versionTag, tempDir, ghToken())
 	log.AssertNoErrorPanicF(err, "Could not download binaries.")
 
 	ext := ""

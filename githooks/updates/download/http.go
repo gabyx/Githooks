@@ -26,7 +26,9 @@ type HTTPDeploySettings struct {
 
 // Download downloads the Githooks from a template URL and
 // extracts it into `dir`.
-func (s *HTTPDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
+// The `token` is an optional authentication token for HTTP requests.
+// If empty, unauthenticated requests are made.
+func (s *HTTPDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
 	cm.Panic("Not implemented.")
 
 	return nil

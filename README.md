@@ -671,7 +671,7 @@ executing or affect its behavior. These should mostly only be used locally and
 not globally be defined.
 
 | Environment Variables                          | Effect                                                                                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+|------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | `GITHOOKS_OS` (defined by Githooks)            | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
 | `GITHOOKS_ARCH` (defined by Githooks)          | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
 | `STAGED_FILES` (defined by Githooks)           | All staged files. Only set in `pre-commit`, `prepare-commit-msg` and `commit-msg` hook.                                   |
@@ -681,6 +681,8 @@ not globally be defined.
 | `GITHOOKS_LOG_LEVEL`                           | A value `debug`, `info`, `warn`, `error` or `disable` sets the log level during <br>Githooks runner execution.            |
 | `GITHOOKS_SKIP_NON_EXISTING_SHARED_HOOKS=true` | Skips on `true` and fails on `false` (or empty) for non-existing shared hooks. <br>See [Trusting Hooks](#trusting-hooks). |
 | `GITHOOKS_SKIP_UNTRUSTED_HOOKS=true`           | Skips on `true` and fails on `false` (or empty) for untrusted hooks. <br>See [Trusting Hooks](#trusting-hooks).           |
+| `GH_TOKEN`                                     | Authentication token for GitHub/Gitea API requests during updates and installs. <br>Avoids rate limits on API calls.      |
+| `GITHUB_TOKEN`                                 | Fallback token if `GH_TOKEN` is not set. Same effect as `GH_TOKEN`.                                                       |
 
 ### Arguments to Shared Hooks
 
