@@ -144,6 +144,8 @@ function parse_args() {
             to_installer="true"
         else
             echo "! Unknown argument '$p'." >&2
+            echo "  Use '--' to separate install.sh options from installer arguments:" >&2
+            echo "    curl -sL <url>/install.sh | bash -s -- -- \"$p\"" >&2
             return 1
         fi
 
