@@ -134,6 +134,10 @@ function parse_args() {
         elif [ "$p" = "--uninstall" ]; then
             unInstall="true"
         elif [ "$prev" = "--version" ]; then
+            if [ "${p#-}" != "$p" ]; then
+                echo "! '--version' requires a version argument, got '$p'." >&2
+                return 1
+            fi
             versionTag="v$p"
 
         elif [ "$p" = "--" ]; then
@@ -145,6 +149,11 @@ function parse_args() {
 
         prev="$p"
     done
+
+    if [ "$prev" = "--version" ] && [ "$versionTag" = "" ]; then
+        echo "! '--version' requires a version argument." >&2
+        return 1
+    fi
 }
 
 function check_old_version_v2() {
