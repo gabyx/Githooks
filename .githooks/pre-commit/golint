@@ -10,7 +10,7 @@ fi
 cd githooks || exit 1
 
 if CGO_ENABLED=0 \
-  golangci-lint run --verbose \
+  golangci-lint run \
   --config ../.golangci.yaml; then
   echo "* golangci-lint OK" >&2
 else
