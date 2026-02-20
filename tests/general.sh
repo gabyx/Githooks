@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
 function run_docker() {
-    if [ "${CI:-}" = "true" ]; then
-        docker "$@"
+    cmd="${CONTAINER_MGR:-docker}"
+
+    if [ "$cmd" = "docker" ]; then
+        if [ "${CI:-}" = "true" ]; then
+            "$cmd" "$@"
+        else
+            sudo "$cmd" "$@"
+        fi
     else
-        sudo docker "$@"
+        "$cmd" "$@"
     fi
 }
 

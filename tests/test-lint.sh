@@ -27,23 +27,22 @@ cat <<EOF | run_docker build \
 EOF
 
 # Build test container.
-cat <<EOF | run_docker build --force-rm -t githooks:test-rules -
-FROM golang:1.24-alpine
-RUN apk update && apk add git git-lfs
-RUN apk add bash jq curl docker just
+cat <<EOF | run_docker build --force-rm -t githooks:test-rules -f - .
+FROM alpine:3.23.0
+RUN apk update && apk add curl git
 
 RUN git config --global safe.directory /data
 
-# CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
-RUN git config --system protocol.file.allow always
+# Install Nix
+RUN curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux \
+  --extra-conf "sandbox = false" \
+  --init none \
+  --no-confirm
+ENV PATH="/nix/var/nix/profiles/default/bin:\$PATH"
+RUN nix --version
 
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-        sh -s -- -b \$(go env GOPATH)/bin v2.6.1
-
-RUN git config --global user.email "githook@test.com" && \
-    git config --global user.name "Githook Tests" && \
-    git config --global init.defaultBranch main && \
-    git config --global core.autocrlf false
+ADD flake.nix flake.lock /
+RUN nix --accept-flake-config develop ".#default" --command true
 
 ENV DOCKER_RUNNING=true
 EOF
@@ -64,7 +63,8 @@ run_docker run --rm -it \
     -e "GH_SHOW_DIFFS=${GH_SHOW_DIFFS:-false}" \
     -e "GH_FIX=${GH_FIX:-false}" \
     -w /data \
-    githooks:test-rules tests/exec-rules.sh ||
+    githooks:test-rules \
+    nix --accept-flake-config develop ".#default" --command tests/exec-rules.sh ||
     {
         echo "! Check rules had failures: exit code: $?"
         exit 1

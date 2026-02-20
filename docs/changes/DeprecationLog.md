@@ -45,7 +45,6 @@ folder is denoted by `<installDir>`.
 ### Register File
 
 1. It becomes a YAML file: **[done]**
-
    - @todo remove legacy load/store of old file `registered`. **[done]**
    - if backwards compatible: needs legacy transform in installer. _[not yet
      done]_
@@ -74,19 +73,15 @@ folder is denoted by `<installDir>`.
 ### Ignore Patterns
 
 1. All ignore files become YAML files `.ignore.yaml`: **[done]**
-
    - no backward compatible: either legacy transform any files in installer or
    - still support old ignore files `.ignore` (parse) by runner, CLI will
      however write YAML. **[done]**
 
 2. Ignore files locations are: **[done]**
-
    1. **User Ignores**
-
       - `<repo>/.git/.githooks.ignore.yaml`
 
    2. **Repository Ignores**
-
       - `<repo>/.githooks/.ignore.yaml` [
       - `<repo>/.githooks/<hookName>/.ignore.yaml`
       - `<sharedRepo>/.ignore.yaml`
@@ -99,7 +94,6 @@ folder is denoted by `<installDir>`.
    file name was matched. To make it more flexible, we match ignore patterns
    against `[<nameSpace>/]<relPath>` where `<relPath>` is the relative path of
    the hook _[not yet finished]_
-
    - relative to `<repo>/.githooks` in case of **repo hooks**, optional
      `<namespace>` is read from `<repo>/.githooks/.namespace`.
    - relative to `<sharedRepo>` where namespace is read from
@@ -119,14 +113,12 @@ folder is denoted by `<installDir>`.
 
 5. Disabling hooks will no more be stored in the `.githooks.checksum` but rather
    as a **user ignore** in `<repo>/.git/.githooks.ignore.yaml`.
-
    - @todo remove legacy store/load from old location. **[done]**
    - changes in CLI _[not done]_
 
 ### Trusting and Checksums
 
 1. Trust file becomes a YAML file. **[done]**
-
    - @todo remove legacy store/load from old location **[done]**
    - no backward compatibility, since it just means -> retrusting hooks.
 
@@ -150,7 +142,6 @@ folder is denoted by `<installDir>`.
    belongs to, in case it is needed (?). _[not done]_
 
 3. Checksums should be stored as SHA1 filenames (as described above) in
-
    - the directory specified in the global Git config
      `githooks.checksumCacheDir` or if not existing (can be made
      `<installDir>/checksums` during install)
@@ -174,7 +165,6 @@ we have trusted this hook. Instead of parsing the file for every hook run. Note:
    ```
 
    which is parsed by `https://godoc.org/github.com/google/shlex`.
-
    - Substitute over all args all environment variables in `sh` style. **[done,
      test 121]**
 
@@ -203,13 +193,11 @@ in parallel. **[done]**
 One might have several successive parallel batches for each type:
 
 - local repository hooks in `<repoPath>/.githooks/<hookName>/...`
-
   - batch 1
   - ...
   - batch N
 
 - each collected shared hooks in `<repoPath>/.githooks/<hookName>...`
-
   - batch 1
   - ...
   - batch N
@@ -260,7 +248,6 @@ Updating might work like the following when the installer enters
 - Get the binares either by manually building or by calling a binary download
   tool (analoguous to the dialog tool) which provides the binaries for the
   system:
-
   - Arguments: current commit sha.
     - Returns: `installer`, `runner`, `cli`"
   - Binaries should be signed:

@@ -29,6 +29,18 @@ function clean_up() {
     fi
 }
 
+function setup() {
+    if [ "${DOCKER_RUNNING:-}" = "true" ]; then
+        git config --system protocol.file.allow always &&
+            git config --global safe.directory /data &&
+            git config --global user.email "githook@test.com" &&
+            git config --global user.name "Githook Tests" &&
+            git config --global init.defaultBranch main &&
+            git config --global core.autocrlf false &&
+            git config --global githooks.exportStagedFilesAsFile true
+    fi
+}
+
 function install_githooks() {
     just build &&
         "$REPO_DIR/githooks/bin/githooks-cli" installer --non-interactive --build-from-source --clone-url "file://$REPO_DIR" &&
@@ -103,8 +115,8 @@ function diff() {
 }
 
 clean_up
+setup
 
-git config --global githooks.exportStagedFilesAsFile true
 temp=$(mktemp -d)
 
 copy_to_temp "$temp"

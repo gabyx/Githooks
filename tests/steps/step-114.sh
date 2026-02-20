@@ -61,6 +61,6 @@ if ! "$GH_INSTALL_BIN_DIR/githooks-cli" update --yes; then
 fi
 
 if [ ! -f ~/.githooks/templates/hooks/pre-commit ]; then
-    echo "! Expected update to install wrappers into \`~/.githooks/templates\`"
+    echo "! Expected update to install wrappers into '~/.githooks/templates'"
     exit 1
 fi

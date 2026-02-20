@@ -2,6 +2,9 @@ set positional-arguments
 set shell := ["bash", "-cue"]
 root_dir := justfile_directory()
 
+format:
+  treefmt
+
 clean:
   cd "{{root_dir}}" && \
     githooks/scripts/clean.sh

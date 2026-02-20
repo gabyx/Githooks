@@ -9,8 +9,8 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 cd "$ROOT_DIR"
 
+# shellcheck disable=SC2317,SC2329
 function clean_up() {
-    # shellcheck disable=SC2317
     run_docker rmi "githooks:unittests" &>/dev/null || true
 }
 

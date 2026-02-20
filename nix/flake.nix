@@ -6,12 +6,16 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs @ {self, ...}:
-    inputs.flake-utils.lib.eachDefaultSystem (system: let
-      overlays = [];
-      pkgs = import (inputs.nixpkgs) {inherit system overlays;};
-    in {
-      packages.default =
-        pkgs.callPackage ./pkgs/default.nix {};
-    });
+  outputs =
+    inputs@{ self, ... }:
+    inputs.flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        overlays = [ ];
+        pkgs = import (inputs.nixpkgs) { inherit system overlays; };
+      in
+      {
+        packages.default = pkgs.callPackage ./pkgs/default.nix { };
+      }
+    );
 }

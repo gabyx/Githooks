@@ -451,7 +451,6 @@ Supported URL for shared hooks are:
 
 - **All URLs [Git supports](https://git-scm.com/docs/git-clone#_git_urls)** such
   as:
-
   - `ssh://github.com/shared/hooks-maven.git@mybranch` and also the short `scp`
     form `git@github.com:shared/hooks-maven.git`
   - `git://user@github.com/shared/hooks-python.git`
@@ -462,7 +461,6 @@ Supported URL for shared hooks are:
   treated the same as a local path to a bare repository, _see next point_.
 
 - **Local paths** to bare and non-bare repositories such as:
-
   - `/local/path/to/checkout` (gets used directly)
   - `/local/path/to/bare-repo.git@mybranch` (gets cloned internally)
 
@@ -927,7 +925,6 @@ dialog fallback is currently only enabled for the `runner`.
 Githooks distinguishes between _fatal_ and _non-fatal_ prompts.
 
 - A _fatal_ prompt will result in a complete abort if
-
   - The prompt could not be shown (terminal or GUI dialog).
   - The answer returned by the user is incorrect (terminal only) or the user
     canceled the GUI dialog.
@@ -1032,7 +1029,6 @@ The installer will:
    `--update` is given the newest Githooks is downloaded and installed directly.
 
 1. Find the install mode relevant hooks directory `<hooksDir>`:
-
    - Use the directory given with `--hooks-dir <dir>` on the command line.
 
    - Use `git config --get githooks.pathForUseCoreHooksPath` if Githooks is
@@ -1040,7 +1036,6 @@ The installer will:
 
    - Use the following template directory if `--hooks-dir-use-template-dir` is
      given:
-
      1. Use `GIT_TEPMLATE_DIR` if set and add `/hooks`
      1. Use Git config value `init.templateDir` if set and add `/hooks`
      1. Use `<install-dir>/templates/hooks`.
@@ -1050,7 +1045,6 @@ The installer will:
      [`centralized`](#install-mode-centralized-hooks) install mode.
 
 1. Write all Githooks run-wrappers into the hooks directory `<hooksDir>` and
-
    - Set `core.hooksPath` for [`centralized`](#install-mode-centralized-hooks)
      install mode (`--centralized`).
 
@@ -1058,7 +1052,6 @@ The installer will:
 
 1. Offer to find existing Git repositories on the file system (disable with
    `--skip-install-into-existing`)
-
    1. Make them use Githooks by either setting `core.hooksPath` (or install
       run-wrappers if `<repo-git-dir>/hooks/githooks-contains-run-wrappers`
       exists).
