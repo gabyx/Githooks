@@ -29,7 +29,7 @@ var (
 func activate() {
 	var hwnd uintptr
 
-	//nolint: errcheck
+	//nolint:errcheck
 	enumWindows.Call(
 		syscall.NewCallback(func(wnd, lparam uintptr) uintptr {
 			var pid uintptr
@@ -48,7 +48,7 @@ func activate() {
 	}
 
 	if hwnd != 0 {
-		setForegroundWindow.Call(hwnd) //nolint: errcheck
+		setForegroundWindow.Call(hwnd) //nolint:errcheck
 	}
 }
 

@@ -55,7 +55,14 @@ func (m *ManagerPodman) NewHookRunExec(
 	attachStdIn bool,
 	allocateTTY bool,
 ) (cm.IExecutable, error) {
-	return m.docker.NewHookRunExec(ref, workspaceDir, workspaceHookDir, hookExec, attachStdIn, allocateTTY)
+	return m.docker.NewHookRunExec(
+		ref,
+		workspaceDir,
+		workspaceHookDir,
+		hookExec,
+		attachStdIn,
+		allocateTTY,
+	)
 }
 
 // IsPodmanAvailable returns if podman is available.

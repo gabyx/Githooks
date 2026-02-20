@@ -9,16 +9,16 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 cd "$ROOT_DIR"
 
+# shellcheck disable=SC2317,SC2329
 function clean_up() {
-    # shellcheck disable=SC2317
-    docker rmi "githooks:unittests" &>/dev/null || true
+    run_docker rmi "githooks:unittests" &>/dev/null || true
 }
 
 trap clean_up EXIT
 
 cd "$ROOT_DIR"
 
-cat <<EOF | docker build --force-rm -t githooks:unittests -f - "$ROOT_DIR"
+cat <<EOF | run_docker build --force-rm -t githooks:unittests -f - "$ROOT_DIR"
 FROM golang:1.24-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl
@@ -89,7 +89,7 @@ WORKDIR /home/test-user/repo
 ENV DOCKER_RUNNING=true
 EOF
 
-if ! docker run --privileged --rm -it \
+if ! run_docker run --privileged --rm -it \
     githooks:unittests \
     tests/exec-unittests.sh ".*Podman.*" "test_podman"; then
     echo "! Check rules had failures."

@@ -28,7 +28,10 @@ func (i *iconArgs) Set(s string) error {
 	case "question":
 		*i.icon = settings.QuestionIcon
 	default:
-		return cm.ErrorF("Icon name '%s' is not one of ['info', 'warning', 'error', 'question'].", s)
+		return cm.ErrorF(
+			"Icon name '%s' is not one of ['info', 'warning', 'error', 'question'].",
+			s,
+		)
 	}
 
 	return nil
@@ -57,7 +60,10 @@ func (i *msgStyleArgs) Set(s string) error {
 	case "question":
 		*i.style = settings.QuestionStyle
 	default:
-		return cm.ErrorF("Style name '%s' is not one of ['info', 'warning', 'error', 'question'].", s)
+		return cm.ErrorF(
+			"Style name '%s' is not one of ['info', 'warning', 'error', 'question'].",
+			s,
+		)
 	}
 
 	return nil

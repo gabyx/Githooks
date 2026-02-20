@@ -25,7 +25,6 @@ func handleResult(ctx *dcm.CmdContext, r *res.Message, err error) error {
 
 // NewCmd creates the message command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
-
 	settings := set.Message{}
 	var timeout uint
 
@@ -45,12 +44,14 @@ Use 'options' to have more choices.
 - '2' : The user pressed an extra button.
 		The output contains the index of that button.`,
 		Run: func(cmd *cobra.Command, args []string) {
-
 			var cancel func()
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 

@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -73,7 +74,6 @@ func GetOutputFromExecutable(
 	exe IExecutable,
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, error) {
-
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
@@ -101,7 +101,6 @@ func GetCombinedOutputFromExecutable(
 	exe IExecutable,
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, int, error) {
-
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
@@ -114,10 +113,11 @@ func GetCombinedOutputFromExecutable(
 
 	out, err := cmd.CombinedOutput()
 
+	var t *exec.ExitError
 	exitCode := -1
 	if err == nil {
 		exitCode = 0
-	} else if t, ok := err.(*exec.ExitError); ok {
+	} else if errors.As(err, &t) {
 		exitCode = t.ExitCode()
 	}
 
@@ -146,7 +146,6 @@ func GetOutputFromExecutableSep(
 	exe IExecutable,
 	pipeSetup PipeSetupFunc,
 	args ...string) ([]byte, []byte, error) {
-
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()
@@ -177,7 +176,6 @@ func RunExecutable(
 	exe IExecutable,
 	pipeSetup PipeSetupFunc,
 	args ...string) error {
-
 	args = exe.GetArgs(args...)
 	cmd := exec.Command(exe.GetCommand(), args...)
 	cmd.Dir = ctx.GetWorkingDir()

@@ -37,7 +37,7 @@ func GetGitLFSVersion() (ver *version.Version, err error) {
 // IsBareRepo returns `true` if `c.GetCwd()` is a bare repository.
 func (c *Context) IsBareRepo() bool {
 	out, _ := c.Get("rev-parse", "--is-bare-repository")
-	return out == GitCVTrue // nolint:nlreturn
+	return out == GitCVTrue //nolint:nlreturn
 }
 
 // IsGitRepo returns `true` if `path` is a git repository (bare or non-bare).
@@ -55,7 +55,6 @@ func (c *Context) IsGitDir() bool {
 // GetMainWorktree returns the main worktree
 // based on the current context's working directory.
 func (c *Context) GetMainWorktree() (string, error) {
-
 	// This feature is kind of buggy in earlier version of git < 2.28.0
 	// it returns a git directory instead of the work tree
 	// We strip "/.git" from the output.
@@ -64,7 +63,7 @@ func (c *Context) GetMainWorktree() (string, error) {
 		return "", err
 	}
 
-	list := strs.SplitLinesN(trees, 2) // nolint: mnd
+	list := strs.SplitLinesN(trees, 2) //nolint:mnd
 	if len(list) == 0 {
 		return "", cm.ErrorF("Could not get main worktree in '%s'", c.GetCwd())
 	}
@@ -172,7 +171,7 @@ func (c *Context) GetCurrentBranch() (string, error) {
 func FindGitDirs(searchDir string) (all []string, err error) {
 	candidates, err := cm.Glob(path.Join(searchDir, "**/HEAD"), true)
 	if err != nil {
-		return
+		return all, err
 	}
 
 	// We obtain a list of HEAD files, e.g.
@@ -198,7 +197,7 @@ func FindGitDirs(searchDir string) (all []string, err error) {
 
 		relPath, err = filepath.Rel(searchDir, dir) // filepath, because path.Rel is not available.
 		if err != nil {
-			return
+			return all, err
 		}
 		relPath = filepath.ToSlash(relPath)
 
@@ -225,7 +224,7 @@ func FindGitDirs(searchDir string) (all []string, err error) {
 
 	all = repos.ToList()
 
-	return
+	return all, err
 }
 
 // Initialize an empty repo at path `repoPath`.
@@ -288,7 +287,13 @@ func Clone(repoPath string, url string, branch string, depth int) error {
 	out, e := ctx.GetCombined(args...)
 
 	if e != nil {
-		return cm.ErrorF("Cloning of '%s' [branch: '%s']\ninto '%s' failed:\n%s", url, branch, repoPath, out)
+		return cm.ErrorF(
+			"Cloning of '%s' [branch: '%s']\ninto '%s' failed:\n%s",
+			url,
+			branch,
+			repoPath,
+			out,
+		)
 	}
 
 	return nil
@@ -337,7 +342,9 @@ func (c *Context) GetCommitLog(commitSHA string, format string) (string, error) 
 
 // GetRemoteURLAndBranch reports the `remote`s `url` and
 // the current `branch` of HEAD.
-func (c *Context) GetRemoteURLAndBranch(remote string) (currentURL string, currentBranch string, err error) {
+func (c *Context) GetRemoteURLAndBranch(
+	remote string,
+) (currentURL string, currentBranch string, err error) {
 	currentURL = c.GetConfig("remote."+remote+".url", LocalScope)
 	currentBranch, err = c.Get("symbolic-ref", "-q", "--short", HEAD)
 
@@ -352,7 +359,6 @@ func PullOrClone(
 	branch string,
 	depth int,
 	repoCheck func(*Context) error) (isNewClone bool, err error) {
-
 	gitx := NewCtxSanitizedAt(repoPath)
 	if gitx.IsGitRepo() {
 		isNewClone = false
@@ -369,7 +375,7 @@ func PullOrClone(
 
 		if err = os.RemoveAll(repoPath); err != nil {
 			err = cm.ErrorF("Could not remove directory '%s'.", repoPath)
-			return // nolint:nlreturn
+			return //nolint:nlreturn
 		}
 
 		err = Clone(repoPath, url, branch, depth)
@@ -394,7 +400,6 @@ func FetchOrClone(
 	depth int,
 	tagPattern string,
 	repoCheck RepoCheck) (isNewClone bool, gitx *Context, err error) {
-
 	gitx = NewCtxSanitizedAt(repoPath)
 
 	if gitx.IsGitRepo() {
@@ -408,7 +413,6 @@ func FetchOrClone(
 
 			isNewClone = reclone
 		}
-
 	} else {
 		isNewClone = true
 	}
@@ -454,8 +458,8 @@ func GetVersionAt(gitx *Context, commitSHA string) (*version.Version, string, er
 	}
 
 	for _, tag := range tags {
-		ver, err := version.NewVersion(tag)
-		if err == nil && ver != nil {
+		ver, e := version.NewVersion(tag)
+		if e == nil && ver != nil {
 			return ver, tag, nil
 		}
 	}
@@ -464,8 +468,11 @@ func GetVersionAt(gitx *Context, commitSHA string) (*version.Version, string, er
 }
 
 // GetVersion gets the semantic version and its tag.
-func GetVersion(gitx *Context, commitSHA string, matchPattern string) (v *version.Version, tag string, err error) {
-
+func GetVersion(
+	gitx *Context,
+	commitSHA string,
+	matchPattern string,
+) (v *version.Version, tag string, err error) {
 	if commitSHA == HEAD {
 		commitSHA, err = GetCommitSHA(gitx, HEAD)
 		if err != nil {

@@ -8,11 +8,11 @@ import (
 	strs "github.com/gabyx/githooks/githooks/strings"
 )
 
-func formatTitle(p *Context) string {
+func formatTitle(_ *Context) string {
 	return cm.FormatInfoMessage("Githooks - Git Hook Manager")
 }
 
-func formatTitleQuestion(p *Context) string {
+func formatTitleQuestion(_ *Context) string {
 	return cm.FormatPromptMessage("Githooks - Git Hook Manager")
 }
 
@@ -40,7 +40,6 @@ func showMessage(p *Context, text string, asError bool) error {
 		} else {
 			p.log.ErrorF(m, text)
 		}
-
 	} else {
 		// Use the terminal (if possible...)
 		var message string
@@ -77,7 +76,6 @@ func showOptions(
 	hintText string,
 	shortOptions string,
 	longOptions ...string) (string, error) {
-
 	var err error
 	options := strings.Split(shortOptions, "/")
 	validator := CreateValidatorAnswerOptions(options)
@@ -102,7 +100,6 @@ func showOptions(
 
 		err = cm.CombineErrors(err, e)
 		p.log.Info(cm.FormatPromptMessage(m, text, hintText, shortOptions))
-
 	} else {
 		// Use the terminal (if possible...)
 		emptyCausesDefault := strs.IsNotEmpty(defaultAnswer)
@@ -137,7 +134,6 @@ func showEntryLoopTerminal(
 	emptyCausesDefault bool,
 	answerToLowerCase bool,
 	validator AnswerValidator) (string, bool, error) {
-
 	var err error // all errors
 
 	nPrompts := uint(0) // How many times we showed the prompt
@@ -146,10 +142,10 @@ func showEntryLoopTerminal(
 	switch {
 	case p.termIn == nil:
 		err = cm.ErrorF("No terminal input available to read prompt answer.")
-		return defaultAnswer, false, err // nolint: nlreturn
+		return defaultAnswer, false, err //nolint:nlreturn
 	case p.termOut == nil:
 		err = cm.ErrorF("No terminal output available to show prompt.")
-		return defaultAnswer, false, err // nolint: nlreturn
+		return defaultAnswer, false, err //nolint:nlreturn
 	}
 
 	// Write to terminal output.
@@ -164,7 +160,6 @@ func showEntryLoopTerminal(
 	}
 
 	for nPrompts < maxPrompts {
-
 		_, e := p.termPrompt.Write([]byte(text))
 		err = cm.CombineErrors(err, e)
 		nPrompts++
@@ -227,8 +222,7 @@ func showEntryLoopTerminal(
 func showMessageTerminal(
 	p *Context,
 	message string,
-	_asError bool) (bool, error) {
-
+	_ bool) (bool, error) {
 	_, isPromptDisplayed, err := showEntryLoopTerminal(
 		p,
 		message,
@@ -246,7 +240,6 @@ func showOptionsTerminal(
 	defaultAnswer string,
 	emptyCausesDefault bool,
 	validator AnswerValidator) (string, bool, error) {
-
 	return showEntryLoopTerminal(
 		p,
 		question,
@@ -263,7 +256,6 @@ func showEntry(
 	defaultAnswer string,
 	validator func(string) error,
 	canCancel bool) (ans string, err error) {
-
 	if p.useGUI {
 		ans, err = showEntryGUI(p, formatTitle(p), text, defaultAnswer, validator, canCancel)
 		if err == nil {
@@ -275,9 +267,7 @@ func showEntry(
 		}
 
 		p.log.Info(text)
-
 	} else {
-
 		if strs.IsNotEmpty(defaultAnswer) {
 			text = cm.FormatPromptMessage("%s [%s]: ", text, defaultAnswer)
 		} else {
@@ -314,14 +304,12 @@ func showEntryMulti(
 	text string,
 	exitAnswer string,
 	validator AnswerValidator) (answers []string, err error) {
-
 	// Wrap the validator into another one which
 	// reacts on `exitAnswer` for non-GUI prompts.
-	var val AnswerValidator = validator
+	var val = validator
 	exitReceived := false
 
 	if !p.useGUI {
-
 		if strs.IsEmpty(exitAnswer) {
 			text += " [empty cancels]"
 		} else {
@@ -345,8 +333,8 @@ func showEntryMulti(
 		ans, err = showEntry(p, text, "", val, true)
 
 		if err != nil {
-
-			if _, ok := err.(ValidationError); ok {
+			var validationError ValidationError
+			if errors.As(err, &validationError) {
 				continue
 			} else if errors.Is(err, ErrorCanceled) {
 				err = nil
@@ -355,7 +343,6 @@ func showEntryMulti(
 			}
 
 			break
-
 		} else if exitReceived {
 			break
 		}
@@ -364,5 +351,5 @@ func showEntryMulti(
 		answers = append(answers, ans)
 	}
 
-	return
+	return answers, err
 }

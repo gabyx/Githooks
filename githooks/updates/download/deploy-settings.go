@@ -51,7 +51,6 @@ func LoadDeploySettings(file string) (IDeploySettings, error) {
 
 // StoreDeploySettings stores the deploy `settings` to `file`.
 func StoreDeploySettings(file string, settings IDeploySettings) error {
-
 	var s deploySettings
 
 	// Always store the new version

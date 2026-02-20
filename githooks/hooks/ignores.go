@@ -136,13 +136,11 @@ func (h *HookPatterns) RemoveAll() (removed int) {
 // MakeRelativePatternsAbsolute makes all relative patterns (not starting with `ns:`) absolute
 // by prepending `ns:<hookNamespace>/<rootPath>/`.
 func (h *HookPatterns) MakeRelativePatternsAbsolute(hookNamespace string, rootPath string) {
-
 	cm.DebugAssertF(strs.IsNotEmpty(hookNamespace), "Namespace must not be empty in any case!")
 
 	replace := func(strs []string) {
 		var invertPref string
 		for i := range strs {
-
 			startIdx, inverted := checkPatternInversion(strs[i])
 			if inverted {
 				invertPref = patternInversionPrefix
@@ -152,13 +150,14 @@ func (h *HookPatterns) MakeRelativePatternsAbsolute(hookNamespace string, rootPa
 
 			if !strings.HasPrefix(strs[i][startIdx:], NamespacePrefix) {
 				// patterns like "**/*/pre-commit/*"
-				strs[i] = invertPref + path.Clean(path.Join(NamespacePrefix+hookNamespace, rootPath, strs[i][startIdx:]))
+				strs[i] = invertPref + path.Clean(
+					path.Join(NamespacePrefix+hookNamespace, rootPath, strs[i][startIdx:]),
+				)
 			} else if strings.HasPrefix(strs[i][startIdx:], NamespacePrefix+NamespaceRepositoryHook) {
 				// "ns:gh-self..." prefixes are directly replaced by the current namespace.
 				strs[i] = invertPref + NamespacePrefix +
 					hookNamespace + strings.TrimPrefix(strs[i][startIdx:], NamespacePrefix+NamespaceRepositoryHook)
 			}
-
 		}
 	}
 
@@ -192,7 +191,6 @@ func hasInvertPrefixEscaped(p string) bool {
 // checkPatternInversion checks a pattern for inversion prefix "!" and returns
 // the start index where the pattern starts and if its an inverted pattern or not.
 func checkPatternInversion(p string) (int, bool) {
-
 	if hasInvertPrefix(p) {
 		return 1, true
 	} else if hasInvertPrefixEscaped(p) {
@@ -204,9 +202,7 @@ func checkPatternInversion(p string) (int, bool) {
 
 // Matches returns true if `namespacePath` matches any of the patterns and otherwise `false`.
 func (h *HookPatterns) Matches(namespacePath string) (matched bool) {
-
 	for _, p := range h.Patterns {
-
 		// Note: Only forward slashes need to be used here in `hookPath`
 		cm.DebugAssert(!strings.Contains(namespacePath, `\`),
 			"Only forward slashes")
@@ -278,7 +274,6 @@ func GetHookPatternsHooksDir(
 	hooksDir string,
 	hookNames []string,
 	hookNamespace string) (patterns HookPatterns, err error) {
-
 	files := GetHookIgnoreFilesHooksDir(hooksDir, hookNames)
 	patterns.Reserve(2 * len(files)) // nolint: mnd
 
@@ -380,7 +375,6 @@ func IsHookPatternValid(pattern string) bool {
 
 // StoreIgnorePatterns stores patterns.
 func StoreIgnorePatterns(patterns HookPatterns, file string) (err error) {
-
 	data := hookIgnoreFile{
 		Version:        hookIgnoreFileVersion,
 		Patterns:       strs.MakeUnique(patterns.Patterns),
@@ -396,7 +390,6 @@ func GetIgnorePatterns(
 	gitDirWorktree string,
 	hookNames []string,
 	hookNamespace string) (patt RepoIgnorePatterns, err error) {
-
 	var e error
 
 	patt.HooksDir, e = GetHookPatternsHooksDir(hooksDir, hookNames, hookNamespace)

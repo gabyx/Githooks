@@ -8,7 +8,6 @@ with `git hooks uninstaller` first.**
   is enabled. The following settings are changed:
 
 - **Only two install modes are supported:**:
-
   - The **normal mode** sets **local** `core.hooksPath` on `git hooks install`
     in a repository and will not do any automatic installation on clone/init.
 

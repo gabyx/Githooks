@@ -22,13 +22,13 @@ func ExampleShowMessage() {
 	t.Icon = settings.ErrorIcon
 	t.Style = settings.ErrorStyle
 
-	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowMessage(nil, &t) //nolint:staticcheck
 
 	t.Icon = settings.WarningIcon
-	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowMessage(nil, &t) //nolint:staticcheck
 
 	t.Icon = settings.InfoIcon
-	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowMessage(nil, &t) //nolint:staticcheck
 
 	// Output:
 }
@@ -48,7 +48,7 @@ func ExampleShowMessageExtra() {
 	t.WindowIcon = settings.WarningIcon
 	t.Style = settings.WarningStyle
 
-	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowMessage(nil, &t) //nolint:staticcheck
 	// Output:
 }
 
@@ -68,7 +68,7 @@ func ExampleShowQuestion() {
 	t.WindowIcon = settings.QuestionIcon
 	t.Style = settings.QuestionStyle
 
-	_, _ = gui.ShowMessage(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowMessage(nil, &t) //nolint:staticcheck
 	// Output:
 }
 
@@ -88,7 +88,7 @@ func ExampleShowEntry() {
 	t.Icon = settings.InfoIcon
 	t.WindowIcon = settings.InfoIcon
 
-	_, _ = gui.ShowEntry(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowEntry(nil, &t) //nolint:staticcheck
 	// Output:
 }
 
@@ -106,7 +106,7 @@ func ExampleShowOptions() {
 	t.Height = 500
 	t.WindowIcon = settings.QuestionIcon
 
-	_, _ = gui.ShowOptions(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowOptions(nil, &t) //nolint:staticcheck
 	// Output:
 }
 
@@ -124,7 +124,7 @@ func ExampleShowOptionsButtons() {
 	t.Style = settings.OptionsStyleButtons
 	t.WindowIcon = settings.QuestionIcon
 
-	_, _ = gui.ShowOptions(nil, &t) // nolint: staticcheck
+	_, _ = gui.ShowOptions(nil, &t) //nolint:staticcheck
 	// Output:
 }
 
@@ -141,7 +141,7 @@ func ExampleShowFileSave() {
 	t.OnlyDirectories = false
 	t.WindowIcon = settings.QuestionIcon
 
-	f, e := gui.ShowFileSave(nil, t) // nolint: staticcheck
+	f, e := gui.ShowFileSave(nil, t) //nolint:staticcheck
 	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
 	// Output:
 }
@@ -158,7 +158,7 @@ func ExampleShowFileSelection() {
 	t.WindowIcon = settings.QuestionIcon
 	t.ShowHidden = false
 
-	f, e := gui.ShowFileSelection(nil, &t) // nolint: staticcheck
+	f, e := gui.ShowFileSelection(nil, &t) //nolint:staticcheck
 	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
 	// Output:
 }
@@ -175,7 +175,7 @@ func ExampleShowDirectorySelection() {
 	t.WindowIcon = settings.QuestionIcon
 	t.ShowHidden = false
 
-	f, e := gui.ShowFileSelection(nil, &t) // nolint: staticcheck
+	f, e := gui.ShowFileSelection(nil, &t) //nolint:staticcheck
 	fmt.Fprintf(os.Stderr, "%v, %v", f, e)
 	// Output:
 }
@@ -188,6 +188,6 @@ func ExampleShowNotification() {
 	t.Height = 500
 	t.WindowIcon = settings.WarningIcon
 
-	_ = gui.ShowNotification(nil, &t) // nolint: staticcheck
+	_ = gui.ShowNotification(nil, &t) //nolint:staticcheck
 	// Output:
 }

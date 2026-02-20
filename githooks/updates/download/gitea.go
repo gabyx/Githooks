@@ -36,7 +36,6 @@ func downloadGitea(
 	versionTag string,
 	dir string,
 	publicPGP string) error {
-
 	client, err := gitea.NewClient(url)
 	if err != nil {
 		return cm.CombineErrors(err, cm.Error("Cannot initialize Gitea client"))
@@ -58,8 +57,15 @@ func downloadGitea(
 
 	target, checksums, err := getGithooksAsset(assets)
 	if err != nil {
-		return cm.CombineErrors(err,
-			cm.ErrorF("Could not select asset in repo '%s/%s' at tag '%s'.", owner, repo, versionTag))
+		return cm.CombineErrors(
+			err,
+			cm.ErrorF(
+				"Could not select asset in repo '%s/%s' at tag '%s'.",
+				owner,
+				repo,
+				versionTag,
+			),
+		)
 	}
 
 	log.InfoF("Verify signature of checksum file '%s'.", checksums.File.URL)
@@ -75,7 +81,7 @@ func downloadGitea(
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 
 	// Store into temp. file.
 	err = os.MkdirAll(dir, cm.DefaultFileModeDirectory)
@@ -91,7 +97,7 @@ func downloadGitea(
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not store download in '%s'.", temp.Name()))
 	}
-	temp.Close()
+	_ = temp.Close()
 
 	log.InfoF("Validate checksums.")
 	err = checkChecksum(temp.Name(), checksumData)

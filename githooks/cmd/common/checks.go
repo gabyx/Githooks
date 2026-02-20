@@ -17,8 +17,14 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 
 	haveInstall, installMode := install.GetInstallMode(gitx)
 	pathToUse := gitx.GetConfig(hooks.GitCKPathForUseCoreHooksPath, git.GlobalScope)
-	globalCoreHooksPath, globalCoreHooksPathSet := gitx.LookupConfig(git.GitCKCoreHooksPath, git.GlobalScope)
-	localCoreHooksPath, localCoreHooksPathSet := gitx.LookupConfig(git.GitCKCoreHooksPath, git.LocalScope)
+	globalCoreHooksPath, globalCoreHooksPathSet := gitx.LookupConfig(
+		git.GitCKCoreHooksPath,
+		git.GlobalScope,
+	)
+	localCoreHooksPath, localCoreHooksPathSet := gitx.LookupConfig(
+		git.GitCKCoreHooksPath,
+		git.LocalScope,
+	)
 
 	if !haveInstall {
 		log.WarnF("Githooks seems not installed. Please install it.")
@@ -43,9 +49,11 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 				localCoreHooksPath, pathToUse)
 		}
 
-		gitDir, err := gitx.GetGitDirCommon()
-		log.AssertNoErrorF(err, "Could not determine common Git dir.")
-		hasRunWrappers, _ := cm.IsPathExisting(path.Join(gitDir, "hooks", hooks.RunWrapperMarkerFileName))
+		gitDir, e := gitx.GetGitDirCommon()
+		log.AssertNoErrorF(e, "Could not determine common Git dir.")
+		hasRunWrappers, _ := cm.IsPathExisting(
+			path.Join(gitDir, "hooks", hooks.RunWrapperMarkerFileName),
+		)
 
 		if hasHooksConfigured &&
 			!localCoreHooksPathSet && !globalCoreHooksPathSet &&
@@ -58,7 +66,6 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 
 	if installMode == install.InstallModeTypeV.Centralized &&
 		globalCoreHooksPathSet && globalCoreHooksPath != pathToUse {
-
 		log.ErrorF("Githooks install is corrupt: \n"+
 			"Global Git config 'core.hooksPath' is set to:\n"+
 			"'%s'\n"+

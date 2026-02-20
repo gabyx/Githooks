@@ -1,26 +1,20 @@
 {
   description = "Githooks Dev";
 
-  nixConfig = {
-    extra-substituters = [
-      # Nix community's cache server
-      "https://cache.nixos.org/"
-      "https://nix-community.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    ];
-  };
-
   inputs = {
     # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+
+    # Format the repo with nix-treefmt.
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
       ...
@@ -38,13 +32,51 @@
             inherit system overlays;
           };
 
+          # Configure formatter.
+          treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
+            projectRootFile = "README.md";
+
+            # Markdown, JSON, YAML, etc.
+            programs.prettier.enable = true;
+
+            # Go
+            programs.gofmt.enable = true;
+            programs.goimports.enable = true;
+            programs.golines.enable = true;
+
+            # Shell.
+            programs.shfmt = {
+              enable = true;
+              indent_size = 4;
+            };
+
+            programs.shellcheck.enable = true;
+
+            # Nix.
+            programs.nixfmt.enable = true;
+          };
+
+          treefmt = treefmtEval.config.build.wrapper;
+
           # Things needed only at compile-time.
           packages = with pkgs; [
+            coreutils
+            findutils
+            gitFull
+            gnugrep
+            bash
+            jq
+            curl
+            just
+
             go_1_24
             golines
             gotools
+            gopls
             golangci-lint
             golangci-lint-langserver
+
+            treefmt
           ];
         in
         with pkgs;
@@ -53,6 +85,10 @@
             # To make CGO and the debugger delve work.
             # https://nixos.wiki/wiki/Go#Using_cgo_on_NixOS
             hardeningDisable = [ "fortify" ];
+            inherit packages;
+          };
+
+          devShells.format = mkShell {
             inherit packages;
           };
         }

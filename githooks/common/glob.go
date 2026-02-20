@@ -49,7 +49,6 @@ func Glob(pattern string, ignoreErrors bool) (l []string, err error) {
 	l = strs.Map(l, filepath.ToSlash)
 
 	return
-
 }
 
 // Expand finds matches for the provided Globs.

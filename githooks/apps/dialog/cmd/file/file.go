@@ -15,7 +15,6 @@ import (
 )
 
 func handleResult(ctx *dcm.CmdContext, r *res.File, err error, sep string) error {
-
 	if ctx.ReportAsJSON {
 		return dcm.HandleJSONResult(ctx, res.NewJSONResult(r), &r.General, err)
 	}
@@ -29,7 +28,6 @@ func handleResult(ctx *dcm.CmdContext, r *res.File, err error, sep string) error
 
 // NewCmd creates the file command.
 func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
-
 	setSave := set.FileSave{}
 	var timeout uint
 	var separator string
@@ -52,12 +50,14 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 			ccm.PanicIfAnyArgs(ctx.Log)(cmd, args)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-
 			var cancel func()
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 
@@ -91,12 +91,14 @@ func NewCmd(ctx *dcm.CmdContext) []*cobra.Command {
 			ccm.PanicIfAnyArgs(ctx.Log)(cmd, args)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-
 			var cancel func()
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 

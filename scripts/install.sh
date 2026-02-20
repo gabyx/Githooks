@@ -22,11 +22,11 @@ function check_bash() {
 function get_platform_os() {
     local -n _platform_os="$1"
 
-    if [[ "$OSTYPE" == "linux"* ]]; then
+    if [[ $OSTYPE == "linux"* ]]; then
         _platform_os="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
+    elif [[ $OSTYPE == "darwin"* ]]; then
         _platform_os="darwin"
-    elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    elif [[ $OSTYPE == "freebsd"* ]]; then
         _platform_os="freebsd"
     else
         # Resort to `uname` for windows stuff.
@@ -235,7 +235,7 @@ if [ "$http_status" != "200" ]; then
     exit 1
 fi
 
-checksumFileURL=$(jq --raw-output ".assets[] | select( .name == \"githooks.checksums\") | .browser_download_url" <"$response")
+checksumFileURL=$(jq --raw-output '.assets[] | select( .name == "githooks.checksums") | .browser_download_url' <"$response")
 
 url=$(
     jq --raw-output ".assets[] |

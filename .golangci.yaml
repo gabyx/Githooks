@@ -1,0 +1,13 @@
+version: "2"
+run:
+  # Report paths relative to the Git root directory.
+  # Related to the LSP `golangci-lint-langserver`:
+  # This makes the diagnostics work in `nvim` when
+  # started in the Git root.
+  relative-path-mode: gitroot
+
+linters:
+  default: standard
+
+issues:
+  max-same-issues: 100

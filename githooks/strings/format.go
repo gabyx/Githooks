@@ -27,11 +27,11 @@ func SplitLinesN(s string, n int) []string {
 }
 
 // Fmt returns a formatted string.
-func Fmt(format string, a ...interface{}) string {
+func Fmt(format string, a ...any) string {
 	return fmt.Sprintf(format, a...)
 }
 
 // FmtW returns a formatted string.
-func FmtW(w io.Writer, format string, a ...interface{}) (int, error) {
+func FmtW(w io.Writer, format string, a ...any) (int, error) {
 	return fmt.Fprintf(w, format, a...)
 }

@@ -7,11 +7,10 @@ import (
 
 // HandleCLIErrors generally handles errors for the Githooks executables. Argument `cwd` can be empty.
 func HandleCLIErrors(
-	err interface{},
+	err any,
 	log ILogContext,
 	getBugReportingInfo func() string,
 ) bool {
-
 	if err == nil {
 		return false
 	}
@@ -38,8 +37,8 @@ func HandleCLIErrors(
 			log.Error(message...)
 		}
 	} else {
-		os.Stderr.WriteString(strings.Join(message, "\n"))
-		os.Stderr.WriteString("\n")
+		_, _ = os.Stderr.WriteString(strings.Join(message, "\n"))
+		_, _ = os.Stderr.WriteString("\n")
 	}
 
 	return true

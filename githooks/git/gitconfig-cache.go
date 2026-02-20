@@ -45,7 +45,6 @@ func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
 }
 
 func toMapIdx(scope string) ConfigScope {
-
 	switch scope {
 	case "system":
 		return SystemScope
@@ -71,7 +70,6 @@ func toConfigArg(scope ConfigScope) string {
 }
 
 func ToConfigName(scope ConfigScope) string {
-
 	switch scope {
 	case SystemScope:
 		return "system"
@@ -91,7 +89,6 @@ func ToConfigName(scope ConfigScope) string {
 }
 
 func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err error) {
-
 	c.scopes = [5]ConfigMap{
 		make(ConfigMap),
 		make(ConfigMap),
@@ -101,7 +98,7 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 
 	// Define a split function that separates on null-terminators.
 	onNullTerminator := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		for i := 0; i < len(data); i++ {
+		for i := range data {
 			if data[i] == '\x00' {
 				return i + 1, data[:i], nil
 			}
@@ -149,7 +146,7 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 			if idx < 0 {
 				err = cm.ErrorF("Wrong Git config scope '%v' for value '%s'", scope, txt)
 
-				return
+				return c, err
 			}
 
 			addEntry(
@@ -158,11 +155,10 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 		}
 	}
 
-	return
+	return c, err
 }
 
 func NewConfigCache(gitx Context, filterFunc func(string) bool) (ConfigCache, error) {
-
 	conf, err := gitx.Get("config", "--includes", "--list", "--null", "--show-scope")
 	if err != nil {
 		return ConfigCache{}, err
@@ -175,7 +171,6 @@ func (c *ConfigCache) SyncChangedValues() {}
 
 // Get all config values for key `key` in the cache.
 func (c *ConfigCache) getAll(key string, scope ConfigScope) (val []string, exists bool) {
-
 	if scope == Traverse {
 		for i := len(c.scopes) - 1; i >= 0; i-- {
 			res, _ := c.getAll(key, ConfigScope(i)) // This order is how Git config reports it.
@@ -226,8 +221,11 @@ func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals [
 // Get a config value for key `key` in the cache.
 func (c *ConfigCache) get(key string, scope ConfigScope) (val string, exists bool) {
 	if scope == Traverse {
-		for i := 0; i < len(c.scopes); i++ {
-			val, exists = c.get(key, ConfigScope(i)) // This order is how Git config takes precedence over others.
+		for i := range len(c.scopes) {
+			val, exists = c.get(
+				key,
+				ConfigScope(i),
+			) // This order is how Git config takes precedence over others.
 			if exists {
 				break
 			}

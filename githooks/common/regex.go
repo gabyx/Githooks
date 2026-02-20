@@ -12,14 +12,14 @@ func MatchLineRegexInFile(filePath string, regex *regexp.Regexp) (found bool, er
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
 		if regex.MatchString(scanner.Text()) {
 			found = true
-			return // nolint:nlreturn
+			return //nolint:nlreturn
 		}
 	}
 

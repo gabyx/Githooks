@@ -15,13 +15,13 @@ import (
 // If an error occurs the directory is empty.
 func CheckDirAccess(targetDir string, subFolderIfExists string) (string, error) {
 	if strs.IsNotEmpty(targetDir) {
-		targetDir, err := cm.ReplaceTilde(targetDir)
+		dir, err := cm.ReplaceTilde(targetDir)
 		if err != nil {
-			return "", cm.ErrorF("Could not replace tilde '~' in '%s'.", targetDir)
+			return "", cm.ErrorF("Could not replace tilde '~' in '%s'.", dir)
 		}
 
-		if cm.IsWritable(targetDir) {
-			return path.Join(targetDir, subFolderIfExists), nil
+		if cm.IsWritable(dir) {
+			return path.Join(dir, subFolderIfExists), nil
 		}
 	}
 
@@ -39,7 +39,6 @@ func FindHooksDirInstall(log cm.ILogContext, gitx *git.Context) (hooksDir string
 // FindHooksDirTemplateDir finds the hooks directory from the template dir
 // used by Git hooks.
 func FindHooksDirTemplateDir(gitx *git.Context) (hooksDir string, err error) {
-
 	// 1. Try setup from environment variables
 	gitTempDir, exists := os.LookupEnv("GIT_TEMPLATE_DIR")
 	if exists {

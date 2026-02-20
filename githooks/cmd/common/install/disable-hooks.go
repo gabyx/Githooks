@@ -14,14 +14,15 @@ func GetHookDisableCallback(
 	gitx *git.Context,
 	nonInteractive bool,
 	uiSettings *UISettings) func(file string) hooks.HookDisableOption {
-
 	if strs.IsEmpty(uiSettings.DeleteDetectedLFSHooks) {
 		// Load default UI value from config.
-		uiSettings.DeleteDetectedLFSHooks = gitx.GetConfig(hooks.GitCKDeleteDetectedLFSHooksAnswer, git.GlobalScope)
+		uiSettings.DeleteDetectedLFSHooks = gitx.GetConfig(
+			hooks.GitCKDeleteDetectedLFSHooksAnswer,
+			git.GlobalScope,
+		)
 	}
 
 	return func(file string) (answer hooks.HookDisableOption) {
-
 		userAnswer := "n"
 		if strs.IsNotEmpty(uiSettings.DeleteDetectedLFSHooks) {
 			userAnswer = uiSettings.DeleteDetectedLFSHooks
@@ -39,12 +40,12 @@ func GetHookDisableCallback(
 
 			log.AssertNoError(err, "Could not show prompt.")
 
-			if userAnswer == "s" {
+			switch userAnswer {
+			case "s":
 				uiSettings.DeleteDetectedLFSHooks = "n" // Store the decision.
-			} else if userAnswer == "a" {
+			case "a":
 				uiSettings.DeleteDetectedLFSHooks = "y" // Store the decision.
 			}
-
 		}
 
 		switch userAnswer {

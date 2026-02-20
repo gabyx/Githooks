@@ -8,7 +8,10 @@ import (
 )
 
 var reURLScheme *regexp.Regexp = regexp.MustCompile(`(?m)^[^:/?#]+://`)
-var reShortSCPSyntax = regexp.MustCompile(`(?m)^(?:(?P<user>.+)@)?(?P<host>.+[^:]):(?P<path>[^:].*)`)
+
+var reShortSCPSyntax = regexp.MustCompile(
+	`(?m)^(?:(?P<user>.+)@)?(?P<host>.+[^:]):(?P<path>[^:].*)`,
+)
 var reRemoteHelperSyntax = regexp.MustCompile(`(?m)^(?P<transport>.+)::(?P<address>.+)`)
 
 // IsCloneURLALocalPath checks if the clone url is a local path.

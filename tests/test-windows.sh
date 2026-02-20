@@ -9,7 +9,7 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 cd "$ROOT_DIR"
 
-cat <<'EOF' | docker build --force-rm -t githooks:windows-lfs -f - .
+cat <<'EOF' | run_docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/dotnet/framework/runtime:4.8-windowsservercore-ltsc2022
 
 
@@ -27,7 +27,7 @@ RUN git config --system protocol.file.allow always
 # ideally, this would be C:\go to match Linux a bit closer, but C:\go is the recommended install path for Go itself on Windows
 ENV GOPATH C:\\gopath
 
-# PATH isn't actually set in the Docker image, so we have to set it from within the container
+# PATH isn't actually set in the run_docker image, so we have to set it from within the container
 RUN $newPath = ('{0}\bin;C:\go\bin;{1}' -f $env:GOPATH, $env:PATH); \
     Write-Host ('Updating PATH: {0}' -f $newPath); \
     [Environment]::SetEnvironmentVariable('PATH', $newPath, [EnvironmentVariableTarget]::Machine);
@@ -83,12 +83,12 @@ WORKDIR C:/githooks-tests/tests
 
 EOF
 
-docker run --rm \
+run_docker run --rm \
     -a stdout \
     -a stderr "githooks:windows-lfs" \
     "C:/Program Files/Git/bin/sh.exe" ./exec-steps.sh --skip-docker-check "$@"
 
 RESULT=$?
 
-docker rmi "githooks:windows-lfs"
+run_docker rmi "githooks:windows-lfs"
 exit $RESULT
