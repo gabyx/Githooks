@@ -20,9 +20,7 @@ var goVersionMin = "1.16.0"
 var versionRe = regexp.MustCompile(`\d+\.\d+(\.\d+)?`)
 
 func findGoExec(cwd string) (cm.CmdContext, error) {
-
 	check := func(gox cm.CmdContext) error {
-
 		verS, err := gox.Get("version")
 		if err != nil {
 			return cm.ErrorF(
@@ -84,7 +82,6 @@ func findGoExec(cwd string) (cm.CmdContext, error) {
 // Build compiles this repos executable with Go and reports
 // the output binary directory where all built binaries reside.
 func Build(gitx *git.Context, buildTags []string, cleanUpX *cm.InterruptContext) (string, error) {
-
 	repoPath := gitx.GetCwd()
 	goSrc := path.Join(repoPath, relPathGoSrc)
 	if !cm.IsDirectory(goSrc) {

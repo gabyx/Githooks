@@ -76,17 +76,16 @@ func getNewUpdateCommit(
 	gitx *git.Context,
 	firstSHA string,
 	lastSHA string,
-	usePreRelease bool) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
-
+	usePreRelease bool,
+) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
 	// Get all commits in (firstSHA, lastSHA]
 	commits, err := gitx.GetCommits(firstSHA, lastSHA)
 	if err != nil {
-		return
+		return commitF, tagF, versionF, infoF, err
 	}
 
 	// Iterate from (firstSHA, lastSHA], the list is reversed.
 	for i := range commits {
-
 		commit := commits[len(commits)-1-i]
 
 		version, tag, e := git.GetVersionAt(gitx, commit)
@@ -95,7 +94,7 @@ func getNewUpdateCommit(
 		case e != nil:
 			err = e
 
-			return
+			return commitF, tagF, versionF, infoF, err
 		case version == nil || strs.IsEmpty(tag):
 			continue // no version tag on this commit
 		case !usePreRelease && strs.IsNotEmpty(version.Prerelease()):
@@ -109,7 +108,7 @@ func getNewUpdateCommit(
 		if e != nil {
 			err = e
 
-			return
+			return commitF, tagF, versionF, infoF, err
 		}
 
 		// We have a valid new version on commit 'commit'
@@ -129,7 +128,7 @@ func getNewUpdateCommit(
 		}
 	}
 
-	return
+	return commitF, tagF, versionF, infoF, err
 }
 
 // RemoteCheckAction is the action type for the remote check.
@@ -155,7 +154,6 @@ func FetchUpdates(
 	usePreRelease bool,
 	setGitConfig bool,
 ) (status ReleaseStatus, err error) {
-
 	cm.AssertOrPanic(strs.IsNotEmpty(cloneDir))
 
 	// Repo check function before fetch is executed.
@@ -183,12 +181,11 @@ func FetchUpdates(
 		}
 
 		if checkRemote {
-			u, b, e := gitx.GetRemoteURLAndBranch(DefaultRemote)
+			u, b, eR := gitx.GetRemoteURLAndBranch(DefaultRemote)
 
-			if e != nil {
+			if eR != nil {
 				return false, cm.CombineErrors(cm.ErrorF(
-					"Could not check url & branch in repository at '%s'", gitx.GetCwd()), e)
-
+					"Could not check url & branch in repository at '%s'", gitx.GetCwd()), eR)
 			} else if u != url || b != branch {
 				if checkRemoteAction != RecloneOnWrongRemote {
 					// Default action is error out:
@@ -239,13 +236,13 @@ func FetchUpdates(
 	depth := -1
 	isNewClone, gitx, err := git.FetchOrClone(cloneDir, url, branch, depth, "v*", check)
 	if err != nil {
-		return
+		return status, err
 	}
 
 	// If branch was empty (default branch), determine it now.
 	if strs.IsEmpty(branch) {
 		if branch, err = gitx.GetCurrentBranch(); err != nil {
-			return
+			return status, err
 		}
 	}
 	remoteBranch := DefaultRemote + "/" + branch
@@ -253,7 +250,7 @@ func FetchUpdates(
 	// Set the url/branch back...
 	if setGitConfig {
 		if err = SetCloneURL(url, branch); err != nil {
-			return
+			return status, err
 		}
 	}
 
@@ -273,7 +270,7 @@ func FetchUpdates(
 			cm.ErrorF("Current version tag '%v' could not be found on branch '%s'",
 				build.BuildTag, branch), e)
 
-		return
+		return status, err
 	}
 
 	e = gitx.Check("reset", "--hard", tag)
@@ -282,7 +279,7 @@ func FetchUpdates(
 			cm.ErrorF("Could not reset branch '%s' to tag '%s'",
 				branch, build.BuildTag), e)
 
-		return
+		return status, err
 	}
 
 	resetRemoteTo := ""
@@ -297,18 +294,20 @@ func FetchUpdates(
 		// Reset the release branch to determined update commit sha.
 		err = gitx.Check("update-ref", "refs/remotes/"+remoteBranch, resetRemoteTo)
 		if err != nil {
-			return
+			return status, err
 		}
 
 		status.RemoteCommitSHA = resetRemoteTo
 	}
 
-	return
+	return status, err
 }
 
 // GetStatus returns the status of the release clone.
-func GetStatus(cloneDir string, checkRemote, skipPrerelease bool) (status ReleaseStatus, err error) {
-
+func GetStatus(
+	cloneDir string,
+	checkRemote, skipPrerelease bool,
+) (status ReleaseStatus, err error) {
 	gitx := git.NewCtxSanitizedAt(cloneDir)
 
 	var url, branch string
@@ -354,10 +353,9 @@ func getStatus(
 	branch string,
 	remoteBranch string,
 	usePreRelease bool) (status ReleaseStatus, err error) {
-
 	localSHA, err := gitx.Get("rev-parse", branch)
 	if err != nil {
-		return
+		return status, err
 	}
 
 	// Get the tag (corresponding to a version)
@@ -366,7 +364,7 @@ func getStatus(
 
 	remoteSHA, err := gitx.Get("rev-parse", remoteBranch)
 	if err != nil {
-		return
+		return status, err
 	}
 
 	var updateInfo []string
@@ -383,7 +381,7 @@ func getStatus(
 			getNewUpdateCommit(gitx, localSHA, remoteSHA, usePreRelease)
 
 		if err != nil {
-			return
+			return status, err
 		}
 	}
 
@@ -405,7 +403,7 @@ func getStatus(
 		Branch:       branch,
 		RemoteBranch: remoteBranch}
 
-	return
+	return status, err
 }
 
 // MergeUpdates merges updates in the Githooks clone directory.
@@ -415,7 +413,7 @@ func getStatus(
 func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 	if !cm.IsDirectory(cloneDir) {
 		err = cm.ErrorF("Clone directory '%s' does not exist.", cloneDir)
-		return //nolint: nlreturn
+		return currentSHA, err //nolint:nlreturn
 	}
 
 	gitx := git.NewCtxSanitizedAt(cloneDir)
@@ -427,14 +425,14 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 	// Safety check that branches are the same.
 	currentBranch, err := gitx.Get("rev-parse", "--abbrev-ref", git.HEAD)
 	if err != nil {
-		return
+		return currentSHA, err
 	}
 
 	if currentBranch != branch {
 		err = cm.ErrorF("Current branch of clone directory\n'%s'\n"+
 			"does not point to the configured branch '%s'\n"+
 			"but instead to '%s'.", cloneDir, branch, currentBranch)
-		return //nolint: nlreturn
+		return currentSHA, err //nolint:nlreturn
 	}
 
 	if dryRun {
@@ -443,7 +441,7 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 		oldBranch := branch
 		branch = "dryrunmerge-" + uuid.New().String() // ust this dry-run branch from now
 		if err = gitx.Check("branch", branch, oldBranch); err != nil {
-			return
+			return currentSHA, err
 		}
 
 		// Delete the branch on exit.
@@ -453,7 +451,7 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 
 		// Checkout the branch
 		if err = gitx.Check("checkout", branch); err != nil {
-			return
+			return currentSHA, err
 		}
 
 		// Checkout the old branch on exit.
@@ -464,13 +462,13 @@ func MergeUpdates(cloneDir string, dryRun bool) (currentSHA string, err error) {
 
 	// Fast-forward merge.
 	if err = gitx.Check("merge", "--ff-only", remoteBranch); err != nil {
-		return
+		return currentSHA, err
 	}
 
 	// Get the current commit SHA1 after the merge.
 	currentSHA, err = gitx.Get("rev-parse", branch)
 
-	return
+	return currentSHA, err
 }
 
 // AcceptUpdateCallback is the callback type
@@ -483,9 +481,17 @@ func RunUpdate(
 	acceptUpdate AcceptUpdateCallback,
 	usePreRelease bool,
 	run func() error) (updateAvailable bool, accepted bool, err error) {
-
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
-	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease, true)
+	status, err := FetchUpdates(
+		cloneDir,
+		"",
+		"",
+		build.BuildTag,
+		true,
+		ErrorOnWrongRemote,
+		usePreRelease,
+		true,
+	)
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not fetch updates."), err)
 
@@ -499,7 +505,6 @@ func RunUpdate(
 	}
 
 	if updateAvailable && accepted {
-
 		_, err = MergeUpdates(cloneDir, true) // Dry run the merge...
 		if err != nil {
 			err = cm.CombineErrors(cm.ErrorF(
@@ -539,7 +544,10 @@ const (
 )
 
 // FormatUpdateText formats a default update text for updates.
-func FormatUpdateText(status *ReleaseStatus, withUpdateHint bool) (versionText string, isMajorUpdate bool) {
+func FormatUpdateText(
+	status *ReleaseStatus,
+	withUpdateHint bool,
+) (versionText string, isMajorUpdate bool) {
 	if !status.IsUpdateAvailable {
 		return strs.Fmt("Githooks is at the latest version '%s'.", build.BuildTag), false
 	}
@@ -581,7 +589,6 @@ func DefaultAcceptUpdateCallback(
 	log cm.ILogContext,
 	promptx prompt.IContext,
 	acceptNonInteractive AcceptNonInteractiveMode) AcceptUpdateCallback {
-
 	return func(status *ReleaseStatus) bool {
 		log.DebugF("Fetch status: '%v'", status)
 		cm.DebugAssert(status.IsUpdateAvailable, "Wrong input.")
@@ -610,7 +617,6 @@ func DefaultAcceptUpdateCallback(
 
 				return true
 			}
-
 		} else {
 			log.InfoF("There is a new Githooks update available:\n%s", versionText)
 
@@ -637,7 +643,6 @@ func RunUpdateOverExecutable(
 	execC cm.IExecContext,
 	pipeSetup cm.PipeSetupFunc,
 	args ...string) error {
-
 	if !UpdateEnabled {
 		return cm.Error("Updates have been disabled in this build of Githooks.")
 	}
@@ -666,7 +671,6 @@ func RunUpdateOverExecutable(
 			return cm.CombineErrors(err,
 				cm.ErrorF("Update output:\n%s\nExit Code: '%v'", output, exitCode))
 		}
-
 	} else {
 		err := cm.RunExecutable(
 			&execX,

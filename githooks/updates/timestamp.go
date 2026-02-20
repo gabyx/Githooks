@@ -1,7 +1,6 @@
 package updates
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strconv"
@@ -27,7 +26,7 @@ func RecordUpdateCheckTimestamp(installDir string) error {
 
 	err = os.WriteFile(
 		GetUpdateCheckTimestampFile(installDir),
-		[]byte(fmt.Sprintf("%v", time.Now().Unix())),
+		[]byte(strconv.FormatInt(time.Now().Unix(), 10)),
 		cm.DefaultFileModeFile)
 
 	return err
@@ -42,7 +41,6 @@ func ResetUpdateCheckTimestamp(installDir string) error {
 
 // GetUpdateCheckTimestamp gets the update check time.
 func GetUpdateCheckTimestamp(installDir string) (t time.Time, isSet bool, err error) {
-
 	// Initialize with too old time...
 	t = time.Unix(0, 0)
 

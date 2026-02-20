@@ -30,21 +30,21 @@ fi
 }
 
 function cleanup() {
-    docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
-    docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
-    docker volume rm gh-test-tmp &>/dev/null || true
+    run_docker rmi "githooks:$IMAGE_TYPE-base" &>/dev/null || true
+    run_docker rmi "githooks:$IMAGE_TYPE" &>/dev/null || true
+    run_docker volume rm gh-test-tmp &>/dev/null || true
 }
 
 trap cleanup EXIT
 
 # Build container to only copy to volumes.
-cat <<EOF | docker build \
+cat <<EOF | run_docker build \
     --force-rm -t "githooks:volumecopy" -f - . || exit 1
     FROM scratch
     CMD you-should-not-run-this-container
 EOF
 
-cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE-base -
+cat <<EOF | run_docker build --force-rm -t githooks:$IMAGE_TYPE-base -
 FROM golang:1.24-alpine
 RUN apk update && apk add git git-lfs
 RUN apk add bash jq curl docker
@@ -52,10 +52,10 @@ RUN apk add bash jq curl docker
 # CVE https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253
 RUN git config --system protocol.file.allow always
 
-RUN go install github.com/wadey/gocovmerge@latest
-RUN go install github.com/mattn/goveralls@latest
-RUN go install gitlab.com/fgmarand/gocoverstats@latest
-RUN go install github.com/nikolaydubina/go-cover-treemap@latest
+RUN go install github.com/wadey/gocovmerge@b5bfa59ec0ad
+RUN go install github.com/mattn/goveralls@v0.0.12
+RUN go install gitlab.com/fgmarand/gocoverstats@v0.0.5
+RUN go install github.com/nikolaydubina/go-cover-treemap@v1.5.0
 
 ENV DOCKER_RUNNING=true
 ENV GH_COVERAGE_DIR="/cover"
@@ -67,7 +67,7 @@ RUN git config --global safe.directory /githooks
 EOF
 
 # Build test container.
-cat <<EOF | docker build --force-rm -t githooks:$IMAGE_TYPE -f - "$ROOT_DIR" || exit 1
+cat <<EOF | run_docker build --force-rm -t githooks:$IMAGE_TYPE -f - "$ROOT_DIR" || exit 1
 FROM githooks:$IMAGE_TYPE-base
 
 ENV GH_TESTS="/var/lib/githooks-tests"
@@ -130,24 +130,24 @@ EOF
 if [ -d "$TEST_DIR/cover" ]; then
     echo "Delete coverage folder."
     # Do this over container due to user permissions.
-    docker run --rm \
+    run_docker run --rm \
         -v "$TEST_DIR/cover":/cover \
         "githooks:$IMAGE_TYPE" \
         find /cover -mindepth 1 -delete
 fi
 
 if [ "$SHOW_REPLACEMENTS" = "true" ]; then
-    docker container rm copy-test || true
-    docker container create --name copy-test "githooks:$IMAGE_TYPE"
-    docker cp "copy-test:/var/lib/githooks-tests/." "$TEST_DIR"
-    docker container rm copy-test
+    run_docker container rm copy-test || true
+    run_docker container create --name copy-test "githooks:$IMAGE_TYPE"
+    run_docker cp "copy-test:/var/lib/githooks-tests/." "$TEST_DIR"
+    run_docker container rm copy-test
     exit 0
 fi
 
 # Run the normal tests to add to the coverage
 # inside the current repo
 echo "Run unit tests..."
-docker run --rm \
+run_docker run --rm \
     -a stdout -a stderr \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "$TEST_DIR/cover":/cover \
@@ -161,10 +161,10 @@ echo "Run integration tests..."
 # Create a volume where all test setup and repositories go in.
 # Is mounted to `/tmp`.
 delete_container_volume gh-test-tmp &>/dev/null || true
-docker volume create gh-test-tmp
+run_docker volume create gh-test-tmp
 
 # Run coverage with normal install
-docker run --rm \
+run_docker run --rm \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
@@ -173,7 +173,7 @@ docker run --rm \
     ./exec-steps.sh "$@" || exit $?
 
 # Run coverage with centralized install
-docker run --rm \
+run_docker run --rm \
     -a stdout -a stderr \
     -v "gh-test-tmp:/tmp" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
@@ -184,7 +184,7 @@ docker run --rm \
 # Upload the produced coverage
 # inside the current repo
 CIRCLE_PULL_REQUEST="${CIRCLE_PULL_REQUEST:-}"
-docker run --rm \
+run_docker run --rm \
     -a stdout -a stderr \
     -v "$TEST_DIR/cover":/cover \
     -v "$TEST_DIR/..":/githooks \

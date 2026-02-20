@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	"github.com/gabyx/githooks/githooks/build"
@@ -33,7 +34,6 @@ func NewSettings(
 	logStats cm.ILogStats,
 	wrapPanicExitCode func(),
 	cleanUpX *cm.InterruptContext) ccm.CmdContext {
-
 	var promptx prompt.IContext
 	var err error
 	cwd, err := os.Getwd()
@@ -80,7 +80,6 @@ func addSubCommands(cmd *cobra.Command, ctx *ccm.CmdContext) {
 
 // MakeGithooksCtl returns the root command of the Githooks CLI executable.
 func MakeGithooksCtl(ctx *ccm.CmdContext) (rootCmd *cobra.Command) {
-
 	title := cm.FormatInfoF("Githooks CLI [version: '%s']", build.BuildVersion)
 	firstPrefix := " ▶ "
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())
@@ -115,7 +114,6 @@ func Run(
 	logStats cm.ILogStats,
 	wrapPanicExitCode func(),
 	cleanUpX *cm.InterruptContext) error {
-
 	ctx := NewSettings(log, logStats, wrapPanicExitCode, cleanUpX)
 	cmd := MakeGithooksCtl(&ctx)
 
@@ -123,7 +121,8 @@ func Run(
 
 	if err != nil {
 		// If its not a command exit, print the help.
-		if _, ok := err.(ccm.CmdExit); !ok {
+		var cmdExit ccm.CmdExit
+		if errors.As(err, &cmdExit) {
 			ctx.Log.AssertNoErrorF(err, "Command failed.")
 			_ = cmd.Help()
 		}

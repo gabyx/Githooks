@@ -8,7 +8,6 @@ import (
 )
 
 func TestGitConfigCache(t *testing.T) {
-
 	s := "system\x00a.a\nbla" +
 		"\x00global\x00a.a\na1" +
 		"\x00global\x00a.a\na2" +
@@ -29,12 +28,12 @@ func TestGitConfigCache(t *testing.T) {
 	global := c.scopes[3]
 	system := c.scopes[4]
 
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(command))
-	assert.Equal(t, 1, len(system))
-	assert.Equal(t, 2, len(global))
-	assert.Equal(t, 3, len(local))
-	assert.Equal(t, 1, len(worktree))
+	assert.NoError(t, err)
+	assert.Len(t, command, 1)
+	assert.Len(t, system, 1)
+	assert.Len(t, global, 2)
+	assert.Len(t, local, 3)
+	assert.Len(t, worktree, 1)
 
 	assert.Equal(t, "bla", system["a.a"].values[0])
 
@@ -59,7 +58,7 @@ func TestGitConfigCache(t *testing.T) {
 	c.Set("s.s", "upsi", LocalScope)
 	v, exists := c.GetAll("s.s", LocalScope)
 	assert.True(t, exists)
-	assert.Equal(t, 1, len(v))
+	assert.Len(t, v, 1)
 
 	// Add
 	c.Add("a.aa", "upsi", GlobalScope)
@@ -85,12 +84,12 @@ func TestGitConfigCache(t *testing.T) {
 
 	v, exists = c.GetAll("t.t", Traverse)
 	assert.True(t, exists)
-	assert.Equal(t, 2, len(v))
+	assert.Len(t, v, 2)
 	assert.Equal(t, []string{"a2", "a3"}, v)
 
 	kv := c.GetAllRegex(regexp.MustCompile("t.*"), Traverse)
 	assert.True(t, exists)
-	assert.Equal(t, 2, len(v))
+	assert.Len(t, v, 2)
 	assert.Equal(t, []KeyValue{
 		{Key: "t.t", Value: "a2"},
 		{Key: "t.t", Value: "a3"}}, kv)

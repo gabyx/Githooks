@@ -17,11 +17,18 @@
 ![OS](https://img.shields.io/badge/OS-linux,%20macOs,%20Windows-blue)
 
 A **platform-independent hooks manager** written in Go to support shared hook
-repositories and per-repository
-[Git hooks](https://git-scm.com/docs/githooks), checked into the working
-repository. This implementation is the Go port and successor of the
-[original implementation](https://github.com/rycus86/githooks) (see
-[Migration](#migrating)).
+repositories and per-repository [Git hooks](https://git-scm.com/docs/githooks),
+checked into the working repository. This implementation is the Go port and
+successor of the [original implementation](https://github.com/rycus86/githooks)
+(see [Migration](#migrating)).
+
+> [!IMPORTANT]
+>
+> This Git hook manager does **one job and only that**: running Git hooks. It
+> will **never** maintain your tools or support language toolchains and all
+> other sidestories you might have to make your hooks execute. There are
+> solutions to this like [Nix ❤️‍🔥](nixos.org) or container managers like `podman`
+> (or `docker` -> don't).
 
 To make this work, the installer creates run-wrappers for Githooks that are
 installed into the `.git/hooks` folders on request (by default). There's more
@@ -39,7 +46,7 @@ Also it searches for hooks in configured shared hook repositories.
 - **No** _it works on my machine_ by
   [running hooks over containers](#running-hooks-in-containers) and
   [automatic build/pull integration of container images](#pull-and-build-integration)
-  (optional).
+  (optional) _Hint: better run it over Nix DevShells and not containers_.
 - Command line interface.
 - Fast execution due to compiled executable. (even **2-3x faster from
   `v2.1.1`**)
@@ -50,81 +57,80 @@ Also it searches for hooks in configured shared hook repositories.
 - **Bonus:** [Platform-independent dialog tool](#dialog-tool) for user prompts
   inside your own hooks.
 
-<details>
-<summary><b>Table of Content (click to expand)</b></summary>
+## Table of Content
 
 <!--toc:start-->
 
-- [Layout and Options](#layout-and-options)
-- [Execution](#execution)
-  - [Staged Files](#staged-files)
-  - [Hook Run Configuration](#hook-run-configuration)
-  - [Parallel Execution](#parallel-execution)
-- [Supported Hooks](#supported-hooks)
-- [Git Large File Storage (Git LFS) Support](#git-large-file-storage-git-lfs-support)
-- [Shared Hook Repositories](#shared-hook-repositories)
-  - [Global Configuration](#global-configuration)
-  - [Local Configuration](#local-configuration)
-  - [Example Githooks Repositories](#example-githooks-repositories)
-  - [Repository Configuration](#repository-configuration)
-  - [Supported URLS](#supported-urls)
-  - [Skip Non-Existing Shared Hooks](#skip-non-existing-shared-hooks)
-- [Layout of Shared Hook Repositories](#layout-of-shared-hook-repositories)
-  - [Shared Repository Namespace](#shared-repository-namespace)
-- [Ignoring Hooks and Files](#ignoring-hooks-and-files)
-- [Trusting Hooks](#trusting-hooks)
-- [Disabling Githooks](#disabling-githooks)
-- [Environment Variables](#environment-variables)
-  - [Arguments to Shared Hooks](#arguments-to-shared-hooks)
-- [Log & Traces](#log-traces)
-- [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
-- [Running Hooks in Containers](#running-hooks-in-containers)
-  - [Podman Manager (rootless)](#podman-manager-rootless)
-  - [Docker Manager](#docker-manager)
-  - [Pull and Build Integration](#pull-and-build-integration)
-  - [Locate Githooks Container Images](#locate-githooks-container-images)
-- [Running Hooks/Scripts Manually](#running-hooksscripts-manually)
-- [User Prompts](#user-prompts)
-- [Installation](#installation)
-  - [Quick (Secure)](#quick-secure)
-  - [Package Manager `nix`](#package-manager-nix)
-  - [Procedure](#procedure)
-  - [Install Modes](#install-modes)
-  - [Install Mode - Manual](#install-mode-manual)
-  - [Install Mode - Centralized Hooks](#install-mode-centralized-hooks)
-  - [Install from different URL and Branch](#install-from-different-url-and-branch)
-  - [Use in CI](#use-in-ci)
-    - [Nested Containers](#nested-containers)
-  - [Gitlab Demo](#gitlab-demo)
-  - [No Installation](#no-installation)
-  - [Non-Interactive Installation](#non-interactive-installation)
-  - [Install on the Server](#install-on-the-server)
-    - [Setup for Bare Repositories](#setup-for-bare-repositories)
-  - [Global Hooks or No Global Hooks](#global-hooks-or-no-global-hooks)
-    - [Manual: Use Githooks Selectively](#manual-use-githooks-selectively)
-    - [Centralized: Use Githooks For All Repositories](#centralized-use-githooks-for-all-repositories)
-  - [Updates](#updates)
-    - [Automatic Update Checks](#automatic-update-checks)
-    - [Update Mechanics](#update-mechanics)
-- [Uninstalling](#uninstalling)
-- [YAML Specifications](#yaml-specifications)
-- [Migration](#migration)
-- [Dialog Tool](#dialog-tool)
-  - [Build From Source](#build-from-source)
-  - [Dependencies](#dependencies)
-- [Tests and Debugging](#tests-and-debugging)
-  - [Debugging in the Dev Container](#debugging-in-the-dev-container)
-  - [Todos](#todos)
-- [Changelog](#changelog)
-  - [Version v2.x.x](#version-v2xx)
-- [FAQ](#faq)
-- [Acknowledgements](#acknowledgements)
-- [Authors](#authors)
-- [Support & Donation](#support-donation)
-- [License](#license)
-<!--toc:end-->
-
-</details>
+- [Githooks](#githooks)
+  - [Table of Content](#table-of-content)
+  - [Layout and Options](#layout-and-options)
+  - [Execution](#execution)
+    - [Staged Files](#staged-files)
+    - [Hook Run Configuration](#hook-run-configuration)
+    - [Parallel Execution](#parallel-execution)
+  - [Supported Hooks](#supported-hooks)
+  - [Git Large File Storage (Git LFS) Support](#git-large-file-storage-git-lfs-support)
+  - [Shared Hook Repositories](#shared-hook-repositories)
+    - [Global Configuration](#global-configuration)
+    - [Local Configuration](#local-configuration)
+    - [Example Githooks Repositories](#example-githooks-repositories)
+    - [Repository Configuration](#repository-configuration)
+    - [Supported URLS](#supported-urls)
+    - [Skip Non-Existing Shared Hooks](#skip-non-existing-shared-hooks)
+  - [Layout of Shared Hook Repositories](#layout-of-shared-hook-repositories)
+    - [Shared Repository Namespace](#shared-repository-namespace)
+  - [Ignoring Hooks and Files](#ignoring-hooks-and-files)
+  - [Trusting Hooks](#trusting-hooks)
+  - [Disabling Githooks](#disabling-githooks)
+  - [Environment Variables](#environment-variables)
+    - [Arguments to Shared Hooks](#arguments-to-shared-hooks)
+  - [Log & Traces](#log-traces)
+  - [Installing or Removing Run-Wrappers](#installing-or-removing-run-wrappers)
+  - [Running Hooks in Containers](#running-hooks-in-containers)
+    - [Podman Manager (rootless)](#podman-manager-rootless)
+    - [Docker Manager](#docker-manager)
+    - [Pull and Build Integration](#pull-and-build-integration)
+    - [Locate Githooks Container Images](#locate-githooks-container-images)
+  - [Running Hooks/Scripts Manually](#running-hooksscripts-manually)
+  - [User Prompts](#user-prompts)
+  - [Installation](#installation)
+    - [Quick (Secure)](#quick-secure)
+    - [Package Manager `nix`](#package-manager-nix)
+    - [Procedure](#procedure)
+    - [Install Modes](#install-modes)
+    - [Install Mode - Manual](#install-mode-manual)
+    - [Install Mode - Centralized Hooks](#install-mode-centralized-hooks)
+    - [Install from different URL and Branch](#install-from-different-url-and-branch)
+    - [Use in CI](#use-in-ci)
+      - [Nested Containers](#nested-containers)
+    - [Gitlab Demo](#gitlab-demo)
+    - [No Installation](#no-installation)
+    - [Non-Interactive Installation](#non-interactive-installation)
+    - [Install on the Server](#install-on-the-server)
+      - [Setup for Bare Repositories](#setup-for-bare-repositories)
+    - [Global Hooks or No Global Hooks](#global-hooks-or-no-global-hooks)
+      - [Manual: Use Githooks Selectively](#manual-use-githooks-selectively)
+      - [Centralized: Use Githooks For All Repositories](#centralized-use-githooks-for-all-repositories)
+    - [Updates](#updates)
+      - [Automatic Update Checks](#automatic-update-checks)
+      - [Update Mechanics](#update-mechanics)
+  - [Uninstalling](#uninstalling)
+  - [YAML Specifications](#yaml-specifications)
+  - [Migration](#migration)
+  - [Dialog Tool](#dialog-tool)
+    - [Build From Source](#build-from-source)
+    - [Dependencies](#dependencies)
+  - [Tests and Debugging](#tests-and-debugging)
+    - [Debugging in the Dev Container](#debugging-in-the-dev-container)
+    - [Todos](#todos)
+  - [Changelog](#changelog)
+    - [Version v2.x.x](#version-v2xx)
+  - [FAQ](#faq)
+  - [Acknowledgements](#acknowledgements)
+  - [Authors](#authors)
+  - [Support & Donation](#support-donation)
+  - [License](#license)
+  <!--toc:end-->
 
 ## Layout and Options
 
@@ -315,8 +321,8 @@ You can inspect the computed batch name by running
 ## Supported Hooks
 
 The supported hooks are listed below. Refer to the
-[Git documentation](https://git-scm.com/docs/githooks) for information on
-what they do and what parameters they receive.
+[Git documentation](https://git-scm.com/docs/githooks) for information on what
+they do and what parameters they receive.
 
 It is receommended to use `--maintained-hooks` options during install
 ([1](#installation-mode-normal), [2](#installing-or-removing-run-wrappers)) to
@@ -450,9 +456,8 @@ you can do it any time by changing the global configuration variable.
 
 Supported URL for shared hooks are:
 
-- **All URLs [Git supports](https://git-scm.com/docs/git-clone#_git_urls)**
-  such as:
-
+- **All URLs [Git supports](https://git-scm.com/docs/git-clone#_git_urls)** such
+  as:
   - `ssh://github.com/shared/hooks-maven.git@mybranch` and also the short `scp`
     form `git@github.com:shared/hooks-maven.git`
   - `git://user@github.com/shared/hooks-python.git`
@@ -463,7 +468,6 @@ Supported URL for shared hooks are:
   treated the same as a local path to a bare repository, _see next point_.
 
 - **Local paths** to bare and non-bare repositories such as:
-
   - `/local/path/to/checkout` (gets used directly)
   - `/local/path/to/bare-repo.git@mybranch` (gets cloned internally)
 
@@ -928,7 +932,6 @@ dialog fallback is currently only enabled for the `runner`.
 Githooks distinguishes between _fatal_ and _non-fatal_ prompts.
 
 - A _fatal_ prompt will result in a complete abort if
-
   - The prompt could not be shown (terminal or GUI dialog).
   - The answer returned by the user is incorrect (terminal only) or the user
     canceled the GUI dialog.
@@ -997,16 +1000,16 @@ or directly into a Nix profile with
 nix profile install "github:gabyx/githooks?dir=nix&ref=v3.0.4"
 ```
 
-> [!NOTE] 
+> [!NOTE]
 >
 > You still need to run the installer to enable it on your system
 > `githooks-cli installer`
 
-> [!WARNING] 
+> [!WARNING]
 >
 > You should never install a major version upgrade as Githooks should be
 > uninstalled completely before. The uninstaller on any version however should
-> work backward-compatible.**
+> work backward-compatible.\*\*
 
 and then use it in your packages, e.g. here with home-manager by doing:
 
@@ -1033,7 +1036,6 @@ The installer will:
    `--update` is given the newest Githooks is downloaded and installed directly.
 
 1. Find the install mode relevant hooks directory `<hooksDir>`:
-
    - Use the directory given with `--hooks-dir <dir>` on the command line.
 
    - Use `git config --get githooks.pathForUseCoreHooksPath` if Githooks is
@@ -1041,7 +1043,6 @@ The installer will:
 
    - Use the following template directory if `--hooks-dir-use-template-dir` is
      given:
-
      1. Use `GIT_TEPMLATE_DIR` if set and add `/hooks`
      1. Use Git config value `init.templateDir` if set and add `/hooks`
      1. Use `<install-dir>/templates/hooks`.
@@ -1051,7 +1052,6 @@ The installer will:
      [`centralized`](#install-mode-centralized-hooks) install mode.
 
 1. Write all Githooks run-wrappers into the hooks directory `<hooksDir>` and
-
    - Set `core.hooksPath` for [`centralized`](#install-mode-centralized-hooks)
      install mode (`--centralized`).
 
@@ -1059,7 +1059,6 @@ The installer will:
 
 1. Offer to find existing Git repositories on the file system (disable with
    `--skip-install-into-existing`)
-
    1. Make them use Githooks by either setting `core.hooksPath` (or install
       run-wrappers if `<repo-git-dir>/hooks/githooks-contains-run-wrappers`
       exists).
@@ -1168,8 +1167,8 @@ hopefully downloaded) already or you can specify them by using
 `<type>` can either be `gitea` ( or `github` which is not needed since it can be
 auto-detected from the URL) and it will automatically download and **verify**
 the binaries over the implemented API. Credentials will be collected over
-[`git credential`](https://git-scm.com/docs/git-credential) to access the
-API. [@todo].
+[`git credential`](https://git-scm.com/docs/git-credential) to access the API.
+[@todo].
 
 ### Use in CI
 

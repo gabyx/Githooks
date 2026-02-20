@@ -11,7 +11,6 @@ The following changes are made:
 
 - Before, the namespace of a hook was simply prefixed by `<hookNamespace>/...`,
   e.g. examples were
-
   - `myhooks/pre-commit/format.sh` for a shared hook repo with
     `<hooksDir>/.namespace` containing `myhooks`.
   - `pre-commit/format.sh` for a repository hook in `<repoDir>/.githooks` where
@@ -19,7 +18,6 @@ The following changes are made:
 
   Now, new namespace paths (see documentation) are written with a explicit
   suffix `ns:` like:
-
   - `ns:myhooks/pre-commit/format.sh` for a shared hook repository with
     `myhooks` in `<hooksDir>/.namespace`.
   - `ns:gh-self/pre-commit/format.sh` for a repository hook in
@@ -34,7 +32,6 @@ The following changes are made:
   path of a hook, including the namespace itself. Now, these patterns are
   relative and are made absolute to the namespace of the current `<hooksDir>`,
   e.g. a pattern
-
   - `**/pre-commit/format.sh` in `.githooks/.ignore.yaml` will be the same as
     `ns:gh-self/**/pre-commit/format.sh` and a pattern
   - `**/batch*/format.sh` in `.githooks/pre-commit/.ignore.yaml` will be the

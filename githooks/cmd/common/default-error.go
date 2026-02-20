@@ -38,7 +38,11 @@ func PanicIfNotExactArgs(log cm.ILogContext, nArgs int) func(cmd *cobra.Command,
 }
 
 // PanicIfNotRangeArgs panics if `cmd` has not exact argument count between `[nMinArgs, nMaxArgs]`.
-func PanicIfNotRangeArgs(log cm.ILogContext, nMinArgs int, nMaxArgs int) func(cmd *cobra.Command, args []string) {
+func PanicIfNotRangeArgs(
+	log cm.ILogContext,
+	nMinArgs int,
+	nMaxArgs int,
+) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		if nMaxArgs < 0 {
 			nMaxArgs = math.MaxInt32

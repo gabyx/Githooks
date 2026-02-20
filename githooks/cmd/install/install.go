@@ -67,10 +67,9 @@ func runUninstallFromRepo(ctx *ccm.CmdContext, fullUninstall bool) {
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create LFS hooks cache.")
 
 	if inst.UninstallFromRepo(ctx.Log, gitDir, lfsHooksCache, fullUninstall) {
-
 		registeredGitDirs.Remove(gitDir)
-		err := registeredGitDirs.Store(ctx.InstallDir)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not store register file in '%s'.",
+		e := registeredGitDirs.Store(ctx.InstallDir)
+		ctx.Log.AssertNoErrorPanicF(e, "Could not store register file in '%s'.",
 			ctx.InstallDir)
 	}
 }
@@ -85,7 +84,6 @@ func runInstall(ctx *ccm.CmdContext, maintainedHooks []string, nonInteractive bo
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) []*cobra.Command {
-
 	var maintainedHooks *[]string
 	nonInteractive := false
 
@@ -99,7 +97,8 @@ into the current repository.`,
 		},
 	}
 
-	installCmd.Flags().BoolVar(&nonInteractive, "non-interactive", false, "Install non-interactively.")
+	installCmd.Flags().
+		BoolVar(&nonInteractive, "non-interactive", false, "Install non-interactively.")
 	maintainedHooks = installCmd.Flags().StringSlice(
 		"maintained-hooks", nil,
 		"A set of hook names which are maintained in this repository.\n"+

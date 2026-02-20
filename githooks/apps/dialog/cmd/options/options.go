@@ -16,7 +16,6 @@ import (
 )
 
 func handleResult(ctx *dcm.CmdContext, r *res.Options, err error, sep string) error {
-
 	if ctx.ReportAsJSON {
 		return dcm.HandleJSONResult(ctx, res.NewJSONResult(r), &r.General, err)
 	}
@@ -41,7 +40,6 @@ func handleResult(ctx *dcm.CmdContext, r *res.Options, err error, sep string) er
 
 // NewCmd creates the options command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
-
 	settings := set.Options{}
 	var timeout uint
 	var separator string
@@ -65,12 +63,14 @@ of a listbox.
         The output contains the index of that button on the first line.
 - '5' : The dialog was closed due to timeout.`,
 		Run: func(cmd *cobra.Command, args []string) {
-
 			var cancel func()
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 

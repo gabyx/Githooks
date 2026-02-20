@@ -4,9 +4,10 @@ package gui
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
@@ -17,7 +18,6 @@ import (
 
 // ShowFileSave shows a file-save dialog with `zenity`.
 func ShowFileSaveZenity(ctx context.Context, zenity string, s *set.FileSave) (res.File, error) {
-
 	args := []string{"--file-selection", "--save"}
 
 	if strs.IsNotEmpty(s.Title) {
@@ -25,11 +25,11 @@ func ShowFileSaveZenity(ctx context.Context, zenity string, s *set.FileSave) (re
 	}
 
 	if s.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(s.Width), 10))
 	}
 
 	if s.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", s.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(s.Height), 10))
 	}
 
 	switch s.WindowIcon {
@@ -65,8 +65,9 @@ func ShowFileSaveZenity(ctx context.Context, zenity string, s *set.FileSave) (re
 			nil
 	}
 
-	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+	exErr := &exec.ExitError{}
+	if errors.As(err, &exErr) {
+		if exErr.ExitCode() == 1 {
 			return res.File{General: res.CancelResult()}, nil
 		}
 	}
@@ -75,8 +76,11 @@ func ShowFileSaveZenity(ctx context.Context, zenity string, s *set.FileSave) (re
 }
 
 // ShowFileSelection shows a file-selection dialog.
-func ShowFileSelectionZenity(ctx context.Context, zenity string, s *set.FileSelection) (res.File, error) {
-
+func ShowFileSelectionZenity(
+	ctx context.Context,
+	zenity string,
+	s *set.FileSelection,
+) (res.File, error) {
 	args := []string{"--file-selection"}
 
 	if strs.IsNotEmpty(s.Title) {
@@ -84,11 +88,11 @@ func ShowFileSelectionZenity(ctx context.Context, zenity string, s *set.FileSele
 	}
 
 	if s.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", s.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(s.Width), 10))
 	}
 
 	if s.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", s.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(s.Height), 10))
 	}
 
 	switch s.WindowIcon {
@@ -118,7 +122,6 @@ func ShowFileSelectionZenity(ctx context.Context, zenity string, s *set.FileSele
 
 	out, err := gunix.RunZenity(ctx, zenity, args, "")
 	if err == nil {
-
 		// Any linebreak at the end will be trimmed away.
 		s := strings.TrimSuffix(string(out), "\n")
 
@@ -128,8 +131,9 @@ func ShowFileSelectionZenity(ctx context.Context, zenity string, s *set.FileSele
 			nil
 	}
 
-	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
+	exErr := &exec.ExitError{}
+	if errors.As(err, &exErr) {
+		if exErr.ExitCode() == 1 {
 			return res.File{General: res.CancelResult()}, nil
 		}
 	}

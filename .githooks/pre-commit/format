@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+set -e
+set -u
+
+if ! command -v treefmt >/dev/null 2>&1; then
+  echo "! Skipping treefmt - not in Nix shell" >&2
+  exit 0
+fi
+
+treefmt &&
+  echo "* treefmt is OK." >&2

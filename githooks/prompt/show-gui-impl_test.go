@@ -30,7 +30,13 @@ func TestCoverage(t *testing.T) {
 
 	ans, err = promptx.ShowOptions(
 		"Do you really wanna do it because its gonna get really messy and output will be convoluted?",
-		"(Yes/no/skip/skip all)", "Y/n/s/a", "Yes", "No", "Skip", "Skip All")
+		"(Yes/no/skip/skip all)",
+		"Y/n/s/a",
+		"Yes",
+		"No",
+		"Skip",
+		"Skip All",
+	)
 	log.InfoF("Answer: '%s'", ans)
 	log.AssertNoErrorF(err, "Error occurred.")
 

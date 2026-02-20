@@ -32,7 +32,9 @@ func (c *Checksums) IsValid() bool {
 	return c.File.IsValid() && c.FileSignature.IsValid()
 }
 
-var githooksBuildAssetRe = regexp.MustCompile(`githooks-.*-(?P<platform>\w+)\.(?P<arch>\w+)(?P<ext>\..*)`)
+var githooksBuildAssetRe = regexp.MustCompile(
+	`githooks-.*-(?P<platform>\w+)\.(?P<arch>\w+)(?P<ext>\..*)`,
+)
 
 const githooksChecksumFile = "githooks.checksums"
 const githooksChecksumSignatureFile = "githooks.checksums.sig"
@@ -40,7 +42,6 @@ const githooksChecksumSignatureFile = "githooks.checksums.sig"
 // getGithooksAsset returns the correct Githooks asset from the list `assets`.
 // The `target.Extension` is also provided.
 func getGithooksAsset(assets []Asset) (target Asset, checksums Checksums, err error) {
-
 	targetOs := runtime.GOOS
 	if targetOs == "darwin" {
 		targetOs = "macos"
@@ -62,12 +63,11 @@ func getGithooksAsset(assets []Asset) (target Asset, checksums Checksums, err er
 	if !checksums.IsValid() {
 		err = cm.ErrorF("Could not find any checksum and signature file.")
 
-		return
+		return target, checksums, err
 	}
 
 	// Search the asset
 	for i := range assets {
-
 		res := githooksBuildAssetRe.FindStringSubmatch(assets[i].FileName)
 
 		if len(res) == 0 {
@@ -82,12 +82,12 @@ func getGithooksAsset(assets []Asset) (target Asset, checksums Checksums, err er
 			target = assets[i]
 			target.Extension = ext
 
-			return
+			return target, checksums, err
 		}
 	}
 
 	err = cm.ErrorF("Could not find any asset for os: '%s' and arch: '%s'.",
 		targetOs, targetArch)
 
-	return
+	return target, checksums, err
 }

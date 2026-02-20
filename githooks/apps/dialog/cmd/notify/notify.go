@@ -10,7 +10,6 @@ import (
 )
 
 func handleResult(ctx *dcm.CmdContext, err error) error {
-
 	if err == nil {
 		ctx.ExitCode = 0
 	}
@@ -20,7 +19,6 @@ func handleResult(ctx *dcm.CmdContext, err error) error {
 
 // NewCmd creates the notify command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
-
 	settings := set.Notification{}
 
 	cmd := &cobra.Command{
@@ -34,7 +32,7 @@ func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
 - > '0' : An error occurred.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			err := gui.ShowNotification(nil, &settings) //nolint: staticcheck
+			err := gui.ShowNotification(nil, &settings) //nolint:staticcheck
 			err = handleResult(ctx, err)
 			ctx.Log.AssertNoErrorPanic(err, "Dialog failed")
 		}}

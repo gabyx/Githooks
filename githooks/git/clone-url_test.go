@@ -15,7 +15,6 @@ func parsableAsRemoteHelper(url string) bool {
 }
 
 func TestCloneURLs(t *testing.T) {
-
 	// Local URLS
 	url := "file://"
 	assert.True(t, IsCloneURLALocalURL(url), "Local url")
@@ -122,5 +121,4 @@ func TestCloneURLs(t *testing.T) {
 	assert.False(t, IsCloneURLANormalURL(url), "Normal url")
 	assert.False(t, parsableAsSCP(url), "Scp syntax")
 	assert.True(t, parsableAsRemoteHelper(url), "Remote helper syntax")
-
 }

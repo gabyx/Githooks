@@ -240,6 +240,6 @@ func (m *ListModel) ItemCount() int {
 	return len(m.options)
 }
 
-func (m *ListModel) Value(index int) interface{} {
+func (m *ListModel) Value(index int) any {
 	return m.options[index]
 }

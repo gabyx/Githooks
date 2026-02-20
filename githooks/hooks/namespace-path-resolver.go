@@ -19,13 +19,12 @@ func ResolveNamespacePaths(
 	installDir string,
 	repoDir string,
 	nsPaths []string) (res []QueryResult, foundAll bool, err error) {
-
 	res = make([]QueryResult, len(nsPaths))
 
 	for i := range nsPaths {
 		res[i].Namespace, res[i].NamespacePath, err = SplitNamespacePath(nsPaths[i])
 		if err != nil {
-			return
+			return res, foundAll, err
 		}
 	}
 
@@ -51,8 +50,8 @@ func ResolveNamespacePaths(
 		}
 
 		hooksDir := GetSharedGithooksDir(repo.RepositoryDir)
-		ns, err := GetHooksNamespace(hooksDir)
-		log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
+		ns, e := GetHooksNamespace(hooksDir)
+		log.AssertNoErrorPanicF(e, "Could not get hook namespace in '%s'", hooksDir)
 
 		for nI := range res {
 			p := &res[nI]
@@ -78,5 +77,5 @@ func ResolveNamespacePaths(
 
 	foundAll = found == len(res)
 
-	return
+	return res, foundAll, err
 }

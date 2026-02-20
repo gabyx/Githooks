@@ -26,7 +26,6 @@ func IsWritable(path string) bool {
 
 // MakeExecutable makes a file executable.
 func MakeExecutable(path string) (err error) {
-
 	stats, err := os.Stat(path)
 	if err != nil {
 		return

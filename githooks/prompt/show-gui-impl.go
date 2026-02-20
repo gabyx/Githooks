@@ -14,7 +14,6 @@ func showEntryDialog(
 	title string,
 	text string,
 	defaultAnswer string) (string, error) {
-
 	opts := settings.Entry{}
 	opts.Title = title
 	opts.Text = text
@@ -24,7 +23,7 @@ func showEntryDialog(
 	opts.Width = 400
 	opts.ForceTopMost = true // only for Windows this is crucial, such that it does not get ignored.
 
-	res, err := gui.ShowEntry(nil, &opts) // nolint
+	res, err := gui.ShowEntry(nil, &opts) //nolint
 
 	switch {
 	case err != nil:
@@ -47,7 +46,6 @@ func showOptionsDialog(
 	defaultOptionIdx int,
 	options []string,
 	longOptions []string) (string, error) {
-
 	opts := settings.Options{}
 	opts.Title = title
 	opts.Text = question
@@ -61,7 +59,7 @@ func showOptionsDialog(
 		opts.DefaultOptions = []uint{uint(defaultOptionIdx)}
 	}
 
-	res, err := gui.ShowOptions(nil, &opts) // nolint
+	res, err := gui.ShowOptions(nil, &opts) //nolint
 
 	switch {
 	case err != nil || res.IsCanceled():
@@ -86,7 +84,6 @@ func showPromptLoop(
 	runPrompt func() (string, error),
 	validator AnswerValidator,
 	canCancel bool) (string, error) {
-
 	var err error
 	var ans string
 
@@ -94,7 +91,6 @@ func showPromptLoop(
 	maxPrompts := p.maxTries
 
 	for nPrompts < maxPrompts {
-
 		ans, err = runPrompt()
 		nPrompts++
 
@@ -106,7 +102,6 @@ func showPromptLoop(
 			} else {
 				return defaultAnswer, err
 			}
-
 		} else if err != nil {
 			p.log.WarnF("Prompt failed: %s", err.Error())
 
@@ -151,7 +146,6 @@ func showMessageGUI(
 	title string,
 	message string,
 	asError bool) error {
-
 	opts := settings.Message{}
 	opts.Title = title
 	opts.Text = message
@@ -166,7 +160,7 @@ func showMessageGUI(
 	}
 	opts.Width = 400
 
-	_, err := gui.ShowMessage(nil, &opts) // nolint
+	_, err := gui.ShowMessage(nil, &opts) //nolint
 
 	return err
 }
@@ -180,12 +174,18 @@ func showOptionsGUI(
 	options []string,
 	longOptions []string,
 	validator AnswerValidator) (string, error) {
-
 	return showPromptLoop(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return showOptionsDialog(title, question, defaultAnswer, defaultOptionIdx, options, longOptions)
+			return showOptionsDialog(
+				title,
+				question,
+				defaultAnswer,
+				defaultOptionIdx,
+				options,
+				longOptions,
+			)
 		},
 		validator,
 		false)
@@ -198,7 +198,6 @@ func showEntryGUI(
 	defaultAnswer string,
 	validator AnswerValidator,
 	canCancel bool) (string, error) {
-
 	return showPromptLoop(
 		p,
 		defaultAnswer,

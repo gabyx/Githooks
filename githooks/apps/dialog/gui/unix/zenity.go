@@ -26,7 +26,12 @@ func GetZenityExecutable() (string, error) {
 }
 
 // RunZenity runs the a Zenity executable.
-func RunZenity(ctx context.Context, zenity string, args []string, workingDir string) (b []byte, err error) {
+func RunZenity(
+	ctx context.Context,
+	zenity string,
+	args []string,
+	workingDir string,
+) (b []byte, err error) {
 	var cmd *exec.Cmd
 	handleErr := func() {
 		if ctx != nil && ctx.Err() != nil {
@@ -36,7 +41,6 @@ func RunZenity(ctx context.Context, zenity string, args []string, workingDir str
 
 	if ctx != nil {
 		cmd = exec.CommandContext(ctx, zenity, args...)
-
 	} else {
 		cmd = exec.Command(zenity, args...)
 	}

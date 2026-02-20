@@ -15,22 +15,20 @@ import (
 )
 
 func handleResult(ctx *dcm.CmdContext, r *res.Entry, err error) error {
-
 	if ctx.ReportAsJSON {
 		return dcm.HandleJSONResult(ctx, res.NewJSONResult(r), &r.General, err)
 	}
 
 	return dcm.HandleGeneralResult(ctx, &r.General, err,
 		func() error {
-			_, err := os.Stdout.WriteString(r.Text + dcm.LineBreak)
+			_, e := os.Stdout.WriteString(r.Text + dcm.LineBreak)
 
-			return err
+			return e
 		}, nil, dcm.DefaultExtraButtonCallback(&r.General))
 }
 
 // NewCmd creates the entry command.
 func NewCmd(ctx *dcm.CmdContext) *cobra.Command {
-
 	settings := set.Entry{}
 	var timeout uint
 
@@ -48,12 +46,14 @@ Unix/Windows supports multiple extra buttons, MacOS does not.
 - '2' : The user pressed an extra button.
 		The output contains the index of that button.`,
 		Run: func(cmd *cobra.Command, args []string) {
-
 			var cancel func()
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 

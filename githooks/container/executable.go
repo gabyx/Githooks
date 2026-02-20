@@ -58,24 +58,25 @@ const dindMsg = "Note: If you are inside a container ALREADY and want\n" +
 	"   location on the host machine, e.g `~/.githooks/shared`.\n\n" +
 	"Check the Githooks manual for instructions on docker-in-docker."
 
-// GetExitCodeHelp gets help for any non-zero exit code if needed.
+// ResolveExitCode gets help for any non-zero exit code if needed.
 func (e *ContainerizedExecutable) ResolveExitCode(exitCode int) string {
-	if e.containerType == ContainerManagerTypeV.Docker {
+	switch e.containerType {
+	case ContainerManagerTypeV.Docker:
 		switch exitCode {
-		case 125: // nolint: mnd
+		case 125: //nolint:mnd
 			return "The docker daemon reported an error.\n" + dindMsg
-		case 126: // nolint: mnd
+		case 126: //nolint:mnd
 			return "Docker command could not be invoked (permission problem?)."
-		case 127: // nolint: mnd
+		case 127: //nolint:mnd
 			return "Command inside container could not be found."
 		}
-	} else if e.containerType == ContainerManagerTypeV.Podman {
+	case ContainerManagerTypeV.Podman:
 		switch exitCode {
-		case 125: // nolint: mnd
+		case 125: //nolint:mnd
 			return "The podman reported an error.\n" + dindMsg
-		case 126: // nolint: mnd
+		case 126: //nolint:mnd
 			return "Podman command could not be invoked (permission problem?)."
-		case 127: // nolint: mnd
+		case 127: //nolint:mnd
 			return "Command inside container could not be found."
 		}
 	}

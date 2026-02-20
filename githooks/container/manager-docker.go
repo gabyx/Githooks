@@ -53,12 +53,13 @@ func (m *ManagerDocker) ImageBuild(
 	context string,
 	stage string,
 	ref string) (string, error) {
-
 	cmd := []string{
 		"build",
 		"-f", dockerfile,
 		"-t", ref,
-		"--label", strs.Fmt("githooks-version=%v", build.GetBuildVersion().String())}
+		"--label", strs.Fmt("githooks-version=%v",
+			build.GetBuildVersion().String()), //nolint:typecheck // Might not be generated yet.
+	}
 
 	if strs.IsNotEmpty(stage) {
 		cmd = append(cmd, "--target", stage)
@@ -90,7 +91,6 @@ func (m *ManagerDocker) NewHookRunExec(
 	attachStdIn bool,
 	allocateTTY bool,
 ) (cm.IExecutable, error) {
-
 	cm.DebugAssert(filepath.IsAbs(workspaceDir), "Workspace dir must be an absolute path.")
 	cm.DebugAssert(filepath.IsAbs(workspaceHookDir), "Workspace hook dir must be an abs path.")
 
@@ -137,8 +137,12 @@ func (m *ManagerDocker) NewHookRunExec(
 		}
 
 		if filepath.IsAbs(cmd) {
-			return nil, cm.ErrorF("Command '%s' specified in '%s' must only contain relative paths "+
-				"for running containerized.", cmd, workspaceHookDir)
+			return nil, cm.ErrorF(
+				"Command '%s' specified in '%s' must only contain relative paths "+
+					"for running containerized.",
+				cmd,
+				workspaceHookDir,
+			)
 		}
 		cmd = path.Join(cmdBasePath, cmd)
 	}
@@ -172,15 +176,22 @@ func (m *ManagerDocker) NewHookRunExec(
 
 	// Mount the shared directory if set.
 	if m.runConfig.AutoMountShared && mountWSShared {
-		containerExec.ArgsPre = append(containerExec.ArgsPre,
+		containerExec.ArgsPre = append(
+			containerExec.ArgsPre,
 			"-v",
-			strs.Fmt("%v:%v:ro", mntWSSharedSrc, mntWSSharedDest)) // Set the mount for the shared directory.
+			strs.Fmt(
+				"%v:%v:ro",
+				mntWSSharedSrc,
+				mntWSSharedDest,
+			),
+		) // Set the mount for the shared directory.
 	}
 
 	// Add all additional arguments.
 	containerExec.ArgsPre = append(containerExec.ArgsPre, m.runConfig.Args...)
 
-	if m.mgrType == ContainerManagerTypeV.Docker {
+	switch m.mgrType {
+	case ContainerManagerTypeV.Docker:
 		if runtime.GOOS != cm.WindowsOsName &&
 			runtime.GOOS != "darwin" {
 			// On non win/mac, execute as the user/group from the host.
@@ -193,7 +204,7 @@ func (m *ManagerDocker) NewHookRunExec(
 				"--user",
 				strs.Fmt("%v:%v", m.uid, m.gid))
 		}
-	} else if m.mgrType == ContainerManagerTypeV.Podman {
+	case ContainerManagerTypeV.Podman:
 		// With rootless podman its much easier to make the volumes
 		// match the host user which launch this Githook.
 		containerExec.ArgsPre = append(containerExec.ArgsPre, "--userns=keep-id:uid=1000,gid=1000")
@@ -226,7 +237,6 @@ func newManagerDocker(
 	cmd string,
 	mgrType ContainerManagerType,
 	readMounts []ReadBindMount) (mgr *ManagerDocker, err error) {
-
 	var uid, gid string
 
 	if runtime.GOOS != cm.WindowsOsName && runtime.GOOS != "darwin" {
@@ -249,7 +259,10 @@ func newManagerDocker(
 	// Load the run config or default it.
 	mgr.runConfig, err = loadContainerRunConfig()
 	if err != nil {
-		err = cm.CombineErrors(err, cm.Error("Run config for containerized runs could not be loaded."))
+		err = cm.CombineErrors(
+			err,
+			cm.Error("Run config for containerized runs could not be loaded."),
+		)
 	}
 
 	// Add additional mounts.
