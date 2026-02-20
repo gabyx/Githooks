@@ -3,15 +3,15 @@ set -e
 set -u
 
 if ! command -v golangci-lint >/dev/null 2>&1; then
-  echo "! golangci-lint - not installed" >&2
+  echo "! golangci-lint - not in Nix shell" >&2
   exit 1
 fi
 
 cd githooks || exit 1
 
-if
-  CGO_ENABLED=0 golangci-lint run --config ../.golangci.yaml
-then
+if CGO_ENABLED=0 \
+  golangci-lint run --verbose \
+  --config ../.golangci.yaml; then
   echo "* golangci-lint OK" >&2
 else
   echo "! golangci-lint problems detected" >&2

@@ -49,12 +49,6 @@
             };
 
             programs.shellcheck.enable = true;
-            settings.formatter.shellcheck = {
-              options = [
-                "-e"
-                "SC1091"
-              ];
-            };
 
             # Nix.
             programs.nixfmt.enable = true;

@@ -57,7 +57,9 @@ func (m *ManagerDocker) ImageBuild(
 		"build",
 		"-f", dockerfile,
 		"-t", ref,
-		"--label", strs.Fmt("githooks-version=%v", build.GetBuildVersion().String())}
+		"--label", strs.Fmt("githooks-version=%v",
+			build.GetBuildVersion().String()), //nolint:typecheck // Might not be generated yet.
+	}
 
 	if strs.IsNotEmpty(stage) {
 		cmd = append(cmd, "--target", stage)
