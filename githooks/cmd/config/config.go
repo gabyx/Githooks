@@ -49,7 +49,12 @@ type SetOptions struct {
 }
 
 // AssertOptions  asserts that all set actions are exclusive etc.
-func (s *SetOptions) AssertOptions(log cm.ILogContext, optsMap *OptionsMapping, noValues bool, args []string) {
+func (s *SetOptions) AssertOptions(
+	log cm.ILogContext,
+	optsMap *OptionsMapping,
+	noValues bool,
+	args []string,
+) {
 	log.PanicIf(!s.Set && !s.Unset && !s.Reset && !s.Print, "You need to specify an option.")
 
 	log.PanicIfF(s.Print && (s.Reset || s.Unset || s.Set || len(args) != 0),
@@ -166,7 +171,13 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 
 		for i := range pairs {
 			key := strs.Fmt("'%s'", pairs[i].Key)
-			_, err = strs.FmtW(&sb, "\n%s "+keyFmt+" : '%s'", cm.ListItemLiteral, key, pairs[i].Value)
+			_, err = strs.FmtW(
+				&sb,
+				"\n%s "+keyFmt+" : '%s'",
+				cm.ListItemLiteral,
+				key,
+				pairs[i].Value,
+			)
 			cm.AssertNoErrorPanic(err, "Could not write message.")
 		}
 
@@ -697,7 +708,12 @@ Can be either global or local configuration, or both by default.`,
 	configCmd.AddCommand(listCmd)
 }
 
-func configDisableCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
+func configDisableCmd(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions,
+) {
 	disableCmd := &cobra.Command{
 		Use:   "disable [flags]",
 		Short: "Disables Githooks in the current repository or globally.",
@@ -714,8 +730,10 @@ LFS hooks and replaced previous hooks are still executed by Githooks.`,
 	optsPSR := createOptionMap(true, false, true)
 
 	configSetOptions(disableCmd, setOpts, &optsPSR, ctx.Log, 0, 0)
-	disableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
-	disableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
+	disableCmd.Flags().
+		BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
+	disableCmd.Flags().
+		BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, disableCmd))
 }
 
@@ -739,7 +757,8 @@ func configContainerizedHooksEnabledCmd(
 	optsPSR := createOptionMap(true, false, true)
 
 	configSetOptions(enableCmd, setOpts, &optsPSR, ctx.Log, 0, 0)
-	enableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
+	enableCmd.Flags().
+		BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
 	enableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, enableCmd))
 }
@@ -765,7 +784,8 @@ If unset 'docker' is used.`,
 	optsPSR := createOptionMap(true, false, true)
 
 	configSetOptions(enableCmd, setOpts, &optsPSR, ctx.Log, 1, 2) // nolint: mnd
-	enableCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
+	enableCmd.Flags().
+		BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration (default).")
 	enableCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration.")
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, enableCmd))
 }
@@ -877,7 +897,12 @@ Use 'git hooks update [--enable|--disable]' to change that setting.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, updateTimeCmd))
 }
 
-func configSharedCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
+func configSharedCmd(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions,
+) {
 	sharedCmd := &cobra.Command{
 		Use:   "shared [flags] [<git-url>...]",
 		Short: "Updates the list of local or global shared hook repositories.",
@@ -901,7 +926,8 @@ each containing a clone URL of a shared hook repository which gets added.`,
 	optsPSR.Set = "add"
 	optsPSR.SetDesc = "Adds given shared hook repositories '<git-url>'s."
 	sharedCmd.Flags().BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration.")
-	sharedCmd.Flags().BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration (default).")
+	sharedCmd.Flags().
+		BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration (default).")
 
 	configSetOptions(sharedCmd, setOpts, &optsPSR, ctx.Log, 1, -1)
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedCmd))
@@ -1060,7 +1086,12 @@ See 'git hooks config trust-all --help'.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, nonInteracticeRunner))
 }
 
-func configDetectedLFSCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
+func configDetectedLFSCmd(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions,
+) {
 	deleteDetectedLFSCmd := &cobra.Command{
 		Use:   "delete-detected-lfs-hooks [flags]",
 		Short: "Change the behavior for detected LFS hooks during install.",

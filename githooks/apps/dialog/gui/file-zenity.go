@@ -76,7 +76,11 @@ func ShowFileSaveZenity(ctx context.Context, zenity string, s *set.FileSave) (re
 }
 
 // ShowFileSelection shows a file-selection dialog.
-func ShowFileSelectionZenity(ctx context.Context, zenity string, s *set.FileSelection) (res.File, error) {
+func ShowFileSelectionZenity(
+	ctx context.Context,
+	zenity string,
+	s *set.FileSelection,
+) (res.File, error) {
 	args := []string{"--file-selection"}
 
 	if strs.IsNotEmpty(s.Title) {

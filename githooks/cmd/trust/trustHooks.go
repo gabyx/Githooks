@@ -85,7 +85,13 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 	repoHooksDir := hooks.GetGithooksDir(repoDir)
 	hookNames := hooks.ManagedHookNames
 
-	state, shared, hookNamespace := list.PrepareListHookState(ctx, repoDir, repoHooksDir, gitDirWorktree, hookNames)
+	state, shared, hookNamespace := list.PrepareListHookState(
+		ctx,
+		repoDir,
+		repoHooksDir,
+		gitDirWorktree,
+		hookNames,
+	)
 	allHooks := getAllHooks(ctx.Log, hookNames, repoDir, gitDir, repoHooksDir, shared, state)
 
 	patterns.MakeRelativePatternsAbsolute(hookNamespace, "")
@@ -129,7 +135,10 @@ by '--patterns' or '--paths'.` + "\n\n" +
 				count++
 			}
 
-			ctx.Log.PanicIfF(count == 0, "You need to provide at least one pattern or namespace path.")
+			ctx.Log.PanicIfF(
+				count == 0,
+				"You need to provide at least one pattern or namespace path.",
+			)
 		},
 
 		Run: func(cmd *cobra.Command, args []string) {

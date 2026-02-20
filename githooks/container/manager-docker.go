@@ -137,8 +137,12 @@ func (m *ManagerDocker) NewHookRunExec(
 		}
 
 		if filepath.IsAbs(cmd) {
-			return nil, cm.ErrorF("Command '%s' specified in '%s' must only contain relative paths "+
-				"for running containerized.", cmd, workspaceHookDir)
+			return nil, cm.ErrorF(
+				"Command '%s' specified in '%s' must only contain relative paths "+
+					"for running containerized.",
+				cmd,
+				workspaceHookDir,
+			)
 		}
 		cmd = path.Join(cmdBasePath, cmd)
 	}
@@ -172,9 +176,15 @@ func (m *ManagerDocker) NewHookRunExec(
 
 	// Mount the shared directory if set.
 	if m.runConfig.AutoMountShared && mountWSShared {
-		containerExec.ArgsPre = append(containerExec.ArgsPre,
+		containerExec.ArgsPre = append(
+			containerExec.ArgsPre,
 			"-v",
-			strs.Fmt("%v:%v:ro", mntWSSharedSrc, mntWSSharedDest)) // Set the mount for the shared directory.
+			strs.Fmt(
+				"%v:%v:ro",
+				mntWSSharedSrc,
+				mntWSSharedDest,
+			),
+		) // Set the mount for the shared directory.
 	}
 
 	// Add all additional arguments.
@@ -249,7 +259,10 @@ func newManagerDocker(
 	// Load the run config or default it.
 	mgr.runConfig, err = loadContainerRunConfig()
 	if err != nil {
-		err = cm.CombineErrors(err, cm.Error("Run config for containerized runs could not be loaded."))
+		err = cm.CombineErrors(
+			err,
+			cm.Error("Run config for containerized runs could not be loaded."),
+		)
 	}
 
 	// Add additional mounts.

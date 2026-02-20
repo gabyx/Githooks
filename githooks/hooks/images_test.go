@@ -76,7 +76,11 @@ func TestUpdateImages(t *testing.T) {
 	err = os.MkdirAll(path.Join(repo, ".githooks/docker/src"), cm.DefaultFileModeDirectory)
 	assert.NoError(t, err)
 
-	err = os.WriteFile(path.Join(repo, ".githooks/.namespace"), []byte("mynamespace"), cm.DefaultFileModeFile)
+	err = os.WriteFile(
+		path.Join(repo, ".githooks/.namespace"),
+		[]byte("mynamespace"),
+		cm.DefaultFileModeFile,
+	)
 	assert.NoError(t, err)
 
 	imageConfig := path.Join(repo, ".githooks/.images.yaml")
@@ -113,7 +117,11 @@ FROM stage1 as stage2
 RUN apk add bash
 `)
 
-	err = os.WriteFile(path.Join(repo, ".githooks/docker/Dockerfile"), content, cm.DefaultFileModeFile)
+	err = os.WriteFile(
+		path.Join(repo, ".githooks/docker/Dockerfile"),
+		content,
+		cm.DefaultFileModeFile,
+	)
 	assert.NoError(t, err)
 
 	log, err := cm.CreateLogContext(false, false)

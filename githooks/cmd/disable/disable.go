@@ -40,7 +40,12 @@ func RunDisable(ctx *ccm.CmdContext, reset bool, onlyPrint bool, global bool) {
 
 	if reset {
 		err := ctx.GitX.UnsetConfig(hooks.GitCKDisable, scope)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not unset '%s' Git config '%s'.", scope, hooks.GitCKDisable)
+		ctx.Log.AssertNoErrorPanicF(
+			err,
+			"Could not unset '%s' Git config '%s'.",
+			scope,
+			hooks.GitCKDisable,
+		)
 		ctx.Log.InfoF("Enabled Githooks %s.", fmt)
 	} else {
 		err := ctx.GitX.SetConfig(hooks.GitCKDisable, true, scope)

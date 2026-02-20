@@ -15,7 +15,11 @@ import (
 )
 
 // ShowMessage shows a message dialog with `zenity`.
-func ShowMessageZenity(ctx context.Context, zenity string, msg *set.Message) (r res.Message, err error) {
+func ShowMessageZenity(
+	ctx context.Context,
+	zenity string,
+	msg *set.Message,
+) (r res.Message, err error) {
 	msg.SetDefaultIcons()
 
 	var args []string
@@ -109,7 +113,9 @@ func ShowMessageZenity(ctx context.Context, zenity string, msg *set.Message) (r 
 		if exErr.ExitCode() == 1 {
 			// Handle extra buttons.
 			if len(out) > 0 {
-				return res.Message{General: getResultButtons(string(out), len(msg.ExtraButtons)+1)}, nil
+				return res.Message{
+					General: getResultButtons(string(out), len(msg.ExtraButtons)+1),
+				}, nil
 			}
 
 			return res.Message{General: res.CancelResult()}, nil

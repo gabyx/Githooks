@@ -41,7 +41,10 @@ func pickFolders(ctx context.Context, s *sets.FileSelection) (r res.File, err er
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	hr, _, _ := coInitializeEx.Call(0, 0x6) //nolint:mnd // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
+	hr, _, _ := coInitializeEx.Call(
+		0,
+		0x6,
+	) //nolint:mnd // COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE
 
 	if hr != 0x80010106 { // nolint: mnd // RPC_E_CHANGED_MODE
 		if int32(hr) < 0 {
@@ -273,7 +276,12 @@ func browseForFolder(ctx context.Context, s *sets.FileSelection) (r res.File, er
 	defer coTaskMemFree.Call(ptr) // nolint: errcheck
 
 	path := make([]uint16, maxPath)
-	success, _, _ := shGetPathFromIDListEx.Call(ptr, uintptr(unsafe.Pointer(&path[0])), uintptr(len(path)), 0)
+	success, _, _ := shGetPathFromIDListEx.Call(
+		ptr,
+		uintptr(unsafe.Pointer(&path[0])),
+		uintptr(len(path)),
+		0,
+	)
 	cm.AssertOrPanic(success == 1, "Could not get path by 'shGetPathFromIDListEx'")
 
 	return res.File{

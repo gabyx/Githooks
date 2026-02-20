@@ -53,7 +53,12 @@ func IsRepoTrusted(
 }
 
 // SetSkipUntrustedHooks sets the settings if the hook runner should fail on active non-trusted hooks.
-func SetSkipUntrustedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+func SetSkipUntrustedHooks(
+	gitx *git.Context,
+	enable bool,
+	reset bool,
+	scope git.ConfigScope,
+) error {
 	switch {
 	case reset:
 		return gitx.UnsetConfig(GitCKSkipUntrustedHooks, scope)
@@ -150,7 +155,11 @@ func (t *ChecksumStore) SyncChecksumAdd(checksums ...ChecksumResult) error {
 	for i := range checksums {
 		checksum := &checksums[i]
 
-		cm.DebugAssertF(len(checksum.SHA1) == 40, "Wrong SHA1 hash '%s'", checksum.SHA1) //nolint:mnd
+		cm.DebugAssertF(
+			len(checksum.SHA1) == 40,
+			"Wrong SHA1 hash '%s'",
+			checksum.SHA1,
+		) //nolint:mnd
 
 		dir := path.Join(t.checksumDir, checksum.SHA1[0:2])
 		err := os.MkdirAll(dir, cm.DefaultFileModeDirectory)

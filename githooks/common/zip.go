@@ -12,7 +12,11 @@ import (
 // ExtractZip will decompress a zip archive, moving all files and folders
 // within the zip file in `src` to an output directory `dest`.
 // Returns all file paths in the zip file.
-func ExtractZip(zipFile io.ReaderAt, zipFileSize int64, destDir string) (paths []string, err error) {
+func ExtractZip(
+	zipFile io.ReaderAt,
+	zipFileSize int64,
+	destDir string,
+) (paths []string, err error) {
 	r, err := zip.NewReader(zipFile, zipFileSize)
 	if err != nil {
 		return paths, err

@@ -19,7 +19,8 @@ One of ['info', 'warning', 'error', 'question'] (only Windows/Unix)`)
 func addFlagsGeneralButton(cmd *cobra.Command, s *set.GeneralButton) {
 	cmd.Flags().StringVar(&s.OkLabel, "ok-label", "", "Ok button label.")
 	cmd.Flags().StringVar(&s.CancelLabel, "cancel-label", "", "Cancel button label.")
-	cmd.Flags().BoolVar(&s.DefaultCancel, "default-cancel", false, "Set 'Cancel' as the default button.")
+	cmd.Flags().
+		BoolVar(&s.DefaultCancel, "default-cancel", false, "Set 'Cancel' as the default button.")
 
 	cmd.Flags().StringArrayVar(&s.ExtraButtons, "extra-button", nil, `Extra buttons labels.
 On macOS/Windows only one extra button is allowed.`)
@@ -37,11 +38,13 @@ func addFlagsGeneralFile(cmd *cobra.Command, s *set.GeneralFile) {
 	cmd.Flags().StringVar(&s.Filename, "filename", "", "Default filename in the dialog.")
 
 	a := fileFilterArgs{Filters: &s.FileFilters}
-	cmd.Flags().Var(&a, "file-filter", "Sets a filename filter ('<name> | <pattern> <pattern> ...').")
+	cmd.Flags().
+		Var(&a, "file-filter", "Sets a filename filter ('<name> | <pattern> <pattern> ...').")
 
 	cmd.Flags().BoolVar(&s.ShowHidden, "show-hidden", false, "Show hidden files.")
 
-	cmd.Flags().BoolVar(&s.OnlyDirectories, "directory", false, "Activate directory-only selection.")
+	cmd.Flags().
+		BoolVar(&s.OnlyDirectories, "directory", false, "Activate directory-only selection.")
 }
 
 // AddFlagsMessage adds flags to the message command.
@@ -85,8 +88,10 @@ func AddFlagsEntry(cmd *cobra.Command, s *set.Entry) {
 	cmd.Flags().Var(&a2, "icon", `Message icon (only macOS).
 One of ['info', 'warning', 'error', 'question']`)
 
-	cmd.Flags().StringVar(&s.DefaultEntry, "default-entry", "", "The default text in the entry field.")
-	cmd.Flags().BoolVar(&s.HideDefaultEntry, "hide-entry", false, "Hide the text in the entry field.")
+	cmd.Flags().
+		StringVar(&s.DefaultEntry, "default-entry", "", "The default text in the entry field.")
+	cmd.Flags().
+		BoolVar(&s.HideDefaultEntry, "hide-entry", false, "Hide the text in the entry field.")
 }
 
 // AddFlagsNotification adds flags to the notification command.

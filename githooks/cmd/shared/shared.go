@@ -32,9 +32,11 @@ func addSharedOpts(c *cobra.Command, opts *sharedOpts, withAll bool) *cobra.Comm
 	c.Flags().BoolVar(&opts.Shared, "shared", false,
 		strs.Fmt("Modify the shared hooks list '%s' (default).", hooks.GetRepoSharedFileRel()))
 
-	c.Flags().BoolVar(&opts.Local, "local", false, "Modify the shared hooks list in the local Git config.")
+	c.Flags().
+		BoolVar(&opts.Local, "local", false, "Modify the shared hooks list in the local Git config.")
 
-	c.Flags().BoolVar(&opts.Global, "global", false, "Modify the shared hooks list in the global Git config.")
+	c.Flags().
+		BoolVar(&opts.Global, "global", false, "Modify the shared hooks list in the global Git config.")
 
 	if withAll {
 		c.Flags().BoolVar(&opts.All, "all", false,
@@ -56,7 +58,12 @@ func runSharedAdd(ctx *ccm.CmdContext, opts *sharedOpts, remove bool, url string
 	case opts.Shared:
 		repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 		modified, err := hooks.ModifyRepoSharedHooks(repoDir, url, remove)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not %s shared hooks list '%s'.", t1, hooks.GetRepoSharedFileRel())
+		ctx.Log.AssertNoErrorPanicF(
+			err,
+			"Could not %s shared hooks list '%s'.",
+			t1,
+			hooks.GetRepoSharedFileRel(),
+		)
 		if modified {
 			ctx.Log.InfoF(t2+" shared hooks list '%s'.", url, hooks.GetRepoSharedFileRel())
 		} else {
@@ -90,7 +97,11 @@ func runSharedClear(ctx *ccm.CmdContext, opts *sharedOpts) {
 	if opts.Shared {
 		repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 		err := hooks.ClearRepoSharedHooks(repoDir)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not clear shared hook list %s'.", hooks.GetRepoSharedFileRel())
+		ctx.Log.AssertNoErrorPanicF(
+			err,
+			"Could not clear shared hook list %s'.",
+			hooks.GetRepoSharedFileRel(),
+		)
 		ctx.Log.InfoF("Cleared shared hook list '%s'.", hooks.GetRepoSharedFileRel())
 	}
 
@@ -153,7 +164,11 @@ func runSharedList(ctx *ccm.CmdContext, opts *sharedOpts) {
 	if opts.Shared {
 		repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 		shared, err := hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
-		ctx.Log.AssertNoErrorPanicF(err, "Could not load shared hook list '%s'.", hooks.GetRepoSharedFileRel())
+		ctx.Log.AssertNoErrorPanicF(
+			err,
+			"Could not load shared hook list '%s'.",
+			hooks.GetRepoSharedFileRel(),
+		)
 
 		ctx.Log.InfoF("Shared hook repositories in '%s':\n%s",
 			hooks.GetRepoSharedFileRel(), format(shared))
@@ -190,7 +205,13 @@ func runSharedUpdate(ctx *ccm.CmdContext) {
 	containerMgr, err := hooks.NewContainerManager(ctx.GitX, false, nil)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create container manager.")
 
-	updated, err := hooks.UpdateAllSharedHooks(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, containerMgr)
+	updated, err := hooks.UpdateAllSharedHooks(
+		ctx.Log,
+		ctx.GitX,
+		ctx.InstallDir,
+		repoDir,
+		containerMgr,
+	)
 	ctx.Log.ErrorIf(err != nil, "There have been errors while updating shared hooks")
 
 	ctx.Log.InfoF("Update '%v' shared repositories.", updated)
@@ -200,7 +221,13 @@ func runSharedRoot(ctx *ccm.CmdContext, nsPaths []string) (exitCode error) {
 	ctx.WrapPanicExitCode()
 	repoDir, _, _ := ccm.AssertRepoRoot(ctx)
 
-	results, foundAll, err := hooks.ResolveNamespacePaths(ctx.Log, ctx.GitX, ctx.InstallDir, repoDir, nsPaths)
+	results, foundAll, err := hooks.ResolveNamespacePaths(
+		ctx.Log,
+		ctx.GitX,
+		ctx.InstallDir,
+		repoDir,
+		nsPaths,
+	)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not resolve namespace paths")
 
 	for i := range results {

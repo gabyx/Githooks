@@ -17,7 +17,15 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string, alwaysBuild bool) {
 	ctx.Log.AssertNoErrorPanicF(err, "Could not create container manager.")
 
 	hooksDir := hooks.GetGithooksDir(repoDir)
-	err = hooks.UpdateImages(ctx.Log, hooksDir, repoDir, hooksDir, imagesFile, containerMgr, alwaysBuild)
+	err = hooks.UpdateImages(
+		ctx.Log,
+		hooksDir,
+		repoDir,
+		hooksDir,
+		imagesFile,
+		containerMgr,
+		alwaysBuild,
+	)
 	ctx.Log.AssertNoErrorF(err, "Could not build images in '%s'.", imagesFile)
 
 	if strs.IsNotEmpty(imagesFile) {
@@ -26,7 +34,11 @@ func runImagesUpdate(ctx *ccm.CmdContext, imagesFile string, alwaysBuild bool) {
 
 	// Cycle through all shared hooks an return the first with matching namespace.
 	allRepos, err := hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
-	ctx.Log.AssertNoErrorPanicF(err, "Could not load shared hook list '%s'.", hooks.GetRepoSharedFileRel())
+	ctx.Log.AssertNoErrorPanicF(
+		err,
+		"Could not load shared hook list '%s'.",
+		hooks.GetRepoSharedFileRel(),
+	)
 	local, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.LocalScope)
 	ctx.Log.AssertNoErrorPanicF(err, "Could not load local shared hook list.")
 	global, err := hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.GlobalScope)

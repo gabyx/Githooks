@@ -192,7 +192,11 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	}
 
 	cm.AssertNoErrorPanic(
-		vi.BindPFlag("skipInstallIntoExisting", cmd.PersistentFlags().Lookup("skip-install-into-existing")))
+		vi.BindPFlag(
+			"skipInstallIntoExisting",
+			cmd.PersistentFlags().Lookup("skip-install-into-existing"),
+		),
+	)
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("maintainedHooks", cmd.PersistentFlags().Lookup("maintained-hooks")))
 	cm.AssertNoErrorPanic(
@@ -216,11 +220,19 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("hooksDir", cmd.PersistentFlags().Lookup("hooks-dir")))
 	cm.AssertNoErrorPanic(
-		vi.BindPFlag("hooksDirUseTemplateDir", cmd.PersistentFlags().Lookup("hooks-dir-use-template-dir")))
+		vi.BindPFlag(
+			"hooksDirUseTemplateDir",
+			cmd.PersistentFlags().Lookup("hooks-dir-use-template-dir"),
+		),
+	)
 
 	if !cm.PackageManagerEnabled {
 		cm.AssertNoErrorPanic(
-			vi.BindPFlag("gitConfigNoAbsPath", cmd.PersistentFlags().Lookup("git-config-no-abs-path")))
+			vi.BindPFlag(
+				"gitConfigNoAbsPath",
+				cmd.PersistentFlags().Lookup("git-config-no-abs-path"),
+			),
+		)
 	}
 
 	setupMockFlags(cmd, vi)
@@ -479,7 +491,11 @@ func runInstallDispatched(
 	log.InfoF("Getting Githooks binaries at version '%s' ...", tag)
 
 	tempDir, err := os.MkdirTemp(args.InternalTempDir, "githooks-update-*")
-	log.AssertNoErrorPanicF(err, "Can not create temporary update dir in '%s'", args.InternalTempDir)
+	log.AssertNoErrorPanicF(
+		err,
+		"Can not create temporary update dir in '%s'",
+		args.InternalTempDir,
+	)
 
 	buildFromSrc := args.BuildFromSource ||
 		gitx.GetConfig(hooks.GitCKBuildFromSource, git.GlobalScope) == git.GitCVTrue
@@ -613,7 +629,8 @@ func setupInstallMode(
 		// Hooks directory given, use it.
 		hooksDir = givenHooksDir
 
-		log.PanicIfF(strs.IsNotEmpty(hooksDirFromTemplateDir) && hooksDir == hooksDirFromTemplateDir,
+		log.PanicIfF(
+			strs.IsNotEmpty(hooksDirFromTemplateDir) && hooksDir == hooksDirFromTemplateDir,
 			"The hooks directory given '%v' points to a used template directory by Git.\n"+
 				"When Githooks places run-wrappers in a template directory, Githooks will run\n"+
 				"suddenly in every new repository (template directory used).\n"+
@@ -750,7 +767,11 @@ func setDirectoryForInstallMode(
 		log.InfoF("%s '%s' to '%s'.", prefix, hooks.GitCKPathForUseCoreHooksPath, hooksDir)
 
 		if !dryRun {
-			err := gitx.SetConfig(hooks.GitCKInstallMode, install.InstallModeTypeV.Manual.Name(), git.GlobalScope)
+			err := gitx.SetConfig(
+				hooks.GitCKInstallMode,
+				install.InstallModeTypeV.Manual.Name(),
+				git.GlobalScope,
+			)
 			log.AssertNoErrorPanic(err, "Could not set Git config value.")
 
 			err = gitx.SetConfig(hooks.GitCKPathForUseCoreHooksPath, hooksDir, git.GlobalScope)
@@ -1158,7 +1179,11 @@ func thankYou(log cm.ILogContext) {
 		"Thanks!\n", hooks.GithooksWebpage)
 }
 
-func determineInstallMode(log cm.ILogContext, args *Arguments, gitx *git.Context) (bool, install.InstallModeType) {
+func determineInstallMode(
+	log cm.ILogContext,
+	args *Arguments,
+	gitx *git.Context,
+) (bool, install.InstallModeType) {
 	haveInstall, installedMode := install.GetInstallMode(gitx)
 
 	var installMode install.InstallModeType
@@ -1249,7 +1274,13 @@ func runInstaller(
 		uiSettings)
 
 	if updates.UpdateEnabled {
-		setupAutomaticUpdateChecks(log, gitx, args.NonInteractive, args.DryRun, uiSettings.PromptCtx)
+		setupAutomaticUpdateChecks(
+			log,
+			gitx,
+			args.NonInteractive,
+			args.DryRun,
+			uiSettings.PromptCtx,
+		)
 	}
 
 	if !args.SkipInstallIntoExisting &&
@@ -1378,7 +1409,11 @@ func runInstall(cmd *cobra.Command, ctx *ccm.CmdContext, vi *viper.Viper) error 
 		defer func() { _ = os.Remove(args.InternalTempDir) }()
 	}
 
-	log.InfoF("Githooks Installer [version: %s, packaged: %v]", build.BuildVersion, cm.PackageManagerEnabled)
+	log.InfoF(
+		"Githooks Installer [version: %s, packaged: %v]",
+		build.BuildVersion,
+		cm.PackageManagerEnabled,
+	)
 	dt := time.Now()
 	log.InfoF("Started at: %s", dt.String())
 

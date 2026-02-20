@@ -200,7 +200,10 @@ func InstallRunWrappersLink(
 	hooksDir string,
 	lfsHooksCache LFSHooksCache,
 ) error {
-	pathForUseCoreHooksPath, exists := gitx.LookupConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
+	pathForUseCoreHooksPath, exists := gitx.LookupConfig(
+		GitCKPathForUseCoreHooksPath,
+		git.GlobalScope,
+	)
 
 	if !exists || strs.IsEmpty(pathForUseCoreHooksPath) {
 		return cm.ErrorF(
@@ -254,7 +257,10 @@ func UninstallRunWrappersLink(
 		return
 	}
 
-	pathForUseCoreHooksPath, exists := gitx.LookupConfig(GitCKPathForUseCoreHooksPath, git.GlobalScope)
+	pathForUseCoreHooksPath, exists := gitx.LookupConfig(
+		GitCKPathForUseCoreHooksPath,
+		git.GlobalScope,
+	)
 
 	if !exists || strs.IsEmpty(pathForUseCoreHooksPath) {
 		return cm.ErrorF(
@@ -423,18 +429,25 @@ func reinstallLFSHooks(
 			file, e := os.ReadFile(src)
 			lfsContent := "  | " + strings.ReplaceAll(string(file), "\n", "\n  | ")
 
-			err = cm.CombineErrors(err, e, cm.ErrorF("Cannot install LFS hook at '%s' because it already exists\n"+
-				"and contains no 'git lfs' statement.\n"+
-				"Either delete the hook and rerun the command or incorporate the following\n"+
-				"content into the file '%s':\n"+
-				"%s", dest, dest, string(lfsContent)))
+			err = cm.CombineErrors(
+				err,
+				e,
+				cm.ErrorF("Cannot install LFS hook at '%s' because it already exists\n"+
+					"and contains no 'git lfs' statement.\n"+
+					"Either delete the hook and rerun the command or incorporate the following\n"+
+					"content into the file '%s':\n"+
+					"%s", dest, dest, string(lfsContent)),
+			)
 
 			continue
 		}
 
 		e := cm.CopyFileOrDirectory(src, dest)
 		if e != nil {
-			err = cm.CombineErrors(e, cm.ErrorF("Cannot move LFS hook from '%s' to '%s'.", src, dest))
+			err = cm.CombineErrors(
+				e,
+				cm.ErrorF("Cannot move LFS hook from '%s' to '%s'.", src, dest),
+			)
 
 			continue
 		}

@@ -30,7 +30,14 @@ func NewCtxAt(cwd string) *Context {
 // NewCtxSanitizedAt creates a git command execution context with
 // working dir `cwd` and sanitized environment.
 func NewCtxSanitizedAt(cwd string) *Context {
-	return &Context{cm.NewCommandCtxBuilder().SetBaseCmd("git").SetCwd(cwd).SetEnv(SanitizeEnv(os.Environ())).Build(), nil}
+	return &Context{
+		cm.NewCommandCtxBuilder().
+			SetBaseCmd("git").
+			SetCwd(cwd).
+			SetEnv(SanitizeEnv(os.Environ())).
+			Build(),
+		nil,
+	}
 }
 
 // NewCtx creates a git command execution context
@@ -109,7 +116,8 @@ func (c *Context) getConfigWithArgs(key string, scope ConfigScope, args ...strin
 	var err error
 
 	if scope != Traverse {
-		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), toConfigArg(scope), key)...)
+		out, err = c.Get(
+			append(append([]string{"config", "--includes"}, args...), toConfigArg(scope), key)...)
 	} else {
 		out, err = c.Get(append(append([]string{"config", "--includes"}, args...), key)...)
 	}

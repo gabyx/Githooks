@@ -98,7 +98,10 @@ func InstallIntoRepo(
 
 		if isBare {
 			// Filter out all non-relevant hooks for bare repositories.
-			hookNames = strs.Filter(hookNames, func(s string) bool { return strs.Includes(hooks.ManagedServerHookNames, s) })
+			hookNames = strs.Filter(
+				hookNames,
+				func(s string) bool { return strs.Includes(hooks.ManagedServerHookNames, s) },
+			)
 			// LFS hooks also do not need to be reinstalled
 			lfsHooksCache = nil
 		}
@@ -113,8 +116,12 @@ func InstallIntoRepo(
 		log.AssertNoErrorPanicF(e, "Could not install run-wrappers into '%s'.", hooksDir)
 
 		if nLFSHooks != 0 {
-			log.InfoF("Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks into '%s'.",
-				len(hookNames), nLFSHooks, hooksDir)
+			log.InfoF(
+				"Installed '%v' Githooks run-wrapper(s) and '%v' missing LFS hooks into '%s'.",
+				len(hookNames),
+				nLFSHooks,
+				hooksDir,
+			)
 		} else {
 			log.InfoF("Installed '%v' Githooks run-wrapper(s) into '%s'",
 				len(hookNames), hooksDir)

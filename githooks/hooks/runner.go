@@ -159,7 +159,9 @@ func GetHookRunCmd(
 	}
 }
 
-var reEnvVariable = regexp.MustCompile(`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s):([a-zA-Z.][a-zA-Z0-9_.]+)\}`)
+var reEnvVariable = regexp.MustCompile(
+	`(\\?)\$\{(!?)(env|git|git-l|git-g|git-s):([a-zA-Z.][a-zA-Z0-9_.]+)\}`,
+)
 
 func getVarSubstitution(
 	getEnv func(string) (string, bool),

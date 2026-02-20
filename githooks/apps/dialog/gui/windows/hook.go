@@ -55,7 +55,11 @@ func hookDialog(
 		if lparam.Message == wmInitDialog {
 
 			name := [8]uint16{}
-			getClassName.Call(lparam.Wnd, uintptr(unsafe.Pointer(&name)), uintptr(len(name))) //nolint:errcheck
+			getClassName.Call(
+				lparam.Wnd,
+				uintptr(unsafe.Pointer(&name)),
+				uintptr(len(name)),
+			) //nolint:errcheck
 
 			if syscall.UTF16ToString(name[:]) == "#32770" { // The class for a dialog box
 				var close bool
@@ -76,7 +80,12 @@ func hookDialog(
 			}
 		}
 
-		next, _, _ := callNextHookEx.Call(hook, uintptr(code), wparam, uintptr(unsafe.Pointer(lparam)))
+		next, _, _ := callNextHookEx.Call(
+			hook,
+			uintptr(code),
+			wparam,
+			uintptr(unsafe.Pointer(lparam)),
+		)
 
 		return next
 	}

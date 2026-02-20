@@ -11,7 +11,8 @@ import (
 func showOptionsWithButtons(
 	ctx context.Context,
 	opts *sets.Options,
-	showMessage func(context.Context, *sets.Message) (res.Message, error)) (r res.Options, err error) {
+	showMessage func(context.Context, *sets.Message) (res.Message, error),
+) (r res.Options, err error) {
 	// Wrap it through `ShowMessage`.
 	msg := sets.Message{
 		General:       opts.General,

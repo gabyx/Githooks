@@ -222,7 +222,10 @@ func (c *ConfigCache) GetAllRegex(key *regexp.Regexp, scope ConfigScope) (vals [
 func (c *ConfigCache) get(key string, scope ConfigScope) (val string, exists bool) {
 	if scope == Traverse {
 		for i := range len(c.scopes) {
-			val, exists = c.get(key, ConfigScope(i)) // This order is how Git config takes precedence over others.
+			val, exists = c.get(
+				key,
+				ConfigScope(i),
+			) // This order is how Git config takes precedence over others.
 			if exists {
 				break
 			}

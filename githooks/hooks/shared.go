@@ -293,7 +293,11 @@ func loadConfigSharedHooks(gitx *git.Context, scope git.ConfigScope) sharedHookC
 	return config
 }
 
-func saveConfigSharedHooks(gitx *git.Context, scope git.ConfigScope, config *sharedHookConfig) error {
+func saveConfigSharedHooks(
+	gitx *git.Context,
+	scope git.ConfigScope,
+	config *sharedHookConfig,
+) error {
 	// Remove all settings and add them back.
 	if err := gitx.UnsetConfig(GitCKShared, scope); err != nil {
 		return err
@@ -301,8 +305,14 @@ func saveConfigSharedHooks(gitx *git.Context, scope git.ConfigScope, config *sha
 
 	for _, url := range config.Urls {
 		if e := gitx.AddConfig(GitCKShared, url, scope); e != nil {
-			return cm.CombineErrors(e,
-				cm.ErrorF("Could not add back all %s shared repository urls: '%q'", git.ToConfigName(scope), config.Urls))
+			return cm.CombineErrors(
+				e,
+				cm.ErrorF(
+					"Could not add back all %s shared repository urls: '%q'",
+					git.ToConfigName(scope),
+					config.Urls,
+				),
+			)
 		}
 	}
 
@@ -392,7 +402,11 @@ func ModifyLocalSharedHooks(gitx *git.Context, url string, remove bool) (modifie
 }
 
 // ModifyGlobalSharedHooks adds/removes a URL to the global shared hooks.
-func ModifyGlobalSharedHooks(gitx *git.Context, url string, remove bool) (modified bool, err error) {
+func ModifyGlobalSharedHooks(
+	gitx *git.Context,
+	url string,
+	remove bool,
+) (modified bool, err error) {
 	config := loadConfigSharedHooks(gitx, git.GlobalScope)
 
 	if remove {
@@ -574,7 +588,12 @@ func (s *SharedRepo) IsCloneValid() bool {
 }
 
 // SetSkipNonExistingSharedHooks sets settings if the hook runner should skip on non existing hooks.
-func SetSkipNonExistingSharedHooks(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+func SetSkipNonExistingSharedHooks(
+	gitx *git.Context,
+	enable bool,
+	reset bool,
+	scope git.ConfigScope,
+) error {
 	switch {
 	case reset:
 		return gitx.UnsetConfig(GitCKSkipNonExistingSharedHooks, scope)
@@ -601,7 +620,12 @@ func SkipNonExistingSharedHooks(gitx *git.Context, scope git.ConfigScope) bool {
 
 // SetDisableSharedHooksUpdate sets settings if the hook runner should
 // disable automatic updates for shared hooks.
-func SetDisableSharedHooksUpdate(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+func SetDisableSharedHooksUpdate(
+	gitx *git.Context,
+	enable bool,
+	reset bool,
+	scope git.ConfigScope,
+) error {
 	switch {
 	case reset:
 		return gitx.UnsetConfig(GitCKAutoUpdateSharedHooksDisabled, scope)
@@ -611,7 +635,10 @@ func SetDisableSharedHooksUpdate(gitx *git.Context, enable bool, reset bool, sco
 }
 
 // IsSharedHooksUpdateDisabled checks if automatic updates for shared hooks is disabled.
-func IsSharedHooksUpdateDisabled(gitx *git.Context, scope git.ConfigScope) (disabled bool, isSet bool) {
+func IsSharedHooksUpdateDisabled(
+	gitx *git.Context,
+	scope git.ConfigScope,
+) (disabled bool, isSet bool) {
 	conf := gitx.GetConfig(GitCKAutoUpdateSharedHooksDisabled, scope)
 	switch {
 	case strs.IsEmpty(conf):

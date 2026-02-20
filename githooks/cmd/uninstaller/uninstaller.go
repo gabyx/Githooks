@@ -81,7 +81,11 @@ func defineArguments(cmd *cobra.Command, vi *viper.Viper) {
 	cm.AssertNoErrorPanic(
 		vi.BindPFlag("nonInteractive", cmd.PersistentFlags().Lookup("non-interactive")))
 	cm.AssertNoErrorPanic(
-		vi.BindPFlag("fullUninstallFromRepos", cmd.PersistentFlags().Lookup("full-uninstall-from-repos")))
+		vi.BindPFlag(
+			"fullUninstallFromRepos",
+			cmd.PersistentFlags().Lookup("full-uninstall-from-repos"),
+		),
+	)
 
 	setupMockFlags(cmd, vi)
 }

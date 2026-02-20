@@ -178,7 +178,14 @@ func showOptionsGUI(
 		p,
 		defaultAnswer,
 		func() (string, error) {
-			return showOptionsDialog(title, question, defaultAnswer, defaultOptionIdx, options, longOptions)
+			return showOptionsDialog(
+				title,
+				question,
+				defaultAnswer,
+				defaultOptionIdx,
+				options,
+				longOptions,
+			)
 		},
 		validator,
 		false)

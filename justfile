@@ -1,4 +1,5 @@
 set positional-arguments
+set dotenv-load := true
 set shell := ["bash", "-cue"]
 root_dir := justfile_directory()
 
@@ -65,7 +66,13 @@ coverage *args:
   cd "{{root_dir}}" && \
     COVERALLS_TOKEN=non-existing tests/test-coverage.sh "$@"
 
-# Lint everything.
+# Lint everything (local).
+[group("lint")]
+lint-local fix="false":
+  cd "{{root_dir}}" && \
+
+
+# Lint everything (dockerized).
 [group("lint")]
 lint fix="false":
   cd "{{root_dir}}" && \

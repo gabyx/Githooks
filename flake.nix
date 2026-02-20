@@ -41,6 +41,8 @@
 
             # Go
             programs.gofmt.enable = true;
+            programs.goimports.enable = true;
+            programs.golines.enable = true;
 
             # Shell.
             programs.shfmt = {
@@ -70,6 +72,7 @@
             go_1_24
             golines
             gotools
+            gopls
             golangci-lint
             golangci-lint-langserver
 
@@ -82,6 +85,10 @@
             # To make CGO and the debugger delve work.
             # https://nixos.wiki/wiki/Go#Using_cgo_on_NixOS
             hardeningDisable = [ "fortify" ];
+            inherit packages;
+          };
+
+          devShells.format = mkShell {
             inherit packages;
           };
         }

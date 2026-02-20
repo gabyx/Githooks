@@ -74,7 +74,10 @@ func UnwrapHookNames(hookNames []string) ([]string, error) {
 			}
 		default:
 			if !strs.Includes(ManagedHookNames, h) {
-				err = cm.CombineErrors(err, cm.ErrorF("Given value '%s' is not a supported hook name.", h))
+				err = cm.CombineErrors(
+					err,
+					cm.ErrorF("Given value '%s' is not a supported hook name.", h),
+				)
 
 				continue
 			}
@@ -132,8 +135,13 @@ func getMaintainedHooksFromString(maintainedHooks string) (hookNamesUnwrapped []
 			return
 		}
 
-		err = cm.CombineErrors(err,
-			cm.ErrorF("Maintained hooks '%s' is not valid. Fallback to all hooks.", maintainedHooks))
+		err = cm.CombineErrors(
+			err,
+			cm.ErrorF(
+				"Maintained hooks '%s' is not valid. Fallback to all hooks.",
+				maintainedHooks,
+			),
+		)
 	}
 
 	return ManagedHookNames, []string{"all"}, err

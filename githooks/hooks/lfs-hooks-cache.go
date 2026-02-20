@@ -128,7 +128,10 @@ func (l *lfsHooksCache) init() (err error) {
 		err = os.MkdirAll(l.repoDir, cm.DefaultFileModeDirectory)
 
 		if err != nil {
-			return cm.CombineErrors(err, cm.ErrorF("Could not create LFS hooks cache in '%s'.", l.repoDir))
+			return cm.CombineErrors(
+				err,
+				cm.ErrorF("Could not create LFS hooks cache in '%s'.", l.repoDir),
+			)
 		}
 
 		err = git.Init(l.repoDir, true)
@@ -157,7 +160,10 @@ func (l *lfsHooksCache) init() (err error) {
 
 	err = os.WriteFile(versionFile, []byte(l.requiredLFSVersion.String()), cm.DefaultFileModeFile)
 	if err != nil {
-		err = cm.CombineErrors(err, cm.ErrorF("Could not write version file in LFS hooks cache '%s'.", l.repoDir))
+		err = cm.CombineErrors(
+			err,
+			cm.ErrorF("Could not write version file in LFS hooks cache '%s'.", l.repoDir),
+		)
 	}
 
 	l.initialized = true

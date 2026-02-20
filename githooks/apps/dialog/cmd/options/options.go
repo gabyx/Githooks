@@ -67,7 +67,10 @@ of a listbox.
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 

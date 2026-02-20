@@ -83,10 +83,18 @@ func PrepareListHookState(
 	shared[hooks.SharedHookTypeV.Repo], err = hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
 	ctx.Log.AssertNoErrorF(err, "Could not load repository shared hooks.")
 
-	shared[hooks.SharedHookTypeV.Local], err = hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.LocalScope)
+	shared[hooks.SharedHookTypeV.Local], err = hooks.LoadConfigSharedHooks(
+		ctx.InstallDir,
+		ctx.GitX,
+		git.LocalScope,
+	)
 	ctx.Log.AssertNoErrorF(err, "Could not load local shared hooks.")
 
-	shared[hooks.SharedHookTypeV.Global], err = hooks.LoadConfigSharedHooks(ctx.InstallDir, ctx.GitX, git.GlobalScope)
+	shared[hooks.SharedHookTypeV.Global], err = hooks.LoadConfigSharedHooks(
+		ctx.InstallDir,
+		ctx.GitX,
+		git.GlobalScope,
+	)
 	ctx.Log.AssertNoErrorF(err, "Could not load global shared hooks.")
 
 	isTrusted, _, _ := hooks.IsRepoTrusted(ctx.GitX, repoDir)
@@ -150,8 +158,14 @@ func printPendingShared(ctx *ccm.CmdContext, shared hooks.SharedRepos) {
 
 	listPending := func(shRepos []hooks.SharedRepo, indent string, category string) {
 		for _, sh := range shRepos {
-			_, err := strs.FmtW(&sb,
-				"\n%s%s '%s' state: ['pending'], type: '%s'", indent, cm.ListItemLiteral, sh.OriginalURL, category)
+			_, err := strs.FmtW(
+				&sb,
+				"\n%s%s '%s' state: ['pending'], type: '%s'",
+				indent,
+				cm.ListItemLiteral,
+				sh.OriginalURL,
+				category,
+			)
 			cm.AssertNoErrorPanic(err, "Could not write pending hooks.")
 		}
 	}
@@ -451,8 +465,10 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 			}
 		}}
 
-	listCmd.Flags().BoolVar(&onlyListActiveHooks, "active", false, "Only list hooks with state 'active'.")
-	listCmd.Flags().BoolVar(&withBatchName, "batch-name", false, "Also show the parallel batch name.")
+	listCmd.Flags().
+		BoolVar(&onlyListActiveHooks, "active", false, "Only list hooks with state 'active'.")
+	listCmd.Flags().
+		BoolVar(&withBatchName, "batch-name", false, "Also show the parallel batch name.")
 
 	listCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
 		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)

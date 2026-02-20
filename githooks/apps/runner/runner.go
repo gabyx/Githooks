@@ -253,7 +253,11 @@ func assertRegistered(gitx *git.Context, installDir string) {
 	}
 }
 
-func showTrustRepoPrompt(gitx *git.Context, promptx prompt.IContext, repoPath string) (isTrusted bool) {
+func showTrustRepoPrompt(
+	gitx *git.Context,
+	promptx prompt.IContext,
+	repoPath string,
+) (isTrusted bool) {
 	question := strs.Fmt(
 		`This repository '%s'
 wants you to trust all current and future hooks without prompting.
@@ -367,7 +371,10 @@ func updateGithooks(settings *HookSettings, uiSettings *UISettings) {
 	log.AssertNoError(err, "Could not record update check time.")
 
 	var usePreRelease bool
-	if settings.GitX.GetConfig(hooks.GitCKUpdateCheckUsePrerelease, git.GlobalScope) == git.GitCVTrue {
+	if settings.GitX.GetConfig(
+		hooks.GitCKUpdateCheckUsePrerelease,
+		git.GlobalScope,
+	) == git.GitCVTrue {
 		usePreRelease = true
 	}
 
@@ -587,11 +594,18 @@ func updateLocalHookImages(settings *HookSettings) {
 	log.AssertNoErrorF(e, "Could not updating container images from '%s'.", settings.HookDir)
 }
 
-func updateSharedHooks(settings *HookSettings, sharedHooks []hooks.SharedRepo, sharedType hooks.SharedHookType) {
+func updateSharedHooks(
+	settings *HookSettings,
+	sharedHooks []hooks.SharedRepo,
+	sharedType hooks.SharedHookType,
+) {
 	disableUpdate, _ := hooks.IsSharedHooksUpdateDisabled(settings.GitX, git.Traverse)
 	updateTriggers := settings.GitX.GetConfigAll(hooks.GitCKSharedUpdateTriggers, git.Traverse)
 
-	updateOnCloneDoneFile := path.Join(settings.GitDirWorktree, ".githooks-shared-update-on-clone-done")
+	updateOnCloneDoneFile := path.Join(
+		settings.GitDirWorktree,
+		".githooks-shared-update-on-clone-done",
+	)
 	updateOnCloneDoneFileExists, _ := cm.IsPathExisting(updateOnCloneDoneFile)
 	updateOnCloneNeeded := settings.HookName == "post-checkout" && !updateOnCloneDoneFileExists
 
@@ -661,9 +675,17 @@ func getConfigSharedHooks(
 
 	switch sharedType {
 	case hooks.SharedHookTypeV.Local:
-		shared, err = hooks.LoadConfigSharedHooks(settings.InstallDir, settings.GitX, git.LocalScope)
+		shared, err = hooks.LoadConfigSharedHooks(
+			settings.InstallDir,
+			settings.GitX,
+			git.LocalScope,
+		)
 	case hooks.SharedHookTypeV.Global:
-		shared, err = hooks.LoadConfigSharedHooks(settings.InstallDir, settings.GitX, git.GlobalScope)
+		shared, err = hooks.LoadConfigSharedHooks(
+			settings.InstallDir,
+			settings.GitX,
+			git.GlobalScope,
+		)
 	default:
 		cm.DebugAssertF(false, "Wrong shared type '%v'", sharedType)
 	}
@@ -817,7 +839,11 @@ func getHooksIn(
 	var internalIgnores hooks.HookPatterns
 	if addInternalIgnores {
 		var e error
-		internalIgnores, e = hooks.GetHookPatternsHooksDir(hooksDir, []string{settings.HookName}, hookNamespace)
+		internalIgnores, e = hooks.GetHookPatternsHooksDir(
+			hooksDir,
+			[]string{settings.HookName},
+			hookNamespace,
+		)
 		log.AssertNoErrorPanicF(e, "Could not get worktree ignores in '%s'.", hooksDir)
 	}
 

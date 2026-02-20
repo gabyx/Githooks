@@ -32,7 +32,9 @@ func (c *Checksums) IsValid() bool {
 	return c.File.IsValid() && c.FileSignature.IsValid()
 }
 
-var githooksBuildAssetRe = regexp.MustCompile(`githooks-.*-(?P<platform>\w+)\.(?P<arch>\w+)(?P<ext>\..*)`)
+var githooksBuildAssetRe = regexp.MustCompile(
+	`githooks-.*-(?P<platform>\w+)\.(?P<arch>\w+)(?P<ext>\..*)`,
+)
 
 const githooksChecksumFile = "githooks.checksums"
 const githooksChecksumSignatureFile = "githooks.checksums.sig"

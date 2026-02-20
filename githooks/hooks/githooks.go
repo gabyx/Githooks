@@ -331,7 +331,12 @@ func IsRunnerNonInteractive(gitx *git.Context, scope git.ConfigScope) bool {
 }
 
 // SetRunnerNonInteractive sets the runner to non-interactive mode.
-func SetRunnerNonInteractive(gitx *git.Context, enable bool, reset bool, scope git.ConfigScope) error {
+func SetRunnerNonInteractive(
+	gitx *git.Context,
+	enable bool,
+	reset bool,
+	scope git.ConfigScope,
+) error {
 	switch {
 	case reset:
 		return gitx.UnsetConfig(GitCKRunnerIsNonInteractive, scope)

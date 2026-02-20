@@ -32,7 +32,11 @@ func getChoicesZenity(output string) (indices []uint) {
 }
 
 // ShowOptionsZenity shows a option dialog with `zenity`.
-func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (r res.Options, err error) {
+func ShowOptionsZenity(
+	ctx context.Context,
+	zenity string,
+	opts *sets.Options,
+) (r res.Options, err error) {
 	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at least one option specified.")
 

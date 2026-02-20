@@ -59,8 +59,15 @@ func downloadGithub(
 
 	target, checksums, err := getGithooksAsset(assets)
 	if err != nil {
-		return cm.CombineErrors(err,
-			cm.ErrorF("Could not select asset in repo '%s/%s' at tag '%s'.", owner, repo, versionTag))
+		return cm.CombineErrors(
+			err,
+			cm.ErrorF(
+				"Could not select asset in repo '%s/%s' at tag '%s'.",
+				owner,
+				repo,
+				versionTag,
+			),
+		)
 	}
 
 	log.InfoF("Verify signature of checksum file '%s'.", checksums.File.URL)

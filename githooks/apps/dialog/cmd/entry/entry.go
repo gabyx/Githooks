@@ -50,7 +50,10 @@ Unix/Windows supports multiple extra buttons, MacOS does not.
 			var cont context.Context
 
 			if timeout > 0 {
-				cont, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+				cont, cancel = context.WithTimeout(
+					context.Background(),
+					time.Duration(timeout)*time.Second,
+				)
 				defer cancel()
 			}
 

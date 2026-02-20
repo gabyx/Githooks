@@ -287,7 +287,13 @@ func Clone(repoPath string, url string, branch string, depth int) error {
 	out, e := ctx.GetCombined(args...)
 
 	if e != nil {
-		return cm.ErrorF("Cloning of '%s' [branch: '%s']\ninto '%s' failed:\n%s", url, branch, repoPath, out)
+		return cm.ErrorF(
+			"Cloning of '%s' [branch: '%s']\ninto '%s' failed:\n%s",
+			url,
+			branch,
+			repoPath,
+			out,
+		)
 	}
 
 	return nil
@@ -336,7 +342,9 @@ func (c *Context) GetCommitLog(commitSHA string, format string) (string, error) 
 
 // GetRemoteURLAndBranch reports the `remote`s `url` and
 // the current `branch` of HEAD.
-func (c *Context) GetRemoteURLAndBranch(remote string) (currentURL string, currentBranch string, err error) {
+func (c *Context) GetRemoteURLAndBranch(
+	remote string,
+) (currentURL string, currentBranch string, err error) {
 	currentURL = c.GetConfig("remote."+remote+".url", LocalScope)
 	currentBranch, err = c.Get("symbolic-ref", "-q", "--short", HEAD)
 
@@ -460,7 +468,11 @@ func GetVersionAt(gitx *Context, commitSHA string) (*version.Version, string, er
 }
 
 // GetVersion gets the semantic version and its tag.
-func GetVersion(gitx *Context, commitSHA string, matchPattern string) (v *version.Version, tag string, err error) {
+func GetVersion(
+	gitx *Context,
+	commitSHA string,
+	matchPattern string,
+) (v *version.Version, tag string, err error) {
 	if commitSHA == HEAD {
 		commitSHA, err = GetCommitSHA(gitx, HEAD)
 		if err != nil {

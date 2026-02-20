@@ -112,8 +112,10 @@ after a successful commit event.`,
 		"Always accepts a new update (non-interactive, all versions).")
 	updateCmd.Flags().BoolVar(&usePreRelease, "use-pre-release", false,
 		"Also discover pre-release versions when updating.")
-	updateCmd.Flags().BoolVar(&setOpts.Set, "enable-check", false, "Enable daily Githooks update checks.")
-	updateCmd.Flags().BoolVar(&setOpts.Unset, "disable-check", false, "Disable daily Githooks update checks.")
+	updateCmd.Flags().
+		BoolVar(&setOpts.Set, "enable-check", false, "Enable daily Githooks update checks.")
+	updateCmd.Flags().
+		BoolVar(&setOpts.Unset, "disable-check", false, "Disable daily Githooks update checks.")
 
 	updateCmd.PersistentPreRun = func(_ *cobra.Command, _ []string) {
 		ccm.CheckGithooksSetup(ctx.Log, ctx.GitX)

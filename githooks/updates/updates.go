@@ -76,7 +76,8 @@ func getNewUpdateCommit(
 	gitx *git.Context,
 	firstSHA string,
 	lastSHA string,
-	usePreRelease bool) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
+	usePreRelease bool,
+) (commitF string, tagF string, versionF *version.Version, infoF []string, err error) {
 	// Get all commits in (firstSHA, lastSHA]
 	commits, err := gitx.GetCommits(firstSHA, lastSHA)
 	if err != nil {
@@ -303,7 +304,10 @@ func FetchUpdates(
 }
 
 // GetStatus returns the status of the release clone.
-func GetStatus(cloneDir string, checkRemote, skipPrerelease bool) (status ReleaseStatus, err error) {
+func GetStatus(
+	cloneDir string,
+	checkRemote, skipPrerelease bool,
+) (status ReleaseStatus, err error) {
 	gitx := git.NewCtxSanitizedAt(cloneDir)
 
 	var url, branch string
@@ -478,7 +482,16 @@ func RunUpdate(
 	usePreRelease bool,
 	run func() error) (updateAvailable bool, accepted bool, err error) {
 	cloneDir := hooks.GetReleaseCloneDir(installDir)
-	status, err := FetchUpdates(cloneDir, "", "", build.BuildTag, true, ErrorOnWrongRemote, usePreRelease, true)
+	status, err := FetchUpdates(
+		cloneDir,
+		"",
+		"",
+		build.BuildTag,
+		true,
+		ErrorOnWrongRemote,
+		usePreRelease,
+		true,
+	)
 	if err != nil {
 		err = cm.CombineErrors(cm.Error("Could not fetch updates."), err)
 
@@ -531,7 +544,10 @@ const (
 )
 
 // FormatUpdateText formats a default update text for updates.
-func FormatUpdateText(status *ReleaseStatus, withUpdateHint bool) (versionText string, isMajorUpdate bool) {
+func FormatUpdateText(
+	status *ReleaseStatus,
+	withUpdateHint bool,
+) (versionText string, isMajorUpdate bool) {
 	if !status.IsUpdateAvailable {
 		return strs.Fmt("Githooks is at the latest version '%s'.", build.BuildTag), false
 	}

@@ -97,7 +97,8 @@ into the current repository.`,
 		},
 	}
 
-	installCmd.Flags().BoolVar(&nonInteractive, "non-interactive", false, "Install non-interactively.")
+	installCmd.Flags().
+		BoolVar(&nonInteractive, "non-interactive", false, "Install non-interactively.")
 	maintainedHooks = installCmd.Flags().StringSlice(
 		"maintained-hooks", nil,
 		"A set of hook names which are maintained in this repository.\n"+

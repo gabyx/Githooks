@@ -150,7 +150,9 @@ func (h *HookPatterns) MakeRelativePatternsAbsolute(hookNamespace string, rootPa
 
 			if !strings.HasPrefix(strs[i][startIdx:], NamespacePrefix) {
 				// patterns like "**/*/pre-commit/*"
-				strs[i] = invertPref + path.Clean(path.Join(NamespacePrefix+hookNamespace, rootPath, strs[i][startIdx:]))
+				strs[i] = invertPref + path.Clean(
+					path.Join(NamespacePrefix+hookNamespace, rootPath, strs[i][startIdx:]),
+				)
 			} else if strings.HasPrefix(strs[i][startIdx:], NamespacePrefix+NamespaceRepositoryHook) {
 				// "ns:gh-self..." prefixes are directly replaced by the current namespace.
 				strs[i] = invertPref + NamespacePrefix +

@@ -16,7 +16,12 @@ type RegisterRepos struct {
 }
 
 // RegisterRepo registers the Git directory in the install directory.
-func RegisterRepo(absGitDir string, installDir string, filterExisting bool, filterGitDirs bool) error {
+func RegisterRepo(
+	absGitDir string,
+	installDir string,
+	filterExisting bool,
+	filterGitDirs bool,
+) error {
 	cm.DebugAssertF(filepath.IsAbs(absGitDir),
 		"Not an absolute Git dir '%s'", absGitDir)
 
@@ -46,7 +51,11 @@ func UnmarkRepoRegistered(gitx *git.Context) error {
 // Load gets the registered repos loaded from the register file in the
 // install folder.
 // We ensured during load, that only existing Git directories are listed.
-func (r *RegisterRepos) Load(installDir string, filterExisting bool, filterGitDirs bool) (err error) {
+func (r *RegisterRepos) Load(
+	installDir string,
+	filterExisting bool,
+	filterGitDirs bool,
+) (err error) {
 	file := GetRegisterFile(installDir)
 
 	if cm.IsFile(file) {
