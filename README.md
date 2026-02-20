@@ -206,7 +206,15 @@ according to `git diff --cached --diff-filter=ACMR --name-only`. File paths are
 separated by a newline `\n`. If you want to iterate in a shell script over them,
 and expect spaces in paths, you might want to set the `IFS` like this:
 
-```shell
+```bash
+#!/bin/bash
+readarray -t files < <(echo "$STAGED_FILES")
+printf "- %s\n" "${files[@]}"
+```
+
+or
+
+```bash
 IFS="
 "
 for file in ${STAGED_FILES}; do
@@ -221,14 +229,21 @@ To enable the `STAGED_FILES_FILE` variable which contains the path to the file
 containing the paths to all staged files (separated by null-chars `\0`, e.g.
 `<path>\0<path>\0`) use
 
-```shell
+```bash
 git config githooks.exportStagedFilesAsFile true
 ```
 
 and read this file in `bash` with something like:
 
-```shell
+```bash
 #!/bin/bash
+readarray -d '' -t files < <(cat "$STAGED_FILES_FILE")
+printf "- %s\n" "${files[@]}"
+```
+
+or
+
+```bash
 while read -rd $'\\0' file; do
     echo "$file"
 done < "$STAGED_FILES_FILE"
@@ -405,7 +420,7 @@ Below are example values for these setting.
 
 ### Global Configuration
 
-```shell
+```bash
 $ git config --global --get-all githooks.shared # shared hooks in global config (for all repositories)
 https://github.com/shared/hooks-python.git
 git@github.com:shared/repo.git@mybranch
@@ -413,7 +428,7 @@ git@github.com:shared/repo.git@mybranch
 
 ### Local Configuration
 
-```shell
+```bash
 $ cd myrepo
 $ git config --local --get-all githooks.shared # shared hooks in local config (for specific repository)
 ssh://user@github.com/shared/special-hooks.git@v3.3.3
@@ -582,7 +597,7 @@ against these _namespace paths_.
 
 Disabling works like:
 
-```shell
+```bash
 # Disable certain hooks by a pattern in this repository:
 # User ignore pattern stored in `.git/.githooks.ignore.yaml`:
 $ git hooks ignore add --pattern "pre-commit/**" # Store: `.git/.githooks.ignore.yaml`:
@@ -648,7 +663,7 @@ You can also trust individual hooks by using
 
 To disable running any Githooks locally or globally, use the following:
 
-```shell
+```bash
 # Disable Githooks completely for this repository:
 $ git hooks disable # Use --reset to undo.
 # or
@@ -709,7 +724,7 @@ envs:
 You can see how the Githooks `runner` is been called by setting the environment
 variable `GITHOOKS_RUNNER_TRACE` to a non empty value.
 
-```shell
+```bash
 GITHOOKS_RUNNER_TRACE=1 git <command> ...
 ```
 
@@ -723,7 +738,7 @@ Githooks-internal Git configuration variables.
 
 To install run-wrappers for only selective hooks, use `--maintained-hooks`, e.g.
 
-```shell
+```bash
 cd repository
 git hook install \
     --maintained-hooks "!all, pre-commit, pre-merge-commit, prepare-commit-msg, commit-msg, post-commit" \
@@ -743,7 +758,7 @@ on my machine!"_
 To enable containerized hook runs set the Git config variable either locally or
 globally with
 
-```shell
+```bash
 git hooks config enable-containerized-hooks [--global] --set true
 ```
 
@@ -751,7 +766,7 @@ or use the environment variable `GITHOOKS_CONTAINERIZED_HOOKS_ENABLED=true`.
 
 Optionally set the container manager (default is `docker`) like
 
-```shell
+```bash
 git hooks config container-manager-types [--global] --set "podman,docker"
 ```
 
@@ -853,7 +868,7 @@ This file will be acted upon when shared hooks are updated, e.g.
 
 You can trigger the image pull/build procedure by running
 
-```shell
+```bash
 git hooks images update [--config ...]
 ```
 
@@ -879,13 +894,13 @@ repository root where this `.images.yaml` is located.
 All built images are automatically labeled with `githooks-version` to make them
 easy to retrieve, e.g.
 
-```shell
+```bash
 docker images --filter label=githooks-version
 ```
 
 or to easily delete all of them by
 
-```shell
+```bash
 docker rmi $(docker images -f "label=githooks-version" -q)
 ```
 
@@ -906,7 +921,7 @@ For example execute the following
 [add-on 'format-all' script in this shared repository](https://github.com/gabyx/Githooks-Docs/blob/main/githooks/scripts/format-docs-all.yaml)
 with:
 
-```shell
+```bash
 git hooks exec --containerized \
   ns:githooks-docs/scripts/format-docs-all.yaml -- \
   --force \
@@ -967,7 +982,7 @@ launch the installer.
 
 **Note:** All downloaded files are checksum & signature checked.
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash
 ```
 
@@ -1104,7 +1119,7 @@ available options. Some of them are described below:
 Its advised to only install Githooks for a selection of the supported hooks by
 using `--maintained-hooks` as
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --maintained-hooks "!all, pre-commit, pre-merge-commit, prepare-commit-msg, commit-msg, post-commit" \
     --maintained-hooks "pre-rebase, post-checkout, post-merge, pre-push"
@@ -1117,7 +1132,7 @@ Git LFS hooks will always be placed if necessary.
 If you want, you can try out what the script would do first, without changing
 anything by using:
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --dry-run
 ```
@@ -1126,7 +1141,7 @@ Optionally, you can also pass the hooks directory to which you want to install
 the Githooks run-wrappers by appending `--hook-dir <path>` to the command above,
 for example:
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --hooks-dir /home/public/myhooks
 ```
@@ -1137,7 +1152,7 @@ You have the option to install Githooks centralized which will use the
 run-wrappers globally by setting the global `core.hooksPath` additionally. For
 this, run the command below.
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --centralized
 ```
@@ -1148,7 +1163,7 @@ If you want to install from another Git repository (e.g. from your own or your
 companies fork), you can specify the repository clone url as well as the branch
 name (default: `main`) when installing with:
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --clone-url "https://server.com/my-githooks-fork.git" \
     --clone-branch "release"
@@ -1183,7 +1198,7 @@ There are generally two scenarios how you would use Githooks in CI.:
 1. Run functionality in hook repositories (local and shared repos): This can be
    done by using `git hooks exec --containerized ...`. The following
 
-   ```shell
+   ```bash
    git hooks exec --containerized \
       ns:githooks-shell/scripts/check-shell-all.yaml -- --force --dir "."
    ```
@@ -1297,7 +1312,7 @@ format:
 
 where `just format` will call the following function:
 
-```shell
+```bash
 function ci_setup_githooks() {
     mkdir -p "$GITHOOKS_INSTALL_PREFIX"
 
@@ -1315,7 +1330,7 @@ function ci_setup_githooks() {
 which then enables you to call side-car scripts in the hook repository, e.g. as
 demonstrated which will run over containers the same as in non-CI use cases:
 
-```shell
+```bash
 function run_format_shared_hooks() {
     printInfo "Run all formats scripts in shared hook repositories."
     git hooks exec --containerized \
@@ -1340,7 +1355,7 @@ with Go by running `githooks/scripts/build.sh --prod`. You can then use the
 hooks by setting `core.hooksPath` (in any suitable Git config) to the checked in
 run-wrappers in `<repoPath>/hooks` like so:
 
-```shell
+```bash
 git clone https://github.com/gabyx/githooks.git githooks
 cd githooks
 githooksRepo=$(pwd)
@@ -1349,13 +1364,13 @@ scripts/build.sh
 
 Then, to globally enable them for every repo:
 
-```shell
+```bash
 git config --global core.hooksPath "$gihooksRepo/hooks"
 ```
 
 or locally enable them for a single repo only:
 
-```shell
+```bash
 cd repo
 git config --local core.hooksPath "$githooksRepo/hooks"
 ```
@@ -1371,7 +1386,7 @@ checks.
 The global install prefix defaults to `${HOME}` but can be changed by using the
 options `--prefix <installPrefix>`:
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --non-interactive [--prefix <installPrefix>]
 ```
@@ -1380,7 +1395,7 @@ It's possible to specify which template directory should be used, by passing the
 `--template-dir <dir>` parameter, where `<dir>` is the directory where you wish
 the templates to be installed.
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --template-dir "/home/public/.githooks-templates"
 ```
@@ -1393,7 +1408,7 @@ directory.
 On a server infrastructure where only _bare_ repositories are maintained, it is
 best to maintain only server hooks. This can be achieved by installing with:
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- -- \
     --maintained-hooks "server"
 ```
@@ -1418,7 +1433,7 @@ which get deployed with `git init` or `git clone` automatically. See also the
 If you want to use Githooks with bare repositories on a server, you should setup
 the following to ensure smooth operations (see [user prompts](#user-prompts)):
 
-```shell
+```bash
 cd bareRepo
 # Install Githooks into this bare repository
 git hooks install
@@ -1447,7 +1462,7 @@ location (`~/.githooks/templates/` by default).
 
 To make Githooks available inside a repository, you must install it with
 
-```shell
+```bash
 cd repo
 git hooks install
 ```
@@ -1488,7 +1503,7 @@ worktree**.
 
 You can update the Githooks any time by running
 
-```shell
+```bash
 git hooks update
 ```
 
@@ -1510,7 +1525,7 @@ this was automatic which was removed).
 Automatic updates can be enabled or disabled at any time by running the command
 below.
 
-```shell
+```bash
 # enable with:
 $ git hooks update --enable-check # `Config: githooks.updateCheckEnabled`
 
@@ -1549,13 +1564,13 @@ command to enable or disable the automatic update checks.
 If you want to get rid of this hook manager, you can execute the uninstaller
 `<installDir>/bin/uninstaller` by
 
-```shell
+```bash
 git hooks uninstaller
 ```
 
 or
 
-```shell
+```bash
 curl -sL https://raw.githubusercontent.com/gabyx/githooks/main/scripts/install.sh | bash -s -- --uninstall
 ```
 
@@ -1627,7 +1642,7 @@ tool independently of Githooks.
 
 ### Build From Source
 
-```shell
+```bash
 cd githooks
 go mod download
 go mod vendor
@@ -1648,14 +1663,14 @@ The dialog tool has the following dependencies:
 
 Running the integration tests with Docker:
 
-```shell
+```bash
 cd githooks
 bash tests/test-alpine.sh # and other 'test-XXXX.sh' files...
 ```
 
 Run certain tests only:
 
-```shell
+```bash
 bash tests/test-alpine.sh --seq {001..120}
 bash tests/test-alpine.sh --seq 065
 ```
