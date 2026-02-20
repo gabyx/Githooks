@@ -8,7 +8,7 @@ import (
 
 	cm "github.com/gabyx/githooks/githooks/common"
 
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v83/github"
 )
 
 // RepoSettings holds repo data for web based Git services such as Github or Gitea.
