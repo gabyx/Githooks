@@ -1,8 +1,0 @@
-{
-  "recommendations": [
-    "golang.go",
-    "foxundermoon.shell-format",
-    "timonwong.shellcheck",
-    "ms-vscode-remote.remote-containers"
-  ]
-}

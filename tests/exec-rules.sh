@@ -22,10 +22,20 @@ trap clean_up EXIT
 
 # shellcheck disable=SC2317
 function clean_up() {
-    delete_container_volumes || true
-
     if [ -d "$temp" ]; then
         rm -rf "$temp" || true
+    fi
+}
+
+function setup() {
+    if [ "${DOCKER_RUNNING:-}" = "true" ]; then
+        git config --system protocol.file.allow always &&
+            git config --global safe.directory /data &&
+            git config --global user.email "githook@test.com" &&
+            git config --global user.name "Githook Tests" &&
+            git config --global init.defaultBranch main &&
+            git config --global core.autocrlf false &&
+            git config --global githooks.exportStagedFilesAsFile true
     fi
 }
 
@@ -34,8 +44,6 @@ function install_githooks() {
         "$REPO_DIR/githooks/bin/githooks-cli" installer --non-interactive --build-from-source --clone-url "file://$REPO_DIR" &&
         git clean -fX &&
         git hooks config trust-all --accept &&
-        git hooks config enable-containerized-hooks --set &&
-        git hooks shared update &&
         git hooks install
 }
 
@@ -103,18 +111,13 @@ function diff() {
 }
 
 clean_up
+setup
 
-git config --global githooks.exportStagedFilesAsFile true
 temp=$(mktemp -d)
 
 copy_to_temp "$temp"
 install_githooks
 generate_all_files
-
-delete_container_volumes
-store_into_container_volumes "$HOME/.githooks/shared"
-set_githooks_container_volume_envs "$temp/repo"
-show_all_container_volumes 2
 
 run_all_hooks
 

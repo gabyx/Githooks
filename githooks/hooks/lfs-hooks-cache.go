@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-// A file cache containing LFS hooks.
+// LFSHooksCache is a file cache containing LFS hooks.
 type LFSHooksCache interface {
 	// Returns all LFS paths and file names inside the cache.
 	GetLFSHooks() ([]string, []string, error)
@@ -72,7 +72,7 @@ func (l *lfsHooksCache) IsIdentical(file string) (identical bool, err error) {
 	return
 }
 
-// Creates a new LFS hooks cache.
+// NewLFSHooksCache creates a new LFS hooks cache.
 func NewLFSHooksCache(tempDir string) (_ LFSHooksCache, err error) {
 	if !git.IsLFSAvailable() {
 		return nil, nil
@@ -103,7 +103,6 @@ func gitLFSInstall(gitx *git.Context) (err error) {
 
 // Initializes the cache.
 func (l *lfsHooksCache) init() (err error) {
-
 	if l.initialized {
 		return nil
 	}
@@ -113,10 +112,9 @@ func (l *lfsHooksCache) init() (err error) {
 	reinit := true
 
 	if cm.IsFile(versionFile) {
-		ver, err := os.ReadFile(versionFile)
-		if err == nil {
-			v, err := version.NewVersion(strings.TrimSpace(string(ver)))
-			reinit = err != nil || !v.Equal(l.requiredLFSVersion)
+		if ver, e := os.ReadFile(versionFile); e == nil {
+			v, eV := version.NewVersion(strings.TrimSpace(string(ver)))
+			reinit = eV != nil || !v.Equal(l.requiredLFSVersion)
 		}
 	}
 
@@ -135,12 +133,12 @@ func (l *lfsHooksCache) init() (err error) {
 
 		err = git.Init(l.repoDir, true)
 		if err != nil {
-			return
+			return err
 		}
 
 		err = gitLFSInstall(gitx)
 		if err != nil {
-			return
+			return err
 		}
 	}
 
@@ -154,7 +152,7 @@ func (l *lfsHooksCache) init() (err error) {
 	if len(l.lfsHookNames) == 0 {
 		err = cm.CombineErrors(err, cm.ErrorF("No LFS hooks found in '%s'.", l.repoDir))
 
-		return
+		return err
 	}
 
 	err = os.WriteFile(versionFile, []byte(l.requiredLFSVersion.String()), cm.DefaultFileModeFile)
@@ -164,5 +162,5 @@ func (l *lfsHooksCache) init() (err error) {
 
 	l.initialized = true
 
-	return
+	return err
 }

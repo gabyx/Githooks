@@ -50,7 +50,6 @@ type SetOptions struct {
 
 // AssertOptions  asserts that all set actions are exclusive etc.
 func (s *SetOptions) AssertOptions(log cm.ILogContext, optsMap *OptionsMapping, noValues bool, args []string) {
-
 	log.PanicIf(!s.Set && !s.Unset && !s.Reset && !s.Print, "You need to specify an option.")
 
 	log.PanicIfF(s.Print && (s.Reset || s.Unset || s.Set || len(args) != 0),
@@ -125,7 +124,6 @@ func configSetOptions(
 	optsMap *OptionsMapping,
 	log cm.ILogContext,
 	nMinArgs int, nMaxArgs int) {
-
 	if strs.IsNotEmpty(optsMap.Print) {
 		cmd.Flags().BoolVar(&opts.Print, optsMap.Print, false, optsMap.PrintDesc)
 	}
@@ -149,9 +147,7 @@ func configSetOptions(
 }
 
 func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
-
 	print := func(scope git.ConfigScope) string {
-
 		pairs := ctx.GitX.GetConfigRegex("(^githooks|alias.hooks)", scope)
 
 		maxLength := 0
@@ -184,7 +180,6 @@ func runList(ctx *ccm.CmdContext, gitOpts *GitOptions) {
 	if gitOpts.Global {
 		ctx.Log.InfoF("Global Githooks configurations %s", print(git.GlobalScope))
 	}
-
 }
 
 func runDisable(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
@@ -345,7 +340,6 @@ func runCloneURL(ctx *ccm.CmdContext, opts *SetOptions) {
 }
 
 func runCloneBranch(ctx *ccm.CmdContext, opts *SetOptions) {
-
 	switch {
 	case opts.Set:
 		err := updates.SetCloneBranch(opts.Values[0])
@@ -393,7 +387,6 @@ func runUpdateTime(ctx *ccm.CmdContext, opts *SetOptions) {
 }
 
 func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
-
 	ccm.AssertRepoRoot(ctx)
 
 	switch {
@@ -426,7 +419,6 @@ func runTrustAllHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 	default:
 		cm.Panic("Wrong arguments.")
 	}
-
 }
 
 // RunUpdateCheck enables/disables Githooks update checks.
@@ -466,9 +458,9 @@ func RunUpdateCheck(ctx *ccm.CmdContext, opts *SetOptions) {
 func runRunnerNonInteractive(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	scope := wrapToGitScope(ctx.Log, gitOpts)
 
-	localOrGlobal := "locally" //nolint: goconst
+	localOrGlobal := "locally" //nolint:goconst
 	if gitOpts.Global {
-		localOrGlobal = "globally" //nolint: goconst
+		localOrGlobal = "globally" //nolint:goconst
 	}
 
 	const text = "non-interactive runner mode"
@@ -510,9 +502,9 @@ func runRunnerNonInteractive(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *Git
 func runSkipNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	scope := wrapToGitScope(ctx.Log, gitOpts)
 
-	localOrGlobal := "locally" //nolint: goconst
+	localOrGlobal := "locally" //nolint:goconst
 	if gitOpts.Global {
-		localOrGlobal = "globally" //nolint: goconst
+		localOrGlobal = "globally" //nolint:goconst
 	}
 
 	const text = "non-existing shared hooks"
@@ -554,9 +546,9 @@ func runSkipNonExistingSharedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpt
 func runDisableSharedHooksUpdate(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	scope := wrapToGitScope(ctx.Log, gitOpts)
 
-	localOrGlobal := "locally" //nolint: goconst
+	localOrGlobal := "locally" //nolint:goconst
 	if gitOpts.Global {
-		localOrGlobal = "globally" //nolint: goconst
+		localOrGlobal = "globally" //nolint:goconst
 	}
 
 	const text = "automatic updates of shared hooks"
@@ -599,9 +591,9 @@ func runDisableSharedHooksUpdate(ctx *ccm.CmdContext, opts *SetOptions, gitOpts 
 func runSkipUntrustedHooks(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
 	scope := wrapToGitScope(ctx.Log, gitOpts)
 
-	localOrGlobal := "locally" //nolint: goconst
+	localOrGlobal := "locally" //nolint:goconst
 	if gitOpts.Global {
-		localOrGlobal = "globally" //nolint: goconst
+		localOrGlobal = "globally" //nolint:goconst
 	}
 
 	const text = "active, untrusted hooks"
@@ -662,10 +654,14 @@ func runDeleteDetectedLFSHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 
 	case opts.Print:
 		conf := ctx.GitX.GetConfig(opt, git.GlobalScope)
-		switch {
-		case conf == "a" /* legacy */ || conf == "y":
+		switch conf { //nolint:staticcheck
+		case "y":
+			fallthrough
+		case "a" /* legacy */ :
 			ctx.Log.Info("Detected LFS hooks are automatically deleted during install.")
-		case conf == "s" /* legacy */ || conf == "n":
+		case "n":
+			fallthrough
+		case "s" /* legacy */ :
 			ctx.Log.Info("Detected LFS hooks are not automatically deleted during install",
 				"but instead backed up.")
 		default:
@@ -678,7 +674,6 @@ func runDeleteDetectedLFSHooks(ctx *ccm.CmdContext, opts *SetOptions) {
 }
 
 func configListCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, gitOpts *GitOptions) {
-
 	listCmd := &cobra.Command{
 		Use:   "list [flags]",
 		Short: "Lists settings of the Githooks configuration.",
@@ -686,12 +681,10 @@ func configListCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, gitOpts *GitOp
 Can be either global or local configuration, or both by default.`,
 		PreRun: ccm.PanicIfAnyArgs(ctx.Log),
 		Run: func(cmd *cobra.Command, args []string) {
-
 			if !gitOpts.Local && !gitOpts.Global {
 				_, _, _, err := ctx.GitX.GetRepoRoot()
 				gitOpts.Local = err == nil
 				gitOpts.Global = true
-
 			} else if gitOpts.Local {
 				ccm.AssertRepoRoot(ctx)
 			}
@@ -705,7 +698,6 @@ Can be either global or local configuration, or both by default.`,
 }
 
 func configDisableCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
-
 	disableCmd := &cobra.Command{
 		Use:   "disable [flags]",
 		Short: "Disables Githooks in the current repository or globally.",
@@ -732,7 +724,6 @@ func configContainerizedHooksEnabledCmd(
 	configCmd *cobra.Command,
 	setOpts *SetOptions,
 	gitOpts *GitOptions) {
-
 	enableCmd := &cobra.Command{
 		Use:   "enable-containerized-hooks [flags]",
 		Short: "Enable running hooks containerized.",
@@ -758,7 +749,6 @@ func configContainerManagerTypesCmd(
 	configCmd *cobra.Command,
 	setOpts *SetOptions,
 	gitOpts *GitOptions) {
-
 	enableCmd := &cobra.Command{
 		Use:   "container-manager-types [flags]",
 		Short: "Set container manger types to use (see 'enable-containerized-hooks').",
@@ -781,7 +771,6 @@ If unset 'docker' is used.`,
 }
 
 func configSearchDirCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
-
 	searchDirCmd := &cobra.Command{
 		Use:   "search-dir [flags]",
 		Short: "Changes the search directory used during installation.",
@@ -798,7 +787,6 @@ used during installation.`,
 }
 
 func configCloneURLCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
-
 	cloneURLCmd := &cobra.Command{
 		Use:   "clone-url [flags]",
 		Short: "Changes the Githooks clone url used for any update.",
@@ -814,7 +802,6 @@ func configCloneURLCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *S
 }
 
 func configCloneBranchCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
-
 	cloneBranchCmd := &cobra.Command{
 		Use:   "clone-branch [flags]",
 		Short: "Changes the Githooks clone url used for any update.",
@@ -830,7 +817,6 @@ func configCloneBranchCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts
 }
 
 func configTrustAllHooksCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
-
 	trustCmd := &cobra.Command{
 		Use:   "trust-all [flags]",
 		Short: "Change trust settings in the current repository.",
@@ -855,7 +841,6 @@ This command needs to be run at the root of a repository.`,
 }
 
 func configUpdateCheckCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
-
 	updateCmd := &cobra.Command{
 		Use:   "update-check [flags]",
 		Short: "Change Githooks update-check settings.",
@@ -871,11 +856,9 @@ func configUpdateCheckCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts
 
 	configSetOptions(updateCmd, setOpts, &optsPSUR, ctx.Log, 0, 0)
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, updateCmd))
-
 }
 
 func configUpdateTimeCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions) {
-
 	updateTimeCmd := &cobra.Command{
 		Use:   "update-time [flags]",
 		Short: "Changes the Githooks update time.",
@@ -895,7 +878,6 @@ Use 'git hooks update [--enable|--disable]' to change that setting.`,
 }
 
 func configSharedCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
-
 	sharedCmd := &cobra.Command{
 		Use:   "shared [flags] [<git-url>...]",
 		Short: "Updates the list of local or global shared hook repositories.",
@@ -904,7 +886,6 @@ func configSharedCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *Set
 The '--add' option accepts multiple '<git-url>' arguments,
 each containing a clone URL of a shared hook repository which gets added.`,
 		Run: func(cmd *cobra.Command, args []string) {
-
 			if !gitOpts.Local && !gitOpts.Global {
 				_, _, _, err := ctx.GitX.GetRepoRoot()
 				gitOpts.Global = true
@@ -931,7 +912,6 @@ func configSkipNonExistingSharedHooks(
 	configCmd *cobra.Command,
 	setOpts *SetOptions,
 	gitOpts *GitOptions) {
-
 	nonExistSharedCmd := &cobra.Command{
 		Use:   "skip-non-existing-shared-hooks [flags]",
 		Short: "Enable or disable skipping non-existing shared hooks.",
@@ -971,7 +951,6 @@ func configDisableSharedHooksUpdate(
 	configCmd *cobra.Command,
 	setOpts *SetOptions,
 	gitOpts *GitOptions) {
-
 	nonExistSharedCmd := &cobra.Command{
 		Use:   "disable-shared-hooks-update [flags]",
 		Short: "Disable/enable automatic updates of shared hooks.",
@@ -1009,7 +988,6 @@ func configFailUntrustedHooks(
 	configCmd *cobra.Command,
 	setOpts *SetOptions,
 	gitOpts *GitOptions) {
-
 	nonExistSharedCmd := &cobra.Command{
 		Use:   "skip-untrusted-hooks [flags]",
 		Short: "Enable/disable skipping active, untrusted hooks.",
@@ -1049,7 +1027,6 @@ func configNonInteractiveRunner(
 	configCmd *cobra.Command,
 	setOpts *SetOptions,
 	gitOpts *GitOptions) {
-
 	nonInteracticeRunner := &cobra.Command{
 		Use:   "non-interactive-runner [flags]",
 		Short: "Enables/disables non-interactive execution of the runner.",
@@ -1084,7 +1061,6 @@ See 'git hooks config trust-all --help'.`,
 }
 
 func configDetectedLFSCmd(ctx *ccm.CmdContext, configCmd *cobra.Command, setOpts *SetOptions, gitOpts *GitOptions) {
-
 	deleteDetectedLFSCmd := &cobra.Command{
 		Use:   "delete-detected-lfs-hooks [flags]",
 		Short: "Change the behavior for detected LFS hooks during install.",
@@ -1110,7 +1086,6 @@ disabled and backed up.`,
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	configCmd := &cobra.Command{
 		Use:    "config",
 		Short:  "Manages various Githooks configuration.",

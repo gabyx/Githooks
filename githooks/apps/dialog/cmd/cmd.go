@@ -31,7 +31,6 @@ Exit code:
 
 // MakeDialogCtl returns the root command of the Githooks dialog executable.
 func MakeDialogCtl(ctx *dcm.CmdContext) (rootCmd *cobra.Command) {
-
 	title := cm.FormatInfoF("Githooks Dialog CLI [version: '%s']", build.BuildVersion)
 	firstPrefix := " ▶ "
 	ccm.InitTemplates(title, firstPrefix, ctx.Log.GetIndent())

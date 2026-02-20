@@ -17,11 +17,10 @@
 ![OS](https://img.shields.io/badge/OS-linux,%20macOs,%20Windows-blue)
 
 A **platform-independent hooks manager** written in Go to support shared hook
-repositories and per-repository
-[Git hooks](https://git-scm.com/docs/githooks), checked into the working
-repository. This implementation is the Go port and successor of the
-[original implementation](https://github.com/rycus86/githooks) (see
-[Migration](#migrating)).
+repositories and per-repository [Git hooks](https://git-scm.com/docs/githooks),
+checked into the working repository. This implementation is the Go port and
+successor of the [original implementation](https://github.com/rycus86/githooks)
+(see [Migration](#migrating)).
 
 To make this work, the installer creates run-wrappers for Githooks that are
 installed into the `.git/hooks` folders on request (by default). There's more
@@ -315,8 +314,8 @@ You can inspect the computed batch name by running
 ## Supported Hooks
 
 The supported hooks are listed below. Refer to the
-[Git documentation](https://git-scm.com/docs/githooks) for information on
-what they do and what parameters they receive.
+[Git documentation](https://git-scm.com/docs/githooks) for information on what
+they do and what parameters they receive.
 
 It is receommended to use `--maintained-hooks` options during install
 ([1](#installation-mode-normal), [2](#installing-or-removing-run-wrappers)) to
@@ -450,9 +449,8 @@ you can do it any time by changing the global configuration variable.
 
 Supported URL for shared hooks are:
 
-- **All URLs [Git supports](https://git-scm.com/docs/git-clone#_git_urls)**
-  such as:
-
+- **All URLs [Git supports](https://git-scm.com/docs/git-clone#_git_urls)** such
+  as:
   - `ssh://github.com/shared/hooks-maven.git@mybranch` and also the short `scp`
     form `git@github.com:shared/hooks-maven.git`
   - `git://user@github.com/shared/hooks-python.git`
@@ -463,7 +461,6 @@ Supported URL for shared hooks are:
   treated the same as a local path to a bare repository, _see next point_.
 
 - **Local paths** to bare and non-bare repositories such as:
-
   - `/local/path/to/checkout` (gets used directly)
   - `/local/path/to/bare-repo.git@mybranch` (gets cloned internally)
 
@@ -928,7 +925,6 @@ dialog fallback is currently only enabled for the `runner`.
 Githooks distinguishes between _fatal_ and _non-fatal_ prompts.
 
 - A _fatal_ prompt will result in a complete abort if
-
   - The prompt could not be shown (terminal or GUI dialog).
   - The answer returned by the user is incorrect (terminal only) or the user
     canceled the GUI dialog.
@@ -997,16 +993,16 @@ or directly into a Nix profile with
 nix profile install "github:gabyx/githooks?dir=nix&ref=v3.0.4"
 ```
 
-> [!NOTE] 
+> [!NOTE]
 >
 > You still need to run the installer to enable it on your system
 > `githooks-cli installer`
 
-> [!WARNING] 
+> [!WARNING]
 >
 > You should never install a major version upgrade as Githooks should be
 > uninstalled completely before. The uninstaller on any version however should
-> work backward-compatible.**
+> work backward-compatible.\*\*
 
 and then use it in your packages, e.g. here with home-manager by doing:
 
@@ -1033,7 +1029,6 @@ The installer will:
    `--update` is given the newest Githooks is downloaded and installed directly.
 
 1. Find the install mode relevant hooks directory `<hooksDir>`:
-
    - Use the directory given with `--hooks-dir <dir>` on the command line.
 
    - Use `git config --get githooks.pathForUseCoreHooksPath` if Githooks is
@@ -1041,7 +1036,6 @@ The installer will:
 
    - Use the following template directory if `--hooks-dir-use-template-dir` is
      given:
-
      1. Use `GIT_TEPMLATE_DIR` if set and add `/hooks`
      1. Use Git config value `init.templateDir` if set and add `/hooks`
      1. Use `<install-dir>/templates/hooks`.
@@ -1051,7 +1045,6 @@ The installer will:
      [`centralized`](#install-mode-centralized-hooks) install mode.
 
 1. Write all Githooks run-wrappers into the hooks directory `<hooksDir>` and
-
    - Set `core.hooksPath` for [`centralized`](#install-mode-centralized-hooks)
      install mode (`--centralized`).
 
@@ -1059,7 +1052,6 @@ The installer will:
 
 1. Offer to find existing Git repositories on the file system (disable with
    `--skip-install-into-existing`)
-
    1. Make them use Githooks by either setting `core.hooksPath` (or install
       run-wrappers if `<repo-git-dir>/hooks/githooks-contains-run-wrappers`
       exists).
@@ -1168,8 +1160,8 @@ hopefully downloaded) already or you can specify them by using
 `<type>` can either be `gitea` ( or `github` which is not needed since it can be
 auto-detected from the URL) and it will automatically download and **verify**
 the binaries over the implemented API. Credentials will be collected over
-[`git credential`](https://git-scm.com/docs/git-credential) to access the
-API. [@todo].
+[`git credential`](https://git-scm.com/docs/git-credential) to access the API.
+[@todo].
 
 ### Use in CI
 

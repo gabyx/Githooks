@@ -21,13 +21,11 @@ func getAllHooks(
 	repoHooksDir string,
 	shared hooks.SharedRepos,
 	state *list.ListingState) (allHooks []hooks.Hook) {
-
-	allHooks = make([]hooks.Hook, 0, 10+2*shared.GetCount()) // nolint: mnd
+	allHooks = make([]hooks.Hook, 0, 10+2*shared.GetCount()) //nolint:mnd
 
 	gitx := git.NewCtxAt(repoDir)
 
 	for _, hookName := range hookNames {
-
 		// List replaced hooks (normally only one)
 		replacedHooks := list.GetAllHooksIn(
 			log, gitx, repoDir, path.Join(gitDir, "hooks"), hookName,
@@ -56,23 +54,19 @@ func getAllHooks(
 }
 
 func apply(log cm.ILogContext, hook *hooks.Hook, checksums *hooks.ChecksumStore, reset bool) {
-
 	err := hook.AssertSHA1()
 	log.AssertNoErrorPanicF(err, "Could not compute SHA1 hash for hook '%s'.", hook.Path)
 
 	if reset {
-
-		removed, err := checksums.SyncChecksumRemove(hook.SHA1)
-		log.AssertNoErrorPanicF(err, "Could not sync checksum for hook '%s'.", hook.Path)
+		removed, e := checksums.SyncChecksumRemove(hook.SHA1)
+		log.AssertNoErrorPanicF(e, "Could not sync checksum for hook '%s'.", hook.Path)
 
 		if removed != 0 {
 			log.InfoF("Removed trust checksum for hook '%s'.", hook.NamespacePath)
 		} else {
 			log.InfoF("No trust checksum for hook '%s'.", hook.NamespacePath)
 		}
-
 	} else {
-
 		err = checksums.SyncChecksumAdd(
 			hooks.ChecksumResult{
 				SHA1:          hook.SHA1,
@@ -110,12 +104,10 @@ func runTrustPatterns(ctx *ccm.CmdContext, reset bool, all bool, patterns *hooks
 	ctx.Log.PanicIfF(countMatches == 0,
 		"Given pattern or paths did not match any hooks '%v'.",
 		patterns)
-
 }
 
 // NewTrustHooksCmd creates this new command.
 func NewTrustHooksCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	reset := false
 	all := false
 	patterns := hooks.HookPatterns{}
@@ -141,7 +133,6 @@ by '--patterns' or '--paths'.` + "\n\n" +
 		},
 
 		Run: func(cmd *cobra.Command, args []string) {
-
 			runTrustPatterns(ctx, reset, all, &patterns)
 		},
 	}

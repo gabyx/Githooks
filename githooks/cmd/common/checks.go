@@ -43,8 +43,8 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 				localCoreHooksPath, pathToUse)
 		}
 
-		gitDir, err := gitx.GetGitDirCommon()
-		log.AssertNoErrorF(err, "Could not determine common Git dir.")
+		gitDir, e := gitx.GetGitDirCommon()
+		log.AssertNoErrorF(e, "Could not determine common Git dir.")
 		hasRunWrappers, _ := cm.IsPathExisting(path.Join(gitDir, "hooks", hooks.RunWrapperMarkerFileName))
 
 		if hasHooksConfigured &&
@@ -58,7 +58,6 @@ func CheckGithooksSetup(log cm.ILogContext, gitx *git.Context) {
 
 	if installMode == install.InstallModeTypeV.Centralized &&
 		globalCoreHooksPathSet && globalCoreHooksPath != pathToUse {
-
 		log.ErrorF("Githooks install is corrupt: \n"+
 			"Global Git config 'core.hooksPath' is set to:\n"+
 			"'%s'\n"+

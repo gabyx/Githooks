@@ -6,7 +6,7 @@ import (
 )
 
 // Template functions for `osascript` templates.
-var templateFuncs = template.FuncMap{"json": func(v interface{}) (string, error) {
+var templateFuncs = template.FuncMap{"json": func(v any) (string, error) {
 	b, err := json.Marshal(v)
 
 	return string(b), err

@@ -20,7 +20,6 @@ const (
 )
 
 func runTrust(ctx *ccm.CmdContext, opt trustOption) {
-
 	repoRoot, _, _ := ccm.AssertRepoRoot(ctx)
 	file := hooks.GetTrustMarkerFile(repoRoot)
 
@@ -70,7 +69,6 @@ func runTrust(ctx *ccm.CmdContext, opt trustOption) {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	trustCmd := &cobra.Command{
 		Use:   "trust",
 		Short: "Manages settings related to trusted repositories.",

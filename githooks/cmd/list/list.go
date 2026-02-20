@@ -18,7 +18,6 @@ import (
 func runList(ctx *ccm.CmdContext,
 	hookNames []string, warnNotFound bool,
 	onlyListActiveHooks bool, withBatchName bool) {
-
 	repoDir, gitDir, gitDirWorktree := ccm.AssertRepoRoot(ctx)
 
 	repoHooksDir := hooks.GetGithooksDir(repoDir)
@@ -26,7 +25,6 @@ func runList(ctx *ccm.CmdContext,
 
 	total := 0
 	for _, hookName := range hookNames {
-
 		list, count := listHooksForName(
 			ctx.Log,
 			hookName,
@@ -61,7 +59,6 @@ func PrepareListHookState(
 	repoHooksDir string,
 	gitDirWorktree string,
 	hookNames []string) (state *ListingState, shared hooks.SharedRepos, hookNamespace string) {
-
 	// Load checksum store
 	checksums, err := hooks.GetChecksumStorage(gitDirWorktree)
 	ctx.Log.AssertNoErrorF(err, "Errors while loading checksum store.")
@@ -81,7 +78,7 @@ func PrepareListHookState(
 	ctx.Log.DebugF("Accumuldated repository ignore patterns: '%q'.", ignores.HooksDir)
 
 	// Load all shared hooks
-	shared = hooks.NewSharedRepos(8) //nolint: mnd
+	shared = hooks.NewSharedRepos(8) //nolint:mnd
 
 	shared[hooks.SharedHookTypeV.Repo], err = hooks.LoadRepoSharedHooks(ctx.InstallDir, repoDir)
 	ctx.Log.AssertNoErrorF(err, "Could not load repository shared hooks.")
@@ -118,7 +115,6 @@ type ListingState struct {
 }
 
 func filterPendingSharedRepos(shared hooks.SharedRepos) (pending hooks.SharedRepos) {
-
 	pending = hooks.NewSharedRepos(0)
 
 	// Filter out pending shared hooks.
@@ -145,7 +141,6 @@ func filterPendingSharedRepos(shared hooks.SharedRepos) (pending hooks.SharedRep
 }
 
 func printPendingShared(ctx *ccm.CmdContext, shared hooks.SharedRepos) {
-
 	count := shared.GetCount()
 	if count == 0 {
 		return
@@ -181,7 +176,6 @@ func listHooksForName(
 	state *ListingState,
 	onlyListActiveHooks bool,
 	withBatchName bool) (string, int) {
-
 	// List replaced hooks (normally only one)
 	gitx := git.NewCtxAt(repoDir)
 	replacedHooks := GetAllHooksIn(
@@ -218,7 +212,6 @@ func listHooksForName(
 		cm.AssertNoErrorPanicF(err, "Could not write hook state.")
 
 		for i := range hooks {
-
 			if onlyListActiveHooks && !hooks[i].Active {
 				continue
 			}
@@ -270,7 +263,6 @@ func GetAllHooksInShared(
 	state *ListingState,
 	sharedRepos []hooks.SharedRepo,
 	category hooks.SharedHookType) (coll []SharedHooks, count int) {
-
 	coll = make([]SharedHooks, 0, len(sharedRepos))
 
 	for i := range sharedRepos {
@@ -283,11 +275,9 @@ func GetAllHooksInShared(
 		if dir := hooks.GetSharedGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(dir) {
 			allHooks = GetAllHooksIn(log, gitx, shRepo.RepositoryDir,
 				dir, hookName, hookNamespace, state, true, false)
-
-		} else if dir := hooks.GetGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(dir) {
+		} else if d := hooks.GetGithooksDir(shRepo.RepositoryDir); cm.IsDirectory(d) {
 			allHooks = GetAllHooksIn(log, gitx, shRepo.RepositoryDir,
-				dir, hookName, hookNamespace, state, true, false)
-
+				d, hookName, hookNamespace, state, true, false)
 		} else {
 			allHooks = GetAllHooksIn(log, gitx, shRepo.RepositoryDir,
 				shRepo.RepositoryDir, hookName, hookNamespace, state, true, false)
@@ -317,7 +307,6 @@ func GetAllHooksIn(
 	state *ListingState,
 	addInternalIgnores bool,
 	isReplacedHook bool) []hooks.Hook {
-
 	isTrusted := func(hookPath string) (bool, string) {
 		if state.isRepoTrusted {
 			return true, ""
@@ -333,7 +322,6 @@ func GetAllHooksIn(
 	if isReplacedHook {
 		hookName = hooks.GetHookReplacementFileName(hookName)
 		cm.DebugAssert(strs.IsNotEmpty(hookNamespace), "Wrong namespace")
-
 	} else {
 		ns, err := hooks.GetHooksNamespace(hooksDir)
 		log.AssertNoErrorPanicF(err, "Could not get hook namespace in '%s'", hooksDir)
@@ -388,7 +376,6 @@ func formatHookState(
 	isGithooksDisabled bool,
 	padding int,
 	indent string) {
-
 	hooksFmt := strs.Fmt("%s%s %%-%vs : ", indent, cm.ListItemLiteral, padding)
 	const stateFmt = " state: ['%[2]s', '%[3]s']"
 	const disabledStateFmt = " state: ['disabled']"
@@ -434,7 +421,6 @@ func formatHookState(
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	onlyListActiveHooks := false
 	withBatchName := false
 
@@ -460,7 +446,6 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 				}
 
 				runList(ctx, args, true, onlyListActiveHooks, withBatchName)
-
 			} else {
 				runList(ctx, hooks.ManagedHookNames, false, onlyListActiveHooks, withBatchName)
 			}

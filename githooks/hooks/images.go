@@ -166,7 +166,7 @@ func buildImage(
 	if err != nil {
 		// Save build error to temporary file.
 		file, _ := os.CreateTemp("", "githooks-image-build-error-*.log")
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		_, e := io.WriteString(file,
 			err.Error()+
 				"\nOutput:\n=====================================================\n"+
@@ -182,7 +182,6 @@ func buildImage(
 				"`cat '%s'\n"+
 				"Partial output:\n...stripped...\n%s",
 				imageRef, file.Name(), file.Name(), out[len(out)-length:]))
-
 	}
 
 	log.InfoF("  %v Built image '%s'.", cm.ListItemLiteral, imageRef)
@@ -201,7 +200,6 @@ func UpdateImages(
 	containerMgr container.IManager,
 	alwaysBuild bool,
 ) (err error) {
-
 	if strs.IsEmpty(configFile) {
 		configFile = GetRepoImagesFile(hooksDir)
 	}
@@ -215,7 +213,7 @@ func UpdateImages(
 	if exists, _ := cm.IsPathExisting(configFile); !exists {
 		log.InfoF("No images config existing '%s'. Skip updating images.", configFile)
 
-		return
+		return err
 	}
 
 	log.InfoF("Build/pull images for repository '%s'...", fromHint)
@@ -229,73 +227,70 @@ func UpdateImages(
 	}
 
 	for imageRef, img := range imagesConfig.Images {
-
-		imageRef, e := addImageReferenceSuffix(imageRef, configFile, namespace)
-		if e != nil {
-			err = cm.CombineErrors(err, e)
+		imgRef, eR := addImageReferenceSuffix(imageRef, configFile, namespace) //nolint:shadow
+		if eR != nil {
+			err = cm.CombineErrors(err, eR)
 
 			continue
 		}
 
-		pullSrc := imageRef
+		pullSrc := imgRef
 
 		if img.Pull != nil {
 			log.WarnIfF(img.Build != nil,
 				"Specified image build configuration on entry '%s'\n"+
 					"in '.images.yaml' in '%s' will be ignored\n"+
-					"because pull is specified.", imageRef, configFile)
+					"because pull is specified.", imgRef, configFile)
 
-			pullSrc, e = addImageReferenceSuffix(img.Pull.Reference, configFile, namespace)
+			pullSrc, eR = addImageReferenceSuffix(img.Pull.Reference, configFile, namespace)
 
-			if e != nil {
-				err = cm.CombineErrors(err, e)
+			if eR != nil {
+				err = cm.CombineErrors(err, eR)
 
 				continue
 			}
 		}
 
 		if img.Build == nil {
-			e := pullImage(
+			eR = pullImage(
 				log,
 				containerMgr,
 				pullSrc,
-				imageRef,
+				imgRef,
 				configFile)
 
-			if e != nil {
-				err = cm.CombineErrors(err, e)
+			if eR != nil {
+				err = cm.CombineErrors(err, eR)
 
 				continue
 			} else {
 				nPulls += 1
 			}
-
 		} else if img.Pull == nil {
-			e := buildImage(
+			eR = buildImage(
 				log,
 				containerMgr,
 				img.Build.Context,
 				img.Build.Dockerfile,
 				img.Build.Stage,
-				imageRef,
+				imgRef,
 				configFile,
 				repositoryDir,
 				alwaysBuild)
 
-			if e != nil {
-				err = cm.CombineErrors(err, e)
+			if eR != nil {
+				err = cm.CombineErrors(err, eR)
 
 				continue
 			} else {
 				nBuilds += 1
 			}
-
 		}
 	}
 
 	log.InfoF("Pulled '%v' and built '%v' images.", nPulls, nBuilds)
 
-	return
+	return err
 }
 
 // addImageReferenceSuffix adds the `namespace` to a image name reference at the place `${namespace}`.

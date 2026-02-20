@@ -41,7 +41,6 @@ func downloadGithub(
 	versionTag string,
 	dir string,
 	publicPGP string) error {
-
 	client := github.NewClient(nil)
 	rel, _, err := client.Repositories.GetReleaseByTag(context.Background(),
 		owner, repo, versionTag)
@@ -77,7 +76,7 @@ func downloadGithub(
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not download url '%s'.", target.URL))
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 
 	// Store into temp. file.
 	err = os.MkdirAll(dir, cm.DefaultFileModeDirectory)
@@ -93,7 +92,7 @@ func downloadGithub(
 	if err != nil {
 		return cm.CombineErrors(err, cm.ErrorF("Could not store download in '%s'.", temp.Name()))
 	}
-	temp.Close()
+	_ = temp.Close()
 
 	// Validate checksum.
 	log.InfoF("Validate checksums.")

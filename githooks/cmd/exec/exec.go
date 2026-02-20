@@ -20,7 +20,6 @@ func execPath(
 	repoDir string,
 	opts execCmdOptions,
 	namespaceEnvs hooks.NamespaceEnvs) (err error) {
-
 	containerMgr, err := hooks.NewContainerManager(ctx.GitX, opts.Containarized, nil)
 	ctx.Log.AssertNoErrorPanic(err, "Could not create container manager.")
 
@@ -119,7 +118,6 @@ type execCmdOptions struct {
 
 // NewCmd creates this new command.
 func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
-
 	var opts execCmdOptions
 
 	execCmd := &cobra.Command{

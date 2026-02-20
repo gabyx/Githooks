@@ -7,7 +7,7 @@ set -u
 TEST_DIR=$(cd "$(dirname "$0")" && pwd)
 . "$TEST_DIR/general.sh"
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 function clean_up() {
     set +e
     clean_dirs
@@ -202,7 +202,7 @@ function main() {
 
         local uninstall_out uninstall_exit
         set +e
-        uninstall_out=$(printf "n\\n" | "$GH_TEST_BIN/githooks-cli" uninstaller \
+        uninstall_out=$(printf 'n\n' | "$GH_TEST_BIN/githooks-cli" uninstaller \
             --full-uninstall-from-repos \
             --stdin 2>&1)
         uninstall_exit="$?"

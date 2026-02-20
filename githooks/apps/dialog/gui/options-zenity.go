@@ -4,14 +4,13 @@ package gui
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"os/exec"
 	"strconv"
 	"strings"
 
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
-	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
@@ -32,16 +31,15 @@ func getChoicesZenity(output string) (indices []uint) {
 	return
 }
 
-// ShowOptions shows a option dialog with `zenity`.
-func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r res.Options, err error) {
-
+// ShowOptionsZenity shows a option dialog with `zenity`.
+func ShowOptionsZenity(ctx context.Context, zenity string, opts *sets.Options) (r res.Options, err error) {
 	if len(opts.Options) == 0 {
 		err = cm.ErrorF("You need at least one option specified.")
 
-		return
+		return r, err
 	}
 
-	if opts.Style == set.OptionsStyleButtons && !opts.MultipleSelection {
+	if opts.Style == sets.OptionsStyleButtons && !opts.MultipleSelection {
 		return showOptionsWithButtons(ctx, opts,
 			func(ctx context.Context, m *sets.Message) (res.Message, error) {
 				return ShowMessageZenity(ctx, zenity, m)
@@ -61,21 +59,21 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 	args = append(args, "--text", opts.Text, "--no-markup")
 
 	if opts.Width > 0 {
-		args = append(args, "--width", fmt.Sprintf("%d", opts.Width))
+		args = append(args, "--width", strconv.FormatUint(uint64(opts.Width), 10))
 	}
 
 	if opts.Height > 0 {
-		args = append(args, "--height", fmt.Sprintf("%d", opts.Height))
+		args = append(args, "--height", strconv.FormatUint(uint64(opts.Height), 10))
 	}
 
 	switch opts.WindowIcon {
-	case set.ErrorIcon:
+	case sets.ErrorIcon:
 		args = append(args, "--window-icon=error")
-	case set.WarningIcon:
+	case sets.WarningIcon:
 		args = append(args, "--window-icon=warning")
-	case set.InfoIcon:
+	case sets.InfoIcon:
 		args = append(args, "--window-icon=info")
-	case set.QuestionIcon:
+	case sets.QuestionIcon:
 		args = append(args, "--window-icon=question")
 	}
 
@@ -89,7 +87,6 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 
 	if opts.ExtraButtons != nil {
 		for i := range opts.ExtraButtons {
-
 			if strs.IsEmpty(opts.ExtraButtons[i]) {
 				return res.Options{}, cm.ErrorF("Empty label for extra button is not allowed")
 			}
@@ -118,7 +115,7 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 
 	// Add choices with ids.
 	for i := range opts.Options {
-		args = append(args, fmt.Sprintf("%d", i), opts.Options[i])
+		args = append(args, strconv.Itoa(i), opts.Options[i])
 	}
 
 	out, err := gunix.RunZenity(ctx, zenity, args, "")
@@ -128,9 +125,9 @@ func ShowOptionsZenity(ctx context.Context, zenity string, opts *set.Options) (r
 			Options: getChoicesZenity(string(out))}, nil
 	}
 
-	if err, ok := err.(*exec.ExitError); ok {
-		if err.ExitCode() == 1 {
-
+	exErr := &exec.ExitError{}
+	if errors.As(err, &exErr) {
+		if exErr.ExitCode() == 1 {
 			// Handle extra buttons.
 			if len(out) > 0 {
 				button := string(out[:len(out)-1])

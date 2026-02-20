@@ -37,7 +37,6 @@ func ReadCoverData(executableName string) (coverDir string, covDataFile string, 
 
 // Setup setups the coverage stuff.
 func Setup(executableName string) (run bool) {
-
 	_, covDataFile, covData := ReadCoverData(executableName)
 
 	// Write the new counter for the next run.

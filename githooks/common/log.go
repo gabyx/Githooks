@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	// GithooksEmoji is the general Githooks emojii.
+	// GithooksEmoji is the general Githooks emoji.
 	GithooksEmoji = "🦎"
 
 	githooksSuffix    = "" // If you like you can make it: "Githooks: "
@@ -38,37 +38,37 @@ var colorPrompt = color.FgGreen.Render
 type ILogContext interface {
 	// Log functions
 	Debug(lines ...string)
-	DebugF(format string, args ...interface{})
+	DebugF(format string, args ...any)
 	Info(lines ...string)
-	InfoF(format string, args ...interface{})
+	InfoF(format string, args ...any)
 	Warn(lines ...string)
-	WarnF(format string, args ...interface{})
+	WarnF(format string, args ...any)
 	Error(lines ...string)
-	ErrorF(format string, args ...interface{})
+	ErrorF(format string, args ...any)
 	ErrorWithStacktrace(lines ...string)
-	ErrorWithStacktraceF(format string, args ...interface{})
+	ErrorWithStacktraceF(format string, args ...any)
 	Panic(lines ...string)
-	PanicF(format string, args ...interface{})
+	PanicF(format string, args ...any)
 
 	// Assert helper functions
-	ErrorOrPanicF(isFatal bool, err error, format string, args ...interface{})
-	ErrorOrPanicIfF(isFatal bool, condition bool, format string, args ...interface{})
+	ErrorOrPanicF(isFatal bool, err error, format string, args ...any)
+	ErrorOrPanicIfF(isFatal bool, condition bool, format string, args ...any)
 	AssertWarn(condition bool, lines ...string)
-	AssertWarnF(condition bool, format string, args ...interface{})
+	AssertWarnF(condition bool, format string, args ...any)
 	DebugIf(condition bool, lines ...string)
-	DebugIfF(condition bool, format string, args ...interface{})
+	DebugIfF(condition bool, format string, args ...any)
 	InfoIf(condition bool, lines ...string)
-	InfoIfF(condition bool, format string, args ...interface{})
+	InfoIfF(condition bool, format string, args ...any)
 	WarnIf(condition bool, lines ...string)
-	WarnIfF(condition bool, format string, args ...interface{})
+	WarnIfF(condition bool, format string, args ...any)
 	ErrorIf(condition bool, lines ...string)
-	ErrorIfF(condition bool, format string, args ...interface{})
+	ErrorIfF(condition bool, format string, args ...any)
 	PanicIf(condition bool, lines ...string)
-	PanicIfF(condition bool, format string, args ...interface{})
+	PanicIfF(condition bool, format string, args ...any)
 	AssertNoError(err error, lines ...string) bool
-	AssertNoErrorF(err error, format string, args ...interface{}) bool
+	AssertNoErrorF(err error, format string, args ...any) bool
 	AssertNoErrorPanic(err error, lines ...string)
-	AssertNoErrorPanicF(err error, format string, args ...interface{})
+	AssertNoErrorPanicF(err error, format string, args ...any)
 
 	HasColor() bool
 	GetIndent() string
@@ -98,7 +98,7 @@ type ILogStats interface {
 }
 
 type FormattedWriter struct {
-	format func(...interface{}) string
+	format func(...any) string
 	writer io.Writer
 }
 
@@ -220,7 +220,7 @@ func parseLogLevel() int {
 	switch level {
 	case "debug":
 		return debugLevel
-	default: // nolint: gocritic
+	default: //nolint:gocritic
 		fallthrough
 	case "info":
 		return infoLevel
@@ -235,7 +235,7 @@ func parseLogLevel() int {
 
 func (c *LogContext) setupLogLevel(fromEnv bool) {
 	if DebugLog {
-		// Allways overwrites.
+		// Always overwrites.
 		c.level = debugLevel
 	} else if fromEnv {
 		c.level = parseLogLevel()
@@ -280,35 +280,35 @@ func (c *LogContext) IsErrorATerminal() bool {
 // Debug logs a debug message.
 func (c *LogContext) Debug(lines ...string) {
 	if DebugLog && c.level <= debugLevel {
-		fmt.Fprint(c.debug, FormatMessage(debugSuffix, indent, lines...), "\n")
+		_, _ = fmt.Fprint(c.debug, FormatMessage(debugSuffix, indent, lines...), "\n")
 	}
 }
 
 // DebugF logs a debug message.
-func (c *LogContext) DebugF(format string, args ...interface{}) {
+func (c *LogContext) DebugF(format string, args ...any) {
 	if DebugLog && c.level <= debugLevel {
-		fmt.Fprint(c.debug, FormatMessageF(debugSuffix, indent, format, args...), "\n")
+		_, _ = fmt.Fprint(c.debug, FormatMessageF(debugSuffix, indent, format, args...), "\n")
 	}
 }
 
 // Info logs a info message.
 func (c *LogContext) Info(lines ...string) {
 	if c.level <= infoLevel {
-		fmt.Fprint(c.info, FormatInfo(lines...), "\n")
+		_, _ = fmt.Fprint(c.info, FormatInfo(lines...), "\n")
 	}
 }
 
 // InfoF logs a info message.
-func (c *LogContext) InfoF(format string, args ...interface{}) {
+func (c *LogContext) InfoF(format string, args ...any) {
 	if c.level <= infoLevel {
-		fmt.Fprint(c.info, FormatInfoF(format, args...), "\n")
+		_, _ = fmt.Fprint(c.info, FormatInfoF(format, args...), "\n")
 	}
 }
 
 // Warn logs a warning message.
 func (c *LogContext) Warn(lines ...string) {
 	if c.level <= warnLevel {
-		fmt.Fprint(c.warn, FormatMessage(warnSuffix, indent, lines...), "\n")
+		_, _ = fmt.Fprint(c.warn, FormatMessage(warnSuffix, indent, lines...), "\n")
 	}
 	if c.doTrackStats {
 		c.nWarnings++
@@ -316,9 +316,9 @@ func (c *LogContext) Warn(lines ...string) {
 }
 
 // WarnF logs a warning message.
-func (c *LogContext) WarnF(format string, args ...interface{}) {
+func (c *LogContext) WarnF(format string, args ...any) {
 	if c.level <= warnLevel {
-		fmt.Fprint(c.warn, FormatMessageF(warnSuffix, indent, format, args...), "\n")
+		_, _ = fmt.Fprint(c.warn, FormatMessageF(warnSuffix, indent, format, args...), "\n")
 	}
 	if c.doTrackStats {
 		c.nWarnings++
@@ -328,7 +328,7 @@ func (c *LogContext) WarnF(format string, args ...interface{}) {
 // Error logs an error.
 func (c *LogContext) Error(lines ...string) {
 	if c.level <= errorLevel {
-		fmt.Fprint(c.error, FormatMessage(errorSuffix, indent, lines...), "\n")
+		_, _ = fmt.Fprint(c.error, FormatMessage(errorSuffix, indent, lines...), "\n")
 	}
 	if c.doTrackStats {
 		c.nErrors++
@@ -336,9 +336,9 @@ func (c *LogContext) Error(lines ...string) {
 }
 
 // ErrorF logs an error.
-func (c *LogContext) ErrorF(format string, args ...interface{}) {
+func (c *LogContext) ErrorF(format string, args ...any) {
 	if c.level <= errorLevel {
-		fmt.Fprint(c.error, FormatMessageF(errorSuffix, indent, format, args...), "\n")
+		_, _ = fmt.Fprint(c.error, FormatMessageF(errorSuffix, indent, format, args...), "\n")
 	}
 	if c.doTrackStats {
 		c.nErrors++
@@ -346,22 +346,22 @@ func (c *LogContext) ErrorF(format string, args ...interface{}) {
 }
 
 // FormatInfoMessage formats a info message.
-func FormatInfoMessage(format string, args ...interface{}) string {
+func FormatInfoMessage(format string, args ...any) string {
 	return FormatMessageF(infoSuffix, indent, format, args...)
 }
 
-// FormatInfoMessage formats a informational message.
-func FormatInformationMessage(format string, args ...interface{}) string {
+// FormatInformationMessage formats a informational message.
+func FormatInformationMessage(format string, args ...any) string {
 	return FormatMessageF(informationSuffix, indent, format, args...)
 }
 
-// FormatError formats an error message.
-func FormatErrorMessage(format string, args ...interface{}) string {
+// FormatErrorMessage formats an error message.
+func FormatErrorMessage(format string, args ...any) string {
 	return FormatMessageF(errorSuffix, indent, format, args...)
 }
 
-// FormatPrompt formats a prompt message.
-func FormatPromptMessage(format string, args ...interface{}) string {
+// FormatPromptMessage formats a prompt message.
+func FormatPromptMessage(format string, args ...any) string {
 	return FormatMessageF(promptSuffix, indent, format, args...)
 }
 
@@ -373,7 +373,7 @@ func (c *LogContext) ErrorWithStacktrace(lines ...string) {
 }
 
 // ErrorWithStacktraceF logs and error with the stack trace.
-func (c *LogContext) ErrorWithStacktraceF(format string, args ...interface{}) {
+func (c *LogContext) ErrorWithStacktraceF(format string, args ...any) {
 	c.ErrorWithStacktrace(strs.Fmt(format, args...))
 }
 
@@ -382,18 +382,18 @@ func (c *LogContext) Panic(lines ...string) {
 	m := FormatMessage(errorSuffix, indent, lines...)
 
 	if c.level <= errorLevel {
-		fmt.Fprint(c.error, m, "\n")
+		_, _ = fmt.Fprint(c.error, m, "\n")
 	}
 
 	panic(GithooksFailure{m})
 }
 
 // PanicF logs an error and calls panic with a GithooksFailure.
-func (c *LogContext) PanicF(format string, args ...interface{}) {
+func (c *LogContext) PanicF(format string, args ...any) {
 	m := FormatMessageF(errorSuffix, indent, format, args...)
 
 	if c.level <= errorLevel {
-		fmt.Fprint(c.error, m, "\n")
+		_, _ = fmt.Fprint(c.error, m, "\n")
 	}
 
 	panic(GithooksFailure{m})
@@ -455,20 +455,20 @@ func (c *LogContext) AddFileWriter(file *os.File) {
 	}
 }
 
-// Remove a potentially added file writer.
+// RemoveFileWriter a potentially added file writer.
 func (c *LogContext) RemoveFileWriter() {
 	if c.file != nil {
 		c.setupWriters()
-		c.file.Close()
+		_ = c.file.Close()
 	}
 
 	c.file = nil
 }
 
-// Moves the the write pointer to the end of the file.
+// MoveFileWriterToEnd the the write pointer to the end of the file.
 func (c *LogContext) MoveFileWriterToEnd() {
 	if c.file != nil {
-		_, _ = c.file.Seek(0, 2) // nolint: mnd
+		_, _ = c.file.Seek(0, 2) //nolint:mnd
 	}
 }
 
@@ -478,16 +478,16 @@ func FormatMessage(suffix string, indent string, lines ...string) string {
 }
 
 // FormatMessageF formats  several lines with a suffix and indent.
-func FormatMessageF(suffix string, indent string, format string, args ...interface{}) string {
+func FormatMessageF(suffix string, indent string, format string, args ...any) string {
 	s := suffix + strs.Fmt(format, args...)
-	return strings.ReplaceAll(s, "\n", "\n"+indent) // nolint:nlreturn
+	return strings.ReplaceAll(s, "\n", "\n"+indent) //nolint:nlreturn
 }
 
-// FormatMessage formats  several lines with a suffix and indent.
+// FormatInfo formats  several lines with a suffix and indent.
 func FormatInfo(lines ...string) string {
 	return FormatMessage(infoSuffix, indent, lines...)
 }
-func FormatInfoF(format string, args ...interface{}) string {
+func FormatInfoF(format string, args ...any) string {
 	return FormatMessageF(infoSuffix, indent, format, args...)
 }
 
