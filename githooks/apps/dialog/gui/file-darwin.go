@@ -10,11 +10,10 @@ import (
 	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
 
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
-	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 )
 
-func initFiltersOSAScript(filters []set.FileFilter) []string {
+func initFiltersOSAScript(filters []sets.FileFilter) []string {
 	var filter []string
 	for _, f := range filters {
 		for _, p := range f.Patterns {
@@ -77,7 +76,7 @@ func translateFileSave(f *sets.FileSave) (d gmac.FileData, err error) {
 	return
 }
 
-func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
+func ShowFileSave(ctx context.Context, s *sets.FileSave) (res.File, error) {
 
 	data, err := translateFileSave(s)
 	if err != nil {
@@ -104,7 +103,7 @@ func ShowFileSave(ctx context.Context, s *set.FileSave) (res.File, error) {
 	return res.File{}, err
 }
 
-func ShowFileSelection(ctx context.Context, s *set.FileSelection) (res.File, error) {
+func ShowFileSelection(ctx context.Context, s *sets.FileSelection) (res.File, error) {
 
 	data, err := translateFileSelection(s)
 	if err != nil {

@@ -10,7 +10,6 @@ import (
 	gmac "github.com/gabyx/githooks/githooks/apps/dialog/gui/darwin"
 	gunix "github.com/gabyx/githooks/githooks/apps/dialog/gui/unix"
 	res "github.com/gabyx/githooks/githooks/apps/dialog/result"
-	set "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	sets "github.com/gabyx/githooks/githooks/apps/dialog/settings"
 	cm "github.com/gabyx/githooks/githooks/common"
 	strs "github.com/gabyx/githooks/githooks/strings"
@@ -80,7 +79,7 @@ func getChoicesOSAScript(output string, maxOptions int) (indices []uint) {
 	return
 }
 
-func ShowOptions(ctx context.Context, opts *set.Options) (r res.Options, err error) {
+func ShowOptions(ctx context.Context, opts *sets.Options) (r res.Options, err error) {
 	zenity, err := gunix.GetZenityExecutable()
 	if err == nil {
 		return ShowOptionsZenity(ctx, zenity, opts)
