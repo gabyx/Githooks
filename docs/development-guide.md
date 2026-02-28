@@ -37,8 +37,8 @@ runs all linting inside this repository containerized.
 
 ## Tests and Debugging
 
-The integration tests in [`tests`](../tests) are containerized (legacy
-decision). To run the tests you can use:
+The integration tests in [`tests`](../tests) are containerized (legacy decision,
+see [`.env`](../.env.tmpl) file). To run the tests you can use:
 
 Running the integration tests you can use `just test *args` which runs
 
