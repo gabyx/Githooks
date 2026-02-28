@@ -21,7 +21,11 @@ const deploySettingsVersion = 1
 
 // IDeploySettings is the common interface for all deploy settings.
 type IDeploySettings interface {
-	Download(log cm.ILogContext, versionTag string, dir string) error
+	// Download downloads the version with `versionTag` into `dir`.
+	// The `token` is an optional authentication token (e.g. GH_TOKEN)
+	// used to authenticate API requests and file downloads. If empty,
+	// unauthenticated requests are made.
+	Download(log cm.ILogContext, versionTag string, dir string, token string) error
 }
 
 // LoadDeploySettings load the deploy settings from `file`.

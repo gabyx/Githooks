@@ -31,9 +31,11 @@ type LocalDeploySettings struct {
 	PublicPGP string
 }
 
-// Download downloads the Githooks from a template URL and
+// Download downloads the Githooks from a local template path and
 // extracts it into `dir`.
-func (s *LocalDeploySettings) Download(log cm.ILogContext, versionTag string, dir string) error {
+// The `token` parameter is unused for local deploy settings but is
+// required by the IDeploySettings interface.
+func (s *LocalDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
 	// Copy everything to director `dir`
 	pathTmpl := template.Must(template.New("").Parse(s.PathTemplate))
 
