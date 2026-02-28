@@ -34,6 +34,13 @@ parse_args() {
         elif [ "$p" = "--prod" ]; then
             DEBUG_TAG=""
             LD_FLAGS+=("-ldflags" "-s -w") # strip debug information
+        elif [ "$p" = "--help" ] || [ "$p" = "-h" ]; then
+            echo "Usage 'build.sh'
+                [--bin-dir <dir>]
+                [--build-tags <tags>]
+                [--coverage]
+                [--prod]"
+            exit 0
         else
             echo "! Unknown argument \`$p\`" >&2
             return 1
