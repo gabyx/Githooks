@@ -671,7 +671,7 @@ executing or affect its behavior. These should mostly only be used locally and
 not globally be defined.
 
 | Environment Variables                          | Effect                                                                                                                    |
-|------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `GITHOOKS_OS` (defined by Githooks)            | The operating system. <br>See [Exported Environment Variables](#exported-environment-variables).                          |
 | `GITHOOKS_ARCH` (defined by Githooks)          | The system architecture. <br>See [Exported Environment Variables](#exported-environment-variables).                       |
 | `STAGED_FILES` (defined by Githooks)           | All staged files. Only set in `pre-commit`, `prepare-commit-msg` and `commit-msg` hook.                                   |

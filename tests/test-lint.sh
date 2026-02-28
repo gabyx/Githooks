@@ -51,6 +51,9 @@ EOF
 # Is mounted to `/tmp`
 run_docker volume create gh-test-tmp
 
+# Always show diffs.
+export GH_SHOW_DIFFS=true
+
 mountArg=":ro"
 if [ "${GH_FIX:-}" = "true" ]; then
     mountArg=""

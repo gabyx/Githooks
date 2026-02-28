@@ -23,7 +23,12 @@ type GiteaDeploySettings struct {
 // Download downloads the version with `versionTag` into `dir` from a Gitea instance.
 // The `token` is an optional authentication token used to authenticate Gitea API
 // requests and file downloads. If empty, unauthenticated requests are made.
-func (s *GiteaDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
+func (s *GiteaDeploySettings) Download(
+	log cm.ILogContext,
+	versionTag string,
+	dir string,
+	token string,
+) error {
 	return downloadGitea(log, s.APIUrl, s.Owner, s.Repository, versionTag, dir, s.PublicPGP, token)
 }
 

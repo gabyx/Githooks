@@ -29,7 +29,12 @@ type GithubDeploySettings struct {
 // Download downloads the version with `versionTag` to `dir` from a Github instance.
 // The `token` is an optional authentication token used to authenticate GitHub API
 // requests and file downloads. If empty, unauthenticated requests are made.
-func (s *GithubDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
+func (s *GithubDeploySettings) Download(
+	log cm.ILogContext,
+	versionTag string,
+	dir string,
+	token string,
+) error {
 	return downloadGithub(log, s.Owner, s.Repository, versionTag, dir, s.PublicPGP, token)
 }
 

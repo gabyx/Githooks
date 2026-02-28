@@ -35,7 +35,12 @@ type LocalDeploySettings struct {
 // extracts it into `dir`.
 // The `token` parameter is unused for local deploy settings but is
 // required by the IDeploySettings interface.
-func (s *LocalDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
+func (s *LocalDeploySettings) Download(
+	log cm.ILogContext,
+	versionTag string,
+	dir string,
+	token string,
+) error {
 	// Copy everything to director `dir`
 	pathTmpl := template.Must(template.New("").Parse(s.PathTemplate))
 

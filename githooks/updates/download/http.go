@@ -28,7 +28,12 @@ type HTTPDeploySettings struct {
 // extracts it into `dir`.
 // The `token` is an optional authentication token for HTTP requests.
 // If empty, unauthenticated requests are made.
-func (s *HTTPDeploySettings) Download(log cm.ILogContext, versionTag string, dir string, token string) error {
+func (s *HTTPDeploySettings) Download(
+	log cm.ILogContext,
+	versionTag string,
+	dir string,
+	token string,
+) error {
 	cm.Panic("Not implemented.")
 
 	return nil
