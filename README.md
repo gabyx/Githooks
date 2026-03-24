@@ -1009,9 +1009,9 @@ nix profile install "github:gabyx/githooks?dir=nix&ref=v3.0.4"
 
 > [!WARNING]
 >
-> You should never install a major version upgrade as Githooks should be
+> **You should never install a major version upgrade as Githooks should be
 > uninstalled completely before. The uninstaller on any version however should
-> work backward-compatible.\*\*
+> work backward-compatible.**
 
 and then use it in your packages, e.g. here with home-manager by doing:
 
@@ -1023,6 +1023,25 @@ in {
   home.packages = [githooks]
 }
 ```
+
+> [!NOTE]
+>
+> Having a `read-only` global Git config will fail the installer. Do the
+> following instead:
+>
+> ```bash
+> # Create a temporary home folder, just for install.
+> mkdir -p "/a/b/c/githooks-install"
+> HOME=/a/b/c/githooks-install githooks-cli installer ...
+> ```
+>
+> then add the Git config file `/a/b/c/githooks-install/.gitconfig` to the
+> include list in your global Git config like:
+>
+> ```ini
+> [include]
+>    path = /a/b/c/githooks-install/.gitconfig
+> ```
 
 ### Procedure
 
