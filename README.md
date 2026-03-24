@@ -1035,13 +1035,8 @@ in {
 > HOME=/a/b/c/githooks-install githooks-cli installer ...
 > ```
 >
-> then add the Git config file `/a/b/c/githooks-install/.gitconfig` to the
-> include list in your global Git config like:
->
-> ```ini
-> [include]
->    path = /a/b/c/githooks-install/.gitconfig
-> ```
+> then add the contents of the config file `/a/b/c/githooks-install/.gitconfig`
+> to your read-only global Git config file.
 
 ### Procedure
 
