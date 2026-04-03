@@ -324,7 +324,7 @@ The supported hooks are listed below. Refer to the
 [Git documentation](https://git-scm.com/docs/githooks) for information on what
 they do and what parameters they receive.
 
-It is receommended to use `--maintained-hooks` options during install
+It is recommended to use `--maintained-hooks` options during install
 ([1](#installation-mode-normal), [2](#installing-or-removing-run-wrappers)) to
 only select the hooks which are really needed, since executing the Githooks
 manager for all hooks might slow down Git operations (especially for
