@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+set -u
+
+DIR=$(cd "$(dirname "$0")" && pwd)
+. "$DIR/.export-staged"
+
+assertStaged
+
+repoDir="$DIR/../.."
+runTests="false"
+
+for file in $STAGED_FILES; do
+  case "$file" in
+    githooks/*.go | githooks/go.mod | githooks/go.sum)
+      runTests="true"
+      break
+      ;;
+  esac
+done
+
+if [ "$runTests" != "true" ]; then
+  echo "* Go unit tests skipped - no staged Go changes" >&2
+  exit 0
+fi
+
+if ! command -v go >/dev/null 2>&1; then
+  echo "! Go is required for unit tests. Enter the Nix shell with 'nix develop'." >&2
+  exit 1
+fi
+
+cd "$repoDir/githooks" || exit 1
+
+if CGO_ENABLED=0 go test -mod=vendor ./...; then
+  echo "* Go unit tests OK" >&2
+else
+  echo "! Go unit tests failed" >&2
+  exit 1
+fi
