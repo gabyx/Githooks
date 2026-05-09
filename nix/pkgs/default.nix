@@ -11,6 +11,7 @@ buildGo126Module rec {
   version = (lib.importJSON ./version.json).version;
 
   src = ../../.;
+
   # In nixpkgs that should be:
   # fetchFromGitHub {
   #   owner = "gabyx";
@@ -20,12 +21,12 @@ buildGo126Module rec {
   # };
 
   modRoot = "./githooks";
-  vendorHash = "sha256-ZcDD4Z/thtyCvXg6GzzKC/FSbh700QEaqXU8FaZaZc4=";
+  vendorHash = "sha256-ULPbM/6DqyVPwq68MnpVesS3w1uxKBbVIZ7i5Kng+1Y=";
   nativeBuildInputs = [ makeWrapper ];
   buildInputs = [ git ];
 
   ldflags = [
-    "-s" # Disable symbole table.
+    "-s" # Disable symbol table.
     "-w" # Disable DWARF generation.
   ];
 
