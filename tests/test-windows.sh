@@ -13,7 +13,7 @@ cat <<'EOF' | run_docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/dotnet/framework/runtime:4.8-windowsservercore-ltsc2022
 
 
-# $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261.26
+# $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261324
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 RUN iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
