@@ -1,12 +1,11 @@
 {
   lib,
-  buildGo124Module,
-  # fetchFromGitHub,
+  buildGo126Module,
   git,
   testers,
   makeWrapper,
 }:
-buildGo124Module rec {
+buildGo126Module rec {
   pname = "githooks";
 
   version = (lib.importJSON ./version.json).version;

@@ -69,7 +69,7 @@
             curl
             just
 
-            go_1_24
+            go_1_26
             golines
             gotools
             gopls

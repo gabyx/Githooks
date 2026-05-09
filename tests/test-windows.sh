@@ -13,7 +13,7 @@ cat <<'EOF' | run_docker build --force-rm -t githooks:windows-lfs -f - .
 FROM mcr.microsoft.com/dotnet/framework/runtime:4.8-windowsservercore-ltsc2022
 
 
-# $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261324
+# $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261.26
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 RUN iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -34,7 +34,7 @@ RUN $newPath = ('{0}\bin;C:\go\bin;{1}' -f $env:GOPATH, $env:PATH); \
 # doing this first to share cache across versions more aggressively
 
 # Check hash below for download.
-ENV GOLANG_VERSION 1.24.10
+ENV GOLANG_VERSION 1.26.3
 
 RUN $url = ('https://go.dev/dl/go{0}.windows-amd64.zip' -f $env:GOLANG_VERSION); \
     Write-Host ('Downloading {0} ...' -f $url); \

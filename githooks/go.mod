@@ -1,6 +1,6 @@
 module github.com/gabyx/githooks/githooks
 
-go 1.24.0
+go 1.26.0
 
 require (
 	code.gitea.io/sdk/gitea v0.15.0
