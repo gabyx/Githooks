@@ -86,7 +86,7 @@ EOF
 run_docker run --rm \
     -a stdout \
     -a stderr "githooks:windows-lfs" \
-    "C:/Program Files/Git/bin/sh.exe" ./exec-steps.sh --skip-docker-check "$@"
+    "C:/Program Files/Git/bin/bash.exe" ./exec-steps.sh --skip-docker-check "$@"
 
 RESULT=$?
 
