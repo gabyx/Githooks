@@ -31,7 +31,7 @@ fi
 
 # shellcheck disable=SC2016
 mkdir -p .githooks/pre-commit &&
-    echo "echo \"'\$(pwd)'\" > '$GH_TEST_TMP/test098.out'" >.githooks/pre-commit/test &&
+    echo "echo \"\$(pwd)\" > '$GH_TEST_TMP/test098.out'" >.githooks/pre-commit/test &&
     git add .githooks ||
     exit 1
 expectedPwd=$(cd "$GH_TEST_TMP/test098" && pwd)
@@ -42,11 +42,8 @@ echo "test" >testing.txt &&
 
 ACCEPT_CHANGES=A git commit -m 'testing hooks' || exit 1
 
-if ! grep -q "'$expectedPwd'" "$GH_TEST_TMP/test098.out"; then
-    echo "! Unexpected target content != '$expectedPwd'"
-    cat "$GH_TEST_TMP/test098.out"
-    exit 1
-fi
+check_paths_are_equal "$expectedPwd" "$(cat "$GH_TEST_TMP/test098.out")" \
+    "! Unexpected target content != '$expectedPwd' (1)"
 
 # Add another workspace
 git worktree add -b example-a "$GH_TEST_TMP/test098-A" HEAD || exit 2
@@ -57,13 +54,11 @@ cd "$GH_TEST_TMP/test098-A" &&
     git add testing.txt ||
     exit 3
 
+rm "$GH_TEST_TMP/test098.out" || true
 ACCEPT_CHANGES=A git commit -m 'testing hooks (from A)' || exit 3
 
-if ! grep -q "'$expectedPwd'" "$GH_TEST_TMP/test098.out"; then
-    echo "! Unexpected target content != '$expectedPwd'"
-    cat "$GH_TEST_TMP/test098.out"
-    exit 3
-fi
+check_paths_are_equal "$expectedPwd" "$(cat "$GH_TEST_TMP/test098.out")" \
+    echo "! Unexpected target content != '$expectedPwd' (2)"
 
 # Add another workspace
 git worktree add -b example-b "$GH_TEST_TMP/test098-B" HEAD || exit 2
@@ -74,10 +69,8 @@ cd "$GH_TEST_TMP/test098-B" &&
     git add testing.txt ||
     exit 4
 
+rm "$GH_TEST_TMP/test098.out" || true
 ACCEPT_CHANGES=A git commit -m 'testing hooks (from B)' || exit 4
 
-if ! grep -q "'$expectedPwd'" "$GH_TEST_TMP/test098.out"; then
-    echo "! Unexpected target content != '$expectedPwd'"
-    cat "$GH_TEST_TMP/test098.out"
-    exit 4
-fi
+check_paths_are_equal "$expectedPwd" "$(cat "$GH_TEST_TMP/test098.out")" \
+    "! Unexpected target content != '$expectedPwd' (3)"
