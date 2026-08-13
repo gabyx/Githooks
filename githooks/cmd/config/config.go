@@ -331,6 +331,67 @@ func runSharedRepos(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) 
 	}
 }
 
+func runTrustedRemotes(ctx *ccm.CmdContext, opts *SetOptions, gitOpts *GitOptions) {
+	opt := hooks.GitCKTrustedRemotes
+
+	localOrGlobal := "local"
+	if gitOpts.Global {
+		localOrGlobal = "global"
+	}
+
+	switch {
+	case opts.Set:
+		scope := wrapToGitScope(ctx.Log, gitOpts)
+		for i := range opts.Values {
+			err := ctx.GitX.AddConfig(opt, opts.Values[i], scope)
+			ctx.Log.AssertNoErrorPanicF(err, "Could not add %s trusted remote.", localOrGlobal)
+		}
+		ctx.Log.InfoF("Added '%v' %s trusted remotes.", len(opts.Values), localOrGlobal)
+
+	case opts.Reset:
+		scope := wrapToGitScope(ctx.Log, gitOpts)
+		err := ctx.GitX.UnsetConfig(opt, scope)
+		ctx.Log.AssertNoErrorPanicF(err, "Could not unset %s trusted remotes.", localOrGlobal)
+		ctx.Log.InfoF("Removed all %s trusted remotes.", localOrGlobal)
+
+	case opts.Print:
+		list := func(p []string) string {
+			if len(p) == 0 {
+				return "[0]: none"
+			}
+
+			return strs.Fmt("[%v]:\n%s", len(p),
+				strings.Join(strs.Map(p,
+					func(s string) string { return strs.Fmt("%s '%s'", cm.ListItemLiteral, s) }),
+					"\n"))
+		}
+
+		if gitOpts.Local {
+			ctx.Log.InfoF("Local trusted remotes %s",
+				list(ctx.GitX.GetConfigAll(opt, git.LocalScope)))
+		}
+
+		if gitOpts.Global {
+			ctx.Log.InfoF("Global trusted remotes %s",
+				list(ctx.GitX.GetConfigAll(opt, git.GlobalScope)))
+		}
+
+		// Report the effect on the current repository, if we are inside one.
+		if _, _, _, err := ctx.GitX.GetRepoRoot(); err == nil {
+			if isTrusted, pattern := hooks.IsRemoteTrusted(ctx.GitX); isTrusted {
+				ctx.Log.InfoF(
+					"The current repository is trusted by pattern '%s'.", pattern)
+			} else {
+				ctx.Log.Info(
+					"The current repository is not trusted by any trusted remote.")
+			}
+		}
+
+	default:
+		cm.Panic("Wrong arguments.")
+	}
+}
+
 func runCloneURL(ctx *ccm.CmdContext, opts *SetOptions) {
 	switch {
 	case opts.Set:
@@ -933,6 +994,58 @@ each containing a clone URL of a shared hook repository which gets added.`,
 	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, sharedCmd))
 }
 
+func configTrustedRemotesCmd(
+	ctx *ccm.CmdContext,
+	configCmd *cobra.Command,
+	setOpts *SetOptions,
+	gitOpts *GitOptions,
+) {
+	trustedRemotesCmd := &cobra.Command{
+		Use:   "trusted-remotes [flags] [<pattern>...]",
+		Short: "Updates the list of trusted remotes.",
+		Long: `Updates the list of glob patterns which are matched against
+the url of the remote '` + hooks.TrustedRemoteName + `' of a repository.
+
+Every repository whose remote url matches any of these patterns trusts all
+its current and future hooks automatically, meaning no trust prompt is shown
+and the trust marker file '<repoPath>/` + hooks.HooksDirName + `/trust-all' is not needed.
+
+The url is matched as configured in 'remote.` + hooks.TrustedRemoteName + `.url',
+meaning 'https://github.com/org/repo.git' and 'git@github.com:org/repo.git' are
+different urls which may need separate patterns. The separator is always '/',
+therefore '*' does not match over '/' but '**' does.
+
+A repository whose trust setting was explicitly set by the user
+(see 'git hooks config trust-all') is not affected by these patterns.
+
+Only add remotes whose current and future hooks you fully trust, since
+Githooks will run them without any confirmation.
+
+The '--add' option accepts multiple '<pattern>' arguments.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if !gitOpts.Local && !gitOpts.Global {
+				_, _, _, err := ctx.GitX.GetRepoRoot()
+				gitOpts.Global = true
+				gitOpts.Local = setOpts.Print && err == nil
+			} else if gitOpts.Local {
+				ccm.AssertRepoRoot(ctx)
+			}
+
+			runTrustedRemotes(ctx, setOpts, gitOpts)
+		}}
+
+	optsPSR := createOptionMap(true, false, true)
+	optsPSR.Set = "add"
+	optsPSR.SetDesc = "Adds given trusted remote patterns '<pattern>'s."
+	trustedRemotesCmd.Flags().
+		BoolVar(&gitOpts.Local, "local", false, "Use the local Git configuration.")
+	trustedRemotesCmd.Flags().
+		BoolVar(&gitOpts.Global, "global", false, "Use the global Git configuration (default).")
+
+	configSetOptions(trustedRemotesCmd, setOpts, &optsPSR, ctx.Log, 1, -1)
+	configCmd.AddCommand(ccm.SetCommandDefaults(ctx.Log, trustedRemotesCmd))
+}
+
 func configSkipNonExistingSharedHooks(
 	ctx *ccm.CmdContext,
 	configCmd *cobra.Command,
@@ -1141,6 +1254,8 @@ func NewCmd(ctx *ccm.CmdContext) *cobra.Command {
 
 	configSharedCmd(ctx, configCmd, &setOpts, &gitOpts)
 	configDisableSharedHooksUpdate(ctx, configCmd, &setOpts, &gitOpts)
+
+	configTrustedRemotesCmd(ctx, configCmd, &setOpts, &gitOpts)
 
 	configSkipNonExistingSharedHooks(ctx, configCmd, &setOpts, &gitOpts)
 	configFailUntrustedHooks(ctx, configCmd, &setOpts, &gitOpts)

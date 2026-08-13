@@ -35,9 +35,73 @@ func SetTrustAllSetting(gitx *git.Context, enable bool, reset bool) error {
 	}
 }
 
+// TrustedRemoteName is the name of the remote whose url is matched
+// against the trusted remote patterns (see `IsRemoteTrusted`).
+const TrustedRemoteName = "origin"
+
+// GetTrustedRemotes gets the trusted remote url patterns in `scope`.
+func GetTrustedRemotes(gitx *git.Context, scope git.ConfigScope) []string {
+	return gitx.GetConfigAll(GitCKTrustedRemotes, scope)
+}
+
+// matchesTrustedRemote reports if `url` matches any glob pattern in
+// `patterns` together with the first pattern which matched.
+// An empty `url` never matches, such that a repository without a
+// remote is never trusted by a pattern like `*`.
+func matchesTrustedRemote(patterns []string, url string) (isTrusted bool, pattern string) {
+	if strs.IsEmpty(url) {
+		return
+	}
+
+	for _, p := range patterns {
+		if strs.IsEmpty(p) {
+			continue
+		}
+
+		// Urls are always separated by `/`, therefore match
+		// platform independent of the path separator.
+		matched, err := cm.GlobMatchSlashes(p, url)
+		cm.DebugAssertNoErrorF(err, "Malformed trusted remote pattern '%s'.", p)
+
+		if err != nil {
+			continue
+		}
+
+		if matched {
+			return true, p
+		}
+	}
+
+	return
+}
+
+// IsRemoteTrusted tells if the url of the remote `TrustedRemoteName` of the
+// current repository matches any pattern in the trusted remotes
+// configuration `GitCKTrustedRemotes` together with the pattern which matched.
+// The url is matched as configured, meaning e.g. `https://` and `ssh://` urls
+// of the same repository need separate patterns.
+func IsRemoteTrusted(gitx *git.Context) (isTrusted bool, pattern string) {
+	patterns := GetTrustedRemotes(gitx, git.Traverse)
+	if len(patterns) == 0 {
+		return
+	}
+
+	return matchesTrustedRemote(
+		patterns,
+		gitx.GetConfig("remote."+TrustedRemoteName+".url", git.LocalScope))
+}
+
 // IsRepoTrusted tells if the repository `repoPath` is trusted.
-// It is only trusted if the trust marker is present and
-// the `trustAll` settings is set to `trusted`.
+// It is trusted if either
+//   - the trust marker is present and the `trustAll` setting is set to
+//     `trusted`, or
+//   - the url of the remote `TrustedRemoteName` matches any trusted remote
+//     pattern (see `IsRemoteTrusted`), which needs neither the trust marker
+//     nor any user interaction.
+//
+// An explicit `trustAll` setting in the repository always takes precedence
+// over the trusted remotes configuration, meaning a repository whose trust
+// was denied by the user stays untrusted.
 // On any error `false` is reported together with the error.
 func IsRepoTrusted(
 	gitx *git.Context,
@@ -48,6 +112,12 @@ func IsRepoTrusted(
 		hasTrustFile = true
 		isTrusted, trustAllSet = GetTrustAllSetting(gitx)
 	}
+
+	if isTrusted || trustAllSet {
+		return
+	}
+
+	isTrusted, _ = IsRemoteTrusted(gitx)
 
 	return
 }

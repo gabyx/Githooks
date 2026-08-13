@@ -29,6 +29,14 @@ func GlobMatch(pattern string, path string) (bool, error) {
 	return glob.Match(pattern, path)
 }
 
+// GlobMatchSlashes matches a pattern against a string which is always
+// separated by forward slashes `/`, such as an url.
+// In contrast to `GlobMatch` the result does not depend on the platforms
+// path separator, meaning `*` never matches over `/` and `**` does.
+func GlobMatchSlashes(pattern string, s string) (bool, error) {
+	return glob.Match(pattern, s)
+}
+
 // Globs represents one filepath glob, with its elements joined by "**".
 type globs []string
 
