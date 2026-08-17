@@ -3,6 +3,7 @@ package hooks
 import (
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"testing"
 
@@ -10,6 +11,25 @@ import (
 	"github.com/gabyx/githooks/githooks/container"
 	"github.com/stretchr/testify/assert"
 )
+
+func requireDocker(t *testing.T) {
+	t.Helper()
+
+	if _, err := exec.LookPath("docker"); err != nil {
+		if os.Getenv("CI") != "" {
+			t.Fatalf("docker is required in CI: %v", err)
+		}
+		t.Skipf("docker is not available: %v", err)
+	}
+
+	output, err := exec.Command("docker", "info").CombinedOutput()
+	if err != nil {
+		if os.Getenv("CI") != "" {
+			t.Fatalf("docker daemon is required in CI: %v\n%s", err, output)
+		}
+		t.Skipf("docker daemon is not available: %v", err)
+	}
+}
 
 func TestLoadImagesConfig(t *testing.T) {
 	file, err := os.CreateTemp("", "image.yaml")
@@ -69,6 +89,8 @@ images:
 }
 
 func TestUpdateImages(t *testing.T) {
+	requireDocker(t)
+
 	repo, err := os.MkdirTemp("", "repo")
 	assert.NoError(t, err)
 	defer func() { _ = os.RemoveAll(repo) }()
