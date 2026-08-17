@@ -19,14 +19,16 @@ format:
 # Clean everything.
 [group("general")]
 clean:
-  cd "{{root_dir}}" && \
-    githooks/scripts/clean.sh
+  githooks/scripts/clean.sh
 
 # Build Githooks.
 [group("build")]
 build *args:
-  cd "{{root_dir}}" && \
-    githooks/scripts/build.sh "$@"
+  githooks/scripts/build.sh "$@"
+
+[group("run")]
+run *args: build
+  githooks/bin/githooks-cli "$@"
 
 # Build Githooks with Nix.
 [group("build")]
