@@ -66,9 +66,11 @@ func NewCtxAt(cwd string, options ...CtxOption) *Context {
 // working dir `cwd` and sanitized environment.
 func NewCtxSanitizedAt(cwd string, options ...CtxOption) *Context {
 	options = append(
-		[]CtxOption{WithModifications(func(builder *cm.CmdContextBuilder) *cm.CmdContextBuilder {
-			return builder.SetEnv(SanitizeEnv(os.Environ()))
-		})}, options...,
+		[]CtxOption{
+			// These env. changes must come first.
+			WithModifications(func(builder *cm.CmdContextBuilder) *cm.CmdContextBuilder {
+				return builder.SetEnv(SanitizeEnv(os.Environ()))
+			})}, options...,
 	)
 
 	return NewCtxAt(cwd, options...)
