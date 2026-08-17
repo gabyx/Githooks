@@ -33,12 +33,10 @@ run *args: build
 # Build Githooks with Nix.
 [group("build")]
 build-nix *args:
-  cd "{{root_dir}}" && \
     nix build -L "./nix#default" -o ./nix/result {{args}}
 
 # Generate all docs.
 doc *args:
-  cd "{{root_dir}}" && \
     githooks/scripts/build-doc.sh "$@"
 
 # List all test.
@@ -53,7 +51,6 @@ list-tests:
 # Run all integration tests for `alpine-user`.
 [group("integration-tests")]
 test-user *args:
-  cd "{{root_dir}}" && \
     tests/test-alpine-user.sh "$@"
 
 # Run all unit tests for `alpine`.
@@ -70,9 +67,9 @@ coverage *args:
 
 # Lint everything (local).
 [group("lint")]
-lint-local fix="false":
-  cd "{{root_dir}}" && \
-
+lint-local:
+  cd githooks && \
+    golangci-lint run --config "{{root_dir}}/.golangci.yaml" --fix ./...
 
 # Lint everything (dockerized).
 [group("lint")]
