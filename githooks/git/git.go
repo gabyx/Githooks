@@ -21,23 +21,57 @@ type Context struct {
 	cache *ConfigCache
 }
 
+type CtxOption func(*opts)
+
+type opts struct {
+	builderF func(builder *cm.CmdContextBuilder) *cm.CmdContextBuilder
+}
+
+func (c *opts) Apply(options ...CtxOption) {
+	for _, f := range options {
+		f(c)
+	}
+}
+
+// WithModifications uses a function `f` to modify the builder.
+func WithModifications(f func(builder *cm.CmdContextBuilder) *cm.CmdContextBuilder) CtxOption {
+	return func(o *opts) {
+		old := o.builderF
+		if old != nil {
+			o.builderF = func(b *cm.CmdContextBuilder) *cm.CmdContextBuilder {
+				b = old(b)
+				return f(b)
+			}
+		} else {
+			o.builderF = f
+		}
+	}
+}
+
 // NewCtxAt creates a git command execution context with
 // working dir `cwd`.
-func NewCtxAt(cwd string) *Context {
-	return &Context{cm.NewCommandCtxBuilder().SetBaseCmd("git").SetCwd(cwd).Build(), nil}
+func NewCtxAt(cwd string, options ...CtxOption) *Context {
+	var o opts
+	o.Apply(options...)
+
+	builder := cm.NewCommandCtxBuilder().SetBaseCmd("git").SetCwd(cwd)
+	if o.builderF != nil {
+		builder = o.builderF(builder)
+	}
+
+	return &Context{builder.Build(), nil}
 }
 
 // NewCtxSanitizedAt creates a git command execution context with
 // working dir `cwd` and sanitized environment.
-func NewCtxSanitizedAt(cwd string) *Context {
-	return &Context{
-		cm.NewCommandCtxBuilder().
-			SetBaseCmd("git").
-			SetCwd(cwd).
-			SetEnv(SanitizeEnv(os.Environ())).
-			Build(),
-		nil,
-	}
+func NewCtxSanitizedAt(cwd string, options ...CtxOption) *Context {
+	options = append(
+		[]CtxOption{WithModifications(func(builder *cm.CmdContextBuilder) *cm.CmdContextBuilder {
+			return builder.SetEnv(SanitizeEnv(os.Environ()))
+		})}, options...,
+	)
+
+	return NewCtxAt(cwd, options...)
 }
 
 // NewCtx creates a git command execution context
@@ -52,7 +86,7 @@ func NewCtxSanitized() *Context {
 	return NewCtxSanitizedAt("")
 }
 
-// SetConfigCache sets the Git config cache to use.
+// InitConfigCache sets the Git config cache to use.
 func (c *Context) InitConfigCache(filter func(string) bool) error {
 	cache, err := NewConfigCache(*c, filter)
 
