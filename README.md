@@ -27,8 +27,8 @@ successor of the [original implementation](https://github.com/rycus86/githooks)
 > This Git hook manager does **one job and only that**: running Git hooks. It
 > will **never** maintain your tools or support language toolchains and all
 > other sidestories you might have to make your hooks execute. There are
-> solutions to this like [Nix ❤️‍🔥](https://nixos.org/) or container managers like `podman`
-> (or `docker` -> don't).
+> solutions to this like [Nix ❤️‍🔥](https://nixos.org/) or container managers like
+> `podman` (or `docker` -> don't).
 
 To make this work, the installer creates run-wrappers for Githooks that are
 installed into the `.git/hooks` folders on request (by default). There's more
