@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"testing"
 
@@ -11,7 +12,12 @@ import (
 
 func TestGithooksCompliesWithGit(t *testing.T) {
 	doc, err := htmlquery.LoadURL("https://git-scm.com/docs/githooks")
-	assert.NoError(t, err, "Could not load doc.")
+	if err != nil {
+		if os.Getenv("CI") != "" {
+			t.Fatalf("could not load Git hooks documentation in CI: %v", err)
+		}
+		t.Skipf("could not load Git hooks documentation: %v", err)
+	}
 
 	list := htmlquery.Find(doc, `//h2[@id="_hooks"]/following-sibling::div//h3`)
 	assert.NotEmpty(t, list)
