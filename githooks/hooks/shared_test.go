@@ -61,14 +61,11 @@ func TestBranchSyntaxStripping(t *testing.T) {
 }
 
 func TestSharedConfigVersion(t *testing.T) {
-	f, e := os.CreateTemp("", "")
+	d := t.TempDir()
+	f, e := os.CreateTemp(d, "")
 	assert.NoError(t, e)
 
-	defer func() { _ = os.Remove(f.Name()) }()
-	_, e = io.WriteString(f,
-		`
-version: 999999
-	  `)
+	_, e = io.WriteString(f, "version: 999999")
 	assert.NoError(t, e)
 
 	_, e = loadRepoSharedHooks(f.Name())

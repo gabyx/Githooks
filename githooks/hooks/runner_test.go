@@ -97,14 +97,11 @@ func TestEnvReplace(t *testing.T) {
 }
 
 func TestRunnerConfigVersion(t *testing.T) {
-	f, e := os.CreateTemp("", "")
+	d := t.TempDir()
+	f, e := os.CreateTemp(d, "")
 	assert.NoError(t, e)
 
-	defer func() { _ = os.Remove(f.Name()) }()
-	_, e = io.WriteString(f,
-		`
-version: 999999
-	  `)
+	_, e = io.WriteString(f, "version: 999999")
 	assert.NoError(t, e)
 
 	_, e = loadRunnerConfig(f.Name())
