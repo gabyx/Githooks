@@ -30,7 +30,7 @@ func (c *CmdContextBuilder) Build() CmdContext {
 	return c.cmdCtx
 }
 
-// SetEnv sets the environment.
+// FromCtx sets the environment.
 func (c *CmdContextBuilder) FromCtx(cmdCtx CmdContext) *CmdContextBuilder {
 	c.cmdCtx.baseCmd = cmdCtx.baseCmd
 	c.cmdCtx.cwd = cmdCtx.cwd
@@ -43,6 +43,19 @@ func (c *CmdContextBuilder) FromCtx(cmdCtx CmdContext) *CmdContextBuilder {
 // SetEnv sets the environment.
 func (c *CmdContextBuilder) SetEnv(env []string) *CmdContextBuilder {
 	c.cmdCtx.env = env
+
+	return c
+}
+
+// AddEnv adds to the environment.
+func (c *CmdContextBuilder) AddEnv(env []string) *CmdContextBuilder {
+	if len(env) != 0 {
+		if c.cmdCtx.env == nil {
+			c.cmdCtx.env = os.Environ()
+		}
+		c.cmdCtx.env = append(c.cmdCtx.env, env...)
+
+	}
 
 	return c
 }
