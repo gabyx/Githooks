@@ -84,9 +84,9 @@ lint-fix: (lint "true")
 
 # Run all unittests.
 [group("unitest")]
-unittests:
+unittests *args:
   cd "{{root_dir}}" && \
-    tests/test-unittests.sh
+    tests/test-unittests.sh "$@"
 
 [group("release")]
 release-test *args:

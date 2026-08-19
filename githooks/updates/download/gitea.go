@@ -47,7 +47,7 @@ func downloadGitea(
 	publicPGP string,
 	token string) error {
 
-	var opts []func(*gitea.Client)
+	var opts []gitea.ClientOption
 	if token != "" {
 		opts = append(opts, gitea.SetToken(token))
 	}

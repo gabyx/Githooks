@@ -1,10 +1,10 @@
 package common
 
 import (
-	"golang.org/x/exp/constraints"
+	"cmp"
 )
 
-func Min[T constraints.Ordered](a, b T) T {
+func Min[T cmp.Ordered](a, b T) T {
 	if a < b {
 		return a
 	}
@@ -12,7 +12,7 @@ func Min[T constraints.Ordered](a, b T) T {
 	return b
 }
 
-func Max[T constraints.Ordered](a, b T) T {
+func Max[T cmp.Ordered](a, b T) T {
 	if a > b {
 		return a
 	}

@@ -57,7 +57,7 @@ cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
 args:
     - "my-file.py"
     - '${env:MONKEY}'
-    - "\${env:MONKEY}"
+    - "\\${env:MONKEY}"
     - "${git:githooks.monkey}"
     - "${git-g:githooks.monkey}"
     - "${git-s:githooks.monkey}"
@@ -90,7 +90,7 @@ cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
 args:
     - "my-file.py"
     - '${env:MONKEY}'
-    - "\${env:MONKEY}"
+    - "\\${env:MONKEY}"
     - "${git:githooks.monkey}"
     - "${git-l:githooks.monkey}"
     - "${git-g:githooks.monkey}"
@@ -115,7 +115,7 @@ cmd: "${env:GH_TEST_TMP}/test121/custom-runner.exe"
 args:
     - "my-file.py"
     - "${!env:MONKEY}"
-    - "\${env:MONKEY}"
+    - "\\${env:MONKEY}"
 version: 1
 EOF
 

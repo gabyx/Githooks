@@ -64,7 +64,7 @@ if [ $? -eq 0 ] || ! echo "$OUT" | grep -q "You cannot add a URL"; then
     exit 1
 fi
 
-echo "urls: - file:////$GH_TEST_TMP/shared/shared-cloned.git" >.githooks/.shared.yaml || exit 1
+echo "urls: [file:////$GH_TEST_TMP/shared/shared-cloned.git ]" >.githooks/.shared.yaml || exit 1
 
 # Invoke shared hooks update
 OUT=$("$GH_INSTALL_BIN_DIR/githooks-runner" "$(pwd)"/.git/hooks/post-merge unused 2>&1)
