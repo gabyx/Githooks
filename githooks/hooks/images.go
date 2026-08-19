@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	ref "github.com/distribution/distribution/reference"
+	ref "github.com/distribution/reference"
 	cm "github.com/gabyx/githooks/githooks/common"
 	"github.com/gabyx/githooks/githooks/container"
 	strs "github.com/gabyx/githooks/githooks/strings"
