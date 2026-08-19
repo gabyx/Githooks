@@ -29,7 +29,7 @@ mkdir -p "$GH_TEST_TMP/shared/third-shared.git/pre-commit" &&
 
 mkdir -p "$GH_TEST_TMP/test061/.githooks" &&
     cd "$GH_TEST_TMP/test061" &&
-    echo "urls: - $GH_TEST_TMP/shared/first-shared.git" >.githooks/.shared.yaml &&
+    echo "urls: [ $GH_TEST_TMP/shared/first-shared.git ]" >.githooks/.shared.yaml &&
     git init ||
     exit 1
 

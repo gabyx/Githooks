@@ -86,7 +86,7 @@ func GetHookRunCmd(
 
 	config, e := loadRunnerConfig(hookPath)
 	if e != nil {
-		return nil, cm.ErrorF("Could not read runner config '%s'", hookPath)
+		return nil, cm.CombineErrors(e, cm.ErrorF("Could not read runner config '%s'", hookPath))
 	}
 
 	subst := getVarSubstitution(os.LookupEnv, gitx.LookupConfig)

@@ -31,7 +31,7 @@ mkdir -p "$GH_TEST_TMP/test103" &&
     git init &&
     install_hooks_if_not_centralized || exit 1
 
-mkdir -p .githooks && echo "urls: - file://$GH_TEST_TMP/shared/hooks-103.git" >.githooks/.shared.yaml || exit 1
+mkdir -p .githooks && echo "urls: [ file://$GH_TEST_TMP/shared/hooks-103.git ]" >.githooks/.shared.yaml || exit 1
 git add .githooks/.shared.yaml
 "$GH_INSTALL_BIN_DIR/githooks-cli" shared update
 

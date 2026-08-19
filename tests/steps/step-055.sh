@@ -67,7 +67,7 @@ mkdir -p "$GH_TEST_TMP/test055" &&
     echo 'echo "Hello"' >.githooks/pre-commit/local-pre &&
     echo 'echo "Hello"' >.githooks/post-commit/local-post &&
     echo 'echo "Hello"' >.githooks/post-merge &&
-    echo "urls: - $url2" >.githooks/.shared.yaml &&
+    echo "urls: [ $url2 ]" >.githooks/.shared.yaml &&
     mkdir -p .githooks/post-commit/step-4 &&
     echo 'echo "Hello"' >.githooks/post-commit/step-4/step4.1 &&
     echo 'echo "Hello"' >.githooks/post-commit/step-4/step4.2 ||
