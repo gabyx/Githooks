@@ -81,6 +81,7 @@ Also it searches for hooks in configured shared hook repositories.
     - [Shared Repository Namespace](#shared-repository-namespace)
   - [Ignoring Hooks and Files](#ignoring-hooks-and-files)
   - [Trusting Hooks](#trusting-hooks)
+    - [Trusted Remotes](#trusted-remotes)
   - [Disabling Githooks](#disabling-githooks)
   - [Environment Variables](#environment-variables)
     - [Arguments to Shared Hooks](#arguments-to-shared-hooks)
@@ -643,6 +644,41 @@ for more information.
 
 You can also trust individual hooks by using
 [`git hooks trust hooks --help`](docs/cli/git_hooks_trust_hooks.md).
+
+### Trusted Remotes
+
+If you trust all hooks coming from certain remotes, e.g. all repositories of
+your own organization, you can add glob patterns which are matched against the
+url of the remote `origin` of a repository:
+
+```shell
+# Trust all repositories of an organization (for all repositories):
+$ git hooks config trusted-remotes --global --add \
+    'https://github.com/my-org/**' 'git@github.com:my-org/**'
+# Show the patterns and if the current repository matches any of them:
+$ git hooks config trusted-remotes --print
+# Remove all patterns again:
+$ git hooks config trusted-remotes --global --reset
+```
+
+Every repository whose remote url matches any of these patterns is a trusted
+repository, meaning **no trust prompt is shown** and the trust marker file
+`<repoPath>/.githooks/trust-all` is not needed. Consult
+[`git hooks config trusted-remotes --help`](docs/cli/git_hooks_config_trusted-remotes.md)
+for more information. Note the following:
+
+- The url is matched as configured in `remote.origin.url`, meaning
+  `https://github.com/my-org/repo.git` and `git@github.com:my-org/repo.git` are
+  different urls which need separate patterns. A repository without a remote
+  `origin` is never trusted.
+- The separator is always `/`, therefore `*` does not match over `/` but `**`
+  does.
+- A repository whose trust setting was explicitly set by the user (see
+  [`git hooks config trust-all`](docs/cli/git_hooks_config_trust-all.md)) is not
+  affected by these patterns, meaning a denied repository stays untrusted.
+- Since all current **and future** hooks of matching repositories run without
+  any confirmation, only add remotes you fully trust: anybody who can push hooks
+  to such a repository can execute code on your machine.
 
 ## Disabling Githooks
 
