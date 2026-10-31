@@ -94,3 +94,48 @@ func TestGitConfigCache(t *testing.T) {
 		{Key: "t.t", Value: "a2"},
 		{Key: "t.t", Value: "a3"}}, kv)
 }
+
+func TestParseConfigUnknownScope(t *testing.T) {
+	t.Run("traverse finds the installation value", func(t *testing.T) {
+		c, err := parseConfig(
+			"unknown\x00credential.helper\nosxkeychain",
+			func(string) bool { return true })
+		assert.NoError(t, err)
+
+		val, exists := c.Get("credential.helper", Traverse)
+		assert.True(t, exists)
+		assert.Equal(t, "osxkeychain", val)
+
+		_, systemExists := c.Get("credential.helper", SystemScope)
+		assert.False(t, systemExists)
+	})
+
+	t.Run("local wins over system and unknown", func(t *testing.T) {
+		s := "unknown\x00credential.helper\nosxkeychain" +
+			"\x00system\x00credential.helper\nsystem-helper" +
+			"\x00submodule\x00other.key\ndropped" +
+			"\x00local\x00credential.helper\nlocal-helper" +
+			"\x00global\x00kept.key\nkept"
+		c, err := parseConfig(s, func(string) bool { return true })
+		assert.NoError(t, err)
+
+		val, exists := c.Get("credential.helper", Traverse)
+		assert.True(t, exists)
+		assert.Equal(t, "local-helper", val)
+
+		sys, sysExists := c.Get("credential.helper", SystemScope)
+		assert.True(t, sysExists)
+		assert.Equal(t, "system-helper", sys)
+
+		all, allExists := c.GetAll("credential.helper", Traverse)
+		assert.True(t, allExists)
+		assert.Equal(t, []string{"osxkeychain", "system-helper", "local-helper"}, all)
+
+		kept, keptExists := c.Get("kept.key", GlobalScope)
+		assert.True(t, keptExists)
+		assert.Equal(t, "kept", kept)
+
+		_, dropped := c.Get("other.key", Traverse)
+		assert.False(t, dropped)
+	})
+}

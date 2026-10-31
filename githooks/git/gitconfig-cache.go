@@ -21,6 +21,11 @@ const (
 	GlobalScope ConfigScope = 3
 	SystemScope ConfigScope = 4
 
+	// unknownScope is the scope Apple Git reports for its installation
+	// config. It has lower precedence than system. Git has no --unknown
+	// flag, so ToConfigName does not accept this scope.
+	unknownScope ConfigScope = 5
+
 	Traverse ConfigScope = -1
 )
 
@@ -35,7 +40,7 @@ type ConfigMap map[string]*ConfigEntry
 
 // GitConfigCache for faster read access.
 type ConfigCache struct {
-	scopes [5]ConfigMap
+	scopes [6]ConfigMap
 }
 
 func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
@@ -56,6 +61,8 @@ func toMapIdx(scope string) ConfigScope {
 		return worktreeScope
 	case "command":
 		return commandScope
+	case "unknown":
+		return unknownScope
 	default:
 		return -1
 	}
@@ -89,7 +96,8 @@ func ToConfigName(scope ConfigScope) string {
 }
 
 func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err error) {
-	c.scopes = [5]ConfigMap{
+	c.scopes = [6]ConfigMap{
+		make(ConfigMap),
 		make(ConfigMap),
 		make(ConfigMap),
 		make(ConfigMap),
@@ -144,9 +152,9 @@ func parseConfig(s string, filterFunc func(string) bool) (c ConfigCache, err err
 
 			idx := toMapIdx(scope)
 			if idx < 0 {
-				err = cm.ErrorF("Wrong Git config scope '%v' for value '%s'", scope, txt)
-
-				return c, err
+				// Keep parsing. One unrecognized scope, such as "submodule",
+				// must not discard the rest of the cache.
+				continue
 			}
 
 			addEntry(
