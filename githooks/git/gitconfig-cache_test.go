@@ -1,11 +1,20 @@
 package git
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+type recordingDebugLog struct {
+	lines []string
+}
+
+func (r *recordingDebugLog) DebugF(format string, args ...any) {
+	r.lines = append(r.lines, fmt.Sprintf(format, args...))
+}
 
 func TestGitConfigCache(t *testing.T) {
 	s := "system\x00a.a\nbla" +
@@ -20,7 +29,7 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00worktree\x00t.t\na2" +
 		"\x00command\x00t.t\na3"
 
-	c, err := parseConfig(s, func(string) bool { return true })
+	c, err := parseConfig(nil, s, func(string) bool { return true })
 
 	command := c.scopes[0]
 	worktree := c.scopes[1]
@@ -98,6 +107,7 @@ func TestGitConfigCache(t *testing.T) {
 func TestParseConfigUnknownScope(t *testing.T) {
 	t.Run("traverse finds the installation value", func(t *testing.T) {
 		c, err := parseConfig(
+			nil,
 			"unknown\x00credential.helper\nosxkeychain",
 			func(string) bool { return true })
 		assert.NoError(t, err)
@@ -116,8 +126,12 @@ func TestParseConfigUnknownScope(t *testing.T) {
 			"\x00submodule\x00other.key\ndropped" +
 			"\x00local\x00credential.helper\nlocal-helper" +
 			"\x00global\x00kept.key\nkept"
-		c, err := parseConfig(s, func(string) bool { return true })
+		log := &recordingDebugLog{}
+		c, err := parseConfig(log, s, func(string) bool { return true })
 		assert.NoError(t, err)
+		assert.Equal(t, []string{
+			"Skipping unrecognized Git config scope 'submodule' for value 'other.key\ndropped'.",
+		}, log.lines)
 
 		val, exists := c.Get("credential.helper", Traverse)
 		assert.True(t, exists)
