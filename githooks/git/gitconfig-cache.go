@@ -43,6 +43,11 @@ type ConfigCache struct {
 	scopes [6]ConfigMap
 }
 
+// debugLog reports Git config scopes this cache does not store.
+type debugLog interface {
+	DebugF(format string, args ...any)
+}
+
 func (c *ConfigCache) getScopeMap(scope ConfigScope) ConfigMap {
 	cm.DebugAssertF(int(scope) < len(c.scopes), "Wrong scope '%s'", scope)
 
@@ -95,13 +100,8 @@ func ToConfigName(scope ConfigScope) string {
 	}
 }
 
-// configDebugLog reports Git config scopes this cache does not store.
-type configDebugLog interface {
-	DebugF(format string, args ...any)
-}
-
 func parseConfig(
-	log configDebugLog,
+	log debugLog,
 	s string,
 	filterFunc func(string) bool,
 ) (c ConfigCache, err error) {
@@ -163,11 +163,9 @@ func parseConfig(
 			if idx < 0 {
 				// Keep parsing. One unrecognized scope, such as "submodule",
 				// must not discard the rest of the cache.
-				if log != nil {
-					log.DebugF(
-						"Skipping unrecognized Git config scope '%s' for value '%s'.",
-						scope, txt)
-				}
+				log.DebugF(
+					"Skipping unrecognized Git config scope '%s' for value '%s'.",
+					scope, txt)
 
 				continue
 			}
@@ -182,7 +180,7 @@ func parseConfig(
 }
 
 func NewConfigCache(
-	log cm.ILogContext,
+	log debugLog,
 	gitx Context,
 	filterFunc func(string) bool,
 ) (ConfigCache, error) {

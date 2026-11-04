@@ -29,7 +29,8 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00worktree\x00t.t\na2" +
 		"\x00command\x00t.t\na3"
 
-	c, err := parseConfig(nil, s, func(string) bool { return true })
+	log := &recordingDebugLog{}
+	c, err := parseConfig(log, s, func(string) bool { return true })
 
 	command := c.scopes[0]
 	worktree := c.scopes[1]
@@ -106,8 +107,9 @@ func TestGitConfigCache(t *testing.T) {
 
 func TestParseConfigUnknownScope(t *testing.T) {
 	t.Run("traverse finds the installation value", func(t *testing.T) {
+		log := &recordingDebugLog{}
 		c, err := parseConfig(
-			nil,
+			log,
 			"unknown\x00credential.helper\nosxkeychain",
 			func(string) bool { return true })
 		assert.NoError(t, err)
