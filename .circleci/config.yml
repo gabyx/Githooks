@@ -30,7 +30,9 @@ jobs:
     executor:
       size: medium
       name: win/server-2022
-      version: current
+      # Image 2026.10.x, which `current` points at, has Windows Containers
+      # disabled. Docker cannot start there. 2026.05.1 still has it enabled.
+      version: "2026.05.1"
     steps:
       - checkout
       - run:
