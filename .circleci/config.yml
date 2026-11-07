@@ -60,25 +60,18 @@ workflows:
                 ]
           filters: &filters
             branches:
-              only: &task-branches
-                - /feature\/.*/
-                - /feat\/.*/
-                - /bugfix\/.*/
-                - /fix\/.*/
-                - /pull/.*/
-      - linux:
-          matrix:
-            parameters:
-              test: ["test-coverage"]
-          filters:
-            branches:
               only:
                 - /feature\/.*/
                 - /feat\/.*/
                 - /bugfix\/.*/
                 - /fix\/.*/
                 - /pull/.*/
-                - main
+                - /main
+      - linux:
+          matrix:
+            parameters:
+              test: ["test-coverage"]
+          filters: *filters
 
       - windows:
           matrix:
