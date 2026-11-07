@@ -48,6 +48,8 @@ const (
 	GitCKSkipNonExistingSharedHooks = "githooks.skipNonExistingSharedHooks"
 	GitCKSkipUntrustedHooks         = "githooks.skipUntrustedHooks"
 
+	GitCKTrustedRemotes = "githooks.trustedRemotes"
+
 	GitCKRunnerIsNonInteractive = "githooks.runnerIsNonInteractive"
 
 	GitCKContainerizedHooksEnabled     = "githooks.containerizedHooksEnabled"
@@ -96,6 +98,8 @@ func GetGlobalGitConfigKeys() []string {
 		GitCKSkipNonExistingSharedHooks,
 		GitCKSkipUntrustedHooks,
 
+		GitCKTrustedRemotes,
+
 		GitCKRunnerIsNonInteractive,
 
 		GitCKContainerManager,
@@ -119,6 +123,8 @@ func GetLocalGitConfigKeys() []string {
 
 		GitCKSkipNonExistingSharedHooks,
 		GitCKSkipUntrustedHooks,
+
+		GitCKTrustedRemotes,
 
 		GitCKRunnerIsNonInteractive,
 

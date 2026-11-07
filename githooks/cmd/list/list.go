@@ -97,7 +97,7 @@ func PrepareListHookState(
 	)
 	ctx.Log.AssertNoErrorF(err, "Could not load global shared hooks.")
 
-	isTrusted, _, _ := hooks.IsRepoTrusted(ctx.GitX, repoDir)
+	isTrusted, _, _ := hooks.IsRepoTrusted(ctx.Log, ctx.GitX, repoDir)
 	isDisabled := hooks.IsGithooksDisabled(ctx.GitX, true)
 
 	state = &ListingState{

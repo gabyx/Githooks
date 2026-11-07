@@ -11,6 +11,7 @@ package common
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -27,6 +28,17 @@ func GlobMatch(pattern string, path string) (bool, error) {
 	}
 
 	return glob.Match(pattern, path)
+}
+
+// GlobMatchString matches a pattern against a string.
+// It never matches over `/` and supports double-star `**` which does.
+func GlobMatchString(pattern string, s string) (bool, error) {
+	if !strings.Contains(pattern, "**") {
+		// passthru to core package if no double-star
+		return path.Match(pattern, s)
+	}
+
+	return glob.Match(pattern, s)
 }
 
 // Globs represents one filepath glob, with its elements joined by "**".
