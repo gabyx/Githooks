@@ -89,8 +89,9 @@ func NewCtxSanitized() *Context {
 }
 
 // InitConfigCache sets the Git config cache to use.
-func (c *Context) InitConfigCache(filter func(string) bool) error {
-	cache, err := NewConfigCache(*c, filter)
+// Unrecognized config scopes are reported with `log.DebugF`.
+func (c *Context) InitConfigCache(log debugLog, filter func(string) bool) error {
+	cache, err := NewConfigCache(log, *c, filter)
 
 	if err != nil {
 		return err

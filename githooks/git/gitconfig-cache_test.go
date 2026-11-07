@@ -1,11 +1,20 @@
 package git
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+type recordingDebugLog struct {
+	lines []string
+}
+
+func (r *recordingDebugLog) DebugF(format string, args ...any) {
+	r.lines = append(r.lines, fmt.Sprintf(format, args...))
+}
 
 func TestGitConfigCache(t *testing.T) {
 	s := "system\x00a.a\nbla" +
@@ -20,7 +29,8 @@ func TestGitConfigCache(t *testing.T) {
 		"\x00worktree\x00t.t\na2" +
 		"\x00command\x00t.t\na3"
 
-	c, err := parseConfig(s, func(string) bool { return true })
+	log := &recordingDebugLog{}
+	c, err := parseConfig(log, s, func(string) bool { return true })
 
 	command := c.scopes[0]
 	worktree := c.scopes[1]
@@ -93,4 +103,55 @@ func TestGitConfigCache(t *testing.T) {
 	assert.Equal(t, []KeyValue{
 		{Key: "t.t", Value: "a2"},
 		{Key: "t.t", Value: "a3"}}, kv)
+}
+
+func TestParseConfigUnknownScope(t *testing.T) {
+	t.Run("traverse finds the installation value", func(t *testing.T) {
+		log := &recordingDebugLog{}
+		c, err := parseConfig(
+			log,
+			"unknown\x00credential.helper\nosxkeychain",
+			func(string) bool { return true })
+		assert.NoError(t, err)
+
+		val, exists := c.Get("credential.helper", Traverse)
+		assert.True(t, exists)
+		assert.Equal(t, "osxkeychain", val)
+
+		_, systemExists := c.Get("credential.helper", SystemScope)
+		assert.False(t, systemExists)
+	})
+
+	t.Run("local wins over system and unknown", func(t *testing.T) {
+		s := "unknown\x00credential.helper\nosxkeychain" +
+			"\x00system\x00credential.helper\nsystem-helper" +
+			"\x00submodule\x00other.key\ndropped" +
+			"\x00local\x00credential.helper\nlocal-helper" +
+			"\x00global\x00kept.key\nkept"
+		log := &recordingDebugLog{}
+		c, err := parseConfig(log, s, func(string) bool { return true })
+		assert.NoError(t, err)
+		assert.Equal(t, []string{
+			"Skipping unrecognized Git config scope 'submodule' for value 'other.key\ndropped'.",
+		}, log.lines)
+
+		val, exists := c.Get("credential.helper", Traverse)
+		assert.True(t, exists)
+		assert.Equal(t, "local-helper", val)
+
+		sys, sysExists := c.Get("credential.helper", SystemScope)
+		assert.True(t, sysExists)
+		assert.Equal(t, "system-helper", sys)
+
+		all, allExists := c.GetAll("credential.helper", Traverse)
+		assert.True(t, allExists)
+		assert.Equal(t, []string{"osxkeychain", "system-helper", "local-helper"}, all)
+
+		kept, keptExists := c.Get("kept.key", GlobalScope)
+		assert.True(t, keptExists)
+		assert.Equal(t, "kept", kept)
+
+		_, dropped := c.Get("other.key", Traverse)
+		assert.False(t, dropped)
+	})
 }
