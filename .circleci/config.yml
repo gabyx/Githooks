@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@5.0
+  win: circleci/windows@5.1
 
 jobs:
   linux:
@@ -29,7 +29,7 @@ jobs:
         type: string
     executor:
       size: medium
-      name: win/server-2022
+      name: win/server-2025
       version: current
     steps:
       - checkout
